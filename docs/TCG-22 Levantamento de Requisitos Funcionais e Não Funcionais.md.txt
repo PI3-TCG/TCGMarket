@@ -18,13 +18,14 @@ Os RFs foram classificados, baseado no método MoSCoW, em: Essencial, Importante
 - RF11 — Cadastro de anúncio (usuário anuncia carta pra venda, com condição/quantidade/preço) — **Essencial**
 - RF12 — Sistema de troca de cartas entre usuários (proposta, aceite, recusa) — **Importante**
 - RF13 — Busca textual por nome da carta — **Importante**
-- RF14 — Avaliação de vendedor/comprador (sistema de reputação) — **Opcional**
+- RF14 — Avaliação de vendedor/comprador (sistema de reputação) — **Importante**
 - RF15 — Histórico de transações do usuário — **Importante**
-- RF16 — Minha coleção (catalogar cartas que o usuário já possui, separado do que está à venda) — **Opcional**
+- RF16 — Minha coleção (catalogar cartas que o usuário já possui, separado do que está à venda) — **Desejável**
 - RF17 — Notificações (proposta de troca recebida, item da wishlist com preço baixo, etc.) — **Opcional**
 - RF18 — Painel administrativo (moderação de anúncios, denúncias, gestão de usuários) — **Opcional**
 - RF19 — Comparação de preços entre vendedores para a mesma carta — **Desejável**
 - RF20 — Sistema de Venda e Compra — **Essencial**
+- RF21 — Chat entre vendedor e comprador — **Desejável**
 
 ## Requisitos Não Funcionais (RNF)
 
