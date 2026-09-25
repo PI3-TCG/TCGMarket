@@ -23,9 +23,9 @@ O projeto ainda está no início. Por enquanto o repositório concentra a docume
 
 | Documento | Conteúdo |
 | --- | --- |
-| [docs/NovosTCG.md](docs/NovosTCG.md) | Escolha dos TCGs e visão da plataforma |
-| [docs/Pagamentos.md](docs/Pagamentos.md) | Spike de integração com métodos de pagamento |
-| [docs/BasicAPI.md](docs/BasicAPI.md) | Conceitos básicos de API |
+| [docs/NovosTCG.md](docs/TCG-11%20Pesquisa%20de%20possíveis%20Novos%20TCG%20a%20entrar%20no%20catálogo.md) | Escolha dos TCGs e visão da plataforma |
+| [docs/Pagamentos.md](docs/TCG-8%20Spike%20Métodos%20de%20pagamento%20.md) | Spike de integração com métodos de pagamento |
+| [docs/BasicAPI.md](docs/TCG-1%20Basico%20sobre%20API.md) | Conceitos básicos de API |
 
 ## Próximos passos
 
