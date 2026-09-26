@@ -17,7 +17,18 @@ Outros TCGs (Pokémon, Magic, Yu-Gi-Oh! e jogos de nicho) podem entrar depois.
 
 ## Status
 
-O projeto ainda está no início. Por enquanto o repositório concentra a documentação de alinhamento do grupo; a estrutura de código será adicionada conforme o desenvolvimento avançar.
+O backend Spring Boot e o frontend React já têm a base inicial. A documentação de alinhamento do grupo continua em `docs/`.
+
+## Como executar
+
+O frontend está em [`frontend/README.md`](frontend/README.md).
+
+```bash
+cd frontend
+npm install
+cp .env.example .env
+npm run dev
+```
 
 ## Documentação
 
@@ -29,4 +40,4 @@ O projeto ainda está no início. Por enquanto o repositório concentra a docume
 
 ## Próximos passos
 
-Este README será atualizado à medida que o grupo definir stack, arquitetura, como rodar o projeto e como contribuir.
+A arquitetura ainda vai evoluir. Este README será atualizado conforme o grupo for definindo contribuição e a execução do backend.
