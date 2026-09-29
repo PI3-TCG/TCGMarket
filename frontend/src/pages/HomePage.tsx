@@ -2,7 +2,7 @@ import { healthCheck } from '@/services/api';
 
 export function HomePage() {
   const apiUrl = import.meta.env.VITE_API_URL
-  const testarApi = async () => {
+  const testApi = async () => {
     try {
       const healthStatus = await healthCheck();
       console.log('Status da API:', healthStatus);
@@ -29,7 +29,7 @@ export function HomePage() {
             {apiUrl}
           </code>
         </p>
-        <button onClick={testarApi} className="mt-6 inline-block rounded bg-amber-400 px-4 py-2 text-sm font-medium text-slate-950 transition-colors hover:bg-amber-500">
+        <button onClick={testApi} className="mt-6 inline-block rounded bg-amber-400 px-4 py-2 text-sm font-medium text-slate-950 transition-colors hover:bg-amber-500">
           Testar API
         </button>
       </section>
