@@ -37,6 +37,7 @@ npm run dev
 | [docs/NovosTCG.md](docs/TCG-11%20Pesquisa%20de%20possíveis%20Novos%20TCG%20a%20entrar%20no%20catálogo.md) | Escolha dos TCGs e visão da plataforma |
 | [docs/Pagamentos.md](docs/TCG-8%20Spike%20Métodos%20de%20pagamento%20.md) | Spike de integração com métodos de pagamento |
 | [docs/BasicAPI.md](docs/TCG-1%20Basico%20sobre%20API.md) | Conceitos básicos de API |
+| [docs/arquitetura/Catálogo de Cartas](docs/arquitetura/TCG-32%20Arquitetura%20do%20Catálogo%20de%20Cartas.md) | Catálogo no MongoDB e APIs externas de cartas como fonte de importação |
 
 ## Próximos passos
 

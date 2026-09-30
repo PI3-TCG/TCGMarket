@@ -1,4 +1,5 @@
 .idea/
-
-backend
+.vscode/
+.env
+.env.production
 
