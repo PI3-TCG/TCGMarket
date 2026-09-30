@@ -1,6 +1,17 @@
+import { healthCheck } from '@/services/api';
+
 export function HomePage() {
   const apiUrl = import.meta.env.VITE_API_URL
-
+  const testApi = async () => {
+    try {
+      const healthStatus = await healthCheck();
+      console.log('Status da API:', healthStatus);
+      alert(`Status da API: ${JSON.stringify(healthStatus)}`);
+    } catch (error) {
+      console.error('Erro ao verificar a saúde da API:', error);
+      alert('Erro ao verificar a saúde da API. Verifique o console para mais detalhes.');
+    }
+};
   return (
     <main className="flex min-h-svh items-center justify-center bg-slate-950 px-6 text-slate-100">
       <section className="w-full max-w-xl rounded-2xl border border-slate-800 bg-slate-900 p-8 shadow-xl">
@@ -18,6 +29,9 @@ export function HomePage() {
             {apiUrl}
           </code>
         </p>
+        <button onClick={testApi} className="mt-6 inline-block rounded bg-amber-400 px-4 py-2 text-sm font-medium text-slate-950 transition-colors hover:bg-amber-500">
+          Testar API
+        </button>
       </section>
     </main>
   )
