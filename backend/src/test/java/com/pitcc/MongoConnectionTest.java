@@ -16,18 +16,19 @@ class MongoConnectionTest {
 
     @Test
     void shouldSaveAndRetrieveDocument() {
-        // Create a new document
         MongoConnectionTestDocument document = new MongoConnectionTestDocument();
         document.setMessage("Hello, MongoDB!");
 
-        // Save the document to the database
         MongoConnectionTestDocument savedDocument = repository.save(document);
 
-        // Retrieve the document from the database
-        MongoConnectionTestDocument retrievedDocument = repository.findById(savedDocument.getId()).orElse(null);
+        try {
+            MongoConnectionTestDocument retrievedDocument =
+                    repository.findById(savedDocument.getId()).orElse(null);
 
-        // Assert that the retrieved document is not null and has the expected message
-        assertNotNull(retrievedDocument);
-        assertEquals("Hello, MongoDB!", retrievedDocument.getMessage());
+            assertNotNull(retrievedDocument);
+            assertEquals("Hello, MongoDB!", retrievedDocument.getMessage());
+        } finally {
+            repository.deleteById(savedDocument.getId());
+        }
     }
 }
