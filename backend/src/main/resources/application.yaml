@@ -1,6 +1,8 @@
 spring:
   application:
     name: backend
+  mongodb:
+    uri: ${MONGODB_URI}
 
 # Catálogos externos. A chave da Pokémon TCG vem só do ambiente e não tem valor padrão.
 external-apis:
@@ -14,4 +16,3 @@ external-apis:
   mtg:
     base-url: ${MTG_API_BASE_URL:https://api.scryfall.com}
     timeout: ${MTG_API_TIMEOUT:10s}
-
