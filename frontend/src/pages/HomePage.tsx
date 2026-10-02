@@ -1,6 +1,6 @@
 import { healthCheck } from '@/services/api';
 
-export function HomePage() {
+export function HomePage({ onRegister }: { onRegister: () => void }) {
   const apiUrl = import.meta.env.VITE_API_URL
   const testApi = async () => {
     try {
@@ -29,9 +29,14 @@ export function HomePage() {
             {apiUrl}
           </code>
         </p>
-        <button onClick={testApi} className="mt-6 inline-block rounded bg-amber-400 px-4 py-2 text-sm font-medium text-slate-950 transition-colors hover:bg-amber-500">
-          Testar API
-        </button>
+        <div className="mt-6 flex items-center gap-4">
+          <button onClick={testApi} className="inline-block rounded bg-amber-400 px-4 py-2 text-sm font-medium text-slate-950 transition-colors hover:bg-amber-500">
+            Testar API
+          </button>
+          <button type="button" onClick={onRegister} className="text-sm font-medium text-amber-200 transition-colors hover:text-amber-400">
+            Criar conta
+          </button>
+        </div>
       </section>
     </main>
   )
