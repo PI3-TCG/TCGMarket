@@ -6,8 +6,7 @@ import com.pitcc.exception.EmailAlreadyRegisteredException;
 import com.pitcc.model.User;
 import com.pitcc.model.UserRole;
 import com.pitcc.repository.UserRepository;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.Instant;
 import java.util.Locale;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -35,7 +34,7 @@ public class UserService {
     user.setEmail(email);
     user.setPasswordHash(passwordEncoder.encode(request.password()));
     user.setRole(UserRole.USER);
-    user.setRegistrationDate(LocalDateTime.now(ZoneOffset.UTC));
+    user.setRegistrationDate(Instant.now());
 
     try {
       return toResponse(userRepository.save(user));

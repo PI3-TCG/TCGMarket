@@ -13,7 +13,7 @@ import com.pitcc.exception.EmailAlreadyRegisteredException;
 import com.pitcc.exception.GlobalExceptionHandler;
 import com.pitcc.model.UserRole;
 import com.pitcc.service.UserService;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -39,7 +39,7 @@ class UserControllerTest {
                 "João Silva",
                 "joao@email.com",
                 UserRole.USER,
-                LocalDateTime.parse("2026-10-02T18:00:00")));
+                Instant.parse("2026-10-02T18:00:00Z")));
 
     mockMvc
         .perform(
@@ -59,7 +59,7 @@ class UserControllerTest {
         .andExpect(jsonPath("$.name").value("João Silva"))
         .andExpect(jsonPath("$.email").value("joao@email.com"))
         .andExpect(jsonPath("$.role").value("USER"))
-        .andExpect(jsonPath("$.registrationDate").value("2026-10-02T18:00:00"))
+        .andExpect(jsonPath("$.registrationDate").value("2026-10-02T18:00:00Z"))
         .andExpect(jsonPath("$.password").doesNotExist())
         .andExpect(jsonPath("$.passwordHash").doesNotExist());
   }
@@ -73,7 +73,7 @@ class UserControllerTest {
                 "João Silva",
                 "joao@email.com",
                 UserRole.USER,
-                LocalDateTime.parse("2026-10-02T18:00:00")));
+                Instant.parse("2026-10-02T18:00:00Z")));
 
     mockMvc
         .perform(
