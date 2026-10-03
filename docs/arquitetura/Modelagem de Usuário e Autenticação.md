@@ -19,7 +19,7 @@ Coleção: `users`.
 | `email` | `String` | `String` | Identificador de login. Índice único. Gravado em minúsculas, sem espaços nas pontas. |
 | `passwordHash` | `String` | `String` | Hash BCrypt. Nunca a senha em texto puro. Nunca devolvido pela API. |
 | `role` | `UserRole` | `String` | Definido pela aplicação. O cliente não escolhe o perfil. |
-| `registrationDate` | `LocalDateTime` | `Date` | Preenchido pelo servidor, em UTC, no momento da persistência. |
+| `registrationDate` | `Instant` | `Date` | Preenchido pelo servidor, em UTC, no momento da persistência. |
 
 ```mermaid
 classDiagram
@@ -29,7 +29,7 @@ classDiagram
         String email
         String passwordHash
         UserRole role
-        LocalDateTime registrationDate
+        Instant registrationDate
     }
     class UserRole {
         <<enumeration>>

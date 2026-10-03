@@ -1,6 +1,7 @@
 package com.pitcc.model;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -19,7 +20,7 @@ public class User {
 
   private UserRole role;
 
-  private LocalDateTime registrationDate;
+  private Instant registrationDate;
 
   public User() {}
 
@@ -63,11 +64,11 @@ public class User {
     this.role = role;
   }
 
-  public LocalDateTime getRegistrationDate() {
+  public Instant getRegistrationDate() {
     return registrationDate;
   }
 
-  public void setRegistrationDate(LocalDateTime registrationDate) {
+  public void setRegistrationDate(Instant registrationDate) {
     this.registrationDate = registrationDate;
   }
 }
