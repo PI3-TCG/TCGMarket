@@ -77,16 +77,16 @@
           <mxGeometry height="247" width="160" y="163" as="geometry" />
         </mxCell>
         <mxCell id="OJnqsfjRi652JIYa93L0-56" parent="1" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" value="Ad" vertex="1">
-          <mxGeometry height="397.5" width="190" x="1221" y="606.25" as="geometry" />
+          <mxGeometry height="476.75" width="190" x="1221" y="572.12" as="geometry" />
         </mxCell>
-        <mxCell id="OJnqsfjRi652JIYa93L0-57" parent="OJnqsfjRi652JIYa93L0-56" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" value="&lt;div&gt;-&amp;nbsp;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;id: ObjectId&lt;/span&gt;&lt;/div&gt;&lt;div&gt;- collectionItemId:&amp;nbsp;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;ObjectId&lt;/span&gt;&lt;/div&gt;&lt;div&gt;- price:&amp;nbsp;BigDecimal&lt;/div&gt;&lt;div&gt;- idiom:&amp;nbsp;Enum&lt;/div&gt;&lt;div&gt;- stockQuantity:&amp;nbsp;Integer&lt;/div&gt;&lt;div&gt;- description: String&lt;/div&gt;&lt;div&gt;- status:&amp;nbsp;Enum&lt;/div&gt;&lt;div&gt;- date:&amp;nbsp;LocalDateTime&lt;/div&gt;" vertex="1">
-          <mxGeometry height="134" width="190" y="26" as="geometry" />
+        <mxCell id="OJnqsfjRi652JIYa93L0-57" parent="OJnqsfjRi652JIYa93L0-56" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" value="&lt;div&gt;-&amp;nbsp;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;id: ObjectId&lt;/span&gt;&lt;/div&gt;&lt;div&gt;- collectionItemId:&amp;nbsp;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;ObjectId&lt;/span&gt;&lt;/div&gt;&lt;div&gt;- price:&amp;nbsp;BigDecimal&lt;/div&gt;&lt;div&gt;- idiom:&amp;nbsp;Enum&lt;/div&gt;&lt;div&gt;- stockQuantity:&amp;nbsp;Integer&lt;/div&gt;&lt;div&gt;- description: String&lt;/div&gt;&lt;div&gt;- status:&amp;nbsp;Enum&lt;br&gt;&lt;div&gt;- availableForSale: Boolean&lt;/div&gt;&lt;div&gt;- availableForTrade: Boolean&lt;/div&gt;&lt;/div&gt;&lt;div&gt;- date:&amp;nbsp;LocalDateTime&lt;/div&gt;" vertex="1">
+          <mxGeometry height="152.75" width="190" y="26" as="geometry" />
         </mxCell>
         <mxCell id="OJnqsfjRi652JIYa93L0-58" parent="OJnqsfjRi652JIYa93L0-56" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" value="" vertex="1">
-          <mxGeometry height="8" width="190" y="160" as="geometry" />
+          <mxGeometry height="8" width="190" y="178.75" as="geometry" />
         </mxCell>
-        <mxCell id="OJnqsfjRi652JIYa93L0-59" parent="OJnqsfjRi652JIYa93L0-56" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" value="&lt;div&gt;+ getId();&lt;/div&gt;&lt;div&gt;&lt;div&gt;+ getCollectionItemId&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;();&lt;/span&gt;&lt;/div&gt;&lt;div&gt;+ setPrice();&lt;/div&gt;&lt;div&gt;+ getPrice();&lt;/div&gt;&lt;div&gt;+ setCondition();&lt;/div&gt;&lt;div&gt;+ getCondition();&lt;/div&gt;&lt;div&gt;+ setIdiom();&lt;/div&gt;&lt;/div&gt;&lt;div&gt;+ getIdiom();&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;+ setStockQuantity();&lt;/div&gt;&lt;div&gt;+ getStockQuantity();&lt;/div&gt;&lt;div&gt;+ setDescription();&lt;/div&gt;&lt;/div&gt;&lt;div&gt;+ getDescription();&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;+ setStatus();&lt;/div&gt;&lt;div&gt;+ getStatus();&lt;/div&gt;&lt;/div&gt;&lt;div&gt;+ getDate();&lt;/div&gt;&lt;/div&gt;" vertex="1">
-          <mxGeometry height="229.5" width="190" y="168" as="geometry" />
+        <mxCell id="OJnqsfjRi652JIYa93L0-59" parent="OJnqsfjRi652JIYa93L0-56" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" value="&lt;div&gt;+ getId();&lt;/div&gt;&lt;div&gt;&lt;div&gt;+ getCollectionItemId&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;();&lt;/span&gt;&lt;/div&gt;&lt;div&gt;+ setPrice();&lt;/div&gt;&lt;div&gt;+ getPrice();&lt;/div&gt;&lt;div&gt;+ setCondition();&lt;/div&gt;&lt;div&gt;+ getCondition();&lt;/div&gt;&lt;div&gt;+ setIdiom();&lt;/div&gt;&lt;/div&gt;&lt;div&gt;+ getIdiom();&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;+ setStockQuantity();&lt;/div&gt;&lt;div&gt;+ getStockQuantity();&lt;/div&gt;&lt;div&gt;+ setDescription();&lt;/div&gt;&lt;/div&gt;&lt;div&gt;+ getDescription();&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;+ setStatus();&lt;/div&gt;&lt;div&gt;+ getStatus();&lt;br&gt;&lt;div&gt;+ setAvailableForSale();&lt;/div&gt;&lt;div&gt;+ isAvailableForTrade();&lt;/div&gt;&lt;div&gt;&lt;div&gt;+ setAvailableForSale();&lt;/div&gt;&lt;div&gt;+ isAvailableForTrade();&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;+ getDate();&lt;/div&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="290" width="190" y="186.75" as="geometry" />
         </mxCell>
         <mxCell id="OJnqsfjRi652JIYa93L0-64" edge="1" parent="1" style="endArrow=none;html=1;rounded=0;" value="">
           <mxGeometry relative="1" as="geometry">
@@ -170,16 +170,16 @@
           <mxGeometry height="30" width="60" x="1631" y="770" as="geometry" />
         </mxCell>
         <mxCell id="fjZ3mj3VOA4t89XRsoHp-10" parent="1" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" value="&lt;i&gt;Transaction&lt;/i&gt;" vertex="1">
-          <mxGeometry height="390" width="190" x="1501" y="1110" as="geometry" />
+          <mxGeometry height="310" width="190" x="1501" y="1150" as="geometry" />
         </mxCell>
-        <mxCell id="fjZ3mj3VOA4t89XRsoHp-11" parent="fjZ3mj3VOA4t89XRsoHp-10" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" value="&lt;div&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;- id: ObjectId&lt;/span&gt;&lt;/div&gt;&lt;div&gt;- adId: ObjectId&lt;/div&gt;&lt;div&gt;- sellerId: ObjectId&lt;/div&gt;&lt;div&gt;- buyerId: ObjectId&lt;/div&gt;&lt;div&gt;- status: Enum&lt;/div&gt;&lt;div&gt;- creationDate: LocalDateTime&lt;/div&gt;&lt;div&gt;- conclusionDate: LocalDateTime&lt;/div&gt;&lt;div&gt;- availableForSale: Boolean&lt;/div&gt;&lt;div&gt;- availableForTrade: Boolean&lt;/div&gt;" vertex="1">
-          <mxGeometry height="142" width="190" y="26" as="geometry" />
+        <mxCell id="fjZ3mj3VOA4t89XRsoHp-11" parent="fjZ3mj3VOA4t89XRsoHp-10" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" value="&lt;div&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;- id: ObjectId&lt;/span&gt;&lt;/div&gt;&lt;div&gt;- adId: ObjectId&lt;/div&gt;&lt;div&gt;- sellerId: ObjectId&lt;/div&gt;&lt;div&gt;- buyerId: ObjectId&lt;/div&gt;&lt;div&gt;- status: Enum&lt;/div&gt;&lt;div&gt;- creationDate: LocalDateTime&lt;/div&gt;&lt;div&gt;- conclusionDate: LocalDateTime&lt;/div&gt;" vertex="1">
+          <mxGeometry height="114" width="190" y="26" as="geometry" />
         </mxCell>
         <mxCell id="fjZ3mj3VOA4t89XRsoHp-12" parent="fjZ3mj3VOA4t89XRsoHp-10" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" value="" vertex="1">
-          <mxGeometry height="8" width="190" y="168" as="geometry" />
+          <mxGeometry height="8" width="190" y="140" as="geometry" />
         </mxCell>
-        <mxCell id="fjZ3mj3VOA4t89XRsoHp-13" parent="fjZ3mj3VOA4t89XRsoHp-10" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" value="&lt;div&gt;+ getId();&lt;/div&gt;&lt;div&gt;&lt;div&gt;+ getAdId();&lt;/div&gt;&lt;/div&gt;&lt;div&gt;+ getSellerId();&lt;/div&gt;&lt;div&gt;&lt;div&gt;+ getBuyerId();&lt;/div&gt;&lt;div&gt;+ setStatus();&lt;/div&gt;&lt;/div&gt;&lt;div&gt;+ getStatus();&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;+ getCreationDate&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;();&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;+ setConclusionDate();&lt;/div&gt;&lt;/div&gt;&lt;div&gt;+ getConclusionDate();&lt;br&gt;&lt;/div&gt;&lt;div&gt;+ isAvailableForSale();&lt;/div&gt;&lt;div&gt;+ getAvailableForTrade();&lt;/div&gt;&lt;div&gt;&lt;div&gt;+ isAvailableForSale();&lt;/div&gt;&lt;div&gt;+ getAvailableForTrade();&lt;/div&gt;&lt;/div&gt;&lt;div&gt;+ finish();&lt;/div&gt;" vertex="1">
-          <mxGeometry height="214" width="190" y="176" as="geometry" />
+        <mxCell id="fjZ3mj3VOA4t89XRsoHp-13" parent="fjZ3mj3VOA4t89XRsoHp-10" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" value="&lt;div&gt;+ getId();&lt;/div&gt;&lt;div&gt;&lt;div&gt;+ getAdId();&lt;/div&gt;&lt;/div&gt;&lt;div&gt;+ getSellerId();&lt;/div&gt;&lt;div&gt;&lt;div&gt;+ getBuyerId();&lt;/div&gt;&lt;div&gt;+ setStatus();&lt;/div&gt;&lt;/div&gt;&lt;div&gt;+ getStatus();&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;+ getCreationDate&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;();&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;+ setConclusionDate();&lt;/div&gt;&lt;/div&gt;&lt;div&gt;+ getConclusionDate();&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;+ finish();&lt;/span&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="162" width="190" y="148" as="geometry" />
         </mxCell>
         <mxCell id="fjZ3mj3VOA4t89XRsoHp-14" parent="1" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" value="Sale" vertex="1">
           <mxGeometry height="111" width="200" x="1332" y="1630" as="geometry" />
@@ -194,16 +194,16 @@
           <mxGeometry height="47" width="200" y="64" as="geometry" />
         </mxCell>
         <mxCell id="fjZ3mj3VOA4t89XRsoHp-18" parent="1" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" value="Exchange" vertex="1">
-          <mxGeometry height="140" width="170" x="1671" y="1630" as="geometry" />
+          <mxGeometry height="150" width="190" x="1671" y="1630" as="geometry" />
         </mxCell>
-        <mxCell id="fjZ3mj3VOA4t89XRsoHp-19" parent="fjZ3mj3VOA4t89XRsoHp-18" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" value="&lt;div&gt;- offeredCardId: ObjectId&lt;/div&gt;&lt;div&gt;- valueDifference:BigDecimal&lt;/div&gt;" vertex="1">
-          <mxGeometry height="47" width="170" y="26" as="geometry" />
+        <mxCell id="fjZ3mj3VOA4t89XRsoHp-19" parent="fjZ3mj3VOA4t89XRsoHp-18" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" value="&lt;div&gt;- offeredCardId: List&amp;lt;ObjectId&amp;gt;&lt;/div&gt;&lt;div&gt;- valueDifference:BigDecimal&lt;/div&gt;" vertex="1">
+          <mxGeometry height="47" width="190" y="26" as="geometry" />
         </mxCell>
         <mxCell id="fjZ3mj3VOA4t89XRsoHp-20" parent="fjZ3mj3VOA4t89XRsoHp-18" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" value="" vertex="1">
-          <mxGeometry height="8" width="170" y="73" as="geometry" />
+          <mxGeometry height="8" width="190" y="73" as="geometry" />
         </mxCell>
-        <mxCell id="fjZ3mj3VOA4t89XRsoHp-21" parent="fjZ3mj3VOA4t89XRsoHp-18" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" value="&lt;div&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;+ getOfferedCardId();&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;+ setValueDifference();&lt;/div&gt;&lt;/div&gt;&lt;div&gt;+ getValueDifference();&lt;/div&gt;" vertex="1">
-          <mxGeometry height="59" width="170" y="81" as="geometry" />
+        <mxCell id="fjZ3mj3VOA4t89XRsoHp-21" parent="fjZ3mj3VOA4t89XRsoHp-18" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" value="&lt;div&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;+ setOferredCardId();&lt;br&gt;+ getOfferedCardId();&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;+ setValueDifference();&lt;/div&gt;&lt;/div&gt;&lt;div&gt;+ getValueDifference();&lt;/div&gt;" vertex="1">
+          <mxGeometry height="69" width="190" y="81" as="geometry" />
         </mxCell>
         <mxCell id="fjZ3mj3VOA4t89XRsoHp-22" parent="1" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" value="Payment" vertex="1">
           <mxGeometry height="320" width="210" x="1327" y="1830" as="geometry" />
@@ -266,7 +266,7 @@
           <mxGeometry height="30" width="60" x="1441" y="1270" as="geometry" />
         </mxCell>
         <mxCell id="fjZ3mj3VOA4t89XRsoHp-35" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="1" vertex="1">
-          <mxGeometry height="30" width="60" x="1321" y="1003.75" as="geometry" />
+          <mxGeometry height="30" width="60" x="1321" y="1061" as="geometry" />
         </mxCell>
         <mxCell id="fjZ3mj3VOA4t89XRsoHp-36" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="1" vertex="1">
           <mxGeometry height="30" width="60" x="1631" y="960" as="geometry" />
@@ -446,16 +446,16 @@
           <mxGeometry height="30" width="60" x="591" y="620" as="geometry" />
         </mxCell>
         <mxCell id="q819th2y5vrWgUEa4RMD-1" parent="1" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" value="CardRequest" vertex="1">
-          <mxGeometry height="350" width="170" x="2111" y="630" as="geometry" />
+          <mxGeometry height="380" width="170" x="2111" y="630" as="geometry" />
         </mxCell>
-        <mxCell id="q819th2y5vrWgUEa4RMD-2" parent="q819th2y5vrWgUEa4RMD-1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" value="&lt;div&gt;- id: ObjectId&lt;/div&gt;&lt;div&gt;- userId: ObjectId&lt;/div&gt;&lt;div&gt;- tcg: Enum&lt;/div&gt;&lt;div&gt;- cardName: String&lt;/div&gt;&lt;div&gt;- collection: String&lt;/div&gt;&lt;div&gt;- status: Enum&lt;/div&gt;&lt;div&gt;- createdAt: LocalDateTime&lt;/div&gt;&lt;div&gt;- reviewedAt: LocalDateTime&lt;/div&gt;" vertex="1">
-          <mxGeometry height="124" width="170" y="26" as="geometry" />
+        <mxCell id="q819th2y5vrWgUEa4RMD-2" parent="q819th2y5vrWgUEa4RMD-1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" value="&lt;div&gt;- id: ObjectId&lt;/div&gt;&lt;div&gt;- userId: ObjectId&lt;/div&gt;&lt;div&gt;- reviewedId: ObjectId&lt;/div&gt;&lt;div&gt;- tcg: Enum&lt;/div&gt;&lt;div&gt;- cardName: String&lt;/div&gt;&lt;div&gt;- collection: String&lt;/div&gt;&lt;div&gt;- status: Enum&lt;/div&gt;&lt;div&gt;- createdAt: LocalDateTime&lt;/div&gt;&lt;div&gt;- reviewedAt: LocalDateTime&lt;/div&gt;" vertex="1">
+          <mxGeometry height="144" width="170" y="26" as="geometry" />
         </mxCell>
         <mxCell id="q819th2y5vrWgUEa4RMD-3" parent="q819th2y5vrWgUEa4RMD-1" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" value="" vertex="1">
-          <mxGeometry height="8" width="170" y="150" as="geometry" />
+          <mxGeometry height="8" width="170" y="170" as="geometry" />
         </mxCell>
-        <mxCell id="q819th2y5vrWgUEa4RMD-4" parent="q819th2y5vrWgUEa4RMD-1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" value="&lt;div&gt;+ getId();&lt;/div&gt;&lt;div&gt;+ getUserId();&lt;/div&gt;&lt;div&gt;+ setTcg();&lt;/div&gt;&lt;div&gt;+ setTcg();&lt;/div&gt;&lt;div&gt;+ setCardName();&lt;/div&gt;&lt;div&gt;&lt;div&gt;+ getCardName();&lt;/div&gt;&lt;div&gt;+ setCollection();&lt;/div&gt;&lt;/div&gt;&lt;div&gt;+ getCollection();&lt;/div&gt;&lt;div&gt;+ setStatus();&lt;/div&gt;&lt;div&gt;+ getStatus();&lt;/div&gt;&lt;div&gt;+ getCreatedAt();&lt;/div&gt;&lt;div&gt;+ getReviewedAt();&lt;/div&gt;" vertex="1">
-          <mxGeometry height="192" width="170" y="158" as="geometry" />
+        <mxCell id="q819th2y5vrWgUEa4RMD-4" parent="q819th2y5vrWgUEa4RMD-1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" value="&lt;div&gt;+ getId();&lt;/div&gt;&lt;div&gt;+ getUserId();&lt;/div&gt;&lt;div&gt;+ getReviewedId();&lt;/div&gt;&lt;div&gt;+ setTcg();&lt;/div&gt;&lt;div&gt;+ getTcg();&lt;/div&gt;&lt;div&gt;+ setCardName();&lt;/div&gt;&lt;div&gt;&lt;div&gt;+ getCardName();&lt;/div&gt;&lt;div&gt;+ setCollection();&lt;/div&gt;&lt;/div&gt;&lt;div&gt;+ getCollection();&lt;/div&gt;&lt;div&gt;+ setStatus();&lt;/div&gt;&lt;div&gt;+ getStatus();&lt;/div&gt;&lt;div&gt;+ getCreatedAt();&lt;/div&gt;&lt;div&gt;+ getReviewedAt();&lt;/div&gt;" vertex="1">
+          <mxGeometry height="202" width="170" y="178" as="geometry" />
         </mxCell>
         <mxCell id="q819th2y5vrWgUEa4RMD-5" edge="1" parent="1" style="endArrow=open;endFill=1;endSize=12;html=1;rounded=0;" value="">
           <mxGeometry relative="1" width="160" as="geometry">
@@ -532,7 +532,7 @@
             <Array as="points">
               <mxPoint x="821" y="2240" />
               <mxPoint x="2260" y="2230" />
-              <mxPoint x="2260" y="1070" />
+              <mxPoint x="2260" y="1120" />
             </Array>
             <mxPoint x="1360" y="1790" as="sourcePoint" />
             <mxPoint x="1520" y="1790" as="targetPoint" />
@@ -545,7 +545,7 @@
           <mxGeometry height="30" width="60" x="1140" y="1600" as="geometry" />
         </mxCell>
         <mxCell id="wLIajSDsZFKwhwIMofdo-15" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="1" vertex="1">
-          <mxGeometry height="30" width="60" x="1211" y="1003.75" as="geometry" />
+          <mxGeometry height="30" width="60" x="1200" y="1059" as="geometry" />
         </mxCell>
         <mxCell id="wLIajSDsZFKwhwIMofdo-16" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="N" vertex="1">
           <mxGeometry height="30" width="60" x="760" y="1871" as="geometry" />

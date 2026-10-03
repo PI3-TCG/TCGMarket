@@ -130,7 +130,7 @@ Dessa forma, informações comuns, como nome, edição e número da coleção, n
 * `setCodeCollection()` — atualiza o código de coleção da carta.
 * `getCodeCollection()` — retorna o código de coleção da carta.
 * `setOfficialRarity()` — atualiza a raridade oficial da carta.
-* `getRaridadeOficial()` — retorna a raridade oficial da carta.
+* `getOfficialRarity()` — retorna a raridade oficial da carta.
 * `setImageUrl()` — atualiza a imagem da carta.
 * `getImageUrl()` — retorna a imagem da carta.
 * `getExternalId()`— retorna o identificador usado na API.
@@ -367,15 +367,16 @@ Um anúncio relaciona uma carta a um vendedor e contém as informações necess�
 | Atributo            | Tipo          | Descrição                                                                |
 | ------------------- | ------------- | ------------------------------------------------------------------------ |
 | `id`                | ObjectId      | Identificador único do anúncio.                                          |
-| `cartaId`           | ObjectId      | Referência à carta anunciada.                                            |
-| `vendedorId`        | ObjectId      | Referência ao usuário responsável pelo anúncio.                          |
-| `preco`             | BigDecimal    | Preço da carta anunciada.                                                |
-| `condicao`          | Enum          | Estado de conservação da carta, como Mint, Near Mint, Boa ou Danificada. |
-| `idioma`            | Enum          | Idioma da carta, como Português, Inglês ou Japonês.                      |
-| `quantidadeEstoque` | Integer       | Quantidade de unidades disponíveis no anúncio.                           |
-| `descricao`         | String        | Informações adicionais fornecidas pelo vendedor sobre o anúncio.         |
+| `collectionItemId`  | ObjectId      | Referência à carta da collection que foi anunciada.                      |
+| `price`             | BigDecimal    | Preço da carta anunciada.                                                |
+| `condition`         | Enum          | Estado de conservação da carta, como Mint, Near Mint, Boa ou Danificada. |
+| `idiom`             | Enum          | Idioma da carta, como Português, Inglês ou Japonês.                      |
+| `stockQuantity`     | Integer       | Quantidade de unidades disponíveis no anúncio.                           |
+| `description`       | String        | Informações adicionais fornecidas pelo vendedor sobre o anúncio.         |
 | `status`            | Enum          | Situação do anúncio: Ativo, Vendido, Reservado ou Removido.              |
-| `dataCadastro`      | LocalDateTime | Data e horário em que o anúncio foi cadastrado.                          |
+| `availableForSale`  | Boolean       | Disponível ou não para venda (true or false).                            |
+| `availableForTrade` | Boolean       | Disponível ou não para troca. (true or false).                           |
+| `date`              | LocalDateTime | Data e horário em que o anúncio foi cadastrado.                          |
 
 ### Métodos
 
@@ -393,6 +394,10 @@ Um anúncio relaciona uma carta a um vendedor e contém as informações necess�
 * `getDescription()` — retorna a descrição do anúncio.
 * `setStatus()` — atualiza o status do anúncio.
 * `getStatus()` — retorna o status do anúncio.
+* `setAvailableForSale()` — atualiza o valor booleano.
+* `isAvailableForTrade()` — retorna valor booleano.
+* `setAvailableForSale()` — atualiza valor booleano.
+* `isAvailableForTrade()` — retorna o valor booleano.
 * `getDate()` — retorna data e horário de quando o anúncio foi criado.
 
 ---
@@ -411,8 +416,9 @@ O usuário pode utilizar as funcionalidades do marketplace, como gerenciar seu p
 | ------------------- | ------------------- | ------------------------------------------------------ |
 | `id`                | ObjectId            | Identificador único do usuário.                        |
 | `name`              | String              | Nome do usuário.                                       |
+| `role`              | Enum                | Papel do usuário (Admin ou não).                       |
 | `email`             | String              | E-mail utilizado pelo usuário.                         |
-| `senhaHash`         | String              | Senha armazenada em formato de hash.                   |
+| `passwordHash`      | String              | Senha armazenada em formato de hash.                   |
 | `phoneNumber`       | String              | Telefone do usuário.                                   |
 | `address`           | Objeto/Subdocumento | Endereço associado ao usuário.                         |
 | `profilePhoto`      | String              | URL da foto de perfil.                                 |
@@ -473,8 +479,7 @@ As transações são especializadas pelas classes:
 | `status`            | Enum          | Estado da transação: Pendente, Confirmada, Concluída ou Cancelada. |
 | `creationDate`      | LocalDateTime | Data e horário de criação da transação.                            |
 | `conclusionDate`    | LocalDateTime | Data e horário de conclusão da transação.                          |
-| `availableForSale`  | Boolean       | Disponível ou não para venda (true or false).                      |
-| `availableForTrade` | Boolean       | Disponível ou não para troca. (true or false).                     |
+
 
 ### Métodos
 
@@ -487,10 +492,6 @@ As transações são especializadas pelas classes:
 * `getCreationDate()` — retorna data e horário da criação da transação.
 * `setConclusionDate()` — atualiza a data e horário da conclusão da transação.
 * `getConclusionDate()` — retorna a data e horário da conclusão da transação.
-* `isAvailableForSale()` — atualiza o valor booleano.
-* `getAvailableForTrade()` — retorna valor booleano.
-* `isAvailableForSale()` — atualiza valor booleano.
-* `getAvailableForTrade()` — retorna o valor booleano.
 * `finish()` — Métodos para finalizar a transação.
 
 ---
@@ -533,14 +534,15 @@ Representa uma negociação na qual os usuários realizam uma troca de cartas.
 A classe permite registrar qual carta está sendo oferecida pelo usuário que deseja realizar a troca.
 
 ### Atributos
-
-| Atributo            | Tipo       | Descrição                                                                            |
-| ------------------- | ---------- | ------------------------------------------------------------------------------------ |
-| `offeredCardId`     | ObjectId   | Referência à carta que o usuário está oferecendo em troca.                           |
-| `valueDifference`   | BigDecimal | Diferença de valor entre as cartas, caso a troca envolva uma compensação financeira. |
+ 
+| Atributo            | Tipo             | Descrição                                                                            |
+| ------------------- | ---------------- | ------------------------------------------------------------------------------------ |
+| `offeredCardId`     | List<ObjectId>   | Referência à carta que o usuário está oferecendo em troca.                           |
+| `valueDifference`   | BigDecimal       | Diferença de valor entre as cartas, caso a troca envolva uma compensação financeira. |
 
 ### Métodos
 
+* `setOfeeredCardId()`— atualiza as cartas oferecidas na troca.
 * `getOfferedCardId()` — retorna o identificador da carta oferecida na troca (`collectionItemId`).
 * `setValueDifference()` — atualiza o valor oferecido na troca.
 * `getValueDifference()` — retorna o valor oferecido na troca.
@@ -643,7 +645,6 @@ Ela permite registrar quais cartas pertencem à coleção do usuário e a quanti
 * `getCardId()` — retorna o identificador da carta colecionada.
 * `setQuantity()` — atualiza a quantidade de cartas colecionadas.
 * `getQuantity()` — retorna a quantidade de cartas colecionadas.
-* `getOrigin()` — retorna a origem da carta.
 * `setCondition()` — atualiza a condição da carta.
 * `getCondition()` — retorna a condição da carta.
 * `getAddition()` — retorna data e horário em que a carta foi adicionada a coleção.
@@ -738,3 +739,46 @@ Ela registra quem enviou a mensagem, qual conversa a mensagem pertence, seu cont
 * `getSentDate()` — retorna a data de envio.
 * `setRead()` — altera o status de leitura da mensagem.
 * `isRead()` — verifica se a mensagem foi lida.
+
+---
+
+# 18. Classe `CardRequest`
+
+### Descrição
+
+A Classe `CardRequest` representa a solicitação de adicioçao de carta ao catálogo feita por um usuário.
+
+Ela registra as informações bases da carta a ser adicionada.
+
+### Atributos
+
+| Atributo         | Tipo          | Descrição                                              |
+| ---------------- | ------------- | ------------------------------------------------------ |
+| `id`             | ObjectId      | Identificador único da solicitação.                    |
+| `userId`         | ObjectId      | Referência ao usuário que solicitpu a inclusão.        |
+| `reviewerId`     | ObjectId      | Referência do administrador que revisou o pedido.      |
+| `tcg`            | Enum          | qual TCG que a carta faz parte.                        |
+| `cardName`       | String        | Nome da carta solicitada.                              |
+| `collection`     | String        | Data e horário em que a mensagem foi enviada.          |
+| `status`         | Enum          | Indica o status da solicitação.                        |
+| `createdAt`      | LocalDateTime | Data e horário que o pedido foi criado.                |
+| `reviewedAt`     | LocalDateTime | Data e horário que o pedido foi revisado por um admin. |
+
+### Métodos
+
+* `getId()` — retorna o identificador da requisição.
+* `getUserId()` — retorna o identificador do usuário que criou a requisição.
+* `getReviewed()` — retorna o identificador do administrador que revisou a solicitação.
+* `setTcg()` — atualiza a qual TCG a carta pertence.
+* `getTcg()` — retorna qual o TCG que a carta pertence.
+* `setCardName()` — atualiza o nome da carta solicitada.
+* `getCardName()` — retorna o nome da carta solicitada.
+* `setCollection()` — atualiza qual a collection que a carta pertence.
+* `getCollection()` — retorna qual a collection que a carta pertence.
+* `setStatus()` — atualiza o status da requisição.
+* `getStatus()` — retorna o status da requisição.
+* `getCreatedAt()` — retorna a data em que a solicitação foi criada.
+* `getReviewedAt()` — retorna a data que a solicitação foi revisada.
+
+---
+
