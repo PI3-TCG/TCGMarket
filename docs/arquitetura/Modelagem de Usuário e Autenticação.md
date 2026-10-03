@@ -70,7 +70,7 @@ O `spring-boot-starter-security` entra na tarefa de login, junto com o filtro do
 
 `POST /api/users` recebe somente `name`, `email` e `password`. O corpo não tem `role`. Se o cliente enviar `role`, o campo é ignorado.
 
-A senha precisa ter entre 6 e 72 caracteres, com letra maiúscula, número e caractere especial. Letra minúscula não é obrigatória.
+A senha precisa ter no mínimo 6 caracteres e no máximo 72 bytes em UTF-8, com letra maiúscula, número e caractere especial. Letra minúscula não é obrigatória.
 
 A aplicação normaliza o e-mail, recusa duplicidade, grava o hash em `passwordHash`, fixa `role = USER` e preenche `registrationDate` em UTC. A resposta traz `id`, `name`, `email`, `role` e `registrationDate`. `password` e `passwordHash` não saem na resposta.
 

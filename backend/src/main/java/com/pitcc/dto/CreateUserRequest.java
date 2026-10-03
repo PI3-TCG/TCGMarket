@@ -1,5 +1,6 @@
 package com.pitcc.dto;
 
+import com.pitcc.validation.MaxUtf8Bytes;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -14,7 +15,8 @@ public record CreateUserRequest(
         @Size(max = 180, message = "O e-mail deve ter no máximo 180 caracteres.")
         String email,
     @NotBlank(message = "A senha é obrigatória.")
-        @Size(min = 6, max = 72, message = "A senha deve ter entre 6 e 72 caracteres.")
+        @Size(min = 6, message = "A senha deve ter no mínimo 6 caracteres.")
+        @MaxUtf8Bytes(value = 72, message = "A senha deve ter no máximo 72 bytes em UTF-8.")
         @Pattern(
             regexp = "^(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z0-9]).+$",
             message = "A senha deve conter letra maiúscula, número e caractere especial.")

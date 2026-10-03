@@ -1,6 +1,10 @@
 import { registerUser } from '@/services/userApi'
 import type { ApiErrorResponse } from '@/types/User'
-import { isStrongPassword } from '@/utils/password'
+import {
+  isStrongPassword,
+  MAX_PASSWORD_UTF8_BYTES,
+  utf8ByteLength,
+} from '@/utils/password'
 import axios from 'axios'
 import { type FormEvent, useState } from 'react'
 
@@ -12,17 +16,22 @@ const EMPTY_FORM = {
   acceptedTerms: false,
 }
 
-type FieldName = 'name' | 'email' | 'password' | 'confirmPassword' | 'acceptedTerms'
+type FieldName =
+  'name' | 'email' | 'password' | 'confirmPassword' | 'acceptedTerms'
 
 export function RegisterPage({ onBack }: { onBack: () => void }) {
   const [form, setForm] = useState(EMPTY_FORM)
   const [errors, setErrors] = useState<Partial<Record<FieldName, string>>>({})
-  const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(
-    null,
-  )
+  const [feedback, setFeedback] = useState<{
+    type: 'success' | 'error'
+    message: string
+  } | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
-  function updateField(field: keyof typeof EMPTY_FORM, value: string | boolean) {
+  function updateField(
+    field: keyof typeof EMPTY_FORM,
+    value: string | boolean,
+  ) {
     setForm((current) => ({ ...current, [field]: value }))
     setErrors((current) => ({ ...current, [field]: undefined }))
   }
@@ -46,10 +55,13 @@ export function RegisterPage({ onBack }: { onBack: () => void }) {
 
     if (!form.password) {
       nextErrors.password = 'A senha é obrigatória.'
-    } else if (form.password.length < 6 || form.password.length > 72) {
-      nextErrors.password = 'A senha deve ter entre 6 e 72 caracteres.'
+    } else if (form.password.length < 6) {
+      nextErrors.password = 'A senha deve ter no mínimo 6 caracteres.'
+    } else if (utf8ByteLength(form.password) > MAX_PASSWORD_UTF8_BYTES) {
+      nextErrors.password = 'A senha deve ter no máximo 72 bytes em UTF-8.'
     } else if (!isStrongPassword(form.password)) {
-      nextErrors.password = 'A senha deve conter letra maiúscula, número e caractere especial.'
+      nextErrors.password =
+        'A senha deve conter letra maiúscula, número e caractere especial.'
     }
 
     if (form.confirmPassword !== form.password) {
@@ -57,7 +69,8 @@ export function RegisterPage({ onBack }: { onBack: () => void }) {
     }
 
     if (!form.acceptedTerms) {
-      nextErrors.acceptedTerms = 'É necessário aceitar o termo de uso dos dados pessoais.'
+      nextErrors.acceptedTerms =
+        'É necessário aceitar o termo de uso dos dados pessoais.'
     }
 
     return nextErrors
@@ -96,9 +109,12 @@ export function RegisterPage({ onBack }: { onBack: () => void }) {
     <main className="flex min-h-svh items-center justify-center bg-slate-950 px-6 py-10 text-slate-100">
       <section className="w-full max-w-xl rounded-2xl border border-slate-800 bg-slate-900 p-8 shadow-xl">
         <p className="text-sm font-medium tracking-wide text-amber-400">TCC</p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight">Criar conta</h1>
+        <h1 className="mt-2 text-3xl font-semibold tracking-tight">
+          Criar conta
+        </h1>
         <p className="mt-4 leading-relaxed text-slate-300">
-          Cadastre-se para anunciar, buscar e trocar cartas. A conta criada é de usuário comum.
+          Cadastre-se para anunciar, buscar e trocar cartas. A conta criada é de
+          usuário comum.
         </p>
 
         <form className="mt-8 space-y-5" onSubmit={handleSubmit} noValidate>
@@ -143,16 +159,20 @@ export function RegisterPage({ onBack }: { onBack: () => void }) {
               <input
                 type="checkbox"
                 checked={form.acceptedTerms}
-                onChange={(event) => updateField('acceptedTerms', event.target.checked)}
+                onChange={(event) =>
+                  updateField('acceptedTerms', event.target.checked)
+                }
                 className="mt-1 size-4 rounded border-slate-600 bg-slate-950 text-amber-400"
               />
               <span>
-                Li e aceito a coleta e o uso dos meus dados pessoais para criar e operar esta
-                conta, conforme a LGPD.
+                Li e aceito a coleta e o uso dos meus dados pessoais para criar
+                e operar esta conta, conforme a LGPD.
               </span>
             </label>
             {errors.acceptedTerms ? (
-              <p className="mt-2 text-sm text-rose-300">{errors.acceptedTerms}</p>
+              <p className="mt-2 text-sm text-rose-300">
+                {errors.acceptedTerms}
+              </p>
             ) : null}
           </div>
 
@@ -231,7 +251,10 @@ function Field({
 function applyApiError(
   error: unknown,
   setErrors: (errors: Partial<Record<FieldName, string>>) => void,
-  setFeedback: (feedback: { type: 'success' | 'error'; message: string }) => void,
+  setFeedback: (feedback: {
+    type: 'success' | 'error'
+    message: string
+  }) => void,
 ) {
   if (axios.isAxiosError<ApiErrorResponse>(error)) {
     const data = error.response?.data
@@ -246,7 +269,9 @@ function applyApiError(
     }
     setFeedback({
       type: 'error',
-      message: data?.message ?? 'Não foi possível concluir o cadastro. Tente novamente.',
+      message:
+        data?.message ??
+        'Não foi possível concluir o cadastro. Tente novamente.',
     })
     return
   }

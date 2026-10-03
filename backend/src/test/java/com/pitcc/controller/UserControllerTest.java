@@ -2,6 +2,8 @@ package com.pitcc.controller;
 
 import static org.hamcrest.Matchers.hasItem;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -153,5 +155,57 @@ class UserControllerTest {
             jsonPath("$.message")
                 .value("Já existe um usuário cadastrado com o e-mail joao@email.com."))
         .andExpect(jsonPath("$.fields[0].field").value("email"));
+  }
+
+  @Test
+  void shouldAcceptUnicodePasswordWithin72Utf8Bytes() throws Exception {
+    when(userService.register(any(CreateUserRequest.class)))
+        .thenReturn(
+            new UserResponse(
+                "abc123",
+                "João Silva",
+                "joao@email.com",
+                UserRole.USER,
+                Instant.parse("2026-10-02T18:00:00Z")));
+
+    String password = "A1!" + "é".repeat(34);
+
+    mockMvc
+        .perform(
+            post("/api/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(userJson(password)))
+        .andExpect(status().isCreated());
+
+    verify(userService).register(any(CreateUserRequest.class));
+  }
+
+  @Test
+  void shouldRejectPasswordAbove72Utf8BytesWithoutCallingEncoder() throws Exception {
+    String password = "A1!" + "é".repeat(35);
+
+    mockMvc
+        .perform(
+            post("/api/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(userJson(password)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.status").value(400))
+        .andExpect(
+            jsonPath("$.fields[?(@.field == 'password')].message")
+                .value(hasItem("A senha deve ter no máximo 72 bytes em UTF-8.")));
+
+    verify(userService, never()).register(any());
+  }
+
+  private String userJson(String password) {
+    return """
+        {
+          "name": "João Silva",
+          "email": "joao@email.com",
+          "password": "%s"
+        }
+        """
+        .formatted(password);
   }
 }
