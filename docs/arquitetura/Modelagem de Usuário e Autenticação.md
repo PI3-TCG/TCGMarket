@@ -1,6 +1,6 @@
 # Modelagem de Usuário e Autenticação
 
-Este documento define como o TCG Market representa um usuário e qual estratégia de autenticação e autorização a aplicação vai usar. Nesta etapa existem o documento MongoDB, o enum de perfil e o repositório. Cadastro, login, emissão de token e proteção de endpoints ficam para as tarefas seguintes.
+Este documento define como o TCG Market representa um usuário e qual estratégia de autenticação e autorização a aplicação vai usar. O cadastro público já está implementado. Login, emissão de token e proteção de endpoints continuam para as tarefas seguintes.
 
 ## Princípio
 
@@ -64,7 +64,17 @@ A estratégia é **JWT stateless com Spring Security**.
 
 Essa escolha acompanha o que o projeto já é: API REST e frontend React em outra origem. O Axios em `frontend/src/services/api.ts` passa a enviar o header quando o login existir. O CORS atual já libera o header.
 
-O `spring-boot-starter-security` entra na tarefa de login, junto com o filtro do token e o `PasswordEncoder`. Incluir o starter agora, sem essa configuração, fecharia os endpoints atuais atrás do login padrão do Spring Security.
+O `spring-boot-starter-security` entra na tarefa de login, junto com o filtro do token. Incluir o starter agora, sem essa configuração, fecharia os endpoints atuais atrás do login padrão do Spring Security. O cadastro já grava o hash com `BCryptPasswordEncoder`, pela dependência `spring-security-crypto`, sem ativar o filtro de segurança.
+
+## Cadastro público
+
+`POST /api/users` recebe somente `name`, `email` e `password`. O corpo não tem `role`. Se o cliente enviar `role`, o campo é ignorado.
+
+A senha precisa ter no mínimo 6 caracteres e no máximo 72 bytes em UTF-8, com letra maiúscula, número e caractere especial. Letra minúscula não é obrigatória.
+
+A aplicação normaliza o e-mail, recusa duplicidade, grava o hash em `passwordHash`, fixa `role = USER` e preenche `registrationDate` em UTC. A resposta traz `id`, `name`, `email`, `role` e `registrationDate`. `password` e `passwordHash` não saem na resposta.
+
+E-mail já cadastrado responde `409`. Dados inválidos respondem `400`.
 
 ## Autorização
 
@@ -84,12 +94,12 @@ Uma conta `USER` só altera dados ligados ao próprio `id`. O `id` vem do token,
 - `com.pitcc.model.UserRole`
 - `com.pitcc.repository.UserRepository`, com `findByEmail` e `existsByEmail`
 - Índice único de e-mail, criado automaticamente na subida da aplicação
+- `POST /api/users`, com validação, hash e perfil `USER`
 
 ## O que fica para as próximas tarefas
 
-1. Cadastro: validar `name`, `email` e senha, recusar e-mail duplicado, gravar o hash e fixar `role = USER`.
-2. Login: conferir o hash e emitir o JWT.
-3. Filtro de autenticação e contexto do usuário autenticado.
-4. Proteção dos endpoints.
-5. Autorização por `USER` e `ADMIN`.
-6. Uso do `id` autenticado nas operações de negócio.
+1. Login: conferir o hash e emitir o JWT.
+2. Filtro de autenticação e contexto do usuário autenticado.
+3. Proteção dos endpoints.
+4. Autorização por `USER` e `ADMIN`.
+5. Uso do `id` autenticado nas operações de negócio.
