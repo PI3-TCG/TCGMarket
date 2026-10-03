@@ -38,6 +38,7 @@ npm run dev
 | [docs/Pagamentos.md](docs/TCG-8%20Spike%20Métodos%20de%20pagamento%20.md) | Spike de integração com métodos de pagamento |
 | [docs/BasicAPI.md](docs/TCG-1%20Basico%20sobre%20API.md) | Conceitos básicos de API |
 | [docs/arquitetura/Catálogo de Cartas](docs/arquitetura/TCG-32%20Arquitetura%20do%20Catálogo%20de%20Cartas.md) | Catálogo no MongoDB e APIs externas de cartas como fonte de importação |
+| [docs/arquitetura/Modelagem de Usuário e Autenticação](docs/arquitetura/Modelagem%20de%20Usuário%20e%20Autenticação.md) | Documento `User`, perfis e estratégia JWT |
 
 ## Próximos passos
 

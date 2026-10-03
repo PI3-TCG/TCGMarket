@@ -3,6 +3,9 @@ spring:
     name: backend
   mongodb:
     uri: ${MONGODB_URI}
+  data:
+    mongodb:
+      auto-index-creation: true
 
 # Catálogos externos. A chave da Pokémon TCG vem só do ambiente e não tem valor padrão.
 external-apis:
