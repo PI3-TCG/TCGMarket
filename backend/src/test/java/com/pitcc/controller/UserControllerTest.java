@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.pitcc.config.PermitAllSecurityConfig;
 import com.pitcc.dto.CreateUserRequest;
 import com.pitcc.dto.UserResponse;
 import com.pitcc.exception.EmailAlreadyRegisteredException;
@@ -25,7 +26,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(UserController.class)
-@Import(GlobalExceptionHandler.class)
+@Import({GlobalExceptionHandler.class, PermitAllSecurityConfig.class})
 class UserControllerTest {
 
   @Autowired private MockMvc mockMvc;

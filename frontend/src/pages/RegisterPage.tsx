@@ -1,3 +1,6 @@
+import mark from '@/assets/mark-3cartas-roxo.svg'
+import hero from '@/assets/login-hero.webp'
+import { Alert } from '@/components/ui/Alert'
 import { registerUser } from '@/services/userApi'
 import type { ApiErrorResponse } from '@/types/User'
 import {
@@ -6,32 +9,76 @@ import {
   utf8ByteLength,
 } from '@/utils/password'
 import axios from 'axios'
-import { type FormEvent, useState } from 'react'
+import { type FormEvent, type ReactNode, useEffect, useState } from 'react'
+
+const FUTURE_TERMS = 'Os termos de uso serão implementados no futuro.'
+const FUTURE_PRIVACY = 'A política de privacidade será implementada no futuro.'
+
+const COUNTRIES = [
+  'Brasil',
+  'Argentina',
+  'Bolívia',
+  'Chile',
+  'Colômbia',
+  'Equador',
+  'Paraguai',
+  'Peru',
+  'Uruguai',
+  'Venezuela',
+  'Portugal',
+  'Estados Unidos',
+  'Canadá',
+  'México',
+  'Espanha',
+  'França',
+  'Alemanha',
+  'Itália',
+  'Japão',
+  'Outro',
+]
 
 const EMPTY_FORM = {
   name: '',
+  username: '',
   email: '',
   password: '',
   confirmPassword: '',
+  birthDate: '',
+  country: 'Brasil',
   acceptedTerms: false,
 }
 
-type FieldName =
-  'name' | 'email' | 'password' | 'confirmPassword' | 'acceptedTerms'
+type FieldName = keyof typeof EMPTY_FORM
 
-export function RegisterPage({ onBack }: { onBack: () => void }) {
+const inputClass =
+  'w-full rounded-xl border border-[#e4dceb] bg-white py-3 pr-4 pl-11 text-sm outline-none placeholder:text-[#b3abbf] focus:border-[#660366] focus:ring-2 focus:ring-[#1688F8]'
+
+export function RegisterPage({
+  onBack,
+  onLogin,
+  onCreated,
+}: {
+  onBack: () => void
+  onLogin: () => void
+  onCreated: () => void
+}) {
   const [form, setForm] = useState(EMPTY_FORM)
   const [errors, setErrors] = useState<Partial<Record<FieldName, string>>>({})
-  const [feedback, setFeedback] = useState<{
-    type: 'success' | 'error'
-    message: string
-  } | null>(null)
+  const [feedback, setFeedback] = useState<string | null>(null)
+  const [notice, setNotice] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
-  function updateField(
-    field: keyof typeof EMPTY_FORM,
-    value: string | boolean,
-  ) {
+  useEffect(() => {
+    if (!notice) {
+      return
+    }
+    const timeout = window.setTimeout(() => setNotice(null), 6000)
+    return () => window.clearTimeout(timeout)
+  }, [notice])
+
+  function updateField(field: FieldName, value: string | boolean) {
     setForm((current) => ({ ...current, [field]: value }))
     setErrors((current) => ({ ...current, [field]: undefined }))
   }
@@ -39,12 +86,20 @@ export function RegisterPage({ onBack }: { onBack: () => void }) {
   function validate() {
     const nextErrors: Partial<Record<FieldName, string>> = {}
     const name = form.name.trim()
+    const username = form.username.trim()
     const email = form.email.trim()
 
     if (!name) {
       nextErrors.name = 'O nome é obrigatório.'
     } else if (name.length > 120) {
       nextErrors.name = 'O nome deve ter no máximo 120 caracteres.'
+    }
+
+    if (!username) {
+      nextErrors.username = 'O nome de usuário é obrigatório.'
+    } else if (!/^[a-zA-Z0-9._]{3,30}$/.test(username)) {
+      nextErrors.username =
+        'Use de 3 a 30 caracteres: letras, números, ponto ou _.'
     }
 
     if (!email) {
@@ -68,9 +123,20 @@ export function RegisterPage({ onBack }: { onBack: () => void }) {
       nextErrors.confirmPassword = 'A confirmação precisa ser igual à senha.'
     }
 
+    if (!form.birthDate) {
+      nextErrors.birthDate = 'A data de nascimento é obrigatória.'
+    } else if (!isAtLeast13(form.birthDate)) {
+      nextErrors.birthDate =
+        'Você precisa ter pelo menos 13 anos para criar uma conta.'
+    }
+
+    if (!form.country) {
+      nextErrors.country = 'O país é obrigatório.'
+    }
+
     if (!form.acceptedTerms) {
       nextErrors.acceptedTerms =
-        'É necessário aceitar o termo de uso dos dados pessoais.'
+        'É necessário aceitar os termos de uso e a política de privacidade.'
     }
 
     return nextErrors
@@ -88,16 +154,12 @@ export function RegisterPage({ onBack }: { onBack: () => void }) {
 
     setSubmitting(true)
     try {
-      const user = await registerUser({
+      await registerUser({
         name: form.name.trim(),
         email: form.email.trim(),
         password: form.password,
       })
-      setForm(EMPTY_FORM)
-      setFeedback({
-        type: 'success',
-        message: `Conta criada para ${user.name}. O e-mail ${user.email} foi cadastrado.`,
-      })
+      onCreated()
     } catch (error) {
       applyApiError(error, setErrors, setFeedback)
     } finally {
@@ -106,119 +168,231 @@ export function RegisterPage({ onBack }: { onBack: () => void }) {
   }
 
   return (
-    <main className="flex min-h-svh items-center justify-center bg-slate-950 px-6 py-10 text-slate-100">
-      <section className="w-full max-w-xl rounded-2xl border border-slate-800 bg-slate-900 p-8 shadow-xl">
-        <p className="text-sm font-medium tracking-wide text-amber-400">TCC</p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight">
-          Criar conta
-        </h1>
-        <p className="mt-4 leading-relaxed text-slate-300">
-          Cadastre-se para anunciar, buscar e trocar cartas. A conta criada é de
-          usuário comum.
-        </p>
+    <main className="min-h-svh bg-[#f7f4fb] text-[#24182f] lg:grid lg:h-svh lg:grid-cols-2 lg:overflow-hidden">
+      <section className="relative lg:h-svh">
+        <img
+          src={hero}
+          alt="Eevee dormindo sobre uma mesa de cartas. Colecione, troque e conecte no TCG Market."
+          className="h-80 w-full object-cover object-[center_72%] sm:h-[28rem] lg:h-full"
+        />
+      </section>
 
-        <form className="mt-8 space-y-5" onSubmit={handleSubmit} noValidate>
-          <Field
-            id="name"
-            label="Nome"
-            value={form.name}
-            error={errors.name}
-            autoComplete="name"
-            onChange={(value) => updateField('name', value)}
-          />
-          <Field
-            id="email"
-            label="E-mail"
-            type="email"
-            value={form.email}
-            error={errors.email}
-            autoComplete="email"
-            onChange={(value) => updateField('email', value)}
-          />
-          <Field
-            id="password"
-            label="Senha"
-            type="password"
-            value={form.password}
-            error={errors.password}
-            autoComplete="new-password"
-            onChange={(value) => updateField('password', value)}
-          />
-          <Field
-            id="confirmPassword"
-            label="Confirmar senha"
-            type="password"
-            value={form.confirmPassword}
-            error={errors.confirmPassword}
-            autoComplete="new-password"
-            onChange={(value) => updateField('confirmPassword', value)}
-          />
+      <section className="relative overflow-y-auto px-6 py-10 lg:h-svh">
+        <Sparkles />
+        {notice ? (
+          <div className="sticky top-0 z-10 mb-4">
+            <Alert
+              tone="info"
+              message={notice}
+              onClose={() => setNotice(null)}
+            />
+          </div>
+        ) : null}
 
-          <div>
-            <label className="flex items-start gap-3 text-sm leading-relaxed text-slate-300">
-              <input
-                type="checkbox"
-                checked={form.acceptedTerms}
-                onChange={(event) =>
-                  updateField('acceptedTerms', event.target.checked)
-                }
-                className="mt-1 size-4 rounded border-slate-600 bg-slate-950 text-amber-400"
+        <div className="relative mx-auto w-full max-w-xl">
+          <div className="flex flex-col items-center text-center">
+            <button type="button" onClick={onBack} className="rounded-lg">
+              <img
+                src={mark}
+                alt="Voltar para o início"
+                className="h-16 w-auto"
               />
-              <span>
-                Li e aceito a coleta e o uso dos meus dados pessoais para criar
-                e operar esta conta, conforme a LGPD.
-              </span>
-            </label>
-            {errors.acceptedTerms ? (
-              <p className="mt-2 text-sm text-rose-300">
-                {errors.acceptedTerms}
-              </p>
-            ) : null}
+            </button>
+            <p className="font-display mt-4 text-2xl tracking-wide text-[#2a1840]">
+              TCG MARKET
+            </p>
+            <h1 className="mt-5 text-3xl font-bold tracking-tight">
+              Crie sua conta
+            </h1>
+            <p className="mt-2 max-w-md text-sm text-[#6d647c]">
+              Faça parte da nossa comunidade de colecionadores e comece sua
+              jornada no mundo dos TCGs.
+            </p>
           </div>
 
-          {feedback ? (
-            <p
-              role="status"
-              className={
-                feedback.type === 'success'
-                  ? 'rounded-lg bg-emerald-950 px-4 py-3 text-sm text-emerald-200'
-                  : 'rounded-lg bg-rose-950 px-4 py-3 text-sm text-rose-200'
-              }
-            >
-              {feedback.message}
-            </p>
-          ) : null}
+          <form className="mt-8 space-y-5" onSubmit={handleSubmit} noValidate>
+            <TextField
+              id="name"
+              label="Nome completo"
+              required
+              value={form.name}
+              placeholder="Seu nome completo"
+              autoComplete="name"
+              error={errors.name}
+              icon={<UserIcon />}
+              onChange={(value) => updateField('name', value)}
+            />
 
-          <div className="flex items-center gap-4">
+            <div className="grid gap-5 sm:grid-cols-2">
+              <TextField
+                id="username"
+                label="Nome de usuário"
+                required
+                value={form.username}
+                placeholder="Ex.: alineguilhoto"
+                autoComplete="username"
+                error={errors.username}
+                icon={<AtIcon />}
+                onChange={(value) => updateField('username', value)}
+              />
+              <TextField
+                id="email"
+                label="E-mail"
+                required
+                type="email"
+                value={form.email}
+                placeholder="seu@email.com"
+                autoComplete="email"
+                error={errors.email}
+                icon={<MailIcon />}
+                onChange={(value) => updateField('email', value)}
+              />
+            </div>
+
+            <div className="grid gap-5 sm:grid-cols-2">
+              <PasswordField
+                id="password"
+                label="Senha"
+                value={form.password}
+                placeholder="Mínimo de 6 caracteres"
+                autoComplete="new-password"
+                visible={showPassword}
+                error={errors.password}
+                onToggle={() => setShowPassword((current) => !current)}
+                onChange={(value) => updateField('password', value)}
+              />
+              <PasswordField
+                id="confirmPassword"
+                label="Confirmar senha"
+                value={form.confirmPassword}
+                placeholder="Repita sua senha"
+                autoComplete="new-password"
+                visible={showConfirmPassword}
+                error={errors.confirmPassword}
+                onToggle={() => setShowConfirmPassword((current) => !current)}
+                onChange={(value) => updateField('confirmPassword', value)}
+              />
+            </div>
+
+            <div className="grid gap-5 sm:grid-cols-2">
+              <TextField
+                id="birthDate"
+                label="Data de nascimento"
+                required
+                type="date"
+                value={form.birthDate}
+                placeholder=""
+                autoComplete="bday"
+                error={errors.birthDate}
+                icon={<CalendarIcon />}
+                onChange={(value) => updateField('birthDate', value)}
+              />
+              <div>
+                <FieldLabel htmlFor="country" required>
+                  País
+                </FieldLabel>
+                <div className="relative">
+                  <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-[#9a90ab]">
+                    <GlobeIcon />
+                  </span>
+                  <select
+                    id="country"
+                    name="country"
+                    value={form.country}
+                    aria-invalid={errors.country ? true : undefined}
+                    onChange={(event) =>
+                      updateField('country', event.target.value)
+                    }
+                    className={`${inputClass} appearance-none pr-10`}
+                  >
+                    {COUNTRIES.map((country) => (
+                      <option key={country} value={country}>
+                        {country}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                {errors.country ? (
+                  <FieldError message={errors.country} />
+                ) : null}
+              </div>
+            </div>
+
+            <p className="flex items-start gap-2 rounded-xl bg-[#eef4ff] px-3 py-3 text-sm text-[#1e3a8a]">
+              <InfoIcon />
+              <span>
+                Você precisa ter pelo menos 13 anos para criar uma conta no TCG
+                Market.
+              </span>
+            </p>
+
+            <div>
+              <label className="flex items-start gap-3 text-sm text-[#4b445c]">
+                <input
+                  type="checkbox"
+                  checked={form.acceptedTerms}
+                  onChange={(event) =>
+                    updateField('acceptedTerms', event.target.checked)
+                  }
+                  className="mt-0.5 size-4 rounded border-[#d8d0e4] text-[#660366]"
+                />
+                <span>
+                  Li e concordo com os{' '}
+                  <TextButton onClick={() => setNotice(FUTURE_TERMS)}>
+                    Termos de uso
+                  </TextButton>{' '}
+                  e a{' '}
+                  <TextButton onClick={() => setNotice(FUTURE_PRIVACY)}>
+                    Política de privacidade
+                  </TextButton>
+                  .
+                  <RequiredMark />
+                </span>
+              </label>
+              {errors.acceptedTerms ? (
+                <FieldError message={errors.acceptedTerms} />
+              ) : null}
+            </div>
+
+            {feedback ? <Alert tone="error" message={feedback} /> : null}
+
             <button
               type="submit"
               disabled={submitting}
-              className="inline-block rounded bg-amber-400 px-4 py-2 text-sm font-medium text-slate-950 transition-colors hover:bg-amber-500 disabled:cursor-not-allowed disabled:opacity-60"
+              className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#660366] text-sm font-semibold text-white transition hover:bg-[#4F024F] focus-visible:ring-2 focus-visible:ring-[#1688F8] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {submitting ? 'Cadastrando...' : 'Cadastrar'}
+              <UserIcon />
+              {submitting ? 'Criando conta...' : 'Criar conta'}
             </button>
+          </form>
+
+          <p className="mt-6 mb-4 text-center text-sm text-[#6d647c]">
+            Já tem uma conta?{' '}
             <button
               type="button"
-              onClick={onBack}
-              className="text-sm font-medium text-slate-300 transition-colors hover:text-amber-200"
+              onClick={onLogin}
+              className="font-semibold text-[#660366] hover:text-[#4F024F]"
             >
-              Voltar
+              Entrar
             </button>
-          </div>
-        </form>
+          </p>
+        </div>
       </section>
     </main>
   )
 }
 
-function Field({
+function TextField({
   id,
   label,
   value,
   error,
   onChange,
   type = 'text',
+  placeholder,
   autoComplete,
+  icon,
+  required = false,
 }: {
   id: string
   label: string
@@ -226,68 +400,302 @@ function Field({
   error?: string
   onChange: (value: string) => void
   type?: string
-  autoComplete?: string
+  placeholder: string
+  autoComplete: string
+  icon: ReactNode
+  required?: boolean
 }) {
   return (
     <div>
-      <label htmlFor={id} className="block text-sm font-medium text-slate-200">
+      <FieldLabel htmlFor={id} required={required}>
         {label}
-      </label>
-      <input
-        id={id}
-        name={id}
-        type={type}
-        value={value}
-        autoComplete={autoComplete}
-        aria-invalid={error ? true : undefined}
-        onChange={(event) => onChange(event.target.value)}
-        className="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 outline-none ring-amber-400 placeholder:text-slate-500 focus:ring-2"
-      />
-      {error ? <p className="mt-2 text-sm text-rose-300">{error}</p> : null}
+      </FieldLabel>
+      <div className="relative">
+        <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-[#9a90ab]">
+          {icon}
+        </span>
+        <input
+          id={id}
+          name={id}
+          type={type}
+          value={value}
+          placeholder={placeholder}
+          autoComplete={autoComplete}
+          aria-invalid={error ? true : undefined}
+          onChange={(event) => onChange(event.target.value)}
+          className={inputClass}
+        />
+      </div>
+      {error ? <FieldError message={error} /> : null}
     </div>
   )
+}
+
+function PasswordField({
+  id,
+  label,
+  value,
+  error,
+  onChange,
+  placeholder,
+  autoComplete,
+  visible,
+  onToggle,
+}: {
+  id: string
+  label: string
+  value: string
+  error?: string
+  onChange: (value: string) => void
+  placeholder: string
+  autoComplete: string
+  visible: boolean
+  onToggle: () => void
+}) {
+  return (
+    <div>
+      <FieldLabel htmlFor={id} required>
+        {label}
+      </FieldLabel>
+      <div className="relative">
+        <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-[#9a90ab]">
+          <LockIcon />
+        </span>
+        <input
+          id={id}
+          name={id}
+          type={visible ? 'text' : 'password'}
+          value={value}
+          placeholder={placeholder}
+          autoComplete={autoComplete}
+          aria-invalid={error ? true : undefined}
+          onChange={(event) => onChange(event.target.value)}
+          className={`${inputClass} pr-12`}
+        />
+        <button
+          type="button"
+          onClick={onToggle}
+          className="absolute top-1/2 right-3 -translate-y-1/2 text-[#9a90ab] hover:text-[#660366]"
+          aria-label={visible ? 'Ocultar senha' : 'Mostrar senha'}
+        >
+          {visible ? <EyeOffIcon /> : <EyeIcon />}
+        </button>
+      </div>
+      {error ? <FieldError message={error} /> : null}
+    </div>
+  )
+}
+
+function FieldLabel({
+  htmlFor,
+  children,
+  required = false,
+}: {
+  htmlFor: string
+  children: ReactNode
+  required?: boolean
+}) {
+  return (
+    <label htmlFor={htmlFor} className="mb-2 block text-sm font-medium">
+      {children}
+      {required ? <RequiredMark /> : null}
+    </label>
+  )
+}
+
+function RequiredMark() {
+  return <span className="text-[#B91C1C]"> *</span>
+}
+
+function FieldError({ message }: { message: string }) {
+  return <p className="mt-2 text-sm text-[#B91C1C]">{message}</p>
+}
+
+function TextButton({
+  children,
+  onClick,
+}: {
+  children: ReactNode
+  onClick: () => void
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="font-semibold text-[#660366] underline-offset-2 hover:underline"
+    >
+      {children}
+    </button>
+  )
+}
+
+function isAtLeast13(value: string) {
+  const birth = new Date(`${value}T00:00:00`)
+  if (Number.isNaN(birth.getTime())) {
+    return false
+  }
+  const today = new Date()
+  let age = today.getFullYear() - birth.getFullYear()
+  const month = today.getMonth() - birth.getMonth()
+  if (month < 0 || (month === 0 && today.getDate() < birth.getDate())) {
+    age -= 1
+  }
+  return age >= 13 && age < 120
 }
 
 function applyApiError(
   error: unknown,
   setErrors: (errors: Partial<Record<FieldName, string>>) => void,
-  setFeedback: (feedback: {
-    type: 'success' | 'error'
-    message: string
-  }) => void,
+  setFeedback: (message: string) => void,
 ) {
   if (axios.isAxiosError<ApiErrorResponse>(error)) {
     const data = error.response?.data
     if (data?.fields?.length) {
       const nextErrors: Partial<Record<FieldName, string>> = {}
       for (const fieldError of data.fields) {
-        if (isFieldName(fieldError.field)) {
+        if (isPersistedField(fieldError.field)) {
           nextErrors[fieldError.field] = fieldError.message
         }
       }
       setErrors(nextErrors)
     }
-    setFeedback({
-      type: 'error',
-      message:
-        data?.message ??
-        'Não foi possível concluir o cadastro. Tente novamente.',
-    })
+    setFeedback(
+      data?.message ?? 'Não foi possível concluir o cadastro. Tente novamente.',
+    )
     return
   }
 
-  setFeedback({
-    type: 'error',
-    message: 'Não foi possível concluir o cadastro. Tente novamente.',
-  })
+  setFeedback('Não foi possível concluir o cadastro. Tente novamente.')
 }
 
-function isFieldName(field: string): field is FieldName {
+function isPersistedField(
+  field: string,
+): field is 'name' | 'email' | 'password' {
+  return field === 'name' || field === 'email' || field === 'password'
+}
+
+function Sparkles() {
   return (
-    field === 'name' ||
-    field === 'email' ||
-    field === 'password' ||
-    field === 'confirmPassword' ||
-    field === 'acceptedTerms'
+    <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+      <span className="absolute top-16 right-8 text-3xl text-[#d8c4ef]">✦</span>
+      <span className="absolute top-48 left-6 text-xl text-[#eadff6]">✦</span>
+      <span className="absolute right-12 bottom-16 text-2xl text-[#e7d8f5]">
+        ✦
+      </span>
+    </div>
+  )
+}
+
+function Icon({ children }: { children: ReactNode }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="size-5"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+    >
+      {children}
+    </svg>
+  )
+}
+
+function UserIcon() {
+  return (
+    <Icon>
+      <circle cx="12" cy="8" r="3.2" />
+      <path d="M5 19c1.2-3 3.4-4.5 7-4.5S17.8 16 19 19" />
+    </Icon>
+  )
+}
+
+function AtIcon() {
+  return (
+    <Icon>
+      <circle cx="12" cy="12" r="3.2" />
+      <path d="M16 12v1.5a2.2 2.2 0 0 0 4.4 0V12a8.4 8.4 0 1 0-3.2 6.6" />
+    </Icon>
+  )
+}
+
+function MailIcon() {
+  return (
+    <Icon>
+      <rect x="3" y="5" width="18" height="14" rx="2" />
+      <path d="m4 7 8 6 8-6" />
+    </Icon>
+  )
+}
+
+function LockIcon() {
+  return (
+    <Icon>
+      <rect x="5" y="11" width="14" height="10" rx="2" />
+      <path d="M8 11V8a4 4 0 0 1 8 0v3" />
+    </Icon>
+  )
+}
+
+function CalendarIcon() {
+  return (
+    <Icon>
+      <rect x="4" y="5" width="16" height="15" rx="2" />
+      <path d="M8 3v4M16 3v4M4 10h16" />
+    </Icon>
+  )
+}
+
+function GlobeIcon() {
+  return (
+    <Icon>
+      <circle cx="12" cy="12" r="8" />
+      <path d="M4 12h16M12 4c2.2 2.4 2.2 13.6 0 16M12 4c-2.2 2.4-2.2 13.6 0 16" />
+    </Icon>
+  )
+}
+
+function InfoIcon() {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      className="mt-0.5 size-5 shrink-0"
+      aria-hidden="true"
+    >
+      <circle
+        cx="10"
+        cy="10"
+        r="8"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+      />
+      <path
+        d="M10 9v5"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
+      <circle cx="10" cy="6.5" r="0.8" fill="currentColor" />
+    </svg>
+  )
+}
+
+function EyeIcon() {
+  return (
+    <Icon>
+      <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z" />
+      <circle cx="12" cy="12" r="3" />
+    </Icon>
+  )
+}
+
+function EyeOffIcon() {
+  return (
+    <Icon>
+      <path d="M3 3l18 18" />
+      <path d="M10.6 10.6A3 3 0 0 0 12 15a3 3 0 0 0 2.4-4.4" />
+      <path d="M9.9 5.2A10.8 10.8 0 0 1 12 5c6.5 0 10 7 10 7a18 18 0 0 1-4.1 4.8" />
+      <path d="M6.1 6.1C3.7 7.8 2 12 2 12s3.5 6 10 6c1.5 0 2.8-.3 4-.8" />
+    </Icon>
   )
 }
