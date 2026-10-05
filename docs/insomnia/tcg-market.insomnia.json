@@ -1,0 +1,318 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2026-10-05T15:00:00.000Z",
+  "__export_source": "tcg-market",
+  "resources": [
+    {
+      "_id": "wrk_tcgmarket",
+      "_type": "workspace",
+      "name": "TCG Market",
+      "description": "Rotas atuais do backend. A busca de catálogo chama a API externa do jogo e devolve a carta já convertida.",
+      "scope": "collection"
+    },
+    {
+      "_id": "env_tcgmarket",
+      "_type": "environment",
+      "parentId": "wrk_tcgmarket",
+      "name": "Base Environment",
+      "data": {
+        "base_url": "http://localhost:8080"
+      },
+      "dataPropertyOrder": {
+        "&": ["base_url"]
+      },
+      "color": null,
+      "isPrivate": false,
+      "metaSortKey": 1
+    },
+    {
+      "_id": "jar_tcgmarket",
+      "_type": "cookie_jar",
+      "parentId": "wrk_tcgmarket",
+      "name": "Default",
+      "cookies": []
+    },
+    {
+      "_id": "fld_health",
+      "_type": "request_group",
+      "parentId": "wrk_tcgmarket",
+      "name": "Health",
+      "description": "",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": 1
+    },
+    {
+      "_id": "req_health",
+      "_type": "request",
+      "parentId": "fld_health",
+      "name": "Status",
+      "description": "Confere se a API está no ar.",
+      "method": "GET",
+      "url": "{{ _.base_url }}/api/health",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 1,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "fld_users",
+      "_type": "request_group",
+      "parentId": "wrk_tcgmarket",
+      "name": "Usuários",
+      "description": "",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": 2
+    },
+    {
+      "_id": "req_create_user",
+      "_type": "request",
+      "parentId": "fld_users",
+      "name": "Cadastrar usuário",
+      "description": "A senha precisa de letra maiúscula, número e caractere especial. A resposta não devolve a senha.",
+      "method": "POST",
+      "url": "{{ _.base_url }}/api/users",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Ash Ketchum\",\n  \"email\": \"ash@example.com\",\n  \"password\": \"Pikachu1!\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 1,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "fld_catalog",
+      "_type": "request_group",
+      "parentId": "wrk_tcgmarket",
+      "name": "Catálogo",
+      "description": "Cada busca chama o provedor externo daquele jogo. Jogos aceitos: pokemon, yugioh e magic.",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": 3
+    },
+    {
+      "_id": "req_pokemon_search",
+      "_type": "request",
+      "parentId": "fld_catalog",
+      "name": "Pokémon — buscar cartas",
+      "description": "Chama a Pokémon TCG API. Devolve até 20 cartas no formato interno.",
+      "method": "GET",
+      "url": "{{ _.base_url }}/api/catalog/pokemon/cards",
+      "body": {},
+      "parameters": [
+        {
+          "name": "q",
+          "value": "charizard",
+          "disabled": false
+        }
+      ],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 1,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_pokemon_id",
+      "_type": "request",
+      "parentId": "fld_catalog",
+      "name": "Pokémon — buscar por id",
+      "description": "O externalId é o id da impressão na Pokémon TCG API, por exemplo base1-4.",
+      "method": "GET",
+      "url": "{{ _.base_url }}/api/catalog/pokemon/cards/by-external-id",
+      "body": {},
+      "parameters": [
+        {
+          "name": "externalId",
+          "value": "base1-4",
+          "disabled": false
+        }
+      ],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 2,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_yugioh_search",
+      "_type": "request",
+      "parentId": "fld_catalog",
+      "name": "Yu-Gi-Oh! — buscar cartas",
+      "description": "Chama a YGOPRODeck. Uma carta conceitual pode virar várias impressões.",
+      "method": "GET",
+      "url": "{{ _.base_url }}/api/catalog/yugioh/cards",
+      "body": {},
+      "parameters": [
+        {
+          "name": "q",
+          "value": "Blue-Eyes White Dragon",
+          "disabled": false
+        }
+      ],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 3,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_yugioh_id",
+      "_type": "request",
+      "parentId": "fld_catalog",
+      "name": "Yu-Gi-Oh! — buscar por id",
+      "description": "O externalId junta passcode, código da coleção e raridade.",
+      "method": "GET",
+      "url": "{{ _.base_url }}/api/catalog/yugioh/cards/by-external-id",
+      "body": {},
+      "parameters": [
+        {
+          "name": "externalId",
+          "value": "89631139:LOB-EN001:Ultra Rare",
+          "disabled": false
+        }
+      ],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 4,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_magic_search",
+      "_type": "request",
+      "parentId": "fld_catalog",
+      "name": "Magic — buscar cartas",
+      "description": "Chama a Scryfall. Devolve até 20 impressões.",
+      "method": "GET",
+      "url": "{{ _.base_url }}/api/catalog/magic/cards",
+      "body": {},
+      "parameters": [
+        {
+          "name": "q",
+          "value": "black lotus",
+          "disabled": false
+        }
+      ],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 5,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_magic_id",
+      "_type": "request",
+      "parentId": "fld_catalog",
+      "name": "Magic — buscar por id",
+      "description": "Troque o externalId pelo UUID devolvido na busca. Este valor é só um exemplo.",
+      "method": "GET",
+      "url": "{{ _.base_url }}/api/catalog/magic/cards/by-external-id",
+      "body": {},
+      "parameters": [
+        {
+          "name": "externalId",
+          "value": "00000000-0000-0000-0000-000000000000",
+          "disabled": false
+        }
+      ],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 6,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    }
+  ]
+}

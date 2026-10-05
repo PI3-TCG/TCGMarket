@@ -4,6 +4,8 @@ import java.util.Objects;
 
 public final class ExternalApiException extends RuntimeException {
 
+  private static final long serialVersionUID = 1L;
+
   private final CardGame cardGame;
   private final ExternalApiErrorType errorType;
   private final Integer statusCode;

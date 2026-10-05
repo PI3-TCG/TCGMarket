@@ -41,7 +41,7 @@ class MtgProviderTest {
 
     List<ExternalCard> cards = provider.searchCards("lotus");
 
-    assertEquals(List.of("alpha", "beta"), cards.stream().map(ExternalCard::externalId).toList());
+    assertEquals(List.of("alpha", "beta"), cards.stream().map(card -> card.externalId()).toList());
     assertTrue(cards.stream().allMatch(card -> "oracle-lotus".equals(card.conceptualId())));
     assertEquals(CardGame.MAGIC_THE_GATHERING, cards.getFirst().cardGame());
     assertEquals("233", cards.getLast().cardNumber());
@@ -62,7 +62,7 @@ class MtgProviderTest {
     assertEquals(MtgProvider.SEARCH_LIMIT, cards.size());
     assertEquals("island-0", cards.getFirst().externalId());
     assertEquals("island-19", cards.getLast().externalId());
-    assertEquals(MtgProvider.SEARCH_LIMIT, cards.stream().map(ExternalCard::externalId).distinct().count());
+    assertEquals(MtgProvider.SEARCH_LIMIT, cards.stream().map(card -> card.externalId()).distinct().count());
   }
 
   @Test

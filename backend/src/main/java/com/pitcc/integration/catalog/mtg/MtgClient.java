@@ -7,7 +7,6 @@ import com.pitcc.integration.catalog.mtg.dto.MtgCardsResponse;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.util.Assert;
 import org.springframework.web.client.RestClient;
 
@@ -30,7 +29,7 @@ public class MtgClient {
                 .queryParam("unique", "prints")
                 .build())
             .retrieve()
-            .onStatus(HttpStatusCode::isError, ExternalApiErrors.errorHandler(CardGame.MAGIC_THE_GATHERING))
+            .onStatus(status -> status.isError(), ExternalApiErrors.errorHandler(CardGame.MAGIC_THE_GATHERING))
             .body(MtgCardsResponse.class))
         .map(response -> cardsOf(response.data()))
         .orElse(List.of());
@@ -42,7 +41,7 @@ public class MtgClient {
     return ExternalApiErrors.fetch(CardGame.MAGIC_THE_GATHERING, () -> restClient.get()
         .uri("/cards/{id}", id)
         .retrieve()
-        .onStatus(HttpStatusCode::isError, ExternalApiErrors.errorHandler(CardGame.MAGIC_THE_GATHERING))
+        .onStatus(status -> status.isError(), ExternalApiErrors.errorHandler(CardGame.MAGIC_THE_GATHERING))
         .body(MtgCardDto.class));
   }
 

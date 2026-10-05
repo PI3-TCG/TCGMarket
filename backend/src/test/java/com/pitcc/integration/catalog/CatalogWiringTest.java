@@ -28,6 +28,6 @@ class CatalogWiringTest {
     assertEquals(3, providers.size());
     assertEquals(
         Set.of(CardGame.POKEMON, CardGame.YUGIOH, CardGame.MAGIC_THE_GATHERING),
-        providers.stream().map(CardCatalogProvider::getCardGame).collect(Collectors.toSet()));
+        providers.stream().map(provider -> provider.getCardGame()).collect(Collectors.toSet()));
   }
 }
