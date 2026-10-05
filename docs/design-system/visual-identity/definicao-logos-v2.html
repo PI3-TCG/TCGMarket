@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TCC — Trading Card Change · Kit de Logo v4</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Plus+Jakarta+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#FAFBFE;--tx:#302B40;--mut:#74788A;--bd:#E6E7F0;--ac:#660366;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1b1726;--tx:#F4F4FD;--mut:#B8BBCC;--bd:#3a3347;--ac:#B98FB9}}
+:root[data-theme="dark"]{--bg:#1b1726;--tx:#F4F4FD;--mut:#B8BBCC;--bd:#3a3347;--ac:#B98FB9}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:'Plus Jakarta Sans',system-ui,sans-serif;line-height:1.5}
+main{max-width:960px;margin:0 auto;padding:34px 21px 89px}
+h1,h2{font-family:Cinzel,Georgia,serif;margin:0}
+h1{font-size:34px;color:var(--ac)}
+h2{font-size:21px;margin:55px 0 5px}
+p.s{color:var(--mut);margin:0 0 21px;font-size:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:21px}
+.box{border:1px solid var(--bd);border-radius:21px;min-height:233px;display:flex;align-items:center;justify-content:center;padding:34px 21px;overflow:hidden;position:relative}
+.light{--c:#660366;--gap:#fff;--ol:#F0E3F0;--tg:#74788A;background:#fff}
+.dark{--c:#fff;--gap:#660366;--ol:#B98FB9;--tg:#F0E3F0;background:#660366}
+svg{display:block}
+.lock{display:flex;align-items:center;justify-content:center;gap:21px;flex-wrap:wrap;position:relative}
+.tx{display:flex;flex-direction:column;align-items:center;line-height:1}
+.wm{font-family:Cinzel,Georgia,serif;font-weight:900;color:var(--c);letter-spacing:.04em;-webkit-text-stroke:.15em var(--ol);paint-order:stroke fill}
+.sub{font-family:Cinzel,Georgia,serif;font-weight:700;font-size:17px;letter-spacing:.1em;color:var(--c);-webkit-text-stroke:.28em var(--ol);paint-order:stroke fill;margin-top:13px;white-space:nowrap}
+.sub b{font-size:1.4em;font-weight:900}
+.flat .wm,.flat .sub{-webkit-text-stroke:0}
+.row{display:flex;align-items:center;gap:13px}
+.nav{width:100%;justify-content:space-between}
+.nav .links{display:flex;gap:21px;align-items:center;font-size:13px;color:#484B5A;flex-wrap:wrap}
+.nav .btn{background:#660366;color:#fff;border-radius:8px;padding:8px 21px;font-weight:700}
+.ft{width:100%;justify-content:space-between;flex-wrap:wrap;gap:21px}
+.ft small{color:var(--tg);font-size:13px}
+.icon{background:#660366;display:flex;align-items:center;justify-content:center;--c:#fff;--gap:#660366}
+.hero{background:linear-gradient(135deg,#660366,#803D80)}
+.hero .bgp{position:absolute;inset:0;width:100%;height:100%;opacity:.14}
+.leg{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:13px;width:100%}
+.leg div{text-align:center;font-size:13px;color:#484B5A}
+.leg svg{margin:0 auto 8px}
+.leg b{display:block;color:#660366;font-family:Cinzel,serif}
+.inl .k{transform-origin:48px 66px;animation:fan 4s ease-in-out infinite}
+.inl .em{animation:em 4s ease-in-out infinite}
+.inl .sp{transform-box:fill-box;transform-origin:center;animation:pop 4s ease-in-out infinite}
+@keyframes fan{0%,10%{transform:rotate(0deg)}38%,86%{transform:rotate(var(--a))}100%{transform:rotate(0deg)}}
+@keyframes em{0%,34%{opacity:0}48%,86%{opacity:1}100%{opacity:0}}
+@keyframes pop{0%,8%{transform:scale(1)}20%{transform:scale(1.3)}34%,100%{transform:scale(1)}}
+@media(prefers-reduced-motion:reduce){.inl .k,.inl .em,.inl .sp{animation:none}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<g id="e-hex" fill="none" stroke="var(--c)" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"><path d="M0-4.8 4.2-2.4v4.8L0 4.8-4.2 2.4v-4.8z"/><circle r="1.1" fill="var(--c)" stroke="none"/></g>
+<g id="e-flame" fill="none" stroke="var(--c)" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"><path d="M0-5C2.6-2.2 4.2-.2 4.2 2.2a4.2 4.2 0 0 1-8.4 0C-4.2.4-3.2-.7-2-1.8-1.9.2-1.1.9 0 .9.7-1.4.6-3.2 0-5z"/></g>
+<g id="e-eye" fill="none" stroke="var(--c)" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"><path d="M-5 0Q0-5.4 5 0Q0 5.4-5 0z"/><circle r="1.5" fill="var(--c)" stroke="none"/></g>
+<g id="e-anchor" fill="none" stroke="var(--c)" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"><circle cy="-3.6" r="1.3"/><path d="M0-2.3V4.8M-2.7-.8H2.7M-4 .8A4 4 0 0 0 4 .8"/></g>
+<path id="e-spark" d="M0-8 2.2-2.2 8 0 2.2 2.2 0 8-2.2 2.2-8 0-2.2-2.2z"/>
+
+<symbol id="m" viewBox="0 0 96 66">
+<g class="k" style="--a:-32deg" transform="rotate(-32 48 66)"><rect x="36" y="10" width="24" height="39" rx="4" fill="var(--gap)" stroke="var(--c)" stroke-width="2"/><use class="em" href="#e-hex" transform="translate(42 19)"/></g>
+<g class="k" style="--a:32deg" transform="rotate(32 48 66)"><rect x="36" y="10" width="24" height="39" rx="4" fill="var(--gap)" stroke="var(--c)" stroke-width="2"/><use class="em" href="#e-anchor" transform="translate(54 19)"/></g>
+<g class="k" style="--a:-16deg" transform="rotate(-16 48 66)"><rect x="36" y="10" width="24" height="39" rx="4" fill="var(--gap)" stroke="var(--c)" stroke-width="2"/><use class="em" href="#e-flame" transform="translate(42 19)"/></g>
+<g class="k" style="--a:16deg" transform="rotate(16 48 66)"><rect x="36" y="10" width="24" height="39" rx="4" fill="var(--gap)" stroke="var(--c)" stroke-width="2"/><use class="em" href="#e-eye" transform="translate(54 19)"/></g>
+<g class="k" style="--a:0deg"><rect x="36" y="10" width="24" height="39" rx="4" fill="var(--c)" stroke="var(--c)" stroke-width="2"/><g transform="translate(48 29.5)"><g class="sp"><use href="#e-spark" fill="var(--gap)" transform="scale(1.35)"/></g></g></g>
+</symbol>
+
+<symbol id="mc" viewBox="0 0 72 58">
+<rect x="24" y="8" width="24" height="39" rx="4" fill="var(--gap)" stroke="var(--c)" stroke-width="2.4" transform="rotate(-18 36 56)"/>
+<rect x="24" y="8" width="24" height="39" rx="4" fill="var(--gap)" stroke="var(--c)" stroke-width="2.4" transform="rotate(18 36 56)"/>
+<rect x="24" y="8" width="24" height="39" rx="4" fill="var(--c)" stroke="var(--c)" stroke-width="2.4"/>
+<use href="#e-spark" fill="var(--gap)" transform="translate(36 27.5) scale(1.35)"/>
+</symbol></defs></svg>
+
+<main>
+<h1>TCC</h1>
+<p class="s">Trading Card Change — kit v4. Mantém o conceito do protótipo (sigla com contorno + nome por extenso + cartas em leque), agora com 5 cartas, uma por franquia. Cada emblema é genérico, sem usar a identidade de nenhuma marca. Proporção das cartas 8:13 e medidas em Fibonacci (8, 13, 21, 34, 55, 89).</p>
+
+<h2>1. Logo principal</h2>
+<p class="s">Horizontal, como no protótipo: sigla à esquerda, leque à direita.</p>
+<div class="grid">
+<div class="box light"><div class="lock"><div class="tx"><div class="wm" style="font-size:89px">TCC</div><div class="sub"><b>T</b>rading <b>C</b>ard <b>C</b>hange</div></div><svg width="150" height="103"><use href="#m"/></svg></div></div>
+<div class="box dark"><div class="lock"><div class="tx"><div class="wm" style="font-size:89px">TCC</div><div class="sub"><b>T</b>rading <b>C</b>ard <b>C</b>hange</div></div><svg width="150" height="103"><use href="#m"/></svg></div></div>
+</div>
+
+<h2>2. Logo da NAV</h2>
+<p class="s">Versão compacta: 3 cartas com o brilho central (sucessor do raio do protótipo) + sigla, sem contorno.</p>
+<div class="box light flat" style="min-height:89px;padding:21px 34px"><div class="row nav"><div class="row"><svg width="46" height="37"><use href="#mc"/></svg><div class="wm" style="font-size:27px">TCC</div></div><div class="links"><span>Pokémon</span><span>Yu-Gi-Oh!</span><span>Magic</span><span>One Piece</span><span>Digimon</span><span class="btn">Entrar</span></div></div></div>
+
+<h2>3. Logo do FOOTER</h2>
+<p class="s">Branco sobre Primary 900, com o nome por extenso.</p>
+<div class="box dark flat" style="min-height:144px"><div class="row ft"><div class="row" style="gap:21px"><svg width="69" height="56"><use href="#mc"/></svg><div class="tx" style="align-items:flex-start"><div class="wm" style="font-size:34px">TCC</div><div class="sub" style="font-size:11px;margin-top:8px"><b>T</b>rading <b>C</b>ard <b>C</b>hange</div></div></div><small>© 2026 TCC. Todos os direitos reservados.</small></div></div>
+
+<h2>4. Ícone / favicon / avatar</h2>
+<p class="s">Leque compacto em 89, 55, 34 e 21px.</p>
+<div class="box light" style="gap:21px">
+<div class="icon" style="width:89px;height:89px;border-radius:21px"><svg width="62" height="50"><use href="#mc"/></svg></div>
+<div class="icon" style="width:55px;height:55px;border-radius:13px"><svg width="38" height="31"><use href="#mc"/></svg></div>
+<div class="icon" style="width:34px;height:34px;border-radius:8px"><svg width="24" height="19"><use href="#mc"/></svg></div>
+<div class="icon" style="width:21px;height:21px;border-radius:5px"><svg width="15" height="12"><use href="#mc"/></svg></div>
+</div>
+
+<h2>5. Animação (loading / splash)</h2>
+<p class="s">As cartas começam empilhadas, abrem em leque, os emblemas surgem e o brilho central pulsa.</p>
+<div class="grid">
+<div class="box light"><div class="lock" style="flex-direction:column;gap:13px"><svg class="inl" width="150" height="103" viewBox="0 0 96 66"></svg><div class="sub" style="margin-top:0;font-size:13px;-webkit-text-stroke:0">Buscando trocas…</div></div></div>
+<div class="box dark"><div class="lock" style="flex-direction:column;gap:13px"><svg class="inl" width="150" height="103" viewBox="0 0 96 66"></svg><div class="sub" style="margin-top:0;font-size:13px;-webkit-text-stroke:0">Carregando…</div></div></div>
+</div>
+
+<h2>6. Fundo / banner</h2>
+<p class="s">Gradiente Primary 900 → Primary 500 com cartas e emblemas espalhados em baixa opacidade.</p>
+<div class="box hero dark" style="min-height:233px">
+<svg class="bgp" aria-hidden="true"><defs><pattern id="p" width="120" height="120" patternUnits="userSpaceOnUse">
+<g fill="none" stroke="var(--c)" stroke-width="1.4"><g transform="translate(20 24) rotate(-12)"><rect x="-10" y="-15" width="20" height="30" rx="3"/><use href="#e-hex" transform="scale(1.1)"/></g>
+<g transform="translate(82 20) rotate(10)"><rect x="-10" y="-15" width="20" height="30" rx="3"/><use href="#e-flame" transform="scale(1.1)"/></g>
+<g transform="translate(30 88) rotate(8)"><rect x="-10" y="-15" width="20" height="30" rx="3"/><use href="#e-eye" transform="scale(1.1)"/></g>
+<g transform="translate(92 90) rotate(-9)"><rect x="-10" y="-15" width="20" height="30" rx="3"/><use href="#e-anchor" transform="scale(1.1)"/></g></g>
+<use href="#e-spark" fill="var(--c)" transform="translate(58 56)"/></pattern></defs><rect width="100%" height="100%" fill="url(#p)"/></svg>
+<div class="lock" style="flex-direction:column;gap:13px"><svg width="120" height="83"><use href="#m"/></svg><div class="tx"><div class="wm" style="font-size:55px">TCC</div><div class="sub" style="font-size:13px"><b>T</b>rading <b>C</b>ard <b>C</b>hange</div></div></div></div>
+
+<h2>7. Os cinco emblemas</h2>
+<p class="s">Cada carta do leque representa um universo, usando símbolos genéricos para não depender de marcas registradas.</p>
+<div class="box light"><div class="leg">
+<div><svg width="48" height="48" viewBox="-6 -6 12 12"><use href="#e-hex"/></svg><b>Hexágono</b>Digimon · mundo digital</div>
+<div><svg width="48" height="48" viewBox="-6 -6 12 12"><use href="#e-flame"/></svg><b>Chama</b>Pokémon · criaturas e energia</div>
+<div><svg width="48" height="48" viewBox="-9 -9 18 18"><use href="#e-spark" fill="var(--c)"/></svg><b>Brilho</b>Magic · arcano e raridade</div>
+<div><svg width="48" height="48" viewBox="-6 -6 12 12"><use href="#e-eye"/></svg><b>Olho</b>Yu-Gi-Oh! · místico e duelo</div>
+<div><svg width="48" height="48" viewBox="-6 -6 12 12"><use href="#e-anchor"/></svg><b>Âncora</b>One Piece · aventura</div>
+</div></div>
+</main>
+<script>
+var s=document.getElementById('m').innerHTML;
+document.querySelectorAll('svg.inl').forEach(function(e){e.innerHTML=s;});
+</script>
+</body>
+</html>
