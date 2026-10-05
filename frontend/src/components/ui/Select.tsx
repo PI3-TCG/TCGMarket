@@ -71,25 +71,35 @@ export function Select({
     if (!locked) setOpen(false)
   }
 
+  function placeCursor() {
+    const selectedIndex = options.findIndex(
+      (option) => option.value === selectedValue,
+    )
+    setCursor(selectedIndex >= 0 ? selectedIndex : firstEnabledIndex(options))
+  }
+
+  function openList() {
+    placeCursor()
+    setOpen(true)
+  }
+
   function onKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
     if (locked || isDisabled) return
 
-    if (event.key === 'ArrowDown') {
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
       event.preventDefault()
-      setOpen(true)
-      setCursor((current) => Math.min(options.length - 1, current + 1))
-    }
-
-    if (event.key === 'ArrowUp') {
-      event.preventDefault()
-      setOpen(true)
-      setCursor((current) => Math.max(0, current - 1))
+      if (!open) {
+        openList()
+        return
+      }
+      const direction = event.key === 'ArrowDown' ? 1 : -1
+      setCursor((current) => moveEnabledIndex(options, current, direction))
     }
 
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault()
       if (!open) {
-        setOpen(true)
+        openList()
         return
       }
       const option = options[cursor]
@@ -109,7 +119,14 @@ export function Select({
           {label}
         </label>
       ) : null}
-      {name ? <input type="hidden" name={name} value={selectedValue} /> : null}
+      {name ? (
+        <input
+          type="hidden"
+          name={name}
+          value={selectedValue}
+          disabled={isDisabled}
+        />
+      ) : null}
       <button
         id={fieldId}
         type="button"
@@ -119,7 +136,12 @@ export function Select({
         aria-invalid={isError || undefined}
         disabled={isDisabled}
         onClick={() => {
-          if (!locked && !isDisabled) setOpen((current) => !current)
+          if (locked || isDisabled) return
+          if (open) {
+            setOpen(false)
+            return
+          }
+          openList()
         }}
         onKeyDown={onKeyDown}
         className={cn(
@@ -200,6 +222,25 @@ export function Select({
       {error ? <p className="mt-1 text-sm text-error-700">{error}</p> : null}
     </div>
   )
+}
+
+function firstEnabledIndex(options: SelectOption[]) {
+  const index = options.findIndex((option) => !option.disabled)
+  return index < 0 ? 0 : index
+}
+
+function moveEnabledIndex(
+  options: SelectOption[],
+  from: number,
+  direction: 1 | -1,
+) {
+  let index = from
+  for (let step = 0; step < options.length; step += 1) {
+    index += direction
+    if (index < 0 || index >= options.length) return from
+    if (!options[index]?.disabled) return index
+  }
+  return from
 }
 
 function triggerChrome({
