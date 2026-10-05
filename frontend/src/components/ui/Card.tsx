@@ -88,7 +88,7 @@ export function ListingCard({
   return (
     <Card preview={preview} interactive={interactive} className={className}>
       <div className="relative">
-        <div className="aspect-[5/4] bg-neutral-100">{image}</div>
+        <div className="aspect-5/4 bg-neutral-100">{image}</div>
         <button
           type="button"
           aria-pressed={favorite}

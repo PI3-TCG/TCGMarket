@@ -89,7 +89,7 @@ export function DesignSystemPage() {
   return (
     <div className="min-h-svh bg-neutral-100">
       <header className="bg-primary-900 text-white">
-        <div className="mx-auto flex max-w-[1440px] flex-wrap items-center gap-4 px-4 py-4 sm:px-6">
+        <div className="mx-auto flex max-w-360 flex-wrap items-center gap-4 px-4 py-4 sm:px-6">
           <Link
             to="/"
             className="rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
@@ -107,7 +107,7 @@ export function DesignSystemPage() {
         </div>
       </header>
 
-      <main className="mx-auto grid max-w-[1440px] items-start gap-4 px-4 py-6 sm:px-6 lg:grid-cols-2">
+      <main className="mx-auto grid max-w-360 items-start gap-4 px-4 py-6 sm:px-6 lg:grid-cols-2">
         <Panel title="Buttons">
           <Columns>
             <Row label="Primary">
