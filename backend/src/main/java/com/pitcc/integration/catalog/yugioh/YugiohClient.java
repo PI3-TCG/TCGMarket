@@ -14,7 +14,6 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import org.springframework.http.HttpRequest;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.web.client.RestClient;
@@ -44,7 +43,7 @@ public class YugiohClient {
                   .build())
               .retrieve()
               .onStatus(status -> status.value() == 400, this::handleBadRequest)
-              .onStatus(HttpStatusCode::isError, ExternalApiErrors.errorHandler(CardGame.YUGIOH))
+              .onStatus(status -> status.isError(), ExternalApiErrors.errorHandler(CardGame.YUGIOH))
               .body(YugiohCardsResponse.class))
           .map(response -> cardsOf(response.data()))
           .orElse(List.of());
@@ -59,7 +58,7 @@ public class YugiohClient {
               .uri(uriBuilder -> uriBuilder.path("/cardinfo.php").queryParam("id", passcode).build())
               .retrieve()
               .onStatus(status -> status.value() == 400, this::handleBadRequest)
-              .onStatus(HttpStatusCode::isError, ExternalApiErrors.errorHandler(CardGame.YUGIOH))
+              .onStatus(status -> status.isError(), ExternalApiErrors.errorHandler(CardGame.YUGIOH))
               .body(YugiohCardsResponse.class))
           .flatMap(response -> cardsOf(response.data()).stream()
               .filter(card -> Long.valueOf(passcode).equals(card.id()))

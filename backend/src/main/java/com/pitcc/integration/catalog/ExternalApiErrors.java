@@ -43,7 +43,7 @@ public final class ExternalApiErrors {
   }
 
   public static RestClient.ResponseSpec.ErrorHandler errorHandler(CardGame cardGame) {
-    return (request, response) -> {
+    return (_, response) -> {
       int status = response.getStatusCode().value();
       if (status == 404) {
         throw new NotFound();

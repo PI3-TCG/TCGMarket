@@ -30,7 +30,7 @@ public class PokemonTcgProvider implements CardCatalogProvider {
   public List<ExternalCard> searchCards(String query) {
     return client.search(query).stream()
         .map(this::toCard)
-        .flatMap(Optional::stream)
+        .flatMap(card -> card.stream())
         .toList();
   }
 

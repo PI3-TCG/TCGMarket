@@ -8,7 +8,6 @@ import com.pitcc.integration.catalog.pokemon.dto.PokemonCardsResponse;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.util.Assert;
 import org.springframework.web.client.RestClient;
 
@@ -32,7 +31,7 @@ public class PokemonTcgClient {
                 .queryParam("pageSize", SEARCH_PAGE_SIZE)
                 .build())
             .retrieve()
-            .onStatus(HttpStatusCode::isError, ExternalApiErrors.errorHandler(CardGame.POKEMON))
+            .onStatus(status -> status.isError(), ExternalApiErrors.errorHandler(CardGame.POKEMON))
             .body(PokemonCardsResponse.class))
         .map(response -> cardsOf(response.data()))
         .orElse(List.of());
@@ -44,9 +43,9 @@ public class PokemonTcgClient {
     return ExternalApiErrors.fetch(CardGame.POKEMON, () -> restClient.get()
             .uri("/cards/{id}", id)
             .retrieve()
-            .onStatus(HttpStatusCode::isError, ExternalApiErrors.errorHandler(CardGame.POKEMON))
+            .onStatus(status -> status.isError(), ExternalApiErrors.errorHandler(CardGame.POKEMON))
             .body(PokemonCardResponse.class))
-        .map(PokemonCardResponse::data);
+        .map(response -> response.data());
   }
 
   private static List<PokemonCardDto> cardsOf(List<PokemonCardDto> cards) {

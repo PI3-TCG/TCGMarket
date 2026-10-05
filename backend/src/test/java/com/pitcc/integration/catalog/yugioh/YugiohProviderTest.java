@@ -51,7 +51,7 @@ class YugiohProviderTest {
 
     assertEquals(
         List.of("89631139:LOB-EN001:Ultra Rare", "89631139:SDK-001:Ultra Rare", "89631139:LC01-EN004:Ultra Rare"),
-        cards.stream().map(ExternalCard::externalId).toList());
+        cards.stream().map(card -> card.externalId()).toList());
     assertTrue(cards.stream().allMatch(card -> card.cardGame() == CardGame.YUGIOH));
   }
 
