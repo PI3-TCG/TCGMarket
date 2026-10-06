@@ -3,15 +3,15 @@ spring:
     name: backend
   mongodb:
     uri: ${MONGODB_URI}
+  data:
+    mongodb:
+      auto-index-creation: true
 
 # O segredo precisa ter pelo menos 32 bytes em UTF-8. A validade padrão é de 24 horas.
 security:
   jwt:
     secret: ${JWT_SECRET}
     expiration: ${JWT_EXPIRATION:24h}
-  data:
-    mongodb:
-      auto-index-creation: true
 
 # Catálogos externos. A chave da Pokémon TCG vem só do ambiente e não tem valor padrão.
 external-apis:

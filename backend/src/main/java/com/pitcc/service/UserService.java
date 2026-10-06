@@ -38,7 +38,7 @@ public class UserService {
     user.setRegistrationDate(Instant.now());
 
     try {
-      return UserResponses.from(userRepository.save(user));
+      return UserResponses.toUserResponse(userRepository.save(user));
     } catch (DuplicateKeyException exception) {
       throw new EmailAlreadyRegisteredException(email);
     }

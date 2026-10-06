@@ -6,7 +6,7 @@ public final class UserResponses {
 
   private UserResponses() {}
 
-  public static UserResponse from(User user) {
+  public static UserResponse toUserResponse(User user) {
     return new UserResponse(
         user.getId(),
         user.getName(),

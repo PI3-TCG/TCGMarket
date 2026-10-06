@@ -73,6 +73,10 @@ function App() {
     return (
       <LoginPage
         initialNotice={loginNotice}
+        onBack={() => {
+          setLoginNotice(null)
+          setPage('home')
+        }}
         onRegister={() => {
           setLoginNotice(null)
           setPage('register')

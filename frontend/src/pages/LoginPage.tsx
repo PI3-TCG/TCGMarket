@@ -10,10 +10,12 @@ const FUTURE_GOOGLE = 'Entrar com o Google será implementado no futuro.'
 const FUTURE_PASSWORD = 'A recuperação de senha será implementada no futuro.'
 
 export function LoginPage({
+  onBack,
   onRegister,
   onSuccess,
   initialNotice = null,
 }: {
+  onBack: () => void
   onRegister: () => void
   onSuccess: (session: LoginResponse) => void
   initialNotice?: string | null
@@ -108,7 +110,13 @@ export function LoginPage({
 
         <div className="relative w-full max-w-md">
           <div className="flex flex-col items-center text-center">
-            <img src={mark} alt="" className="h-16 w-auto" />
+            <button type="button" onClick={onBack} className="rounded-lg">
+              <img
+                src={mark}
+                alt="Voltar para o início"
+                className="h-16 w-auto"
+              />
+            </button>
             <p className="font-display mt-4 text-2xl tracking-wide text-[#2a1840]">
               TCG MARKET
             </p>

@@ -43,7 +43,7 @@ public class AuthService {
     }
 
     String token = jwtService.generate(user.getId(), user.getRole());
-    return new LoginResponse(token, UserResponses.from(user));
+    return new LoginResponse(token, UserResponses.toUserResponse(user));
   }
 
   public UserResponse currentUser() {
@@ -53,7 +53,7 @@ public class AuthService {
     }
     return userRepository
         .findById(current.id())
-        .map(UserResponses::from)
+        .map(UserResponses::toUserResponse)
         .orElseThrow(InvalidAuthenticationException::new);
   }
 
