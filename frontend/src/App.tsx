@@ -1,3 +1,4 @@
+import axios from 'axios'
 import { useEffect, useState } from 'react'
 import { HomePage } from '@/pages/HomePage'
 import { LoginPage } from '@/pages/LoginPage'
@@ -38,8 +39,11 @@ function App() {
         }
         setUser(current)
       })
-      .catch(() => {
+      .catch((error: unknown) => {
         if (!active) {
+          return
+        }
+        if (!axios.isAxiosError(error) || error.response?.status !== 401) {
           return
         }
         clearSession()
