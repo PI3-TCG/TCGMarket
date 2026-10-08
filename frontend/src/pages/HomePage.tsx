@@ -1,43 +1,86 @@
-import { healthCheck } from '@/services/api';
+import { BrandShell } from '@/components/layout/BrandShell'
+import { Alert } from '@/components/ui/Alert'
+import { Button } from '@/components/ui/Button'
+import { Input } from '@/components/ui/Input'
+import { healthCheck } from '@/services/api'
+import { useNavigate } from '@tanstack/react-router'
+import { useState } from 'react'
 
-export function HomePage({ onRegister }: { onRegister: () => void }) {
+export function HomePage() {
+  const navigate = useNavigate()
   const apiUrl = import.meta.env.VITE_API_URL
-  const testApi = async () => {
+  const [testing, setTesting] = useState(false)
+  const [feedback, setFeedback] = useState<{
+    type: 'success' | 'error'
+    message: string
+  } | null>(null)
+
+  async function testApi() {
+    setTesting(true)
+    setFeedback(null)
     try {
-      const healthStatus = await healthCheck();
-      console.log('Status da API:', healthStatus);
-      alert(`Status da API: ${JSON.stringify(healthStatus)}`);
+      const healthStatus = await healthCheck()
+      setFeedback({
+        type: 'success',
+        message: `API respondeu: ${healthStatus.status}. ${healthStatus.message}`,
+      })
     } catch (error) {
-      console.error('Erro ao verificar a saúde da API:', error);
-      alert('Erro ao verificar a saúde da API. Verifique o console para mais detalhes.');
+      console.error('Erro ao verificar a saúde da API:', error)
+      setFeedback({
+        type: 'error',
+        message:
+          'Não foi possível falar com a API. Confira se o servidor está no ar.',
+      })
+    } finally {
+      setTesting(false)
     }
-};
+  }
+
   return (
-    <main className="flex min-h-svh items-center justify-center bg-slate-950 px-6 text-slate-100">
-      <section className="w-full max-w-xl rounded-2xl border border-slate-800 bg-slate-900 p-8 shadow-xl">
-        <p className="text-sm font-medium tracking-wide text-amber-400">TCC</p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight">
-          Trading Card Change
-        </h1>
-        <p className="mt-4 leading-relaxed text-slate-300">
-          Front-end pronto para o desenvolvimento. Esta página confirma que
-          React, TypeScript, Vite e Tailwind estão funcionando.
-        </p>
-        <p className="mt-6 text-sm text-slate-400">
-          API:{' '}
-          <code className="rounded bg-slate-800 px-2 py-1 text-amber-200">
-            {apiUrl}
-          </code>
-        </p>
-        <div className="mt-6 flex items-center gap-4">
-          <button onClick={testApi} className="inline-block rounded bg-amber-400 px-4 py-2 text-sm font-medium text-slate-950 transition-colors hover:bg-amber-500">
-            Testar API
-          </button>
-          <button type="button" onClick={onRegister} className="text-sm font-medium text-amber-200 transition-colors hover:text-amber-400">
-            Criar conta
-          </button>
-        </div>
-      </section>
-    </main>
+    <BrandShell>
+      <p className="text-sm font-semibold tracking-wide text-primary-700">
+        Ambiente de desenvolvimento
+      </p>
+      <h1 className="mt-2 font-display text-4xl leading-tight font-bold text-neutral-900">
+        O front está pronto
+      </h1>
+      <p className="mt-4 leading-relaxed text-neutral-700">
+        React, TypeScript, Vite e Tailwind estão no ar. Esta tela confirma a
+        base do TCG Market antes das páginas do marketplace.
+      </p>
+
+      <div className="mt-8">
+        <Input
+          label="API"
+          value={apiUrl || 'VITE_API_URL não definida'}
+          readOnly
+        />
+      </div>
+
+      {feedback ? (
+        <Alert
+          className="mt-4"
+          variant={feedback.type}
+          onDismiss={() => setFeedback(null)}
+        >
+          {feedback.message}
+        </Alert>
+      ) : null}
+
+      <div className="mt-6 flex flex-wrap gap-3">
+        <Button onClick={() => navigate({ to: '/cadastro' })}>
+          Criar conta
+        </Button>
+        <Button variant="outline" disabled={testing} onClick={testApi}>
+          {testing ? 'Testando...' : 'Testar API'}
+        </Button>
+        <Button
+          variant="outline"
+          onClick={() => navigate({ to: '/design-system' })}
+        >
+          Ver componentes
+        </Button>
+      </div>
+    </BrandShell>
   )
 }

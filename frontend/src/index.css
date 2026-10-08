@@ -1,1 +1,59 @@
 @import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-display: Cinzel, ui-serif, Georgia, serif;
+
+  --spacing: 4px;
+
+  --color-primary-900: #660366;
+  --color-primary-800: #4f024f;
+  --color-primary-700: #996699;
+  --color-primary-500: #803d80;
+  --color-primary-300: #b98fb9;
+  --color-primary-100: #f0e3f0;
+
+  --color-secondary-700: #0969d7;
+  --color-secondary-500: #1688f8;
+  --color-secondary-300: #73b8ff;
+  --color-secondary-100: #e4f1ff;
+
+  --color-neutral-0: #ffffff;
+  --color-neutral-50: #fafbfe;
+  --color-neutral-100: #f4f4fd;
+  --color-neutral-200: #e6e7f0;
+  --color-neutral-300: #d1d3de;
+  --color-neutral-500: #74788a;
+  --color-neutral-700: #484b5a;
+  --color-neutral-900: #302b40;
+
+  --color-success-700: #15803d;
+  --color-success-200: #b7e4c7;
+  --color-success-50: #e7f6ec;
+  --color-warning-700: #d97706;
+  --color-warning-200: #f6d7a8;
+  --color-warning-50: #fff6e8;
+  --color-error-700: #b91c1c;
+  --color-error-600: #991b1b;
+  --color-error-200: #f5c2c2;
+  --color-error-50: #fdecec;
+  --color-info-700: #1d4ed8;
+  --color-info-200: #c5d7fb;
+  --color-info-50: #e8f0fe;
+  --color-rare-700: #8a6500;
+  --color-rare-500: #e0a100;
+  --color-rare-100: #fff4cc;
+
+  --radius-control: 8px;
+  --radius-surface: 12px;
+
+  --shadow-sm: 0 1px 3px rgb(48 43 64 / 0.08);
+  --shadow-md: 0 4px 12px rgb(48 43 64 / 0.1);
+  --shadow-lg: 0 8px 24px rgb(48 43 64 / 0.14);
+}
+
+@layer base {
+  body {
+    @apply bg-neutral-50 font-sans text-neutral-900 antialiased;
+  }
+}

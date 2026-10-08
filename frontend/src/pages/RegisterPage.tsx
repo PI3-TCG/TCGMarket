@@ -1,4 +1,10 @@
+import { BrandShell } from '@/components/layout/BrandShell'
+import { Alert } from '@/components/ui/Alert'
+import { Button } from '@/components/ui/Button'
+import { Checkbox } from '@/components/ui/Checkbox'
+import { Input } from '@/components/ui/Input'
 import { registerUser } from '@/services/userApi'
+import { useNavigate } from '@tanstack/react-router'
 import type { ApiErrorResponse } from '@/types/User'
 import {
   isStrongPassword,
@@ -19,7 +25,8 @@ const EMPTY_FORM = {
 type FieldName =
   'name' | 'email' | 'password' | 'confirmPassword' | 'acceptedTerms'
 
-export function RegisterPage({ onBack }: { onBack: () => void }) {
+export function RegisterPage() {
+  const navigate = useNavigate()
   const [form, setForm] = useState(EMPTY_FORM)
   const [errors, setErrors] = useState<Partial<Record<FieldName, string>>>({})
   const [feedback, setFeedback] = useState<{
@@ -106,145 +113,97 @@ export function RegisterPage({ onBack }: { onBack: () => void }) {
   }
 
   return (
-    <main className="flex min-h-svh items-center justify-center bg-slate-950 px-6 py-10 text-slate-100">
-      <section className="w-full max-w-xl rounded-2xl border border-slate-800 bg-slate-900 p-8 shadow-xl">
-        <p className="text-sm font-medium tracking-wide text-amber-400">TCC</p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight">
-          Criar conta
-        </h1>
-        <p className="mt-4 leading-relaxed text-slate-300">
-          Cadastre-se para anunciar, buscar e trocar cartas. A conta criada é de
-          usuário comum.
-        </p>
+    <BrandShell>
+      <h1 className="font-display text-4xl leading-tight font-bold text-neutral-900">
+        Crie sua conta
+      </h1>
+      <p className="mt-3 leading-relaxed text-neutral-700">
+        Cadastre-se para anunciar, buscar e trocar cartas. A conta criada é de
+        usuário comum.
+      </p>
 
-        <form className="mt-8 space-y-5" onSubmit={handleSubmit} noValidate>
-          <Field
-            id="name"
-            label="Nome"
-            value={form.name}
-            error={errors.name}
-            autoComplete="name"
-            onChange={(value) => updateField('name', value)}
-          />
-          <Field
-            id="email"
-            label="E-mail"
-            type="email"
-            value={form.email}
-            error={errors.email}
-            autoComplete="email"
-            onChange={(value) => updateField('email', value)}
-          />
-          <Field
-            id="password"
-            label="Senha"
-            type="password"
-            value={form.password}
-            error={errors.password}
-            autoComplete="new-password"
-            onChange={(value) => updateField('password', value)}
-          />
-          <Field
-            id="confirmPassword"
-            label="Confirmar senha"
-            type="password"
-            value={form.confirmPassword}
-            error={errors.confirmPassword}
-            autoComplete="new-password"
-            onChange={(value) => updateField('confirmPassword', value)}
-          />
+      <form className="mt-8 space-y-5" onSubmit={handleSubmit} noValidate>
+        <Input
+          id="name"
+          name="name"
+          label="Nome"
+          placeholder="Seu nome completo"
+          autoComplete="name"
+          value={form.name}
+          error={errors.name}
+          onChange={(event) => updateField('name', event.target.value)}
+        />
+        <Input
+          id="email"
+          name="email"
+          label="E-mail"
+          type="email"
+          placeholder="seu@email.com"
+          autoComplete="email"
+          value={form.email}
+          error={errors.email}
+          onChange={(event) => updateField('email', event.target.value)}
+        />
+        <Input
+          id="password"
+          name="password"
+          label="Senha"
+          type="password"
+          placeholder="Mínimo de 6 caracteres"
+          autoComplete="new-password"
+          value={form.password}
+          error={errors.password}
+          hint={
+            errors.password
+              ? undefined
+              : 'Use letra maiúscula, número e caractere especial.'
+          }
+          onChange={(event) => updateField('password', event.target.value)}
+        />
+        <Input
+          id="confirmPassword"
+          name="confirmPassword"
+          label="Confirmar senha"
+          type="password"
+          placeholder="Repita sua senha"
+          autoComplete="new-password"
+          value={form.confirmPassword}
+          error={errors.confirmPassword}
+          onChange={(event) =>
+            updateField('confirmPassword', event.target.value)
+          }
+        />
 
-          <div>
-            <label className="flex items-start gap-3 text-sm leading-relaxed text-slate-300">
-              <input
-                type="checkbox"
-                checked={form.acceptedTerms}
-                onChange={(event) =>
-                  updateField('acceptedTerms', event.target.checked)
-                }
-                className="mt-1 size-4 rounded border-slate-600 bg-slate-950 text-amber-400"
-              />
-              <span>
-                Li e aceito a coleta e o uso dos meus dados pessoais para criar
-                e operar esta conta, conforme a LGPD.
-              </span>
-            </label>
-            {errors.acceptedTerms ? (
-              <p className="mt-2 text-sm text-rose-300">
-                {errors.acceptedTerms}
-              </p>
-            ) : null}
-          </div>
+        <Checkbox
+          name="acceptedTerms"
+          checked={form.acceptedTerms}
+          error={errors.acceptedTerms}
+          onChange={(event) =>
+            updateField('acceptedTerms', event.target.checked)
+          }
+          label="Li e aceito a coleta e o uso dos meus dados pessoais para criar e operar esta conta, conforme a LGPD."
+        />
 
-          {feedback ? (
-            <p
-              role="status"
-              className={
-                feedback.type === 'success'
-                  ? 'rounded-lg bg-emerald-950 px-4 py-3 text-sm text-emerald-200'
-                  : 'rounded-lg bg-rose-950 px-4 py-3 text-sm text-rose-200'
-              }
-            >
-              {feedback.message}
-            </p>
-          ) : null}
+        {feedback ? (
+          <Alert variant={feedback.type} onDismiss={() => setFeedback(null)}>
+            {feedback.message}
+          </Alert>
+        ) : null}
 
-          <div className="flex items-center gap-4">
-            <button
-              type="submit"
-              disabled={submitting}
-              className="inline-block rounded bg-amber-400 px-4 py-2 text-sm font-medium text-slate-950 transition-colors hover:bg-amber-500 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {submitting ? 'Cadastrando...' : 'Cadastrar'}
-            </button>
-            <button
-              type="button"
-              onClick={onBack}
-              className="text-sm font-medium text-slate-300 transition-colors hover:text-amber-200"
-            >
-              Voltar
-            </button>
-          </div>
-        </form>
-      </section>
-    </main>
-  )
-}
-
-function Field({
-  id,
-  label,
-  value,
-  error,
-  onChange,
-  type = 'text',
-  autoComplete,
-}: {
-  id: string
-  label: string
-  value: string
-  error?: string
-  onChange: (value: string) => void
-  type?: string
-  autoComplete?: string
-}) {
-  return (
-    <div>
-      <label htmlFor={id} className="block text-sm font-medium text-slate-200">
-        {label}
-      </label>
-      <input
-        id={id}
-        name={id}
-        type={type}
-        value={value}
-        autoComplete={autoComplete}
-        aria-invalid={error ? true : undefined}
-        onChange={(event) => onChange(event.target.value)}
-        className="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 outline-none ring-amber-400 placeholder:text-slate-500 focus:ring-2"
-      />
-      {error ? <p className="mt-2 text-sm text-rose-300">{error}</p> : null}
-    </div>
+        <div className="flex flex-wrap items-center gap-3 pt-1">
+          <Button type="submit" disabled={submitting} className="min-w-40">
+            {submitting ? 'Cadastrando...' : 'Criar conta'}
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => navigate({ to: '/' })}
+          >
+            Voltar
+          </Button>
+        </div>
+      </form>
+    </BrandShell>
   )
 }
 
