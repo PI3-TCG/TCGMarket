@@ -2,6 +2,8 @@ import mark from '@/assets/mark-3cartas-roxo.svg'
 import hero from '@/assets/login-hero.webp'
 import { Alert } from '@/components/ui/Alert'
 import { registerUser } from '@/services/userApi'
+import { useSession } from '@/session'
+import { useNavigate } from '@tanstack/react-router'
 import type { ApiErrorResponse } from '@/types/User'
 import {
   isStrongPassword,
@@ -53,15 +55,9 @@ type FieldName = keyof typeof EMPTY_FORM
 const inputClass =
   'w-full rounded-xl border border-[#e4dceb] bg-white py-3 pr-4 pl-11 text-sm outline-none placeholder:text-[#b3abbf] focus:border-[#660366] focus:ring-2 focus:ring-[#1688F8]'
 
-export function RegisterPage({
-  onBack,
-  onLogin,
-  onCreated,
-}: {
-  onBack: () => void
-  onLogin: () => void
-  onCreated: () => void
-}) {
+export function RegisterPage() {
+  const navigate = useNavigate()
+  const { setLoginNotice } = useSession()
   const [form, setForm] = useState(EMPTY_FORM)
   const [errors, setErrors] = useState<Partial<Record<FieldName, string>>>({})
   const [feedback, setFeedback] = useState<string | null>(null)
@@ -159,7 +155,8 @@ export function RegisterPage({
         email: form.email.trim(),
         password: form.password,
       })
-      onCreated()
+      setLoginNotice('Conta criada. Entre para continuar sua jornada.')
+      navigate({ to: '/login' })
     } catch (error) {
       applyApiError(error, setErrors, setFeedback)
     } finally {
@@ -181,17 +178,19 @@ export function RegisterPage({
         <Sparkles />
         {notice ? (
           <div className="sticky top-0 z-10 mb-4">
-            <Alert
-              tone="info"
-              message={notice}
-              onClose={() => setNotice(null)}
-            />
+            <Alert variant="info" onDismiss={() => setNotice(null)}>
+              {notice}
+            </Alert>
           </div>
         ) : null}
 
         <div className="relative mx-auto w-full max-w-xl">
           <div className="flex flex-col items-center text-center">
-            <button type="button" onClick={onBack} className="rounded-lg">
+            <button
+              type="button"
+              onClick={() => navigate({ to: '/' })}
+              className="rounded-lg"
+            >
               <img
                 src={mark}
                 alt="Voltar para o início"
@@ -354,7 +353,11 @@ export function RegisterPage({
               ) : null}
             </div>
 
-            {feedback ? <Alert tone="error" message={feedback} /> : null}
+            {feedback ? (
+              <Alert variant="error" onDismiss={() => setFeedback(null)}>
+                {feedback}
+              </Alert>
+            ) : null}
 
             <button
               type="submit"
@@ -370,7 +373,7 @@ export function RegisterPage({
             Já tem uma conta?{' '}
             <button
               type="button"
-              onClick={onLogin}
+              onClick={() => navigate({ to: '/login' })}
               className="font-semibold text-[#660366] hover:text-[#4F024F]"
             >
               Entrar

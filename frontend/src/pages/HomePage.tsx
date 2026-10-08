@@ -1,7 +1,8 @@
 import hero from '@/assets/homepage-hero.webp'
 import mark from '@/assets/mark-3cartas-branco.svg'
 import { Alert } from '@/components/ui/Alert'
-import type { UserResponse } from '@/types/User'
+import { useSession } from '@/session'
+import { useNavigate } from '@tanstack/react-router'
 import { type FormEvent, type ReactNode, useEffect, useState } from 'react'
 
 const GAMES = [
@@ -63,19 +64,9 @@ const RECENT = [
   { name: 'Omnimon', meta: 'BT1 • Digimon', price: 'R$ 320,00' },
 ]
 
-export function HomePage({
-  user,
-  sessionReady,
-  onRegister,
-  onLogin,
-  onLogout,
-}: {
-  user: UserResponse | null
-  sessionReady: boolean
-  onRegister: () => void
-  onLogin: () => void
-  onLogout: () => void
-}) {
+export function HomePage() {
+  const navigate = useNavigate()
+  const { user, sessionReady, logout } = useSession()
   const [notice, setNotice] = useState<string | null>(null)
   const [query, setQuery] = useState('')
   const [menuOpen, setMenuOpen] = useState(false)
@@ -130,7 +121,9 @@ export function HomePage({
 
           <button
             type="button"
-            onClick={() => (user ? soon('Criar anúncio') : onLogin())}
+            onClick={() =>
+              user ? soon('Criar anúncio') : navigate({ to: '/login' })
+            }
             className="hidden rounded-full border border-white/40 px-4 py-2 text-sm font-semibold hover:bg-white/10 sm:inline-flex"
           >
             Criar anúncio
@@ -167,7 +160,7 @@ export function HomePage({
                   </p>
                   <button
                     type="button"
-                    onClick={onLogout}
+                    onClick={logout}
                     className="w-full rounded-lg px-2 py-2 text-left text-sm font-medium text-[#660366] hover:bg-[#f3eaf3]"
                   >
                     Sair
@@ -179,7 +172,7 @@ export function HomePage({
             <div className="flex items-center gap-2">
               <button
                 type="button"
-                onClick={onRegister}
+                onClick={() => navigate({ to: '/cadastro' })}
                 disabled={!sessionReady}
                 className="hidden px-2 text-sm font-semibold hover:text-white/80 disabled:opacity-60 sm:inline"
               >
@@ -187,7 +180,7 @@ export function HomePage({
               </button>
               <button
                 type="button"
-                onClick={onLogin}
+                onClick={() => navigate({ to: '/login' })}
                 disabled={!sessionReady}
                 className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-[#660366] hover:bg-[#f3eaf3] disabled:opacity-60"
               >
@@ -221,7 +214,9 @@ export function HomePage({
 
       {notice ? (
         <div className="fixed top-24 right-4 left-4 z-30 mx-auto max-w-md sm:left-auto">
-          <Alert tone="info" message={notice} onClose={() => setNotice(null)} />
+          <Alert variant="info" onDismiss={() => setNotice(null)}>
+            {notice}
+          </Alert>
         </div>
       ) : null}
 
@@ -258,7 +253,9 @@ export function HomePage({
               </button>
               <button
                 type="button"
-                onClick={() => (user ? soon('Criar anúncio') : onLogin())}
+                onClick={() =>
+                  user ? soon('Criar anúncio') : navigate({ to: '/login' })
+                }
                 className="rounded-xl border border-white/70 bg-white/10 px-5 py-3 text-sm font-semibold hover:bg-white/20"
               >
                 Criar anúncio
@@ -414,7 +411,7 @@ export function HomePage({
               ) : (
                 <button
                   type="button"
-                  onClick={onRegister}
+                  onClick={() => navigate({ to: '/cadastro' })}
                   className="mt-4 w-full rounded-xl bg-[#660366] py-3 text-sm font-semibold text-white hover:bg-[#4F024F]"
                 >
                   Criar uma conta gratuita

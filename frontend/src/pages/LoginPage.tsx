@@ -1,25 +1,26 @@
 import mark from '@/assets/mark-3cartas-roxo.svg'
 import hero from '@/assets/login-hero.webp'
 import { Alert } from '@/components/ui/Alert'
-import { login } from '@/services/authApi'
-import type { ApiErrorResponse, LoginResponse } from '@/types/User'
+import { login as loginRequest } from '@/services/authApi'
+import { useSession } from '@/session'
+import type { ApiErrorResponse } from '@/types/User'
+import { useNavigate } from '@tanstack/react-router'
 import axios from 'axios'
-import { type FormEvent, type ReactNode, useEffect, useState } from 'react'
+import {
+  type FormEvent,
+  type ReactNode,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 
 const FUTURE_GOOGLE = 'Entrar com o Google será implementado no futuro.'
 const FUTURE_PASSWORD = 'A recuperação de senha será implementada no futuro.'
 
-export function LoginPage({
-  onBack,
-  onRegister,
-  onSuccess,
-  initialNotice = null,
-}: {
-  onBack: () => void
-  onRegister: () => void
-  onSuccess: (session: LoginResponse) => void
-  initialNotice?: string | null
-}) {
+export function LoginPage() {
+  const navigate = useNavigate()
+  const { login, loginNotice, setLoginNotice, user } = useSession()
+  const stickyNotice = useRef(loginNotice)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -27,16 +28,28 @@ export function LoginPage({
     {},
   )
   const [feedback, setFeedback] = useState<string | null>(null)
-  const [notice, setNotice] = useState<string | null>(initialNotice)
+  const [notice, setNotice] = useState<string | null>(loginNotice)
   const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
-    if (!notice || notice === initialNotice) {
+    if (loginNotice) {
+      setLoginNotice(null)
+    }
+  }, [loginNotice, setLoginNotice])
+
+  useEffect(() => {
+    if (user) {
+      navigate({ to: '/' })
+    }
+  }, [navigate, user])
+
+  useEffect(() => {
+    if (!notice || notice === stickyNotice.current) {
       return
     }
     const timeout = window.setTimeout(() => setNotice(null), 6000)
     return () => window.clearTimeout(timeout)
-  }, [notice, initialNotice])
+  }, [notice])
 
   function updateEmail(value: string) {
     setEmail(value)
@@ -74,11 +87,12 @@ export function LoginPage({
 
     setSubmitting(true)
     try {
-      const session = await login({
+      const session = await loginRequest({
         email: email.trim(),
         password,
       })
-      onSuccess(session)
+      login(session)
+      navigate({ to: '/' })
     } catch (error) {
       setFeedback(loginErrorMessage(error))
     } finally {
@@ -100,17 +114,19 @@ export function LoginPage({
         <Sparkles />
         {notice ? (
           <div className="absolute top-4 right-4 left-4 z-10 mx-auto max-w-md sm:left-auto">
-            <Alert
-              tone="info"
-              message={notice}
-              onClose={() => setNotice(null)}
-            />
+            <Alert variant="info" onDismiss={() => setNotice(null)}>
+              {notice}
+            </Alert>
           </div>
         ) : null}
 
         <div className="relative w-full max-w-md">
           <div className="flex flex-col items-center text-center">
-            <button type="button" onClick={onBack} className="rounded-lg">
+            <button
+              type="button"
+              onClick={() => navigate({ to: '/' })}
+              className="rounded-lg"
+            >
               <img
                 src={mark}
                 alt="Voltar para o início"
@@ -182,7 +198,7 @@ export function LoginPage({
               ) : null}
             </div>
 
-            {feedback ? <Alert tone="error" message={feedback} /> : null}
+            {feedback ? <Alert variant="error">{feedback}</Alert> : null}
 
             <button
               type="submit"
@@ -213,7 +229,7 @@ export function LoginPage({
             Ainda não tem uma conta?{' '}
             <button
               type="button"
-              onClick={onRegister}
+              onClick={() => navigate({ to: '/cadastro' })}
               className="font-semibold text-[#660366] hover:text-[#4F024F]"
             >
               Criar conta gratuita
