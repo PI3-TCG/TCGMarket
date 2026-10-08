@@ -53,8 +53,10 @@ export function Mark({
   tone?: 'brand' | 'inverse'
   className?: string
 }) {
-  const ink = tone === 'brand' ? '#660366' : '#FFFFFF'
-  const paper = tone === 'brand' ? '#FFFFFF' : '#660366'
+  const brand = 'var(--color-primary-900)'
+  const white = 'var(--color-neutral-0)'
+  const ink = tone === 'brand' ? brand : white
+  const paper = tone === 'brand' ? white : brand
 
   return (
     <svg viewBox="0 0 72 58" className={className} aria-hidden>

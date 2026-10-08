@@ -53,7 +53,7 @@ const EMPTY_FORM = {
 type FieldName = keyof typeof EMPTY_FORM
 
 const inputClass =
-  'w-full rounded-xl border border-[#e4dceb] bg-white py-3 pr-4 pl-11 text-sm outline-none placeholder:text-[#b3abbf] focus:border-[#660366] focus:ring-2 focus:ring-[#1688F8]'
+  'w-full rounded-xl border border-neutral-300 bg-white py-3 pr-4 pl-11 text-sm outline-none placeholder:text-neutral-500 focus:border-primary-900 focus:ring-2 focus:ring-secondary-500'
 
 export function RegisterPage() {
   const navigate = useNavigate()
@@ -165,12 +165,12 @@ export function RegisterPage() {
   }
 
   return (
-    <main className="min-h-svh bg-[#f7f4fb] text-[#24182f] lg:grid lg:h-svh lg:grid-cols-2 lg:overflow-hidden">
+    <main className="min-h-svh bg-neutral-50 text-neutral-900 lg:grid lg:h-svh lg:grid-cols-2 lg:overflow-hidden">
       <section className="relative lg:h-svh">
         <img
           src={hero}
           alt="Eevee dormindo sobre uma mesa de cartas. Colecione, troque e conecte no TCG Market."
-          className="h-80 w-full object-cover object-[center_72%] sm:h-[28rem] lg:h-full"
+          className="h-80 w-full object-cover object-[center_72%] sm:h-112 lg:h-full"
         />
       </section>
 
@@ -197,13 +197,13 @@ export function RegisterPage() {
                 className="h-16 w-auto"
               />
             </button>
-            <p className="font-display mt-4 text-2xl tracking-wide text-[#2a1840]">
+            <p className="font-display mt-4 text-2xl tracking-wide text-neutral-900">
               TCG MARKET
             </p>
             <h1 className="mt-5 text-3xl font-bold tracking-tight">
               Crie sua conta
             </h1>
-            <p className="mt-2 max-w-md text-sm text-[#6d647c]">
+            <p className="mt-2 max-w-md text-sm text-neutral-500">
               Faça parte da nossa comunidade de colecionadores e comece sua
               jornada no mundo dos TCGs.
             </p>
@@ -291,7 +291,7 @@ export function RegisterPage() {
                   País
                 </FieldLabel>
                 <div className="relative">
-                  <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-[#9a90ab]">
+                  <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-neutral-500">
                     <GlobeIcon />
                   </span>
                   <select
@@ -317,7 +317,7 @@ export function RegisterPage() {
               </div>
             </div>
 
-            <p className="flex items-start gap-2 rounded-xl bg-[#eef4ff] px-3 py-3 text-sm text-[#1e3a8a]">
+            <p className="flex items-start gap-2 rounded-xl bg-info-50 px-3 py-3 text-sm text-info-700">
               <InfoIcon />
               <span>
                 Você precisa ter pelo menos 13 anos para criar uma conta no TCG
@@ -326,14 +326,14 @@ export function RegisterPage() {
             </p>
 
             <div>
-              <label className="flex items-start gap-3 text-sm text-[#4b445c]">
+              <label className="flex items-start gap-3 text-sm text-neutral-700">
                 <input
                   type="checkbox"
                   checked={form.acceptedTerms}
                   onChange={(event) =>
                     updateField('acceptedTerms', event.target.checked)
                   }
-                  className="mt-0.5 size-4 rounded border-[#d8d0e4] text-[#660366]"
+                  className="mt-0.5 size-4 rounded border-neutral-300 text-primary-900"
                 />
                 <span>
                   Li e concordo com os{' '}
@@ -362,19 +362,19 @@ export function RegisterPage() {
             <button
               type="submit"
               disabled={submitting}
-              className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#660366] text-sm font-semibold text-white transition hover:bg-[#4F024F] focus-visible:ring-2 focus-visible:ring-[#1688F8] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+              className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary-900 text-sm font-semibold text-white transition hover:bg-primary-800 focus-visible:ring-2 focus-visible:ring-secondary-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <UserIcon />
               {submitting ? 'Criando conta...' : 'Criar conta'}
             </button>
           </form>
 
-          <p className="mt-6 mb-4 text-center text-sm text-[#6d647c]">
+          <p className="mt-6 mb-4 text-center text-sm text-neutral-500">
             Já tem uma conta?{' '}
             <button
               type="button"
               onClick={() => navigate({ to: '/login' })}
-              className="font-semibold text-[#660366] hover:text-[#4F024F]"
+              className="font-semibold text-primary-900 hover:text-primary-800"
             >
               Entrar
             </button>
@@ -414,7 +414,7 @@ function TextField({
         {label}
       </FieldLabel>
       <div className="relative">
-        <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-[#9a90ab]">
+        <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-neutral-500">
           {icon}
         </span>
         <input
@@ -461,7 +461,7 @@ function PasswordField({
         {label}
       </FieldLabel>
       <div className="relative">
-        <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-[#9a90ab]">
+        <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-neutral-500">
           <LockIcon />
         </span>
         <input
@@ -478,7 +478,7 @@ function PasswordField({
         <button
           type="button"
           onClick={onToggle}
-          className="absolute top-1/2 right-3 -translate-y-1/2 text-[#9a90ab] hover:text-[#660366]"
+          className="absolute top-1/2 right-3 -translate-y-1/2 text-neutral-500 hover:text-primary-900"
           aria-label={visible ? 'Ocultar senha' : 'Mostrar senha'}
         >
           {visible ? <EyeOffIcon /> : <EyeIcon />}
@@ -507,11 +507,11 @@ function FieldLabel({
 }
 
 function RequiredMark() {
-  return <span className="text-[#B91C1C]"> *</span>
+  return <span className="text-error-700"> *</span>
 }
 
 function FieldError({ message }: { message: string }) {
-  return <p className="mt-2 text-sm text-[#B91C1C]">{message}</p>
+  return <p className="mt-2 text-sm text-error-700">{message}</p>
 }
 
 function TextButton({
@@ -525,7 +525,7 @@ function TextButton({
     <button
       type="button"
       onClick={onClick}
-      className="font-semibold text-[#660366] underline-offset-2 hover:underline"
+      className="font-semibold text-primary-900 underline-offset-2 hover:underline"
     >
       {children}
     </button>
@@ -580,9 +580,11 @@ function isPersistedField(
 function Sparkles() {
   return (
     <div className="pointer-events-none absolute inset-0" aria-hidden="true">
-      <span className="absolute top-16 right-8 text-3xl text-[#d8c4ef]">✦</span>
-      <span className="absolute top-48 left-6 text-xl text-[#eadff6]">✦</span>
-      <span className="absolute right-12 bottom-16 text-2xl text-[#e7d8f5]">
+      <span className="absolute top-16 right-8 text-3xl text-primary-300">
+        ✦
+      </span>
+      <span className="absolute top-48 left-6 text-xl text-primary-100">✦</span>
+      <span className="absolute right-12 bottom-16 text-2xl text-primary-100">
         ✦
       </span>
     </div>

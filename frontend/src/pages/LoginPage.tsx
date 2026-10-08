@@ -101,12 +101,12 @@ export function LoginPage() {
   }
 
   return (
-    <main className="min-h-svh bg-[#f7f4fb] text-[#24182f] lg:grid lg:grid-cols-2">
+    <main className="min-h-svh bg-neutral-50 text-neutral-900 lg:grid lg:grid-cols-2">
       <section className="relative lg:sticky lg:top-0 lg:h-svh">
         <img
           src={hero}
           alt="Eevee dormindo sobre uma mesa de cartas. Colecione, troque e conecte no TCG Market."
-          className="h-80 w-full object-cover object-[center_72%] sm:h-[28rem] lg:absolute lg:inset-0 lg:h-full"
+          className="h-80 w-full object-cover object-[center_72%] sm:h-112 lg:absolute lg:inset-0 lg:h-full"
         />
       </section>
 
@@ -133,13 +133,13 @@ export function LoginPage() {
                 className="h-16 w-auto"
               />
             </button>
-            <p className="font-display mt-4 text-2xl tracking-wide text-[#2a1840]">
+            <p className="font-display mt-4 text-2xl tracking-wide text-neutral-900">
               TCG MARKET
             </p>
             <h1 className="mt-6 text-3xl font-bold tracking-tight">
               Bem-vinda de volta!
             </h1>
-            <p className="mt-2 text-sm text-[#6d647c]">
+            <p className="mt-2 text-sm text-neutral-500">
               Faça login para continuar sua jornada no mundo dos TCGs.
             </p>
           </div>
@@ -164,13 +164,13 @@ export function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setNotice(FUTURE_PASSWORD)}
-                  className="text-sm font-medium text-[#660366] hover:text-[#4F024F]"
+                  className="text-sm font-medium text-primary-900 hover:text-primary-800"
                 >
                   Esqueceu sua senha?
                 </button>
               </div>
               <div className="relative">
-                <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-[#9a90ab]">
+                <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-neutral-500">
                   <LockIcon />
                 </span>
                 <input
@@ -182,19 +182,19 @@ export function LoginPage() {
                   autoComplete="current-password"
                   aria-invalid={errors.password ? true : undefined}
                   onChange={(event) => updatePassword(event.target.value)}
-                  className="w-full rounded-xl border border-[#e4dceb] bg-white py-3 pr-12 pl-11 text-sm outline-none placeholder:text-[#b3abbf] focus:border-[#660366] focus:ring-2 focus:ring-[#1688F8]"
+                  className="w-full rounded-xl border border-neutral-300 bg-white py-3 pr-12 pl-11 text-sm outline-none placeholder:text-neutral-500 focus:border-primary-900 focus:ring-2 focus:ring-secondary-500"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword((current) => !current)}
-                  className="absolute top-1/2 right-3 -translate-y-1/2 text-[#9a90ab] hover:text-[#660366]"
+                  className="absolute top-1/2 right-3 -translate-y-1/2 text-neutral-500 hover:text-primary-900"
                   aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
                 >
                   {showPassword ? <EyeOffIcon /> : <EyeIcon />}
                 </button>
               </div>
               {errors.password ? (
-                <p className="mt-2 text-sm text-[#B91C1C]">{errors.password}</p>
+                <p className="mt-2 text-sm text-error-700">{errors.password}</p>
               ) : null}
             </div>
 
@@ -203,34 +203,34 @@ export function LoginPage() {
             <button
               type="submit"
               disabled={submitting}
-              className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#660366] text-sm font-semibold text-white transition hover:bg-[#4F024F] focus-visible:ring-2 focus-visible:ring-[#1688F8] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+              className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary-900 text-sm font-semibold text-white transition hover:bg-primary-800 focus-visible:ring-2 focus-visible:ring-secondary-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <LoginIcon />
               {submitting ? 'Entrando...' : 'Entrar'}
             </button>
           </form>
 
-          <div className="my-6 flex items-center gap-4 text-sm text-[#9a90ab]">
-            <span className="h-px flex-1 bg-[#e4dceb]" />
+          <div className="my-6 flex items-center gap-4 text-sm text-neutral-500">
+            <span className="h-px flex-1 bg-neutral-200" />
             ou
-            <span className="h-px flex-1 bg-[#e4dceb]" />
+            <span className="h-px flex-1 bg-neutral-200" />
           </div>
 
           <button
             type="button"
             onClick={() => setNotice(FUTURE_GOOGLE)}
-            className="flex h-12 w-full items-center justify-center gap-3 rounded-xl border border-[#e4dceb] bg-white text-sm font-semibold text-[#24182f] transition hover:bg-[#f3eaf3] focus-visible:ring-2 focus-visible:ring-[#1688F8] focus-visible:ring-offset-2"
+            className="flex h-12 w-full items-center justify-center gap-3 rounded-xl border border-neutral-300 bg-white text-sm font-semibold text-neutral-900 transition hover:bg-primary-100 focus-visible:ring-2 focus-visible:ring-secondary-500 focus-visible:ring-offset-2"
           >
             <GoogleIcon />
             Entrar com o Google
           </button>
 
-          <p className="mt-8 text-center text-sm text-[#6d647c]">
+          <p className="mt-8 text-center text-sm text-neutral-500">
             Ainda não tem uma conta?{' '}
             <button
               type="button"
               onClick={() => navigate({ to: '/cadastro' })}
-              className="font-semibold text-[#660366] hover:text-[#4F024F]"
+              className="font-semibold text-primary-900 hover:text-primary-800"
             >
               Criar conta gratuita
             </button>
@@ -268,7 +268,7 @@ function Field({
         {label}
       </label>
       <div className="relative">
-        <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-[#9a90ab]">
+        <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-neutral-500">
           {icon}
         </span>
         <input
@@ -280,10 +280,10 @@ function Field({
           autoComplete={autoComplete}
           aria-invalid={error ? true : undefined}
           onChange={(event) => onChange(event.target.value)}
-          className="w-full rounded-xl border border-[#e4dceb] bg-white py-3 pr-4 pl-11 text-sm outline-none placeholder:text-[#b3abbf] focus:border-[#660366] focus:ring-2 focus:ring-[#1688F8]"
+          className="w-full rounded-xl border border-neutral-300 bg-white py-3 pr-4 pl-11 text-sm outline-none placeholder:text-neutral-500 focus:border-primary-900 focus:ring-2 focus:ring-secondary-500"
         />
       </div>
-      {error ? <p className="mt-2 text-sm text-[#B91C1C]">{error}</p> : null}
+      {error ? <p className="mt-2 text-sm text-error-700">{error}</p> : null}
     </div>
   )
 }
@@ -301,14 +301,14 @@ function loginErrorMessage(error: unknown) {
 function Sparkles() {
   return (
     <div className="pointer-events-none absolute inset-0" aria-hidden="true">
-      <span className="absolute top-16 right-10 text-3xl text-[#d8c4ef]">
+      <span className="absolute top-16 right-10 text-3xl text-primary-300">
         ✦
       </span>
-      <span className="absolute top-40 left-8 text-xl text-[#eadff6]">✦</span>
-      <span className="absolute right-16 bottom-24 text-2xl text-[#e7d8f5]">
+      <span className="absolute top-40 left-8 text-xl text-primary-100">✦</span>
+      <span className="absolute right-16 bottom-24 text-2xl text-primary-100">
         ✦
       </span>
-      <span className="absolute bottom-10 left-16 text-lg text-[#f0e6f8]">
+      <span className="absolute bottom-10 left-16 text-lg text-primary-100">
         ✦
       </span>
     </div>
