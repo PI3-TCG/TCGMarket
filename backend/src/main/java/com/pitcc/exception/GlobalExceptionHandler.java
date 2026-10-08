@@ -2,6 +2,7 @@ package com.pitcc.exception;
 
 import com.pitcc.dto.ApiErrorResponse;
 import com.pitcc.dto.ApiErrorResponse.FieldErrorResponse;
+import com.pitcc.dto.LoginRequest;
 import com.pitcc.integration.catalog.ExternalApiException;
 import java.time.Instant;
 import java.util.List;
@@ -26,12 +27,23 @@ public class GlobalExceptionHandler {
             .map(error -> new FieldErrorResponse(error.getField(), error.getDefaultMessage()))
             .toList();
 
-    return ResponseEntity.badRequest()
-        .body(
-            error(
-                HttpStatus.BAD_REQUEST,
-                "Dados de cadastro inválidos.",
-                fields));
+    String message =
+        exception.getBindingResult().getTarget() instanceof LoginRequest
+            ? "Dados de login inválidos."
+            : "Dados de cadastro inválidos.";
+    return ResponseEntity.badRequest().body(error(HttpStatus.BAD_REQUEST, message, fields));
+  }
+
+  @ExceptionHandler(InvalidCredentialsException.class)
+  public ResponseEntity<ApiErrorResponse> handleInvalidCredentials(
+      InvalidCredentialsException exception) {
+    return unauthorized(exception.getMessage());
+  }
+
+  @ExceptionHandler(InvalidAuthenticationException.class)
+  public ResponseEntity<ApiErrorResponse> handleInvalidAuthentication(
+      InvalidAuthenticationException exception) {
+    return unauthorized(exception.getMessage());
   }
 
   @ExceptionHandler(EmailAlreadyRegisteredException.class)
@@ -66,6 +78,11 @@ public class GlobalExceptionHandler {
         exception.getMessage(),
         exception);
     return ResponseEntity.status(status).body(error(status, externalMessage(exception), List.of()));
+  }
+
+  private ResponseEntity<ApiErrorResponse> unauthorized(String message) {
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+        .body(error(HttpStatus.UNAUTHORIZED, message, List.of()));
   }
 
   private ResponseEntity<ApiErrorResponse> conflict(String message) {

@@ -2,6 +2,7 @@ package com.pitcc.service;
 
 import com.pitcc.dto.CreateUserRequest;
 import com.pitcc.dto.UserResponse;
+import com.pitcc.dto.UserResponses;
 import com.pitcc.exception.EmailAlreadyRegisteredException;
 import com.pitcc.model.User;
 import com.pitcc.model.UserRole;
@@ -37,7 +38,7 @@ public class UserService {
     user.setRegistrationDate(Instant.now());
 
     try {
-      return toResponse(userRepository.save(user));
+      return UserResponses.toUserResponse(userRepository.save(user));
     } catch (DuplicateKeyException exception) {
       throw new EmailAlreadyRegisteredException(email);
     }
@@ -45,14 +46,5 @@ public class UserService {
 
   private String normalizeEmail(String email) {
     return email.trim().toLowerCase(Locale.ROOT);
-  }
-
-  private UserResponse toResponse(User user) {
-    return new UserResponse(
-        user.getId(),
-        user.getName(),
-        user.getEmail(),
-        user.getRole(),
-        user.getRegistrationDate());
   }
 }

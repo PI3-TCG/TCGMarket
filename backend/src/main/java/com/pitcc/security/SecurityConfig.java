@@ -1,0 +1,60 @@
+package com.pitcc.security;
+
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+@Configuration
+@EnableWebSecurity
+@EnableConfigurationProperties(JwtProperties.class)
+public class SecurityConfig {
+
+  public static final String AUTHENTICATION_REQUIRED = "Autenticação necessária.";
+  public static final String ACCESS_DENIED = "Você não tem permissão para esta ação.";
+
+  @Bean
+  SecurityFilterChain securityFilterChain(HttpSecurity http, JwtService jwtService, ApiErrorWriter errors)
+      throws Exception {
+    http.csrf(AbstractHttpConfigurer::disable)
+        .httpBasic(AbstractHttpConfigurer::disable)
+        .formLogin(AbstractHttpConfigurer::disable)
+        .logout(AbstractHttpConfigurer::disable)
+        .cors(cors -> {})
+        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .authorizeHttpRequests(
+            auth ->
+                auth.requestMatchers(HttpMethod.GET, "/api/health")
+                    .permitAll()
+                    .requestMatchers(HttpMethod.POST, "/api/users")
+                    .permitAll()
+                    .requestMatchers(HttpMethod.POST, "/api/auth/login")
+                    .permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/catalog/**")
+                    .permitAll()
+                    .requestMatchers(HttpMethod.OPTIONS, "/**")
+                    .permitAll()
+                    .requestMatchers("/error")
+                    .permitAll()
+                    .anyRequest()
+                    .authenticated())
+        .exceptionHandling(
+            handler ->
+                handler
+                    .authenticationEntryPoint(
+                        (request, response, exception) ->
+                            errors.write(response, HttpStatus.UNAUTHORIZED, AUTHENTICATION_REQUIRED))
+                    .accessDeniedHandler(
+                        (request, response, exception) ->
+                            errors.write(response, HttpStatus.FORBIDDEN, ACCESS_DENIED)))
+        .addFilterBefore(new JwtAuthenticationFilter(jwtService), UsernamePasswordAuthenticationFilter.class);
+    return http.build();
+  }
+}

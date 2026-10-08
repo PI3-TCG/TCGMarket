@@ -1,5 +1,6 @@
 import { DesignSystemPage } from '@/pages/DesignSystemPage'
 import { HomePage } from '@/pages/HomePage'
+import { LoginPage } from '@/pages/LoginPage'
 import { RegisterPage } from '@/pages/RegisterPage'
 import { NotFound, RootLayout } from '@/routes/RootLayout'
 import {
@@ -25,6 +26,12 @@ const registerRoute = createRoute({
   component: RegisterPage,
 })
 
+const loginRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/login',
+  component: LoginPage,
+})
+
 const designSystemRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/design-system',
@@ -34,6 +41,7 @@ const designSystemRoute = createRoute({
 const routeTree = rootRoute.addChildren([
   indexRoute,
   registerRoute,
+  loginRoute,
   designSystemRoute,
 ])
 
