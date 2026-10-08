@@ -1,5 +1,6 @@
 import axios from 'axios'
-import { useEffect, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useState, type ReactNode } from 'react'
+import { SESSION_EXPIRED_EVENT } from '@/services/api'
 import { currentUser } from '@/services/authApi'
 import {
   clearSession,
@@ -9,6 +10,8 @@ import {
 } from '@/services/authStorage'
 import { SessionContext } from '@/session'
 import type { LoginResponse, UserResponse } from '@/types/User'
+
+const SESSION_EXPIRED_NOTICE = 'Sua sessão expirou. Entre novamente.'
 
 export function SessionProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserResponse | null>(() =>
@@ -55,6 +58,29 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
+  useEffect(() => {
+    function expire() {
+      setUser(null)
+      setLoginNotice(SESSION_EXPIRED_NOTICE)
+    }
+    window.addEventListener(SESSION_EXPIRED_EVENT, expire)
+    return () => window.removeEventListener(SESSION_EXPIRED_EVENT, expire)
+  }, [])
+
+  const refreshUser = useCallback(async () => {
+    const token = readToken()
+    if (!token) {
+      return
+    }
+    try {
+      const current = await currentUser()
+      saveSession(token, current)
+      setUser(current)
+    } catch {
+      // Um 401 já encerra a sessão pelo interceptor; outras falhas mantêm o usuário atual.
+    }
+  }, [])
+
   function login(session: LoginResponse) {
     saveSession(session.token, session.user)
     setUser(session.user)
@@ -76,6 +102,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         setLoginNotice,
         login,
         logout,
+        refreshUser,
       }}
     >
       {children}

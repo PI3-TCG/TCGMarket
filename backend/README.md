@@ -22,3 +22,14 @@ Não é necessário instalar o Maven globalmente, pois o projeto utiliza Maven W
 
 ```bash
 ./mvnw spring-boot:run
+```
+
+## Primeiro administrador
+
+Todo cadastro público nasce como `USER`. Para ter o primeiro `ADMIN`, cadastre a conta normalmente e suba a API com `ADMIN_EMAIL` apontando para o e-mail dela:
+
+```bash
+ADMIN_EMAIL=admin@email.com ./mvnw spring-boot:run
+```
+
+Na subida, a conta com esse e-mail passa a ser `ADMIN`. Se o e-mail não existir, a API só registra um aviso no log. Depois disso, outros administradores podem ser promovidos pela Área Administrativa (`PATCH /api/admin/users/{id}/role`).

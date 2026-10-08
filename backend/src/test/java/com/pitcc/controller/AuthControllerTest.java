@@ -12,12 +12,15 @@ import com.pitcc.dto.LoginResponse;
 import com.pitcc.dto.UserResponse;
 import com.pitcc.exception.GlobalExceptionHandler;
 import com.pitcc.exception.InvalidCredentialsException;
+import com.pitcc.model.User;
 import com.pitcc.model.UserRole;
+import com.pitcc.repository.UserRepository;
 import com.pitcc.security.ApiErrorWriter;
 import com.pitcc.security.JwtService;
 import com.pitcc.security.SecurityConfig;
 import com.pitcc.service.AuthService;
 import java.time.Instant;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -42,6 +45,8 @@ class AuthControllerTest {
   @Autowired private JwtService jwtService;
 
   @MockitoBean private AuthService authService;
+
+  @MockitoBean private UserRepository userRepository;
 
   @Test
   void shouldLoginWithoutReturningPassword() throws Exception {
@@ -134,6 +139,10 @@ class AuthControllerTest {
                 "joao@email.com",
                 UserRole.ADMIN,
                 Instant.parse("2026-10-02T18:00:00Z")));
+    User admin = new User();
+    admin.setId("abc123");
+    admin.setRole(UserRole.ADMIN);
+    when(userRepository.findById("abc123")).thenReturn(Optional.of(admin));
     String token = jwtService.generate("abc123", UserRole.ADMIN);
 
     mockMvc

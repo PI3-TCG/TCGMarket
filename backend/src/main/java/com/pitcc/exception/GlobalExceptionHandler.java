@@ -3,7 +3,9 @@ package com.pitcc.exception;
 import com.pitcc.dto.ApiErrorResponse;
 import com.pitcc.dto.ApiErrorResponse.FieldErrorResponse;
 import com.pitcc.dto.LoginRequest;
+import com.pitcc.dto.UpdateUserRoleRequest;
 import com.pitcc.integration.catalog.ExternalApiException;
+import com.pitcc.security.SecurityConfig;
 import java.time.Instant;
 import java.util.List;
 import org.slf4j.Logger;
@@ -11,6 +13,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -28,10 +32,35 @@ public class GlobalExceptionHandler {
             .toList();
 
     String message =
-        exception.getBindingResult().getTarget() instanceof LoginRequest
-            ? "Dados de login inválidos."
-            : "Dados de cadastro inválidos.";
+        switch (exception.getBindingResult().getTarget()) {
+          case LoginRequest ignored -> "Dados de login inválidos.";
+          case UpdateUserRoleRequest ignored -> "Perfil inválido.";
+          case null, default -> "Dados de cadastro inválidos.";
+        };
     return ResponseEntity.badRequest().body(error(HttpStatus.BAD_REQUEST, message, fields));
+  }
+
+  @ExceptionHandler(HttpMessageNotReadableException.class)
+  public ResponseEntity<ApiErrorResponse> handleUnreadableBody(
+      HttpMessageNotReadableException exception) {
+    return ResponseEntity.badRequest()
+        .body(error(HttpStatus.BAD_REQUEST, "Corpo da requisição inválido.", List.of()));
+  }
+
+  @ExceptionHandler(AccessDeniedException.class)
+  public ResponseEntity<ApiErrorResponse> handleAccessDenied(AccessDeniedException exception) {
+    return forbidden(SecurityConfig.ACCESS_DENIED);
+  }
+
+  @ExceptionHandler(OwnRoleChangeException.class)
+  public ResponseEntity<ApiErrorResponse> handleOwnRoleChange(OwnRoleChangeException exception) {
+    return forbidden(exception.getMessage());
+  }
+
+  @ExceptionHandler(UserNotFoundException.class)
+  public ResponseEntity<ApiErrorResponse> handleUserNotFound(UserNotFoundException exception) {
+    return ResponseEntity.status(HttpStatus.NOT_FOUND)
+        .body(error(HttpStatus.NOT_FOUND, exception.getMessage(), List.of()));
   }
 
   @ExceptionHandler(InvalidCredentialsException.class)
@@ -83,6 +112,11 @@ public class GlobalExceptionHandler {
   private ResponseEntity<ApiErrorResponse> unauthorized(String message) {
     return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
         .body(error(HttpStatus.UNAUTHORIZED, message, List.of()));
+  }
+
+  private ResponseEntity<ApiErrorResponse> forbidden(String message) {
+    return ResponseEntity.status(HttpStatus.FORBIDDEN)
+        .body(error(HttpStatus.FORBIDDEN, message, List.of()));
   }
 
   private ResponseEntity<ApiErrorResponse> conflict(String message) {

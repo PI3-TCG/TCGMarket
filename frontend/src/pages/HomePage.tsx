@@ -1,7 +1,7 @@
 import hero from '@/assets/homepage-hero.webp'
 import mark from '@/assets/mark-3cartas-branco.svg'
 import { Alert } from '@/components/ui/Alert'
-import { useSession } from '@/session'
+import { hasRole, useSession } from '@/session'
 import { useNavigate } from '@tanstack/react-router'
 import { type FormEvent, type ReactNode, useEffect, useState } from 'react'
 
@@ -158,6 +158,15 @@ export function HomePage() {
                   <p className="px-2 pb-2 text-xs text-[#6d647c]">
                     {user.email}
                   </p>
+                  {hasRole(user, 'ADMIN') ? (
+                    <button
+                      type="button"
+                      onClick={() => navigate({ to: '/admin' })}
+                      className="w-full rounded-lg px-2 py-2 text-left text-sm font-medium text-[#24182f] hover:bg-[#f3eaf3]"
+                    >
+                      Área Administrativa
+                    </button>
+                  ) : null}
                   <button
                     type="button"
                     onClick={logout}
