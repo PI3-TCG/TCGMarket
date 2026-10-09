@@ -234,6 +234,9 @@ A tela de detalhes já possui uma referência no projeto:
 
 `docs/design-system/prototyping/wireframe-detalheCartas.png`
 
+A especificação completa da tela, com estados e regras de dados, está em
+`docs/arquitetura/prototipo-detalhes-carta-tcg-market.md`.
+
 Assim, o catálogo funciona como o ponto de entrada para encontrar uma
 carta e depois visualizar suas informações e anúncios disponíveis.
 
