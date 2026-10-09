@@ -1,6 +1,7 @@
 import { DesignSystemPage } from '@/pages/DesignSystemPage'
 import { HomePage } from '@/pages/HomePage'
 import { RegisterPage } from '@/pages/RegisterPage'
+import { CatalogPage } from '@/pages/CatalogPage'
 import { NotFound, RootLayout } from '@/routes/RootLayout'
 import {
   createRootRoute,
@@ -31,11 +32,19 @@ const designSystemRoute = createRoute({
   component: DesignSystemPage,
 })
 
+const catalogRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/catalogo/$game',
+  component: CatalogPage,
+})
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   registerRoute,
   designSystemRoute,
+  catalogRoute,
 ])
+
 
 export const router = createRouter({ routeTree })
 
