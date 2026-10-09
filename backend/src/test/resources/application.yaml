@@ -1,4 +1,0 @@
-security:
-  jwt:
-    secret: test-secret-key-must-be-at-least-32-bytes!
-    expiration: 1h
