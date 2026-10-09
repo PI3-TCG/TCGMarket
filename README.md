@@ -30,6 +30,10 @@ cp .env.example .env
 npm run dev
 ```
 
+## Homologação
+
+O merge na `main` testa o backend, publica a imagem no GHCR e implanta na EC2 de homologação. Preparação, variáveis, rollback e custos estão em [`infra/hml/README.md`](infra/hml/README.md).
+
 ## Documentação
 
 | Documento | Conteúdo |
