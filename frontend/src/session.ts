@@ -1,13 +1,19 @@
-import { createContext, useContext } from 'react'
-import type { LoginResponse, UserResponse } from '@/types/User'
+import {
+  createContext,
+  useContext,
+  type Dispatch,
+  type SetStateAction,
+} from 'react'
+import type { LoginResponse, UserResponse, UserRole } from '@/types/User'
 
 export type SessionValue = {
   user: UserResponse | null
   sessionReady: boolean
   loginNotice: string | null
-  setLoginNotice: (notice: string | null) => void
+  setLoginNotice: Dispatch<SetStateAction<string | null>>
   login: (session: LoginResponse) => void
   logout: () => void
+  refreshUser: () => Promise<void>
 }
 
 export const SessionContext = createContext<SessionValue | null>(null)
@@ -18,4 +24,12 @@ export function useSession() {
     throw new Error('useSession precisa estar dentro de SessionProvider.')
   }
   return session
+}
+
+// Decide só o que a interface mostra. Quem autoriza de fato é a API.
+export function hasRole(user: UserResponse | null, role: UserRole) {
+  if (!user) {
+    return false
+  }
+  return role === 'USER' || user.role === role
 }

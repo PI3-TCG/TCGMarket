@@ -1,3 +1,5 @@
+import { RequireAuth } from '@/components/auth/RequireAuth'
+import { AdminPage } from '@/pages/AdminPage'
 import { DesignSystemPage } from '@/pages/DesignSystemPage'
 import { HomePage } from '@/pages/HomePage'
 import { LoginPage } from '@/pages/LoginPage'
@@ -32,6 +34,16 @@ const loginRoute = createRoute({
   component: LoginPage,
 })
 
+const adminRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/admin',
+  component: () => (
+    <RequireAuth role="ADMIN">
+      <AdminPage />
+    </RequireAuth>
+  ),
+})
+
 const designSystemRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/design-system',
@@ -42,6 +54,7 @@ const routeTree = rootRoute.addChildren([
   indexRoute,
   registerRoute,
   loginRoute,
+  adminRoute,
   designSystemRoute,
 ])
 

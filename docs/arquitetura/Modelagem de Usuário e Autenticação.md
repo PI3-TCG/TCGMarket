@@ -88,6 +88,28 @@ A autorização é por perfil, lido do token e conferido no backend.
 
 Uma conta `USER` só altera dados ligados ao próprio `id`. O `id` vem do token, não de um campo enviado pelo cliente.
 
+### Como a autorização está implementada
+
+- O filtro do JWT valida a assinatura e a validade do token e depois busca o usuário no MongoDB. O perfil usado na requisição é o que está no banco, não o `role` gravado no token. Uma conta rebaixada perde o acesso de `ADMIN` na hora, e um token de conta removida responde `401`.
+- `/api/admin/**` exige `ROLE_ADMIN` no `SecurityConfig`. O `AdminUserService` repete a regra com `@PreAuthorize("hasRole('ADMIN')")`, para que nenhuma outra chamada ao service escape da checagem.
+- Sem token ou com token inválido: `401` com "Autenticação necessária.". Autenticado sem o perfil exigido: `403` com "Você não tem permissão para esta ação.".
+
+| Método | Endpoint | Acesso | Descrição |
+| --- | --- | --- | --- |
+| `GET` | `/api/auth/me` | Autenticado | Devolve o usuário atual com o `role`, para o Front-end adaptar a navegação. |
+| `GET` | `/api/admin/users` | `ADMIN` | Lista os usuários, sem `passwordHash`. |
+| `PATCH` | `/api/admin/users/{id}/role` | `ADMIN` | Recebe `{ "role": "USER" \| "ADMIN" }` e altera o perfil de outro usuário. |
+
+Regras do `PATCH`:
+
+- Um `USER` recebe `403`, inclusive ao tentar promover a própria conta.
+- Um `ADMIN` não altera o próprio perfil (`403`, "Você não pode alterar o próprio perfil."). Isso também garante que sempre sobra pelo menos um administrador.
+- Usuário inexistente responde `404`. `role` ausente ou desconhecido responde `400`.
+
+O primeiro `ADMIN` vem da variável `ADMIN_EMAIL`: na subida, a conta já cadastrada com esse e-mail é promovida. Vazia, nada acontece.
+
+No Front-end, a rota `/admin` e o item "Área Administrativa" do menu só aparecem para `ADMIN`. Isso é só interface: a proteção real continua na API.
+
 ## O que esta etapa entrega
 
 - `com.pitcc.model.User`
@@ -98,8 +120,8 @@ Uma conta `USER` só altera dados ligados ao próprio `id`. O `id` vem do token,
 
 ## O que fica para as próximas tarefas
 
-1. Login: conferir o hash e emitir o JWT.
-2. Filtro de autenticação e contexto do usuário autenticado.
-3. Proteção dos endpoints.
-4. Autorização por `USER` e `ADMIN`.
+1. ~~Login: conferir o hash e emitir o JWT.~~
+2. ~~Filtro de autenticação e contexto do usuário autenticado.~~
+3. ~~Proteção dos endpoints.~~
+4. ~~Autorização por `USER` e `ADMIN`.~~
 5. Uso do `id` autenticado nas operações de negócio.

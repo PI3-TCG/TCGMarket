@@ -12,6 +12,9 @@ security:
   jwt:
     secret: ${JWT_SECRET}
     expiration: ${JWT_EXPIRATION:24h}
+  # Conta já cadastrada que vira ADMIN na subida da aplicação. Vazio não promove ninguém.
+  admin:
+    email: ${ADMIN_EMAIL:}
 
 # Catálogos externos. A chave da Pokémon TCG vem só do ambiente e não tem valor padrão.
 external-apis:

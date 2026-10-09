@@ -1,9 +1,15 @@
+export type UserRole = 'USER' | 'ADMIN'
+
 export interface UserResponse {
   id: string
   name: string
   email: string
-  role: 'USER' | 'ADMIN'
+  role: UserRole
   registrationDate: string
+}
+
+export interface UpdateUserRoleRequest {
+  role: UserRole
 }
 
 export interface CreateUserRequest {
