@@ -56,4 +56,22 @@
   body {
     @apply bg-neutral-50 font-sans text-neutral-900 antialiased;
   }
+
+  /* O Tailwind 4 deixou de aplicar cursor: pointer em botões por padrão. */
+  button:not(:disabled),
+  [role='button']:not([aria-disabled='true']),
+  select:not(:disabled),
+  summary,
+  label:has(input[type='checkbox']:not(:disabled)),
+  label:has(input[type='radio']:not(:disabled)),
+  input[type='checkbox']:not(:disabled),
+  input[type='radio']:not(:disabled) {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  select:disabled,
+  input:disabled {
+    cursor: not-allowed;
+  }
 }

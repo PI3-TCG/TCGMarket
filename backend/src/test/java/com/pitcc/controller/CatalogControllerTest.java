@@ -5,6 +5,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.pitcc.config.PermitAllSecurityConfig;
 import com.pitcc.dto.CatalogCardResponse;
 import com.pitcc.exception.CatalogCardNotFoundException;
 import com.pitcc.exception.GlobalExceptionHandler;
@@ -22,7 +23,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(CatalogController.class)
-@Import(GlobalExceptionHandler.class)
+@Import({GlobalExceptionHandler.class, PermitAllSecurityConfig.class})
 class CatalogControllerTest {
 
   @Autowired private MockMvc mockMvc;

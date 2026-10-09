@@ -108,6 +108,8 @@ public class YugiohClient {
   }
 
   private static final class NoMatchingCard extends RuntimeException {
+    private static final long serialVersionUID = 1L;
+
     private NoMatchingCard() {
       super(null, null, false, false);
     }

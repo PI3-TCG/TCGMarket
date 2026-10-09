@@ -116,6 +116,8 @@ public final class ExternalApiErrors {
   }
 
   private static final class NotFound extends RuntimeException {
+    private static final long serialVersionUID = 1L;
+
     private NotFound() {
       super(null, null, false, false);
     }
