@@ -92,8 +92,8 @@ export function HomePage() {
   const firstName = user?.name.split(' ')[0]
 
   return (
-    <div className="min-h-svh bg-[#f6f3fb] text-[#24182f]">
-      <header className="sticky top-0 z-20 bg-[#660366] text-white shadow-md">
+    <div className="min-h-svh bg-neutral-50 text-neutral-900">
+      <header className="sticky top-0 z-20 bg-primary-900 text-white shadow-md">
         <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3 sm:gap-4">
           <button
             type="button"
@@ -114,7 +114,7 @@ export function HomePage() {
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="Buscar carta, anúncio ou usuário..."
-                className="w-full rounded-full bg-white/15 py-2.5 pr-4 pl-10 text-sm text-white outline-none placeholder:text-white/70 focus:ring-2 focus:ring-[#1688F8]"
+                className="w-full rounded-full bg-white/15 py-2.5 pr-4 pl-10 text-sm text-white outline-none placeholder:text-white/70 focus:ring-2 focus:ring-secondary-500"
               />
             </label>
           </form>
@@ -145,7 +145,7 @@ export function HomePage() {
                 className="flex items-center gap-2 rounded-full py-1 pr-2 pl-1 hover:bg-white/10"
                 aria-expanded={menuOpen}
               >
-                <span className="flex size-9 items-center justify-center rounded-full bg-white text-sm font-bold text-[#660366]">
+                <span className="flex size-9 items-center justify-center rounded-full bg-white text-sm font-bold text-primary-900">
                   {firstName?.[0] ?? 'U'}
                 </span>
                 <span className="hidden max-w-32 truncate text-sm font-medium md:inline">
@@ -153,16 +153,16 @@ export function HomePage() {
                 </span>
               </button>
               {menuOpen ? (
-                <div className="absolute right-0 mt-2 w-56 rounded-xl bg-white p-3 text-[#24182f] shadow-xl">
+                <div className="absolute right-0 mt-2 w-56 rounded-xl bg-white p-3 text-neutral-900 shadow-xl">
                   <p className="px-2 text-sm font-semibold">{user.name}</p>
-                  <p className="px-2 pb-2 text-xs text-[#6d647c]">
+                  <p className="px-2 pb-2 text-xs text-neutral-500">
                     {user.email}
                   </p>
                   {hasRole(user, 'ADMIN') ? (
                     <button
                       type="button"
                       onClick={() => navigate({ to: '/admin' })}
-                      className="w-full rounded-lg px-2 py-2 text-left text-sm font-medium text-[#24182f] hover:bg-[#f3eaf3]"
+                      className="w-full rounded-lg px-2 py-2 text-left text-sm font-medium text-neutral-900 hover:bg-primary-100"
                     >
                       Área Administrativa
                     </button>
@@ -170,7 +170,7 @@ export function HomePage() {
                   <button
                     type="button"
                     onClick={logout}
-                    className="w-full rounded-lg px-2 py-2 text-left text-sm font-medium text-[#660366] hover:bg-[#f3eaf3]"
+                    className="w-full rounded-lg px-2 py-2 text-left text-sm font-medium text-primary-900 hover:bg-primary-100"
                   >
                     Sair
                   </button>
@@ -191,7 +191,7 @@ export function HomePage() {
                 type="button"
                 onClick={() => navigate({ to: '/login' })}
                 disabled={!sessionReady}
-                className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-[#660366] hover:bg-[#f3eaf3] disabled:opacity-60"
+                className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-primary-900 hover:bg-primary-100 disabled:opacity-60"
               >
                 {sessionReady ? 'Entrar' : '...'}
               </button>
@@ -200,7 +200,7 @@ export function HomePage() {
         </div>
       </header>
 
-      <nav className="border-b border-[#eadff3] bg-white">
+      <nav className="border-b border-neutral-200 bg-white">
         <div className="mx-auto flex max-w-6xl justify-start gap-1 overflow-x-auto px-2 sm:justify-center">
           <NavChip
             current
@@ -236,17 +236,17 @@ export function HomePage() {
           </p>
         ) : null}
 
-        <section className="relative min-h-[22rem] overflow-hidden rounded-3xl bg-[#2a1248] text-white shadow-lg">
+        <section className="relative min-h-88 overflow-hidden rounded-3xl bg-neutral-900 text-white shadow-lg">
           <img
             src={hero}
             alt=""
             className="absolute inset-y-0 right-0 h-full w-full object-cover object-[70%_center] sm:w-[72%]"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#2a1248] from-20% via-[#2a1248]/92 via-45% to-transparent to-70%" />
-          <div className="relative flex min-h-[22rem] max-w-xl flex-col justify-center px-6 py-10 sm:px-10">
+          <div className="absolute inset-0 bg-linear-to-r from-neutral-900 from-20% via-neutral-900/92 via-45% to-transparent to-70%" />
+          <div className="relative flex min-h-88 max-w-xl flex-col justify-center px-6 py-10 sm:px-10">
             <h1 className="text-4xl leading-tight font-bold tracking-tight sm:text-5xl">
               Mais que cartas,{' '}
-              <span className="text-[#e9d5ff]">uma comunidade.</span>
+              <span className="text-primary-100">uma comunidade.</span>
             </h1>
             <p className="mt-4 max-w-md text-sm leading-relaxed text-white/85 sm:text-base">
               Compre, venda, troque e expanda sua coleção de TCGs com outros fãs
@@ -256,7 +256,7 @@ export function HomePage() {
               <button
                 type="button"
                 onClick={() => soon('O catálogo')}
-                className="rounded-xl bg-[#660366] px-5 py-3 text-sm font-semibold hover:bg-[#4F024F]"
+                className="rounded-xl bg-primary-900 px-5 py-3 text-sm font-semibold hover:bg-primary-800"
               >
                 Explorar catálogo
               </button>
@@ -290,7 +290,7 @@ export function HomePage() {
             <button
               type="button"
               onClick={() => soon('O catálogo')}
-              className="text-sm font-semibold text-[#660366]"
+              className="text-sm font-semibold text-primary-900"
             >
               Ver todos
             </button>
@@ -325,7 +325,7 @@ export function HomePage() {
               <button
                 type="button"
                 onClick={() => soon('Os anúncios')}
-                className="text-sm font-semibold text-[#660366]"
+                className="text-sm font-semibold text-primary-900"
               >
                 Ver todos os anúncios
               </button>
@@ -336,7 +336,7 @@ export function HomePage() {
                   key={card.name}
                   type="button"
                   onClick={() => soon('Os anúncios')}
-                  className="overflow-hidden rounded-2xl border border-[#eadff3] bg-white text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                  className="overflow-hidden rounded-2xl border border-neutral-200 bg-white text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
                 >
                   <span
                     className="block h-36"
@@ -348,11 +348,11 @@ export function HomePage() {
                     <span className="block text-sm font-semibold">
                       {card.name}
                     </span>
-                    <span className="mt-1 block text-xs text-[#6d647c]">
+                    <span className="mt-1 block text-xs text-neutral-500">
                       {card.meta}
                     </span>
                     <span className="mt-2 flex items-center justify-between">
-                      <span className="rounded-full bg-[#f3eaf3] px-2 py-0.5 text-[11px] font-medium text-[#660366]">
+                      <span className="rounded-full bg-primary-100 px-2 py-0.5 text-[11px] font-medium text-primary-900">
                         {card.tag}
                       </span>
                       <span className="text-sm font-bold">{card.price}</span>
@@ -364,18 +364,18 @@ export function HomePage() {
           </div>
 
           <div className="space-y-4">
-            <div className="rounded-2xl border border-[#eadff3] bg-white p-4 shadow-sm">
+            <div className="rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm">
               <div className="mb-3 flex items-center justify-between">
                 <h2 className="font-bold">Últimos anúncios</h2>
                 <button
                   type="button"
                   onClick={() => soon('Os anúncios')}
-                  className="text-xs font-semibold text-[#660366]"
+                  className="text-xs font-semibold text-primary-900"
                 >
                   Ver todos
                 </button>
               </div>
-              <ul className="divide-y divide-[#f1eaf4]">
+              <ul className="divide-y divide-neutral-200">
                 {RECENT.map((item) => (
                   <li key={item.name}>
                     <button
@@ -387,7 +387,7 @@ export function HomePage() {
                         <span className="block text-sm font-medium">
                           {item.name}
                         </span>
-                        <span className="block text-xs text-[#6d647c]">
+                        <span className="block text-xs text-neutral-500">
                           {item.meta}
                         </span>
                       </span>
@@ -400,11 +400,11 @@ export function HomePage() {
               </ul>
             </div>
 
-            <aside className="rounded-2xl bg-gradient-to-br from-[#f3eaf8] to-[#efe7fb] p-5">
+            <aside className="rounded-2xl bg-linear-to-br from-primary-100 to-neutral-100 p-5">
               <h2 className="text-lg font-bold">
                 {user ? `Olá, ${firstName}` : 'Faça parte da nossa comunidade'}
               </h2>
-              <p className="mt-2 text-sm leading-relaxed text-[#4b445c]">
+              <p className="mt-2 text-sm leading-relaxed text-neutral-700">
                 {user
                   ? 'Sua conta já está pronta. Em breve você anuncia cartas, monta a coleção e troca com outros fãs.'
                   : 'Siga outros colecionadores, participe de trocas e fique por dentro das novidades.'}
@@ -413,7 +413,7 @@ export function HomePage() {
                 <button
                   type="button"
                   onClick={() => soon('Criar anúncio')}
-                  className="mt-4 w-full rounded-xl bg-[#660366] py-3 text-sm font-semibold text-white hover:bg-[#4F024F]"
+                  className="mt-4 w-full rounded-xl bg-primary-900 py-3 text-sm font-semibold text-white hover:bg-primary-800"
                 >
                   Criar anúncio
                 </button>
@@ -421,12 +421,12 @@ export function HomePage() {
                 <button
                   type="button"
                   onClick={() => navigate({ to: '/cadastro' })}
-                  className="mt-4 w-full rounded-xl bg-[#660366] py-3 text-sm font-semibold text-white hover:bg-[#4F024F]"
+                  className="mt-4 w-full rounded-xl bg-primary-900 py-3 text-sm font-semibold text-white hover:bg-primary-800"
                 >
                   Criar uma conta gratuita
                 </button>
               )}
-              <ul className="mt-4 space-y-2 text-sm text-[#4b445c]">
+              <ul className="mt-4 space-y-2 text-sm text-neutral-700">
                 <li>Anuncie suas cartas</li>
                 <li>Monte sua coleção</li>
                 <li>Conecte-se com outros fãs</li>
@@ -436,7 +436,7 @@ export function HomePage() {
         </section>
       </main>
 
-      <footer className="bg-[#4F024F] text-white">
+      <footer className="bg-primary-800 text-white">
         <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 sm:grid-cols-2 lg:grid-cols-5">
           <div>
             <div className="flex items-center gap-2">
@@ -497,8 +497,8 @@ function NavChip({
       onClick={onClick}
       className={`flex shrink-0 items-center gap-2 border-b-2 px-3 py-3 text-sm ${
         current
-          ? 'border-[#660366] font-semibold text-[#660366]'
-          : 'border-transparent text-[#5c516b] hover:text-[#660366]'
+          ? 'border-primary-900 font-semibold text-primary-900'
+          : 'border-transparent text-neutral-700 hover:text-primary-900'
       }`}
     >
       {children}

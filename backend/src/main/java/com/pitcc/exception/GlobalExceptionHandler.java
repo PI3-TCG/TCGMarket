@@ -33,8 +33,8 @@ public class GlobalExceptionHandler {
 
     String message =
         switch (exception.getBindingResult().getTarget()) {
-          case LoginRequest ignored -> "Dados de login inválidos.";
-          case UpdateUserRoleRequest ignored -> "Perfil inválido.";
+          case LoginRequest _ -> "Dados de login inválidos.";
+          case UpdateUserRoleRequest _ -> "Perfil inválido.";
           case null, default -> "Dados de cadastro inválidos.";
         };
     return ResponseEntity.badRequest().body(error(HttpStatus.BAD_REQUEST, message, fields));
