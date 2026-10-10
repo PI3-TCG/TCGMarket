@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import com.pitcc.model.CardGame;
 import org.junit.jupiter.api.Test;
 
 class ExternalCardTest {
@@ -14,7 +15,7 @@ class ExternalCardTest {
         " id ",
         "  ",
         " Name ",
-        CardGame.POKEMON,
+        com.pitcc.model.CardGame.POKEMON,
         "  ",
         null,
         "",
@@ -37,7 +38,7 @@ class ExternalCardTest {
         "89631139:LOB-EN001:Ultra Rare",
         " 89631139 ",
         "Blue-Eyes White Dragon",
-        CardGame.YUGIOH,
+        com.pitcc.model.CardGame.YUGIOH,
         null,
         null,
         null,
@@ -51,7 +52,7 @@ class ExternalCardTest {
   @Test
   void shouldRejectCardWithoutIdentity() {
     assertThrows(IllegalArgumentException.class, () ->
-        new ExternalCard(" ", null, "Name", CardGame.POKEMON, null, null, null, null, null));
+        new ExternalCard(" ", null, "Name", com.pitcc.model.CardGame.POKEMON, null, null, null, null, null));
     assertThrows(IllegalArgumentException.class, () ->
         new ExternalCard("id", null, " ", CardGame.POKEMON, null, null, null, null, null));
   }

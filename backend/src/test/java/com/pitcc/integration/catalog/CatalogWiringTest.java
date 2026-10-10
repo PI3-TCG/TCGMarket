@@ -7,11 +7,15 @@ import com.pitcc.integration.catalog.config.ExternalApisProperties;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import com.pitcc.model.CardGame;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
+@ActiveProfiles("test")
 class CatalogWiringTest {
 
   @Autowired
@@ -27,7 +31,7 @@ class CatalogWiringTest {
     assertFalse(properties.mtg().baseUrl().isBlank());
     assertEquals(3, providers.size());
     assertEquals(
-        Set.of(CardGame.POKEMON, CardGame.YUGIOH, CardGame.MAGIC_THE_GATHERING),
+        Set.of(com.pitcc.model.CardGame.POKEMON, com.pitcc.model.CardGame.YUGIOH, CardGame.MAGIC_THE_GATHERING),
         providers.stream().map(provider -> provider.getCardGame()).collect(Collectors.toSet()));
   }
 }

@@ -10,9 +10,9 @@ import static org.springframework.test.web.client.match.MockRestRequestMatchers.
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
-import com.pitcc.integration.catalog.CardGame;
 import com.pitcc.integration.catalog.ExternalApiErrorType;
 import com.pitcc.integration.catalog.ExternalApiException;
+import com.pitcc.model.CardGame;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
@@ -103,5 +103,13 @@ class MtgClientTest {
     ExternalApiException malformed = assertThrows(ExternalApiException.class, () -> client.search("lotus"));
     assertEquals(ExternalApiErrorType.INVALID_RESPONSE, malformed.getErrorType());
     assertEquals(CardGame.MAGIC_THE_GATHERING, malformed.getCardGame());
+  }
+  @Test
+  void shouldRejectAResponseWithoutTheDataList() {
+    server.expect(requestTo(containsString("/cards/search")))
+        .andRespond(withSuccess("{\"data\":null}", MediaType.APPLICATION_JSON));
+    ExternalApiException exception = assertThrows(ExternalApiException.class, () -> client.search("test"));
+    assertEquals(ExternalApiErrorType.INVALID_RESPONSE, exception.getErrorType());
+    server.verify();
   }
 }

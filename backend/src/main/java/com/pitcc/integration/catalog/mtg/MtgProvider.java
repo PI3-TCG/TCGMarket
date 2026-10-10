@@ -1,17 +1,21 @@
 package com.pitcc.integration.catalog.mtg;
 
 import com.pitcc.integration.catalog.CardCatalogProvider;
-import com.pitcc.integration.catalog.CardGame;
+import com.pitcc.integration.catalog.CatalogImportProvider;
+import com.pitcc.integration.catalog.ImportBatch;
+import com.pitcc.model.CardSource;
 import com.pitcc.integration.catalog.ExternalCard;
 import com.pitcc.integration.catalog.mtg.dto.MtgCardDto;
 import java.util.List;
 import java.util.Optional;
+
+import com.pitcc.model.CardGame;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
-public class MtgProvider implements CardCatalogProvider {
+public class MtgProvider implements CardCatalogProvider, CatalogImportProvider {
 
   static final int SEARCH_LIMIT = 20;
 
@@ -24,8 +28,19 @@ public class MtgProvider implements CardCatalogProvider {
   }
 
   @Override
-  public CardGame getCardGame() {
+  public com.pitcc.model.CardGame getCardGame() {
     return CardGame.MAGIC_THE_GATHERING;
+  }
+
+  @Override
+  public CardSource getSource() {
+    return CardSource.SCRYFALL;
+  }
+
+  @Override
+  public ImportBatch fetchForImport(String query) {
+    return ImportBatch.map(client.search(query), getSource(),
+        dto -> dto.id(), dto -> MtgCardMapper.toMagicCard(dto).stream().toList());
   }
 
   @Override

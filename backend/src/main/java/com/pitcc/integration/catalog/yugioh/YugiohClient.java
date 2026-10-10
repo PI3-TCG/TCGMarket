@@ -1,6 +1,5 @@
 package com.pitcc.integration.catalog.yugioh;
 
-import com.pitcc.integration.catalog.CardGame;
 import com.pitcc.integration.catalog.ExternalApiErrorType;
 import com.pitcc.integration.catalog.ExternalApiErrors;
 import com.pitcc.integration.catalog.ExternalApiException;
@@ -13,6 +12,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
+
+import com.pitcc.model.CardGame;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.util.Assert;
@@ -34,7 +35,7 @@ public class YugiohClient {
     Assert.hasText(query, "query must not be blank");
     String term = query.trim();
     try {
-      return ExternalApiErrors.fetch(CardGame.YUGIOH, () -> restClient.get()
+      return ExternalApiErrors.fetch(com.pitcc.model.CardGame.YUGIOH, () -> restClient.get()
               .uri(uriBuilder -> uriBuilder
                   .path("/cardinfo.php")
                   .queryParam("fname", term)
@@ -43,7 +44,7 @@ public class YugiohClient {
                   .build())
               .retrieve()
               .onStatus(status -> status.value() == 400, this::handleBadRequest)
-              .onStatus(status -> status.isError(), ExternalApiErrors.errorHandler(CardGame.YUGIOH))
+              .onStatus(status -> status.isError(), ExternalApiErrors.errorHandler(com.pitcc.model.CardGame.YUGIOH))
               .body(YugiohCardsResponse.class))
           .map(response -> cardsOf(response.data()))
           .orElse(List.of());
@@ -54,13 +55,14 @@ public class YugiohClient {
 
   public Optional<YugiohCardDto> findByPasscode(long passcode) {
     try {
-      return ExternalApiErrors.fetch(CardGame.YUGIOH, () -> restClient.get()
+      return ExternalApiErrors.fetch(com.pitcc.model.CardGame.YUGIOH, () -> restClient.get()
               .uri(uriBuilder -> uriBuilder.path("/cardinfo.php").queryParam("id", passcode).build())
               .retrieve()
               .onStatus(status -> status.value() == 400, this::handleBadRequest)
-              .onStatus(status -> status.isError(), ExternalApiErrors.errorHandler(CardGame.YUGIOH))
+              .onStatus(status -> status.isError(), ExternalApiErrors.errorHandler(com.pitcc.model.CardGame.YUGIOH))
               .body(YugiohCardsResponse.class))
           .flatMap(response -> cardsOf(response.data()).stream()
+              .filter(Objects::nonNull)
               .filter(card -> Long.valueOf(passcode).equals(card.id()))
               .findFirst());
     } catch (NoMatchingCard exception) {
@@ -102,9 +104,11 @@ public class YugiohClient {
 
   private static List<YugiohCardDto> cardsOf(List<YugiohCardDto> cards) {
     if (cards == null) {
-      return List.of();
+      throw new ExternalApiException(CardGame.YUGIOH, ExternalApiErrorType.INVALID_RESPONSE,
+          null, "Resposta de catálogo sem a lista data", null);
     }
-    return cards.stream().filter(Objects::nonNull).toList();
+    // Preserva entradas nulas para que a importação as registre como falhas de mapeamento.
+    return new java.util.ArrayList<>(cards);
   }
 
   private static final class NoMatchingCard extends RuntimeException {

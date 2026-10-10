@@ -7,6 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.net.ConnectException;
 import java.net.http.HttpTimeoutException;
+
+import com.pitcc.model.CardGame;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClientException;
@@ -26,15 +28,15 @@ class ExternalApiErrorsTest {
   @Test
   void shouldTranslateTimeoutAndConnectionFailures() {
     ExternalApiException timeout = assertThrows(ExternalApiException.class, () ->
-        ExternalApiErrors.fetch(CardGame.MAGIC_THE_GATHERING, () -> {
+        ExternalApiErrors.fetch(com.pitcc.model.CardGame.MAGIC_THE_GATHERING, () -> {
           throw new ResourceAccessException("read timed out", new HttpTimeoutException("read timed out"));
         }));
     assertEquals(ExternalApiErrorType.TIMEOUT, timeout.getErrorType());
-    assertEquals(CardGame.MAGIC_THE_GATHERING, timeout.getCardGame());
+    assertEquals(com.pitcc.model.CardGame.MAGIC_THE_GATHERING, timeout.getCardGame());
     assertNull(timeout.getStatusCode());
 
     ExternalApiException unavailable = assertThrows(ExternalApiException.class, () ->
-        ExternalApiErrors.fetch(CardGame.POKEMON, () -> {
+        ExternalApiErrors.fetch(com.pitcc.model.CardGame.POKEMON, () -> {
           throw new ResourceAccessException("connect failed", new ConnectException("refused"));
         }));
     assertEquals(ExternalApiErrorType.UNAVAILABLE, unavailable.getErrorType());
@@ -43,7 +45,7 @@ class ExternalApiErrorsTest {
   @Test
   void shouldHideRawRestClientFailures() {
     ExternalApiException exception = assertThrows(ExternalApiException.class, () ->
-        ExternalApiErrors.fetch(CardGame.YUGIOH, () -> {
+        ExternalApiErrors.fetch(com.pitcc.model.CardGame.YUGIOH, () -> {
           throw new RestClientException("broken payload");
         }));
 
@@ -53,7 +55,7 @@ class ExternalApiErrorsTest {
   @Test
   void shouldRejectEmptyBody() {
     ExternalApiException exception = assertThrows(ExternalApiException.class, () ->
-        ExternalApiErrors.fetch(CardGame.POKEMON, () -> null));
+        ExternalApiErrors.fetch(com.pitcc.model.CardGame.POKEMON, () -> null));
 
     assertEquals(ExternalApiErrorType.INVALID_RESPONSE, exception.getErrorType());
   }
@@ -61,7 +63,7 @@ class ExternalApiErrorsTest {
   @Test
   void shouldPreserveIntegrationExceptions() {
     ExternalApiException original = new ExternalApiException(
-        CardGame.POKEMON,
+        com.pitcc.model.CardGame.POKEMON,
         ExternalApiErrorType.RATE_LIMITED,
         429,
         "limited",
