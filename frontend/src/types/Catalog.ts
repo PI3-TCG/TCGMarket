@@ -15,3 +15,14 @@ export interface CatalogPageResponse {
   totalElements: number
   totalPages: number
 }
+export interface CatalogCardResponse {
+  externalId: string
+  conceptualId: string
+  name: string
+  cardGame: 'POKEMON' | 'YUGIOH' | 'MAGIC_THE_GATHERING'
+  setName: string | null
+  setCode: string | null
+  cardNumber: string | null
+  rarity: string | null
+  imageUrl: string | null
+}

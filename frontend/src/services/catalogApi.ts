@@ -1,10 +1,26 @@
 import { api } from '@/services/api'
-import type { CatalogPageResponse } from '@/types/Catalog'
+import type { CatalogCard, CatalogCardResponse } from '@/types/Catalog'
 
-export async function getCatalogCards(game: string,page: number, size: number) {
-  const response = await api.get<CatalogPageResponse>('/api/catalog/cards', {
-    params: { game, page, size },
-  })
 
-  return response.data
+export async function searchCatalogCards(
+  game: string,
+  query: string,
+): Promise<CatalogCard[]> {
+  const q = query.trim()
+  if (!q) return []
+  const response = await api.get<CatalogCardResponse[]>(
+    `/api/catalog/${encodeURIComponent(game)}/cards`,
+    {
+      params: { q },
+    },
+  )
+  return response.data.map((card) => ({
+    id: `${card.cardGame}:${card.externalId}`,
+    name: card.name,
+    game: game,
+    edition: card.setName ?? '',
+    cardNumber: card.cardNumber ?? '',
+    officialRarity: card.rarity || 'Não informada',
+    imageUrl: card.imageUrl || '',
+  }))
 }

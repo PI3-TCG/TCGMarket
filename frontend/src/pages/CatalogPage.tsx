@@ -2,9 +2,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { useParams } from '@tanstack/react-router'
 import { CatalogCard } from '@/components/catalog/CatalogCard'
 import { AddToCollectionModal } from '@/components/catalog/AddToCollectionModal'
-import { mockCatalogCards } from '@/mocks/catalogCards'
 import type { CatalogCard as CatalogCardData } from '@/types/Catalog'
-import { SiteLayout } from '@/components/layout/SiteLayout'
+import { searchCatalogCards } from '@/services/catalogApi'
 
 const PAGE_SIZE = 10
 
@@ -27,12 +26,56 @@ export function CatalogPage() {
   const [page, setPage] = useState(1)
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [selectedCard, setSelectedCard] = useState<CatalogCardData | null>(null)
+  const [debouncedSearch, setDebouncedSearch] = useState('')
+  const [searchResult, setSearchResult] = useState<{
+    key: string
+    cards: CatalogCardData[]
+    error: string | null
+  } | null>(null)
+  const supportedGame = ['pokemon', 'magic', 'yugioh'].includes(game)
 
-  // Prévia local até a API do catálogo interno estar disponível.
-  const cards = useMemo(
-    () => mockCatalogCards.filter((card) => card.game === game),
-    [game],
-  )
+  useEffect(() => {
+    const timer = window.setTimeout(
+      () => setDebouncedSearch(search.trim()),
+      350,
+    )
+    return () => window.clearTimeout(timer)
+  }, [search])
+
+  useEffect(() => {
+    if (!debouncedSearch || !supportedGame) return
+    let active = true
+    const key = `${game}:${debouncedSearch}`
+    searchCatalogCards(game, debouncedSearch)
+      .then((cards) => {
+        if (active) setSearchResult({ key, cards, error: null })
+      })
+      .catch(() => {
+        if (active)
+          setSearchResult({
+            key,
+            cards: [],
+            error:
+              'Não foi possível consultar o catálogo. Verifique a conexão com a API e tente novamente.',
+          })
+      })
+    return () => {
+      active = false
+    }
+  }, [game, debouncedSearch, supportedGame])
+
+  const searchKey = `${game}:${search.trim()}`
+  const isSearching = Boolean(search.trim()) && supportedGame
+  const isLoading =
+    isSearching &&
+    (search.trim() !== debouncedSearch || searchResult?.key !== searchKey)
+  const searchError = isSearching && !isLoading ? searchResult?.error : null
+
+  const cards = useMemo(() => {
+    if (!isSearching) return []
+
+    return searchResult?.key === searchKey ? searchResult.cards : []
+  }, [isSearching, searchKey, searchResult])
 
   const editions = useMemo(
     () => [...new Set(cards.map((card) => card.edition))].sort(),
@@ -45,10 +88,8 @@ export function CatalogPage() {
   )
 
   const filtered = useMemo(() => {
-    const normalizedSearch = search.trim().toLocaleLowerCase('pt-BR')
     const result = cards.filter(
       (card) =>
-        card.name.toLocaleLowerCase('pt-BR').includes(normalizedSearch) &&
         (rarity === 'all' || card.officialRarity === rarity) &&
         (edition === 'all' || card.edition === edition),
     )
@@ -59,7 +100,7 @@ export function CatalogPage() {
         : a.name.localeCompare(b.name, 'pt-BR'),
     )
     return result
-  }, [cards, search, rarity, edition, sort])
+  }, [cards, rarity, edition, sort])
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
   const currentPage = Math.min(page, totalPages)
@@ -67,17 +108,6 @@ export function CatalogPage() {
     (currentPage - 1) * PAGE_SIZE,
     currentPage * PAGE_SIZE,
   )
-
-  useEffect(() => {
-    setPage(1)
-  }, [game, search, rarity, edition, sort])
-
-  useEffect(() => {
-    setSearch('')
-    setRarity('all')
-    setEdition('all')
-    setSelectedCard(null)
-  }, [game])
 
   function clearFilters() {
     setSearch('')
@@ -156,7 +186,12 @@ export function CatalogPage() {
               id="catalog-search"
               type="search"
               value={search}
-              onChange={(event) => setSearch(event.target.value)}
+              onChange={(event) => {
+                setSearch(event.target.value)
+                setPage(1)
+                setEdition('all')
+                setRarity('all')
+              }}
               placeholder="Buscar carta no catálogo..."
               className="mb-4 w-full rounded-lg border border-[#e1def5] bg-white px-3 py-3 text-sm outline-none focus:border-primary-900 focus:ring-2 focus:ring-primary-100"
             />
@@ -172,7 +207,10 @@ export function CatalogPage() {
                 <select
                   id="catalog-edition"
                   value={edition}
-                  onChange={(event) => setEdition(event.target.value)}
+                  onChange={(event) => {
+                    setEdition(event.target.value)
+                    setPage(1)
+                  }}
                   className="w-full rounded-lg border border-[#e5e2f4] bg-white px-2 py-2 text-sm"
                 >
                   <option value="all">Todas as coleções</option>
@@ -196,7 +234,10 @@ export function CatalogPage() {
                 <select
                   id="catalog-rarity"
                   value={rarity}
-                  onChange={(event) => setRarity(event.target.value)}
+                  onChange={(event) => {
+                    setRarity(event.target.value)
+                    setPage(1)
+                  }}
                   className="w-full rounded-lg border border-[#e5e2f4] bg-white px-2 py-2 text-sm"
                 >
                   <option value="all">Todas as raridades</option>
@@ -225,7 +266,10 @@ export function CatalogPage() {
             <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
               <p className="text-sm font-semibold">
                 <span className="underline decoration-primary-900 underline-offset-2">
-                  {filtered.length.toLocaleString('pt-BR')}
+                  {(isLoading || searchError
+                    ? 0
+                    : filtered.length
+                  ).toLocaleString('pt-BR')}
                 </span>{' '}
                 {filtered.length === 1
                   ? 'carta encontrada'
@@ -239,7 +283,10 @@ export function CatalogPage() {
                 <select
                   id="catalog-sort"
                   value={sort}
-                  onChange={(event) => setSort(event.target.value)}
+                  onChange={(event) => {
+                    setSort(event.target.value)
+                    setPage(1)
+                  }}
                   className="rounded-lg border border-[#e1def5] bg-white px-3 py-2 text-xs text-[#171443] sm:text-sm"
                 >
                   <option value="name-asc">Nome: A–Z</option>
@@ -248,7 +295,21 @@ export function CatalogPage() {
               </label>
             </div>
 
-            {visibleCards.length === 0 ? (
+            {isLoading ? (
+              <div
+                role="status"
+                className="rounded-xl border bg-white px-6 py-16 text-center"
+              >
+                Buscando cartas no catálogo...
+              </div>
+            ) : searchError ? (
+              <div
+                role="alert"
+                className="rounded-xl border border-red-200 bg-white px-6 py-12 text-center text-red-700"
+              >
+                {searchError}
+              </div>
+            ) : visibleCards.length === 0 ? (
               <div className="rounded-xl border border-dashed border-[#dcd8ed] bg-white px-6 py-16 text-center">
                 <h3 className="font-display text-lg font-bold">
                   Nenhuma carta encontrada
@@ -276,7 +337,7 @@ export function CatalogPage() {
               </div>
             )}
 
-            {totalPages > 1 && (
+            {!isLoading && !searchError && totalPages > 1 && (
               <nav
                 aria-label="Paginação do catálogo"
                 className="mt-7 flex flex-wrap items-center justify-center gap-2"
