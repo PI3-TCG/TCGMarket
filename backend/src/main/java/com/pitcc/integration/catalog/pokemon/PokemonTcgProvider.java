@@ -1,17 +1,21 @@
 package com.pitcc.integration.catalog.pokemon;
 
 import com.pitcc.integration.catalog.CardCatalogProvider;
-import com.pitcc.integration.catalog.CardGame;
+import com.pitcc.integration.catalog.CatalogImportProvider;
+import com.pitcc.integration.catalog.ImportBatch;
+import com.pitcc.model.CardSource;
 import com.pitcc.integration.catalog.ExternalCard;
 import com.pitcc.integration.catalog.pokemon.dto.PokemonCardDto;
 import java.util.List;
 import java.util.Optional;
+
+import com.pitcc.model.CardGame;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
-public class PokemonTcgProvider implements CardCatalogProvider {
+public class PokemonTcgProvider implements CardCatalogProvider, CatalogImportProvider {
 
   private static final Logger log = LoggerFactory.getLogger(PokemonTcgProvider.class);
 
@@ -22,8 +26,19 @@ public class PokemonTcgProvider implements CardCatalogProvider {
   }
 
   @Override
-  public CardGame getCardGame() {
+  public com.pitcc.model.CardGame getCardGame() {
     return CardGame.POKEMON;
+  }
+
+  @Override
+  public CardSource getSource() {
+    return CardSource.POKEMON_TCG_API;
+  }
+
+  @Override
+  public ImportBatch fetchForImport(String query) {
+    return ImportBatch.map(client.search(query), getSource(),
+        dto -> dto.id(), dto -> PokemonCardMapper.toPokemonCard(dto).stream().toList());
   }
 
   @Override

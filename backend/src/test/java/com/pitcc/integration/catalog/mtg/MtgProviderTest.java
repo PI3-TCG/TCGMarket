@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
-import com.pitcc.integration.catalog.CardGame;
 import com.pitcc.integration.catalog.ExternalApiErrorType;
 import com.pitcc.integration.catalog.ExternalApiException;
 import com.pitcc.integration.catalog.ExternalCard;
@@ -15,6 +14,8 @@ import com.pitcc.integration.catalog.mtg.dto.MtgImageUris;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import com.pitcc.model.CardGame;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -43,7 +44,7 @@ class MtgProviderTest {
 
     assertEquals(List.of("alpha", "beta"), cards.stream().map(card -> card.externalId()).toList());
     assertTrue(cards.stream().allMatch(card -> "oracle-lotus".equals(card.conceptualId())));
-    assertEquals(CardGame.MAGIC_THE_GATHERING, cards.getFirst().cardGame());
+    assertEquals(com.pitcc.model.CardGame.MAGIC_THE_GATHERING, cards.getFirst().cardGame());
     assertEquals("233", cards.getLast().cardNumber());
   }
 
