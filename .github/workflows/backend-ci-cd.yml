@@ -1,0 +1,190 @@
+name: Backend CI/CD (HML)
+
+# PR para main: só testes, sem segredos e sem permissão de escrita.
+# Push na main (inclui merge de PR): testes -> imagem no GHCR -> deploy na EC2 de HML.
+# O deploy só roda quando a variável de repositório HML_DEPLOY_ENABLED for "true".
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - "infra/hml/**"
+      - ".github/workflows/backend-ci-cd.yml"
+  push:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - "infra/hml/**"
+      - ".github/workflows/backend-ci-cd.yml"
+  workflow_dispatch:
+    inputs:
+      image_sha:
+        description: "Opcional: commit (40 caracteres) de uma imagem já publicada, para reimplantar ou voltar versão sem rebuild"
+        required: false
+        default: ""
+        type: string
+
+permissions: {}
+
+concurrency:
+  group: backend-ci-cd-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  IMAGE_REPO: ghcr.io/pi3-tcg/tcgmarket-backend
+
+jobs:
+  test:
+    name: Testes do backend
+    if: github.event_name != 'workflow_dispatch' || inputs.image_sha == ''
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    services:
+      mongodb:
+        image: mongo:8
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.runCommand({ ping: 1 }).ok'"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      MONGODB_URI: mongodb://localhost:27017/tcgmarket_test
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "25"
+          cache: maven
+          cache-dependency-path: backend/pom.xml
+
+      - name: Testes e empacotamento
+        run: bash ./mvnw -B -ntp verify
+
+      - name: Relatórios de teste
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: surefire-reports
+          path: backend/target/surefire-reports/
+          retention-days: 7
+
+  publish-image:
+    name: Publicar imagem no GHCR
+    needs: test
+    if: >-
+      github.ref == 'refs/heads/main'
+      && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.image_sha == ''))
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: docker/setup-buildx-action@v4
+
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ env.IMAGE_REPO }}
+          tags: |
+            type=sha,format=long
+            type=raw,value=hml
+
+      - id: build
+        uses: docker/build-push-action@v7
+        with:
+          context: backend
+          file: backend/Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=backend
+          cache-to: type=gha,scope=backend,mode=max
+
+      - name: Resumo
+        env:
+          DEPLOY_ENABLED: ${{ vars.HML_DEPLOY_ENABLED }}
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: |
+          {
+            echo "### Imagem publicada"
+            echo "- \`${IMAGE_REPO}:sha-${GITHUB_SHA}\`"
+            echo "- digest: \`${DIGEST}\`"
+            if [ "$DEPLOY_ENABLED" != "true" ]; then
+              echo ""
+              echo "> Deploy em HML desativado: a variável de repositório HML_DEPLOY_ENABLED não é \"true\"."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  deploy-hml:
+    name: Deploy na EC2 (HML)
+    needs: [test, publish-image]
+    # !failure() permite rodar quando test/publish foram pulados no rollback manual,
+    # mas bloqueia o deploy se qualquer um deles falhar.
+    if: >-
+      !cancelled() && !failure()
+      && github.ref == 'refs/heads/main'
+      && github.event_name != 'pull_request'
+      && vars.HML_DEPLOY_ENABLED == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    environment: hml
+    permissions:
+      contents: read
+      id-token: write
+    concurrency:
+      group: deploy-hml
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+          role-session-name: tcgmarket-hml-deploy-${{ github.run_id }}
+
+      - name: Deploy via SSM
+        env:
+          AWS_REGION: ${{ vars.AWS_REGION }}
+          HML_INSTANCE_ID: ${{ vars.HML_INSTANCE_ID }}
+          IMAGE_SHA: ${{ inputs.image_sha || github.sha }}
+          SCRIPTS_SHA: ${{ github.sha }}
+        run: bash infra/hml/ssm-deploy.sh
+
+      - name: Verificar endpoint público
+        if: vars.HML_API_URL != ''
+        env:
+          HML_API_URL: ${{ vars.HML_API_URL }}
+        run: |
+          for attempt in 1 2 3 4 5 6; do
+            code="$(curl -s -o /dev/null -m 10 -w '%{http_code}' "${HML_API_URL%/}/api/health/ready" || true)"
+            echo "tentativa ${attempt}: HTTP ${code}"
+            [ "$code" = "200" ] && exit 0
+            sleep 10
+          done
+          exit 1
