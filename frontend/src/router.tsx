@@ -1,9 +1,11 @@
 import { RequireAuth } from '@/components/auth/RequireAuth'
+import { SiteLayout } from '@/components/layout/SiteLayout'
 import { AdminPage } from '@/pages/AdminPage'
 import { DesignSystemPage } from '@/pages/DesignSystemPage'
 import { HomePage } from '@/pages/HomePage'
 import { LoginPage } from '@/pages/LoginPage'
 import { RegisterPage } from '@/pages/RegisterPage'
+import { CatalogPage } from '@/pages/CatalogPage'
 import { NotFound, RootLayout } from '@/routes/RootLayout'
 import {
   createRootRoute,
@@ -16,10 +18,22 @@ const rootRoute = createRootRoute({
   notFoundComponent: NotFound,
 })
 
-const indexRoute = createRoute({
+const siteLayoutRoute = createRoute({
   getParentRoute: () => rootRoute,
+  id: 'site-layout',
+  component: SiteLayout,
+})
+
+const indexRoute = createRoute({
+  getParentRoute: () => siteLayoutRoute,
   path: '/',
   component: HomePage,
+})
+
+const catalogRoute = createRoute({
+  getParentRoute: () => siteLayoutRoute,
+  path: '/catalogo/$game',
+  component: CatalogPage,
 })
 
 const registerRoute = createRoute({
@@ -51,7 +65,7 @@ const designSystemRoute = createRoute({
 })
 
 const routeTree = rootRoute.addChildren([
-  indexRoute,
+  siteLayoutRoute.addChildren([indexRoute, catalogRoute]),
   registerRoute,
   loginRoute,
   adminRoute,
