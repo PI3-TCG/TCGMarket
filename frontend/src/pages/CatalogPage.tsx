@@ -1,149 +1,154 @@
-import { useEffect, useMemo, useState } from "react";
-import { useParams } from "@tanstack/react-router";
-import { CatalogCard } from "@/components/catalog/CatalogCard";
-import { CardDetailsModal } from "@/components/catalog/CardDetailsModal";
-import { mockCatalogCards } from "@/mocks/catalogCards";
-import type { CatalogCard as CatalogCardData } from "@/types/Catalog";
+import { useEffect, useMemo, useState } from 'react'
+import { useParams } from '@tanstack/react-router'
+import { CatalogCard } from '@/components/catalog/CatalogCard'
+import { AddToCollectionModal } from '@/components/catalog/AddToCollectionModal'
+import { mockCatalogCards } from '@/mocks/catalogCards'
+import type { CatalogCard as CatalogCardData } from '@/types/Catalog'
+import { SiteLayout } from '@/components/layout/SiteLayout'
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 10
+
 const gameNames: Record<string, string> = {
-  pokemon: "Pokémon",
-  magic: "Magic: The Gathering",
-  yugioh: "Yu-Gi-Oh!",
-  "one-piece": "One Piece",
-  digimon: "Digimon",
-};
+  pokemon: 'Pokémon',
+  magic: 'Magic: The Gathering',
+  yugioh: 'Yu-Gi-Oh!',
+  'one-piece': 'One Piece',
+  digimon: 'Digimon',
+}
+
+const futureFilters = ['Tipo', 'Idioma', 'Condição', 'Preço', 'Disponibilidade']
 
 export function CatalogPage() {
-  const { game } = useParams({ from: "/catalogo/$game" });
-  const [search, setSearch] = useState("");
-  const [rarity, setRarity] = useState("all");
-  const [sort, setSort] = useState("name-asc");
-  const [page, setPage] = useState(1);
-  const [selectedCard, setSelectedCard] = useState<CatalogCardData | null>(
-    null,
-  );
-  const [filtersOpen, setFiltersOpen] = useState(false);
+  const { game } = useParams({ from: '/site-layout/catalogo/$game' })
+  const [search, setSearch] = useState('')
+  const [rarity, setRarity] = useState('all')
+  const [edition, setEdition] = useState('all')
+  const [sort, setSort] = useState('name-asc')
+  const [page, setPage] = useState(1)
+  const [filtersOpen, setFiltersOpen] = useState(false)
+  const [selectedCard, setSelectedCard] = useState<CatalogCardData | null>(null)
 
-  // Prévia: substitua este conjunto pelo estado da API quando o backend estiver pronto.
+  // Prévia local até a API do catálogo interno estar disponível.
   const cards = useMemo(
     () => mockCatalogCards.filter((card) => card.game === game),
     [game],
-  );
+  )
+
+  const editions = useMemo(
+    () => [...new Set(cards.map((card) => card.edition))].sort(),
+    [cards],
+  )
+
   const rarities = useMemo(
     () => [...new Set(cards.map((card) => card.officialRarity))].sort(),
     [cards],
-  );
+  )
 
   const filtered = useMemo(() => {
+    const normalizedSearch = search.trim().toLocaleLowerCase('pt-BR')
     const result = cards.filter(
       (card) =>
-        card.name
-          .toLocaleLowerCase("pt-BR")
-          .includes(search.trim().toLocaleLowerCase("pt-BR")) &&
-        (rarity === "all" || card.officialRarity === rarity),
-    );
-    result.sort((a, b) =>
-      sort === "name-desc"
-        ? b.name.localeCompare(a.name)
-        : a.name.localeCompare(b.name),
-    );
-    return result;
-  }, [cards, search, rarity, sort]);
+        card.name.toLocaleLowerCase('pt-BR').includes(normalizedSearch) &&
+        (rarity === 'all' || card.officialRarity === rarity) &&
+        (edition === 'all' || card.edition === edition),
+    )
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const currentPage = Math.min(page, totalPages);
+    result.sort((a, b) =>
+      sort === 'name-desc'
+        ? b.name.localeCompare(a.name, 'pt-BR')
+        : a.name.localeCompare(b.name, 'pt-BR'),
+    )
+    return result
+  }, [cards, search, rarity, edition, sort])
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
+  const currentPage = Math.min(page, totalPages)
   const visibleCards = filtered.slice(
     (currentPage - 1) * PAGE_SIZE,
     currentPage * PAGE_SIZE,
-  );
+  )
 
   useEffect(() => {
-    setPage(1);
-  }, [game, search, rarity, sort]);
+    setPage(1)
+  }, [game, search, rarity, edition, sort])
+
   useEffect(() => {
-    setSearch("");
-    setRarity("all");
-    setSelectedCard(null);
-  }, [game]);
+    setSearch('')
+    setRarity('all')
+    setEdition('all')
+    setSelectedCard(null)
+  }, [game])
+
+  function clearFilters() {
+    setSearch('')
+    setRarity('all')
+    setEdition('all')
+    setPage(1)
+  }
+
+  const gameName = gameNames[game] ?? game
 
   return (
-    <main className="min-h-screen bg-[#FAFBFE] pb-16 text-neutral-900">
-      <div className="border-b border-neutral-200 bg-white">
-        <div className="mx-auto flex max-w-7xl items-center gap-2 overflow-x-auto px-4 py-3 sm:px-6">
-          {Object.entries(gameNames).map(([slug, label]) => (
+    <main className="min-h-screen bg-[#FAFBFE] pb-12 text-[#171443]">
+      {/* Header global e footer continuam fora do escopo desta página. */}
+      <div className="mx-auto w-full max-w-[1600px] px-4 pt-4 sm:px-6 xl:px-[38px]">
+        <header className="relative mb-4 flex min-h-[116px] items-center overflow-hidden rounded-xl border border-[#eeeafb] bg-gradient-to-r from-[#f8f7ff] via-[#f2edff] to-[#e5d6fb] px-6 py-5 sm:px-8">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -right-12 -top-24 size-64 rounded-full border-[32px] border-white/40"
+          />
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute right-[14%] top-0 size-32 rounded-full bg-primary-100/70 blur-2xl"
+          />
+          <div className="relative flex items-center gap-4">
             <span
-              key={slug}
-              className={`shrink-0 rounded-full px-4 py-2 text-xs font-semibold ${slug === game ? "bg-primary-900 text-white" : "bg-neutral-100 text-neutral-600"}`}
+              aria-hidden="true"
+              className="flex size-14 shrink-0 items-center justify-center rounded-full border-4 border-[#25135c] bg-white text-3xl shadow-sm"
             >
-              {label}
+              {game === 'pokemon' ? '◉' : '✦'}
             </span>
-          ))}
-        </div>
-      </div>
-
-      <div className="mx-auto max-w-7xl px-4 pt-7 sm:px-6">
-        <header className="relative mb-8 overflow-hidden rounded-2xl bg-gradient-to-r from-primary-900 via-[#4c075c] to-[#1c205c] px-7 py-10 text-white shadow-lg sm:px-10 sm:py-12">
-          <div className="pointer-events-none absolute -right-16 -top-24 size-72 rounded-full border-[36px] border-white/10" />
-          <div className="pointer-events-none absolute bottom-[-130px] right-[20%] size-64 rounded-full bg-secondary-500/20 blur-3xl" />
-          <div className="relative max-w-2xl">
-            <p className="mb-3 text-xs font-bold uppercase tracking-[0.25em] text-white/70">
-              TCG Market · Catálogo oficial
-            </p>
-            <h1 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
-              Explore o universo {gameNames[game] ?? game}
-            </h1>
-            <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/80 sm:text-base">
-              Descubra cartas, encontre suas favoritas e explore diferentes
-              edições em um só lugar.
-            </p>
+            <div>
+              <h1 className="font-display text-2xl font-bold leading-tight text-[#21154d] sm:text-4xl">
+                {gameName}
+              </h1>
+              <p className="mt-1 text-xs text-[#292057] sm:text-sm">
+                Explore todas as cartas de {gameName}.
+              </p>
+            </div>
           </div>
         </header>
 
-        <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-widest text-primary-900">
-              Explorar coleção
-            </p>
-            <h2 className="mt-1 font-display text-2xl font-bold">
-              Catálogo de cartas
-            </h2>
-            <p className="mt-1 text-sm text-neutral-500">
-              {filtered.length}{" "}
-              {filtered.length === 1
-                ? "carta encontrada"
-                : "cartas encontradas"}
-            </p>
-          </div>
+        <div className="mb-3 lg:hidden">
           <button
             type="button"
-            onClick={() => setFiltersOpen(!filtersOpen)}
-            className="rounded-control border border-neutral-300 bg-white px-4 py-2 text-sm font-semibold lg:hidden"
+            onClick={() => setFiltersOpen((value) => !value)}
+            aria-expanded={filtersOpen}
+            className="w-full rounded-lg border border-[#dedcf3] bg-white px-4 py-3 text-left text-sm font-semibold text-primary-900"
           >
-            {filtersOpen ? "Ocultar filtros" : "Mostrar filtros"}
+            {filtersOpen ? 'Ocultar filtros' : 'Mostrar filtros'}
           </button>
         </div>
 
-        <div className="grid items-start gap-6 lg:grid-cols-[250px_minmax(0,1fr)]">
+        <div className="grid items-start gap-4 lg:grid-cols-[280px_minmax(0,1fr)] xl:grid-cols-[335px_minmax(0,1fr)] xl:gap-[26px]">
           <aside
-            className={`${filtersOpen ? "block" : "hidden"} rounded-surface border border-neutral-200 bg-white p-5 shadow-sm lg:block`}
+            className={`${filtersOpen ? 'block' : 'hidden'} rounded-xl border border-[#e6e5f3] bg-white p-4 shadow-sm lg:block lg:min-h-[590px]`}
+            aria-label="Filtros do catálogo"
           >
-            <div className="mb-5 flex items-center justify-between">
-              <h3 className="font-display text-lg font-bold">Filtros</h3>
+            <div className="mb-4 flex items-center justify-between gap-2">
+              <h2 className="font-display text-lg font-bold">Filtros</h2>
               <button
                 type="button"
-                onClick={() => {
-                  setSearch("");
-                  setRarity("all");
-                }}
-                className="cursor-pointer text-xs font-semibold text-primary-900 hover:underline"
+                onClick={clearFilters}
+                className="text-xs font-semibold text-primary-900 underline underline-offset-2"
               >
-                Limpar
+                Limpar filtros
               </button>
             </div>
+
             <label
               htmlFor="catalog-search"
-              className="mb-2 block text-xs font-bold text-neutral-700"
+              className="mb-2 block text-xs font-semibold"
             >
               Buscar carta
             </label>
@@ -151,52 +156,91 @@ export function CatalogPage() {
               id="catalog-search"
               type="search"
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Nome da carta..."
-              className="mb-6 w-full rounded-control border border-neutral-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100"
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Buscar carta no catálogo..."
+              className="mb-4 w-full rounded-lg border border-[#e1def5] bg-white px-3 py-3 text-sm outline-none focus:border-primary-900 focus:ring-2 focus:ring-primary-100"
             />
-            <label
-              htmlFor="catalog-rarity"
-              className="mb-2 block text-xs font-bold text-neutral-700"
-            >
-              Raridade
-            </label>
-            <select
-              id="catalog-rarity"
-              value={rarity}
-              onChange={(e) => setRarity(e.target.value)}
-              className="w-full rounded-control border border-neutral-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100"
-            >
-              <option value="all">Todas as raridades</option>
-              {rarities.map((item) => (
-                <option key={item} value={item}>
-                  {item}
-                </option>
-              ))}
-            </select>
-            <div className="mt-7 rounded-xl bg-primary-100 p-4">
-              <p className="text-sm font-bold text-primary-900">
-                Sua próxima descoberta começa aqui
-              </p>
-              <p className="mt-2 text-xs leading-relaxed text-neutral-600">
-                Explore o catálogo e selecione uma carta para conhecer seus
-                detalhes.
-              </p>
-            </div>
+
+            <details className="mb-2 rounded-lg border border-[#e5e2f4]" open>
+              <summary className="cursor-pointer px-3 py-3 text-sm font-semibold">
+                Coleção
+              </summary>
+              <div className="border-t border-[#eeeafb] px-3 pb-3 pt-2">
+                <label htmlFor="catalog-edition" className="sr-only">
+                  Filtrar por coleção
+                </label>
+                <select
+                  id="catalog-edition"
+                  value={edition}
+                  onChange={(event) => setEdition(event.target.value)}
+                  className="w-full rounded-lg border border-[#e5e2f4] bg-white px-2 py-2 text-sm"
+                >
+                  <option value="all">Todas as coleções</option>
+                  {editions.map((item) => (
+                    <option key={item} value={item}>
+                      {item}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </details>
+
+            <details className="mb-2 rounded-lg border border-[#e5e2f4]" open>
+              <summary className="cursor-pointer px-3 py-3 text-sm font-semibold">
+                Raridade
+              </summary>
+              <div className="border-t border-[#eeeafb] px-3 pb-3 pt-2">
+                <label htmlFor="catalog-rarity" className="sr-only">
+                  Filtrar por raridade
+                </label>
+                <select
+                  id="catalog-rarity"
+                  value={rarity}
+                  onChange={(event) => setRarity(event.target.value)}
+                  className="w-full rounded-lg border border-[#e5e2f4] bg-white px-2 py-2 text-sm"
+                >
+                  <option value="all">Todas as raridades</option>
+                  {rarities.map((item) => (
+                    <option key={item} value={item}>
+                      {item}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </details>
+
+            {futureFilters.map((filter) => (
+              <div
+                key={filter}
+                className="mb-2 flex items-center justify-between rounded-lg border border-[#e5e2f4] px-3 py-3 text-sm"
+                aria-label={`${filter}: em desenvolvimento`}
+              >
+                <span className="font-semibold">{filter}</span>
+                <span className="text-[10px] text-neutral-500">Em breve</span>
+              </div>
+            ))}
           </aside>
 
           <section className="min-w-0" aria-label="Resultados do catálogo">
-            <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-surface border border-neutral-200 bg-white px-4 py-3">
-              <span className="text-sm text-neutral-600">
-                <strong className="text-neutral-900">{filtered.length}</strong>{" "}
-                resultados
-              </span>
-              <label className="flex items-center gap-2 text-xs font-semibold text-neutral-600">
-                Ordenar por
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+              <p className="text-sm font-semibold">
+                <span className="underline decoration-primary-900 underline-offset-2">
+                  {filtered.length.toLocaleString('pt-BR')}
+                </span>{' '}
+                {filtered.length === 1
+                  ? 'carta encontrada'
+                  : 'cartas encontradas'}
+              </p>
+              <label
+                className="flex items-center gap-2 text-xs text-[#514b7e]"
+                htmlFor="catalog-sort"
+              >
+                <span className="hidden sm:inline">Ordenar por:</span>
                 <select
+                  id="catalog-sort"
                   value={sort}
-                  onChange={(e) => setSort(e.target.value)}
-                  className="rounded-control border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-900"
+                  onChange={(event) => setSort(event.target.value)}
+                  className="rounded-lg border border-[#e1def5] bg-white px-3 py-2 text-xs text-[#171443] sm:text-sm"
                 >
                   <option value="name-asc">Nome: A–Z</option>
                   <option value="name-desc">Nome: Z–A</option>
@@ -205,9 +249,8 @@ export function CatalogPage() {
             </div>
 
             {visibleCards.length === 0 ? (
-              <div className="rounded-surface border border-dashed border-neutral-300 bg-white px-6 py-20 text-center">
-                <div className="mb-4 text-4xl">✦</div>
-                <h3 className="font-display text-xl font-bold">
+              <div className="rounded-xl border border-dashed border-[#dcd8ed] bg-white px-6 py-16 text-center">
+                <h3 className="font-display text-lg font-bold">
                   Nenhuma carta encontrada
                 </h3>
                 <p className="mt-2 text-sm text-neutral-500">
@@ -215,17 +258,14 @@ export function CatalogPage() {
                 </p>
                 <button
                   type="button"
-                  onClick={() => {
-                    setSearch("");
-                    setRarity("all");
-                  }}
-                  className="mt-5 cursor-pointer rounded-control bg-primary-900 px-5 py-2.5 text-sm font-bold text-white"
+                  onClick={clearFilters}
+                  className="mt-5 rounded-lg bg-primary-900 px-5 py-2.5 text-sm font-semibold text-white"
                 >
                   Limpar filtros
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 xl:grid-cols-5">
+              <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-5">
                 {visibleCards.map((card) => (
                   <CatalogCard
                     key={card.id}
@@ -239,13 +279,13 @@ export function CatalogPage() {
             {totalPages > 1 && (
               <nav
                 aria-label="Paginação do catálogo"
-                className="mt-8 flex flex-wrap items-center justify-center gap-2"
+                className="mt-7 flex flex-wrap items-center justify-center gap-2"
               >
                 <button
                   type="button"
                   disabled={currentPage === 1}
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  className="rounded-control border border-neutral-200 bg-white px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-40"
+                  onClick={() => setPage((value) => Math.max(1, value - 1))}
+                  className="rounded-lg border border-[#e1def5] bg-white px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   Anterior
                 </button>
@@ -256,9 +296,9 @@ export function CatalogPage() {
                   <button
                     key={number}
                     type="button"
-                    aria-current={number === currentPage ? "page" : undefined}
+                    aria-current={number === currentPage ? 'page' : undefined}
                     onClick={() => setPage(number)}
-                    className={`size-9 rounded-control text-sm font-semibold ${number === currentPage ? "bg-primary-900 text-white" : "border border-neutral-200 bg-white text-neutral-700"}`}
+                    className={`size-9 rounded-lg text-sm font-semibold ${number === currentPage ? 'bg-primary-900 text-white' : 'border border-[#e1def5] bg-white'}`}
                   >
                     {number}
                   </button>
@@ -266,8 +306,10 @@ export function CatalogPage() {
                 <button
                   type="button"
                   disabled={currentPage === totalPages}
-                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                  className="rounded-control border border-neutral-200 bg-white px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-40"
+                  onClick={() =>
+                    setPage((value) => Math.min(totalPages, value + 1))
+                  }
+                  className="rounded-lg border border-[#e1def5] bg-white px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   Próxima
                 </button>
@@ -276,10 +318,14 @@ export function CatalogPage() {
           </section>
         </div>
       </div>
-      <CardDetailsModal
-        card={selectedCard}
-        onClose={() => setSelectedCard(null)}
-      />
+
+      {selectedCard && (
+        <AddToCollectionModal
+          key={selectedCard.id}
+          card={selectedCard}
+          onClose={() => setSelectedCard(null)}
+        />
+      )}
     </main>
-  );
+  )
 }
