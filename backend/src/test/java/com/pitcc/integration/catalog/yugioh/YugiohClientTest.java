@@ -138,4 +138,12 @@ class YugiohClientTest {
 
     assertEquals(ExternalApiErrorType.INVALID_RESPONSE, exception.getErrorType());
   }
+  @Test
+  void shouldRejectAResponseWithoutTheDataList() {
+    server.expect(requestTo(containsString("/cardinfo.php")))
+        .andRespond(withSuccess("{\"data\":null}", MediaType.APPLICATION_JSON));
+    ExternalApiException exception = assertThrows(ExternalApiException.class, () -> client.search("test"));
+    assertEquals(ExternalApiErrorType.INVALID_RESPONSE, exception.getErrorType());
+    server.verify();
+  }
 }

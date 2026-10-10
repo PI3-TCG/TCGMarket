@@ -4,12 +4,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.pitcc.integration.catalog.CardGame;
 import com.pitcc.integration.catalog.ExternalCard;
 import com.pitcc.integration.catalog.yugioh.dto.YugiohCardDto;
 import com.pitcc.integration.catalog.yugioh.dto.YugiohCardImageDto;
 import com.pitcc.integration.catalog.yugioh.dto.YugiohCardSetDto;
 import java.util.List;
+
+import com.pitcc.model.CardGame;
 import org.junit.jupiter.api.Test;
 
 class YugiohCardMapperTest {

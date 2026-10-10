@@ -1,0 +1,8 @@
+*
+!.mvn/
+!mvnw
+!pom.xml
+!src/
+.mvn/wrapper/maven-wrapper.jar
+**/.env
+**/.env.*

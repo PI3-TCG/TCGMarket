@@ -1,0 +1,9 @@
+# Fica em config/ para sobrepor o application.yaml principal sem escondê-lo.
+spring:
+  mongodb:
+    uri: ${MONGODB_URI:mongodb://localhost:27017/tcgmarket_test}
+
+security:
+  jwt:
+    secret: test-secret-key-must-be-at-least-32-bytes!
+    expiration: 1h

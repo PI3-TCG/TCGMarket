@@ -1,0 +1,77 @@
+# Homologação na EC2. Só o backend e, com o perfil "https", o proxy Caddy.
+# A persistência é o MongoDB Atlas: não adicione MongoDB aqui. O Compose de
+# desenvolvimento com MongoDB local é backend/docker-compose.yml.
+#
+# BACKEND_IMAGE fica no .env deste diretório e é mantido pelo deploy.sh.
+name: tcgmarket-hml
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  backend:
+    image: ${BACKEND_IMAGE:?BACKEND_IMAGE precisa apontar para uma tag sha-<commit>}
+    container_name: tcgmarket-backend
+    restart: unless-stopped
+    env_file:
+      - path: ./backend.env
+        required: true
+    environment:
+      SPRING_PROFILES_ACTIVE: hml
+      # Heap em 65% do limite do contêiner, com margem para metaspace e threads.
+      JAVA_TOOL_OPTIONS: "-XX:MaxRAMPercentage=65 -XX:+ExitOnOutOfMemoryError"
+    ports:
+      # Só a própria EC2 alcança a 8080. O acesso externo passa pelo Caddy.
+      - "127.0.0.1:8080:8080"
+    # t3.small tem 2 GiB: sobra ~1 GiB para SO, Docker, agente SSM e Caddy.
+    mem_limit: 900m
+    cpus: 1.5
+    pids_limit: 512
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    stop_grace_period: 30s
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "http://127.0.0.1:8080/api/health/ready"]
+      interval: 15s
+      timeout: 5s
+      start_period: 90s
+      retries: 3
+    logging: *logging
+
+  caddy:
+    image: caddy:2.11-alpine
+    container_name: tcgmarket-caddy
+    profiles: ["https"]
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      API_DOMAIN: ${API_DOMAIN:-}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    mem_limit: 128m
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+    security_opt:
+      - no-new-privileges:true
+    logging: *logging
+
+volumes:
+  caddy_data:
+  caddy_config:

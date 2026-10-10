@@ -1,12 +1,14 @@
 package com.pitcc.integration.catalog;
 
+import com.pitcc.model.CardGame;
+
 import java.util.Objects;
 
 public final class ExternalApiException extends RuntimeException {
 
   private static final long serialVersionUID = 1L;
 
-  private final CardGame cardGame;
+  private final com.pitcc.model.CardGame cardGame;
   private final ExternalApiErrorType errorType;
   private final Integer statusCode;
 

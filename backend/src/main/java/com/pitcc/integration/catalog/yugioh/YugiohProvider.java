@@ -1,15 +1,19 @@
 package com.pitcc.integration.catalog.yugioh;
 
 import com.pitcc.integration.catalog.CardCatalogProvider;
-import com.pitcc.integration.catalog.CardGame;
+import com.pitcc.integration.catalog.CatalogImportProvider;
+import com.pitcc.integration.catalog.ImportBatch;
+import com.pitcc.model.CardSource;
 import com.pitcc.integration.catalog.ExternalCard;
 import java.util.List;
 import java.util.Optional;
+
+import com.pitcc.model.CardGame;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
 @Component
-public class YugiohProvider implements CardCatalogProvider {
+public class YugiohProvider implements CardCatalogProvider, CatalogImportProvider {
 
   static final int SEARCH_LIMIT = 20;
 
@@ -20,8 +24,19 @@ public class YugiohProvider implements CardCatalogProvider {
   }
 
   @Override
-  public CardGame getCardGame() {
+  public com.pitcc.model.CardGame getCardGame() {
     return CardGame.YUGIOH;
+  }
+
+  @Override
+  public CardSource getSource() {
+    return CardSource.YGOPRODECK;
+  }
+
+  @Override
+  public ImportBatch fetchForImport(String query) {
+    return ImportBatch.map(client.search(query), getSource(),
+        dto -> dto.id() == null ? null : dto.id().toString(), dto -> YugiohCardMapper.toYugiohCards(dto));
   }
 
   @Override

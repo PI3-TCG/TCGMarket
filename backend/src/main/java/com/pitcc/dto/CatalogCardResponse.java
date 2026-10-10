@@ -1,7 +1,8 @@
 package com.pitcc.dto;
 
-import com.pitcc.integration.catalog.CardGame;
 import com.pitcc.integration.catalog.ExternalCard;
+import com.pitcc.model.CardGame;
+import com.pitcc.model.Card;
 
 public record CatalogCardResponse(
     String externalId,
@@ -13,6 +14,12 @@ public record CatalogCardResponse(
     String cardNumber,
     String rarity,
     String imageUrl) {
+
+  public static CatalogCardResponse from(Card card) {
+    return new CatalogCardResponse(card.getExternalId(), card.getConceptualId(), card.getName(),
+        card.getGame(), card.getEdition(), card.getCodeCollection(), card.getCardNumber(),
+        card.getOfficialRarity(), card.getImageUrl());
+  }
 
   public static CatalogCardResponse from(ExternalCard card) {
     return new CatalogCardResponse(

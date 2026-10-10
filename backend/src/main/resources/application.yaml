@@ -16,6 +16,11 @@ security:
   admin:
     email: ${ADMIN_EMAIL:}
 
+# Origens aceitas pelo CORS, separadas por vírgula. O padrão aberto serve só para desenvolvimento.
+app:
+  cors:
+    allowed-origin-patterns: ${CORS_ALLOWED_ORIGINS:*}
+
 # Catálogos externos. A chave da Pokémon TCG vem só do ambiente e não tem valor padrão.
 external-apis:
   pokemon:

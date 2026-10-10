@@ -1,0 +1,8 @@
+# Mongo exclusivo dos testes: docker compose -f docker-compose.test.yml up -d --wait
+# MONGODB_TEST_URI continua disponível para ambientes de CI ou bancos autenticados.
+spring:
+  mongodb:
+    uri: ${MONGODB_TEST_URI:mongodb://localhost:27018/tcgmarket_test?serverSelectionTimeoutMS=5000&connectTimeoutMS=5000}
+  data:
+    mongodb:
+      auto-index-creation: true

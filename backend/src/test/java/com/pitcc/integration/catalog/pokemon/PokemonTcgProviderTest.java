@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
-import com.pitcc.integration.catalog.CardGame;
 import com.pitcc.integration.catalog.ExternalApiErrorType;
 import com.pitcc.integration.catalog.ExternalApiException;
 import com.pitcc.integration.catalog.ExternalCard;
@@ -15,6 +14,8 @@ import com.pitcc.integration.catalog.pokemon.dto.PokemonImagesDto;
 import com.pitcc.integration.catalog.pokemon.dto.PokemonSetDto;
 import java.util.List;
 import java.util.Optional;
+
+import com.pitcc.model.CardGame;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -46,7 +47,7 @@ class PokemonTcgProviderTest {
     List<ExternalCard> cards = provider.searchCards("charizard");
 
     assertEquals(List.of("base1-4", "base4-4"), cards.stream().map(card -> card.externalId()).toList());
-    assertEquals(CardGame.POKEMON, cards.getFirst().cardGame());
+    assertEquals(com.pitcc.model.CardGame.POKEMON, cards.getFirst().cardGame());
     assertEquals(null, cards.getFirst().conceptualId());
     assertEquals("https://img.example/l.png", cards.getFirst().imageUrl());
   }

@@ -2,4 +2,16 @@
 .vscode/
 
 .env
-.env.production
+.env.*
+!.env.example
+
+# Segredos de servidor e chaves (HML na EC2, SSH, certificados)
+backend.env
+*.pem
+*.key
+*.ppk
+id_rsa*
+id_ed25519*
+
+# Metadados criados pelo Windows ao baixar arquivos no WSL
+*:Zone.Identifier

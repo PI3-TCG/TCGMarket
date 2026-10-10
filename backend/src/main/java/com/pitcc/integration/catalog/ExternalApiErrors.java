@@ -5,6 +5,8 @@ import java.net.http.HttpTimeoutException;
 import java.util.Optional;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
+
+import com.pitcc.model.CardGame;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
@@ -18,7 +20,7 @@ public final class ExternalApiErrors {
    * Executa uma chamada HTTP e traduz as falhas para {@link ExternalApiException}.
    * HTTP 404, sinalizado por {@link #errorHandler}, vira {@link Optional#empty()}.
    */
-  public static <T> Optional<T> fetch(CardGame cardGame, Supplier<T> call) {
+  public static <T> Optional<T> fetch(com.pitcc.model.CardGame cardGame, Supplier<T> call) {
     T body;
     try {
       body = call.get();

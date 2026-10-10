@@ -9,7 +9,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.pitcc.integration.catalog.CardGame;
 import com.pitcc.integration.catalog.ExternalApiErrorType;
 import com.pitcc.integration.catalog.ExternalApiException;
 import com.pitcc.integration.catalog.ExternalCard;
@@ -19,6 +18,8 @@ import com.pitcc.integration.catalog.yugioh.dto.YugiohCardSetDto;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import com.pitcc.model.CardGame;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -52,7 +53,7 @@ class YugiohProviderTest {
     assertEquals(
         List.of("89631139:LOB-EN001:Ultra Rare", "89631139:SDK-001:Ultra Rare", "89631139:LC01-EN004:Ultra Rare"),
         cards.stream().map(card -> card.externalId()).toList());
-    assertTrue(cards.stream().allMatch(card -> card.cardGame() == CardGame.YUGIOH));
+    assertTrue(cards.stream().allMatch(card -> card.cardGame() == com.pitcc.model.CardGame.YUGIOH));
   }
 
   @Test

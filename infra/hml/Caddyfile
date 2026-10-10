@@ -1,0 +1,18 @@
+# O certificado é emitido automaticamente pela Let's Encrypt quando API_DOMAIN
+# já resolve para o IP público da EC2 e as portas 80/443 estão liberadas.
+{$API_DOMAIN} {
+	encode zstd gzip
+
+	reverse_proxy backend:8080
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		-Server
+	}
+
+	log {
+		output stdout
+		format json
+	}
+}

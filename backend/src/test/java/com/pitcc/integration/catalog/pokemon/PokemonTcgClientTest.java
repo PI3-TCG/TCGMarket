@@ -8,9 +8,9 @@ import static org.springframework.test.web.client.match.MockRestRequestMatchers.
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
-import com.pitcc.integration.catalog.CardGame;
 import com.pitcc.integration.catalog.ExternalApiErrorType;
 import com.pitcc.integration.catalog.ExternalApiException;
+import com.pitcc.model.CardGame;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
@@ -64,7 +64,7 @@ class PokemonTcgClientTest {
         .andRespond(withStatus(HttpStatus.TOO_MANY_REQUESTS));
     ExternalApiException rateLimited = assertThrows(ExternalApiException.class, () -> client.search("pikachu"));
     assertEquals(ExternalApiErrorType.RATE_LIMITED, rateLimited.getErrorType());
-    assertEquals(CardGame.POKEMON, rateLimited.getCardGame());
+    assertEquals(com.pitcc.model.CardGame.POKEMON, rateLimited.getCardGame());
     assertEquals(429, rateLimited.getStatusCode());
 
     server.reset();
@@ -96,6 +96,14 @@ class PokemonTcgClientTest {
   @Test
   void shouldRejectBlankQueryBeforeCallingApi() {
     assertThrows(IllegalArgumentException.class, () -> client.search(" "));
+    server.verify();
+  }
+  @Test
+  void shouldRejectAResponseWithoutTheDataList() {
+    server.expect(requestTo(containsString("/cards")))
+        .andRespond(withSuccess("{\"data\":null}", MediaType.APPLICATION_JSON));
+    ExternalApiException exception = assertThrows(ExternalApiException.class, () -> client.search("test"));
+    assertEquals(ExternalApiErrorType.INVALID_RESPONSE, exception.getErrorType());
     server.verify();
   }
 }
