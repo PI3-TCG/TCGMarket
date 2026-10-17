@@ -22,6 +22,7 @@ import {
   createRoute,
   createRouter,
 } from '@tanstack/react-router'
+import { MyCollectionPage } from '@/pages/MyCollectionPage'
 
 const rootRoute = createRootRoute({
   component: RootLayout,
@@ -136,6 +137,16 @@ const designSystemRoute = createRoute({
   component: DesignSystemPage,
 })
 
+const myCollectionRoute = createRoute({
+  getParentRoute: () => siteLayoutRoute,
+  path: '/minha-colecao',
+  component: () => (
+    <RequireAuth>
+      <MyCollectionPage />
+    </RequireAuth>
+  ),
+})
+
 const routeTree = rootRoute.addChildren([
   siteLayoutRoute.addChildren([
     indexRoute,
@@ -149,6 +160,7 @@ const routeTree = rootRoute.addChildren([
       adminUsersRoute,
       adminCatalogRoute,
     ]),
+    myCollectionRoute,
   ]),
   registerRoute,
   loginRoute,

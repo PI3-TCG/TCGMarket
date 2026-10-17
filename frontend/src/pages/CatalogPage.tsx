@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams, useSearch } from '@tanstack/react-router'
 import { CatalogCard } from '@/components/catalog/CatalogCard'
-import { CARD_TYPE_LABELS as typeLabels } from '@/components/catalog/cardDetailsFormat'
 import type {
   CatalogFilters,
   CatalogPage as CatalogPageData,

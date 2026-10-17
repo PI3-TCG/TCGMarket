@@ -127,6 +127,18 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(status).body(error(status, externalMessage(exception), List.of()));
   }
 
+  @ExceptionHandler(IllegalArgumentException.class)
+  public ResponseEntity<ApiErrorResponse> handleIllegalArgument(
+          IllegalArgumentException exception) {
+
+    return ResponseEntity.badRequest()
+            .body(error(
+                    HttpStatus.BAD_REQUEST,
+                    exception.getMessage(),
+                    List.of()
+            ));
+  }
+
   private ResponseEntity<ApiErrorResponse> unauthorized(String message) {
     return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
         .body(error(HttpStatus.UNAUTHORIZED, message, List.of()));
