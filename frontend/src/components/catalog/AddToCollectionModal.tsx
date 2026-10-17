@@ -1,26 +1,71 @@
-
 import { useEffect, useState } from 'react'
 import type { CatalogCard } from '@/types/Catalog'
 
+import type { CardCondition, CardLanguage } from '@/types/Collection'
 type Props = {
   card: CatalogCard
   onClose: () => void
+  onSuccess?: () => void
 }
+import { addToMyCollection } from '@/services/collection'
+import { Alert } from '@/components/ui/Alert'
+import axios from 'axios'
 
-const CONDITIONS = [
-  { value: 'NM', label: 'Near Mint (NM)' },
-  { value: 'LP', label: 'Lightly Played (LP)' },
-  { value: 'MP', label: 'Moderately Played (MP)' },
-  { value: 'HP', label: 'Heavily Played (HP)' },
-  { value: 'DMG', label: 'Damaged (DMG)' },
+const CONDITIONS: {
+  value: CardCondition
+  label: string
+}[] = [
+  { value: 'NEAR_MINT', label: 'Near Mint (NM)' },
+  { value: 'LIGHTLY_PLAYED', label: 'Lightly Played (LP)' },
+  { value: 'MODERATELY_PLAYED', label: 'Moderately Played (MP)' },
+  { value: 'HEAVILY_PLAYED', label: 'Heavily Played (HP)' },
+  { value: 'DAMAGED', label: 'Damaged (DMG)' },
 ]
 
-export function AddToCollectionModal({ card, onClose }: Props) {
+export function AddToCollectionModal({ card, onClose, onSuccess }: Props) {
   const [quantity, setQuantity] = useState(1)
-  const [condition, setCondition] = useState('NM')
-  const [language, setLanguage] = useState('pt-BR')
-  const [notes, setNotes] = useState('')
+  const [condition, setCondition] = useState<CardCondition>('NEAR_MINT')
+
+  const [language, setLanguage] = useState<CardLanguage>('PORTUGUESE')
   const [favorite, setFavorite] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState(false)
+
+  async function handleAddToCollection() {
+    if (isSaving || success) return
+
+    if (!Number.isSafeInteger(quantity) || quantity < 1) {
+      setError('Informe uma quantidade válida.')
+      return
+    }
+
+    setIsSaving(true)
+    setError(null)
+
+    try {
+      await addToMyCollection({
+        cardId: card.id,
+        quantity,
+        condition,
+        language,
+      })
+
+      setSuccess(true)
+      onSuccess?.()
+    } catch (err: unknown) {
+      if (axios.isAxiosError<{ message?: string }>(err)) {
+        setError(
+          err.response?.data?.message ??
+            'Não foi possível adicionar a carta. Tente novamente.',
+        )
+      } else {
+        setError('Ocorreu um erro inesperado. Tente novamente.')
+      }
+    } finally {
+      setIsSaving(false)
+    }
+  }
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow
@@ -157,7 +202,9 @@ export function AddToCollectionModal({ card, onClose }: Props) {
                 <select
                   id="collection-condition"
                   value={condition}
-                  onChange={(e) => setCondition(e.target.value)}
+                  onChange={(event) =>
+                    setCondition(event.target.value as CardCondition)
+                  }
                   className="h-11 w-full rounded-lg border border-neutral-200 bg-white px-3 text-sm"
                 >
                   {CONDITIONS.map((item) => (
@@ -170,8 +217,8 @@ export function AddToCollectionModal({ card, onClose }: Props) {
             </div>
 
             <div className="rounded-lg bg-primary-50 p-3 text-xs text-primary-900">
-              A condição indica o estado de conservação da carta.
-              Consulte o guia de condições da plataforma.
+              A condição indica o estado de conservação da carta. Consulte o
+              guia de condições da plataforma.
             </div>
 
             <div>
@@ -184,39 +231,20 @@ export function AddToCollectionModal({ card, onClose }: Props) {
               <select
                 id="collection-language"
                 value={language}
-                onChange={(e) => setLanguage(e.target.value)}
+                onChange={(event) =>
+                  setLanguage(event.target.value as CardLanguage)
+                }
                 className="h-11 w-full rounded-lg border border-neutral-200 bg-white px-3 text-sm"
               >
-                <option value="pt-BR">Português (PT-BR)</option>
-                <option value="en">Inglês (EN)</option>
-                <option value="ja">Japonês (JA)</option>
+                <option value="PORTUGUESE">Português (PT-BR)</option>
+                <option value="ENGLISH">Inglês (EN)</option>
+                <option value="JAPANESE">Japonês (JA)</option>
               </select>
-            </div>
-
-            <div>
-              <label
-                htmlFor="collection-notes"
-                className="mb-2 block text-sm font-semibold"
-              >
-                Observações (opcional)
-              </label>
-              <textarea
-                id="collection-notes"
-                value={notes}
-                onChange={(e) => setNotes(e.target.value.slice(0, 300))}
-                placeholder="Ex.: Comprada em evento, carta favorita..."
-                className="min-h-24 w-full resize-none rounded-lg border border-neutral-200 p-3 text-sm"
-              />
-              <p className="text-right text-xs text-neutral-500">
-                {notes.length}/300
-              </p>
             </div>
 
             <label className="flex cursor-pointer items-center justify-between rounded-xl border border-neutral-200 p-4">
               <span>
-                <strong className="block text-sm">
-                  Marcar como favorito
-                </strong>
+                <strong className="block text-sm">Marcar como favorito</strong>
                 <span className="text-xs text-neutral-500">
                   Destaque esta carta na sua coleção.
                 </span>
@@ -230,6 +258,17 @@ export function AddToCollectionModal({ card, onClose }: Props) {
             </label>
 
             <div className="flex flex-wrap justify-end gap-3">
+              {error && (
+                <Alert variant="error" onDismiss={() => setError(null)}>
+                  {error}
+                </Alert>
+              )}
+
+              {success && (
+                <Alert variant="success" title="Carta adicionada!">
+                  Sua coleção foi atualizada com sucesso.
+                </Alert>
+              )}
               <button
                 type="button"
                 onClick={onClose}
@@ -239,16 +278,17 @@ export function AddToCollectionModal({ card, onClose }: Props) {
               </button>
               <button
                 type="button"
-                disabled
-                title="Aguardando integração com a API da coleção"
-                className="rounded-lg bg-primary-900 px-5 py-3 text-sm font-semibold text-white opacity-60"
+                onClick={handleAddToCollection}
+                disabled={isSaving || success}
+                className="rounded-lg bg-primary-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-primary-800 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                Adicionar à minha coleção
+                {isSaving
+                  ? 'Adicionando...'
+                  : success
+                    ? 'Carta adicionada'
+                    : 'Adicionar à minha coleção'}
               </button>
             </div>
-            <p className="text-right text-xs text-neutral-500">
-              O salvamento ficará disponível após a integração com a API.
-            </p>
           </div>
         </div>
       </section>

@@ -19,7 +19,7 @@ export function SiteHeader({ onSoon: soon }: Props) {
 
   return (
     <header className="sticky top-0 z-20 bg-gradient-to-r from-[#47104f] via-primary-900 to-[#310b43] text-white shadow-md">
-      <div className="mx-auto flex min-h-16 w-full max-w-[1600px] items-center gap-3 px-4 py-2 sm:gap-5 sm:px-6 lg:px-8">
+      <div className="relative mx-auto flex min-h-16 w-full max-w-[1600px] items-center gap-3 px-4 py-2 sm:gap-5 sm:px-6 lg:px-8">
         <button
           type="button"
           onClick={() => navigate({ to: '/' })}
@@ -32,10 +32,12 @@ export function SiteHeader({ onSoon: soon }: Props) {
           </span>
         </button>
 
+        {/* Em telas grandes, centraliza em relação ao header inteiro,
+            sem depender da largura do logo ou dos botões do perfil. */}
         <form
           onSubmit={search}
           role="search"
-          className="mx-auto min-w-0 max-w-[540px] flex-1 lg:ml-10"
+          className="mx-auto min-w-0 max-w-[540px] flex-1 lg:absolute lg:left-1/2 lg:w-[38%] lg:-translate-x-1/2"
         >
           <label className="relative block">
             <span className="sr-only">Buscar carta, anúncio ou usuário</span>
@@ -50,7 +52,7 @@ export function SiteHeader({ onSoon: soon }: Props) {
           </label>
         </form>
 
-        <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+        <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-2">
           <button
             type="button"
             onClick={() => soon('O carrinho de compras')}

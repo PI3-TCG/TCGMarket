@@ -3,8 +3,14 @@ package com.pitcc.model;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
 
 @Document(collection = "collection_items")
+@CompoundIndex(
+        name = "uk_collection_items_identity",
+        def = "{'userId': 1, 'cardId': 1, 'condition': 1, 'language': 1}",
+        unique = true
+)
 public class CollectionItem {
 
     @Id

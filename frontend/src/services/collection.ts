@@ -1,5 +1,6 @@
 import { api } from '@/services/api'
 import type {
+  AddToCollectionRequest,
   CollectionFilterOptions,
   CollectionFilterValues,
   CollectionPage,
@@ -11,6 +12,11 @@ type CollectionQuery = {
   size?: number
   filters?: CollectionFilterValues
   signal?: AbortSignal
+}
+export async function addToMyCollection(
+  request: AddToCollectionRequest,
+): Promise<void> {
+  await api.post('/api/users/me/collection', request)
 }
 
 export async function getMyCollection({
