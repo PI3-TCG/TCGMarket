@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useNavigate } from '@tanstack/react-router'
+import { Link } from '@tanstack/react-router'
 import collectionBanner from '@/assets/images/image-collection.png'
 import { CollectionItemCard } from '@/components/collection/CollectionItemCard'
 import { CollectionState } from '@/components/collection/CollectionState'
@@ -20,6 +20,8 @@ import {
   CollectionFilters,
   emptyCollectionFilters,
 } from '@/components/collection/CollectionFilters'
+import { CardDetailsModal } from '@/components/catalog/CardDetailsModal'
+import type { CatalogCard } from '@/types/Catalog'
 
 type CollectionResult =
   | { status: 'loading' }
@@ -166,6 +168,10 @@ type CollectionPageDataProps = {
   onPageChange: (page: number) => void
   onRetry: () => void
 }
+type CollectionModal =
+  | { mode: 'details'; card: CatalogCard }
+  | { mode: 'add'; card: CatalogCard }
+  | null
 
 function CollectionPageData({
   page,
@@ -173,7 +179,7 @@ function CollectionPageData({
   onPageChange,
   onRetry,
 }: CollectionPageDataProps) {
-  const navigate = useNavigate()
+  const [activeModal, setActiveModal] = useState<CollectionModal>(null)
   const [result, setResult] = useState<CollectionResult>({
     status: 'loading',
   })
@@ -197,117 +203,130 @@ function CollectionPageData({
           setResult({ status: 'error' })
         }
       })
-
     return () => controller.abort()
   }, [page, filters])
 
-  const hasFilters = Object.values(filters).some(
-    (value) => value.trim() !== '',
-  )
+  function openDetails(card: CatalogCard) {
+    setActiveModal({ mode: 'details', card })
+  }
+
+  function closeModal() {
+    setActiveModal(null)
+  }
+
+  const hasFilters = Object.values(filters).some((value) => value.trim() !== '')
 
   const pageButtonClass =
     'min-h-10 rounded-lg border border-primary-900 px-4 py-2 text-sm font-semibold text-primary-900 enabled:cursor-pointer enabled:hover:bg-primary-100 disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500'
 
   return (
-    <section
-      aria-label="Itens da coleção"
-      className="rounded-xl border border-neutral-200 bg-white p-4"
-    >
-      {result.status === 'loading' ? (
-        <CollectionState status="loading" />
-      ) : result.status === 'error' ? (
-        <CollectionState status="error" onRetry={onRetry} />
-      ) : result.data.totalElements === 0 ? (
-        hasFilters ? (
-          <div role="status" className="px-4 py-12 text-center">
-            <h2 className="text-lg font-semibold text-primary-900">
-              Nenhuma carta encontrada
-            </h2>
+    <>
+      <section
+        aria-label="Itens da coleção"
+        className="rounded-xl border border-neutral-200 bg-white p-4"
+      >
+        {result.status === 'loading' ? (
+          <CollectionState status="loading" />
+        ) : result.status === 'error' ? (
+          <CollectionState status="error" onRetry={onRetry} />
+        ) : result.data.totalElements === 0 ? (
+          hasFilters ? (
+            <div role="status" className="px-4 py-12 text-center">
+              <h2 className="text-lg font-semibold text-primary-900">
+                Nenhuma carta encontrada
+              </h2>
 
-            <p className="mt-2 text-sm text-neutral-700">
-              Altere os filtros ou clique em “Limpar filtros” para consultar
-              a coleção completa.
-            </p>
-          </div>
-        ) : (
-          <CollectionState status="empty" />
-        )
-      ) : (
-        <>
-          <h2
-            aria-live="polite"
-            className="mb-4 text-sm font-semibold text-primary-900"
-          >
-            {result.data.totalElements}{' '}
-            {hasFilters
-              ? result.data.totalElements === 1
-                ? 'item encontrado'
-                : 'itens encontrados'
-              : result.data.totalElements === 1
-                ? 'item na coleção'
-                : 'itens na coleção'}
-          </h2>
-
-          {result.data.content.length > 0 ? (
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5">
-              {result.data.content.map((item) => (
-                <CollectionItemCard
-                  key={item.id}
-                  item={item}
-                  onDetails={(selected) => {
-                    navigate({
-                      to: '/cartas/$id',
-                      params: { id: selected.card.id },
-                    })
-                  }}
-                />
-              ))}
+              <p className="mt-2 text-sm text-neutral-700">
+                Altere os filtros ou clique em “Limpar filtros” para consultar a
+                coleção completa.
+              </p>
             </div>
           ) : (
-            <p className="py-8 text-center text-sm text-neutral-700">
-              Esta página não possui itens. Volte à primeira página.
-            </p>
-          )}
-
-          <nav
-            aria-label="Paginação da coleção"
-            className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-neutral-200 pt-4"
-          >
-            <button
-              type="button"
-              disabled={page === 0}
-              onClick={() => onPageChange(Math.max(0, page - 1))}
-              className={pageButtonClass}
+            <CollectionState status="empty" />
+          )
+        ) : (
+          <>
+            <h2
+              aria-live="polite"
+              className="mb-4 text-sm font-semibold text-primary-900"
             >
-              Anterior
-            </button>
+              {result.data.totalElements}{' '}
+              {hasFilters
+                ? result.data.totalElements === 1
+                  ? 'item encontrado'
+                  : 'itens encontrados'
+                : result.data.totalElements === 1
+                  ? 'item na coleção'
+                  : 'itens na coleção'}
+            </h2>
 
-            <span className="text-sm text-neutral-700">
-              Página {result.data.number + 1} de {result.data.totalPages}
-            </span>
+            {result.data.content.length > 0 ? (
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5">
+                {result.data.content.map((item) => (
+                  <CollectionItemCard
+                    key={item.id}
+                    item={item}
+                    onDetails={(selected) => {
+                      openDetails(selected.card)
+                    }}
+                  />
+                ))}
+              </div>
+            ) : (
+              <p className="py-8 text-center text-sm text-neutral-700">
+                Esta página não possui itens. Volte à primeira página.
+              </p>
+            )}
 
-            <button
-              type="button"
-              disabled={result.data.last}
-              onClick={() => onPageChange(page + 1)}
-              className={pageButtonClass}
+            <nav
+              aria-label="Paginação da coleção"
+              className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-neutral-200 pt-4"
             >
-              Próxima
-            </button>
-
-            {result.data.content.length === 0 && (
               <button
                 type="button"
-                onClick={() => onPageChange(0)}
+                disabled={page === 0}
+                onClick={() => onPageChange(Math.max(0, page - 1))}
                 className={pageButtonClass}
               >
-                Primeira página
+                Anterior
               </button>
-            )}
-          </nav>
-        </>
+
+              <span className="text-sm text-neutral-700">
+                Página {result.data.number + 1} de {result.data.totalPages}
+              </span>
+
+              <button
+                type="button"
+                disabled={result.data.last}
+                onClick={() => onPageChange(page + 1)}
+                className={pageButtonClass}
+              >
+                Próxima
+              </button>
+
+              {result.data.content.length === 0 && (
+                <button
+                  type="button"
+                  onClick={() => onPageChange(0)}
+                  className={pageButtonClass}
+                >
+                  Primeira página
+                </button>
+              )}
+            </nav>
+          </>
+        )}
+      </section>
+
+      {activeModal?.mode === 'details' && (
+        <CardDetailsModal
+          key={activeModal.card.id}
+          cardId={activeModal.card.id}
+          context="collection"
+          onClose={closeModal}
+        />
       )}
-    </section>
+    </>
   )
 }
 
@@ -337,15 +356,9 @@ function CollectionSummaryData() {
   return (
     <CollectionSummary
       status={result.status}
-      totalItems={
-        result.status === 'success' ? result.data.totalItems : null
-      }
-      totalCopies={
-        result.status === 'success' ? result.data.totalCopies : null
-      }
-      totalGames={
-        result.status === 'success' ? result.data.totalGames : null
-      }
+      totalItems={result.status === 'success' ? result.data.totalItems : null}
+      totalCopies={result.status === 'success' ? result.data.totalCopies : null}
+      totalGames={result.status === 'success' ? result.data.totalGames : null}
     />
   )
 }

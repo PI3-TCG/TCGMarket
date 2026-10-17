@@ -59,3 +59,16 @@ export interface CollectionFilterOptions {
   editions: string[]
   rarities: string[]
 }
+export interface AddToCollectionRequest {
+  cardId: string
+  quantity: number
+  condition: CardCondition
+  language: CardLanguage
+}
+import type {
+  AddToCollectionRequest,
+  CollectionFilterOptions,
+  CollectionFilterValues,
+  CollectionPage,
+  CollectionSummaryResponse,
+} from '@/types/Collection'

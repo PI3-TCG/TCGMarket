@@ -9,6 +9,15 @@ import type {
 import { fetchCatalogFilters, searchCatalogCards } from '@/services/catalogApi'
 import { typeLabels } from '@/components/catalog/catalogLabels'
 import { pageItems } from '@/utils/pagination'
+import pokemonBanner from '@/assets/images/image-pokemon.png'
+import magicBanner from '@/assets/images/image-magic.png'
+import yugiohBanner from '@/assets/images/image-yugioh.png'
+import onePieceBanner from '@/assets/images/image-onePiece.png'
+import digimonBanner from '@/assets/images/image-digimon.png'
+import { CardDetailsModal } from '@/components/catalog/CardDetailsModal'
+import { AddToCollectionModal } from '@/components/catalog/AddToCollectionModal'
+import type { CatalogCard as CatalogCardData } from '@/types/Catalog'
+import { useSession } from '@/session'
 
 const gameNames: Record<string, string> = {
   pokemon: 'Pokémon',
@@ -16,6 +25,14 @@ const gameNames: Record<string, string> = {
   yugioh: 'Yu-Gi-Oh!',
   'one-piece': 'One Piece',
   digimon: 'Digimon',
+}
+
+const gameBanners: Record<string, string> = {
+  pokemon: pokemonBanner,
+  magic: magicBanner,
+  yugioh: yugiohBanner,
+  'one-piece': onePieceBanner,
+  digimon: digimonBanner,
 }
 
 const supportedGames = ['pokemon', 'magic', 'yugioh']
@@ -30,8 +47,16 @@ export function CatalogPage() {
   const { game } = useParams({ from: '/site-layout/catalogo/$game' })
   return <CatalogView key={game} game={game} />
 }
+type CatalogModal =
+  | { mode: 'details'; card: CatalogCardData }
+  | { mode: 'add'; card: CatalogCardData }
+  | null
 
 function CatalogView({ game }: { game: string }) {
+  const [activeModal, setActiveModal] = useState<CatalogModal>(null)
+
+  const { user, setLoginNotice } = useSession()
+
   const search = useSearch({ from: '/site-layout/catalogo/$game' })
   const navigate = useNavigate({ from: '/catalogo/$game' })
   const supportedGame = supportedGames.includes(game)
@@ -154,31 +179,66 @@ function CatalogView({ game }: { game: string }) {
   const gameName = gameNames[game] ?? game
   const total = data?.totalElements ?? 0
 
+  function openCardDetails(card: CatalogCardData) {
+    setActiveModal({
+      mode: 'details',
+      card,
+    })
+  }
+
+  function openAddToCollection(card: CatalogCardData) {
+    if (!user) {
+      setLoginNotice('Entre na sua conta para adicionar cartas à coleção.')
+
+      navigate({
+        to: '/login',
+        search: {
+          redirect: `/cartas/${encodeURIComponent(card.id)}?adicionar=1`,
+        },
+      })
+
+      return
+    }
+
+    setActiveModal({
+      mode: 'add',
+      card,
+    })
+  }
+
+  function closeModal() {
+    setActiveModal(null)
+  }
+
   return (
     <main className="min-h-screen bg-[#FAFBFE] pb-12 text-[#171443]">
       {/* Header global e footer continuam fora do escopo desta página. */}
       <div className="mx-auto w-full max-w-[1600px] px-4 pt-4 sm:px-6 xl:px-[38px]">
-        <header className="relative mb-4 flex min-h-[116px] items-center overflow-hidden rounded-xl border border-[#eeeafb] bg-gradient-to-r from-[#f8f7ff] via-[#f2edff] to-[#e5d6fb] px-6 py-5 sm:px-8">
+        <header className="relative mb-4 flex min-h-[160px] items-center overflow-hidden rounded-xl border border-[#eeeafb] bg-primary-900 px-6 py-5 shadow-sm sm:min-h-[190px] sm:px-8">
+          {gameBanners[game] && (
+            <img
+              src={gameBanners[game]}
+              alt=""
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 h-full w-full object-cover object-center"
+            />
+          )}
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute -right-12 -top-24 size-64 rounded-full border-[32px] border-white/40"
+            className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#130b30]/85 via-[#130b30]/50 to-transparent"
           />
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute right-[14%] top-0 size-32 rounded-full bg-primary-100/70 blur-2xl"
-          />
-          <div className="relative flex items-center gap-4">
+          <div className="relative z-10 flex items-center gap-4">
             <span
               aria-hidden="true"
-              className="flex size-14 shrink-0 items-center justify-center rounded-full border-4 border-[#25135c] bg-white text-3xl shadow-sm"
+              className="flex size-14 shrink-0 items-center justify-center rounded-full border-2 border-white/80 bg-white/15 text-3xl text-white shadow-sm backdrop-blur-sm"
             >
               {game === 'pokemon' ? '◉' : '✦'}
             </span>
             <div>
-              <h1 className="font-display text-2xl font-bold leading-tight text-[#21154d] sm:text-4xl">
+              <h1 className="font-display text-2xl font-bold leading-tight text-white drop-shadow-sm sm:text-4xl">
                 {gameName}
               </h1>
-              <p className="mt-1 text-xs text-[#292057] sm:text-sm">
+              <p className="mt-1 text-xs text-white/90 sm:text-sm">
                 Explore todas as cartas de {gameName}.
               </p>
             </div>
@@ -401,7 +461,11 @@ function CatalogView({ game }: { game: string }) {
             ) : (
               <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-5">
                 {data.content.map((card) => (
-                  <CatalogCard key={card.id} card={card} />
+                  <CatalogCard
+                    key={card.id}
+                    card={card}
+                    onSelect={openCardDetails}
+                  />
                 ))}
               </div>
             )}
@@ -454,6 +518,22 @@ function CatalogView({ game }: { game: string }) {
           </section>
         </div>
       </div>
+      {activeModal?.mode === 'details' && (
+        <CardDetailsModal
+          key={activeModal.card.id}
+          cardId={activeModal.card.id}
+          onClose={closeModal}
+          onAdd={openAddToCollection}
+        />
+      )}
+
+      {activeModal?.mode === 'add' && (
+        <AddToCollectionModal
+          key={activeModal.card.id}
+          card={activeModal.card}
+          onClose={closeModal}
+        />
+      )}
     </main>
   )
 }
