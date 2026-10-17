@@ -10,34 +10,11 @@ import {
     emptyCollectionFilters,
 } from '@/components/collection/CollectionFilters'
 import { CollectionState } from '@/components/collection/CollectionState'
-import { Modal } from '@/components/ui/Modal'
-import type { CollectionItem } from '@/types/Collection'
 
 
-const conditionLabels = {
-  NEAR_MINT: 'Near Mint',
-  LIGHTLY_PLAYED: 'Lightly Played',
-  MODERATELY_PLAYED: 'Moderately Played',
-  HEAVILY_PLAYED: 'Heavily Played',
-  DAMAGED: 'Damaged',
-}
 
-const languageLabels = {
-  PORTUGUESE: 'Português',
-  ENGLISH: 'Inglês',
-  JAPANESE: 'Japonês',
-}
-
-const gameLabels = {
-  POKEMON: 'Pokémon',
-  YUGIOH: 'Yu-Gi-Oh!',
-  MAGIC_THE_GATHERING: 'Magic: The Gathering',
-}
 
 export function CollectionPreviewPage() {
-
-    const [selectedItem, setSelectedItem] =
-        useState<CollectionItem | null>(null)
 
     const [previewStatus, setPreviewStatus] =
         useState<PreviewStatus>('success')

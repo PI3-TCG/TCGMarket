@@ -274,7 +274,7 @@ export function AddToCollectionModal({ card, onClose, onSuccess }: Props) {
                 onClick={onClose}
                 className="rounded-lg border border-primary-900 px-5 py-3 text-sm font-semibold text-primary-900"
               >
-                Cancelar
+                Voltar
               </button>
               <button
                 type="button"
