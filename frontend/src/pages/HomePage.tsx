@@ -1,9 +1,14 @@
-import hero from '@/assets/homepage-hero.webp'
 import { Alert } from '@/components/ui/Alert'
 import { GAMES } from '@/components/layout/siteGames'
 import { useSession } from '@/session'
 import { useNavigate } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
+import hero from '@/assets/images/image-banner-home.png'
+import pokemonBanner from '@/assets/images/image-nav-pokemon.png'
+import magicBanner from '@/assets/images/image-nav-magic.png'
+import yugiohBanner from '@/assets/images/image-nav-yugioh.png'
+import onePieceBanner from '@/assets/images/image-nav-onePiece.png'
+import digimonBanner from '@/assets/images/image-nav-digimon.png'
 
 const FEATURED = [
   {
@@ -87,6 +92,14 @@ const RECENT = [
   { name: 'Omnimon', meta: 'BT1 • Digimon', price: 'R$ 320,00' },
 ]
 
+const exploreImages: Record<string, string> = {
+  poke: pokemonBanner,
+  magic: magicBanner,
+  yugioh: yugiohBanner,
+  piece: onePieceBanner,
+  digimon: digimonBanner,
+}
+
 export function HomePage() {
   const navigate = useNavigate()
   const { user, sessionReady } = useSession()
@@ -120,13 +133,14 @@ export function HomePage() {
         <section className="relative min-h-[300px] overflow-hidden rounded-lg bg-neutral-900 text-white shadow-lg">
           <img
             src={hero}
-
             alt=""
-
-            className="absolute inset-y-0 right-0 h-full w-full object-cover object-[70%_center] sm:w-[72%]"
+            className="absolute inset-0 h-full w-full object-cover object-center"
           />
 
-          <div className="absolute inset-0 bg-linear-to-r from-neutral-900 from-20% via-neutral-900/92 via-45% to-transparent to-70%" />
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 bg-linear-to-r from-neutral-900/75 from-0% via-neutral-900/55 via-45% to-transparent to-80%"
+          />
 
           <div className="relative flex min-h-[300px] max-w-xl flex-col justify-center px-6 py-6 sm:px-8 sm:py-8">
             <h1 className="text-3xl leading-tight font-bold tracking-tight sm:text-4xl">
@@ -200,9 +214,9 @@ export function HomePage() {
                 onClick={() =>
                   game.slug
                     ? navigate({
-                        to: '/catalogo/$game',
-                        params: { game: game.slug },
-                      })
+                      to: '/catalogo/$game',
+                      params: { game: game.slug },
+                    })
                     : soon(`O catálogo de ${game.name}`)
                 }
 
@@ -212,7 +226,21 @@ export function HomePage() {
                   background: `linear-gradient(145deg, ${game.from}, ${game.to})`,
                 }}
               >
-                <GameMark kind={game.mark} />
+                {exploreImages[game.mark] ? (
+                  <img
+                    src={exploreImages[game.mark]}
+                    alt=""
+                    loading="lazy"
+                    className="absolute inset-0 h-full w-full object-cover object-right transition-transform duration-300 group-hover:scale-105"
+                  />
+                ) : (
+                  <GameMark kind={game.mark} />
+                )}
+
+                <div
+                  aria-hidden="true"
+                  className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent"
+                />
 
                 <span className="absolute bottom-3 left-3 text-lg font-bold">
                   {game.name}
