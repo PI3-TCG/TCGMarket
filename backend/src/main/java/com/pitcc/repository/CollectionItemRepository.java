@@ -13,6 +13,11 @@ public interface CollectionItemRepository extends MongoRepository<CollectionItem
 
     Page<CollectionItem> findByUserId(String userId, Pageable pageable);
 
+    Optional<CollectionItem> findByIdAndUserId(
+            String id,
+            String userId
+    );
+
     @Aggregation(pipeline = {
             """
             {

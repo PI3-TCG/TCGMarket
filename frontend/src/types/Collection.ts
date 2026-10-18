@@ -65,10 +65,8 @@ export interface AddToCollectionRequest {
   condition: CardCondition
   language: CardLanguage
 }
-import type {
-  AddToCollectionRequest,
-  CollectionFilterOptions,
-  CollectionFilterValues,
-  CollectionPage,
-  CollectionSummaryResponse,
-} from '@/types/Collection'
+export interface UpdateCollectionItemRequest {
+  quantity: number
+  condition: CardCondition
+  language: CardLanguage
+}

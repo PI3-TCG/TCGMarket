@@ -5,6 +5,7 @@ import type {
   CollectionFilterValues,
   CollectionPage,
   CollectionSummaryResponse,
+  UpdateCollectionItemRequest,
 } from '@/types/Collection'
 
 type CollectionQuery = {
@@ -65,4 +66,13 @@ export async function getMyCollectionFilterOptions(
   )
 
   return response.data
+}
+export async function updateMyCollectionItem(
+  itemId: string,
+  request: UpdateCollectionItemRequest,
+): Promise<void> {
+  await api.patch(
+    `/api/users/me/collection/${encodeURIComponent(itemId)}`,
+    request,
+  )
 }
