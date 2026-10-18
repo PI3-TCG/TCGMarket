@@ -14,6 +14,7 @@ import type {
   CollectionSummaryResponse,
   CollectionFilterValues,
   CollectionFilterOptions,
+  CollectionItem,
 } from '@/types/Collection'
 import {
   CollectionFilters,
@@ -21,6 +22,7 @@ import {
 } from '@/components/collection/CollectionFilters'
 import { CardDetailsModal } from '@/components/catalog/CardDetailsModal'
 import type { CatalogCard } from '@/types/Catalog'
+import { EditCollectionItemModal } from '@/components/collection/EditCollectionItemModal'
 
 type CollectionResult =
   | { status: 'loading' }
@@ -151,6 +153,10 @@ function CollectionContent() {
           filters={filters}
           onPageChange={setPage}
           onRetry={() => setAttempt((current) => current + 1)}
+          onCollectionUpdated={() => {
+            setAttempt((current) => current + 1)
+            setSummaryAttempt((current) => current + 1)
+          }}
         />
       </div>
     </div>
@@ -162,10 +168,11 @@ type CollectionPageDataProps = {
   filters: CollectionFilterValues
   onPageChange: (page: number) => void
   onRetry: () => void
+  onCollectionUpdated: () => void
 }
 type CollectionModal =
   | { mode: 'details'; card: CatalogCard }
-  | { mode: 'add'; card: CatalogCard }
+  | { mode: 'edit'; item: CollectionItem }
   | null
 
 function CollectionPageData({
@@ -173,6 +180,7 @@ function CollectionPageData({
   filters,
   onPageChange,
   onRetry,
+  onCollectionUpdated,
 }: CollectionPageDataProps) {
   const [activeModal, setActiveModal] = useState<CollectionModal>(null)
   const [result, setResult] = useState<CollectionResult>({
@@ -203,6 +211,10 @@ function CollectionPageData({
 
   function openDetails(card: CatalogCard) {
     setActiveModal({ mode: 'details', card })
+  }
+
+  function openEdit(item: CollectionItem) {
+    setActiveModal({ mode: 'edit', item })
   }
 
   function closeModal() {
@@ -266,6 +278,7 @@ function CollectionPageData({
                     onDetails={(selected) => {
                       openDetails(selected.card)
                     }}
+                    onEdit={openEdit}
                   />
                 ))}
               </div>
@@ -321,6 +334,18 @@ function CollectionPageData({
           cardId={activeModal.card.id}
           context="collection"
           onClose={closeModal}
+        />
+      )}
+      
+      {activeModal?.mode === 'edit' && (
+        <EditCollectionItemModal
+          key={activeModal.item.id}
+          item={activeModal.item}
+          onClose={closeModal}
+          onSaved={() => {
+            closeModal()
+            onCollectionUpdated()
+          }}
         />
       )}
     </>

@@ -65,3 +65,8 @@ export interface AddToCollectionRequest {
   condition: CardCondition
   language: CardLanguage
 }
+export interface UpdateCollectionItemRequest {
+  quantity: number
+  condition: CardCondition
+  language: CardLanguage
+}
