@@ -18,6 +18,8 @@ public interface CollectionItemRepository extends MongoRepository<CollectionItem
             String userId
     );
 
+    long deleteByIdAndUserId(String id, String userId);
+
     @Aggregation(pipeline = {
             """
             {

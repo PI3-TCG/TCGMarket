@@ -76,3 +76,7 @@ export async function updateMyCollectionItem(
     request,
   )
 }
+
+export async function removeMyCollectionItem(itemId: string): Promise<void> {
+  await api.delete(`/api/users/me/collection/${encodeURIComponent(itemId)}`)
+}

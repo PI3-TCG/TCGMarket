@@ -599,6 +599,45 @@
       "settingEncodeUrl": true,
       "settingRebuildPath": true,
       "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "fld_collection",
+      "_type": "request_group",
+      "parentId": "wrk_tcgmarket",
+      "name": "Minha coleção",
+      "description": "Rotas da coleção do usuário autenticado. Todas exigem token.",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": 4
+    },
+    {
+      "_id": "req_remove_collection_item",
+      "_type": "request",
+      "parentId": "fld_collection",
+      "name": "Remover item da coleção",
+      "description": "Exige token. Remove o item (agrupamento inteiro) da coleção do usuário autenticado; a carta do catálogo não é apagada. Troque o id do exemplo pelo id do item da coleção. Devolve 204 quando remove, 404 se o item não existe ou é de outro usuário e 409 se o item está em um anúncio ativo.",
+      "method": "DELETE",
+      "url": "{{ _.base_url }}/api/users/me/collection/000000000000000000000000",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": 1,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
     }
   ]
 }

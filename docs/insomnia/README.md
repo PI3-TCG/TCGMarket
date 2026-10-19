@@ -12,6 +12,7 @@ A collection cobre só o que a API já expõe:
 - `GET /api/catalog/{game}/filters`
 - `GET /api/catalog/{game}/cards/by-external-id?externalId=`
 - `GET /api/catalog/cards/{id}`: carta completa pelo `id` do catálogo interno, com os atributos do TCG (`pokemon`, `yugioh` ou `magic`) e `otherPrintings`
+- `DELETE /api/users/me/collection/{itemId}`: remove o item da coleção do usuário autenticado (exige `token`). Devolve `204` ao remover, `404` se o item não existe ou é de outro usuário e `409` se o item está em um anúncio ativo. A carta do catálogo não é apagada.
 
 Os jogos do catálogo são `pokemon`, `yugioh` e `magic`. As rotas consultam só o catálogo interno (MongoDB); o JSON original da Pokémon TCG API, da YGOPRODeck e da Scryfall não aparece nelas.
 

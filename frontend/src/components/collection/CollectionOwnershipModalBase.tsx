@@ -19,7 +19,7 @@ export type CollectionModalCard = {
 }
 
 type ModalBaseProps = {
-  mode: 'add' | 'edit'
+  mode: 'add' | 'edit' | 'remove'
   card: CollectionModalCard
   title: string
   subtitle: string
@@ -41,7 +41,19 @@ const GAME_LABELS: Record<string, string> = {
   MAGIC_THE_GATHERING: 'Magic',
 }
 
-/** Estrutura visual compartilhada pelos modais de adicionar e editar. */
+const SUCCESS_TITLES: Record<ModalBaseProps['mode'], string> = {
+  add: 'Carta adicionada!',
+  edit: 'Alterações salvas!',
+  remove: 'Carta removida!',
+}
+
+const PRIMARY_ICONS = {
+  add: 'plus',
+  edit: 'check',
+  remove: 'trash',
+} as const
+
+/** Estrutura visual compartilhada pelos modais de adicionar, editar e remover. */
 export function CollectionOwnershipModalBase({
   mode,
   card,
@@ -135,6 +147,8 @@ export function CollectionOwnershipModalBase({
             <div className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-primary-300/30 bg-white text-primary-900 shadow-sm">
               {mode === 'add' ? (
                 <Icon name="plus" size={24} />
+              ) : mode === 'remove' ? (
+                <Icon name="trash" size={24} className="text-error-700" />
               ) : (
                 <svg
                   viewBox="0 0 24 24"
@@ -266,12 +280,7 @@ export function CollectionOwnershipModalBase({
             <div className="mt-5 space-y-3" aria-live="polite">
               {error && <Alert variant="error">{error}</Alert>}
               {successMessage && (
-                <Alert
-                  variant="success"
-                  title={
-                    mode === 'add' ? 'Carta adicionada!' : 'Alterações salvas!'
-                  }
-                >
+                <Alert variant="success" title={SUCCESS_TITLES[mode]}>
                   {successMessage}
                 </Alert>
               )}
@@ -298,9 +307,13 @@ export function CollectionOwnershipModalBase({
                 <button
                   type="submit"
                   disabled={isSaving || disablePrimary}
-                  className="flex items-center justify-center gap-2 rounded-lg bg-primary-900 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary-800 focus-visible:outline-2 focus-visible:outline-secondary-500 disabled:cursor-not-allowed disabled:opacity-60"
+                  className={`flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition-colors focus-visible:outline-2 focus-visible:outline-secondary-500 disabled:cursor-not-allowed disabled:opacity-60 ${
+                    mode === 'remove'
+                      ? 'bg-error-700 hover:bg-error-600'
+                      : 'bg-primary-900 hover:bg-primary-800'
+                  }`}
                 >
-                  <Icon name={mode === 'add' ? 'plus' : 'check'} size={16} />
+                  <Icon name={PRIMARY_ICONS[mode]} size={16} />
                   {isSaving ? busyLabel : primaryLabel}
                 </button>
               )}
