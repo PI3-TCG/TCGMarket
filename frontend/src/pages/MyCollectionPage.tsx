@@ -23,6 +23,7 @@ import {
 import { CardDetailsModal } from '@/components/catalog/CardDetailsModal'
 import type { CatalogCard } from '@/types/Catalog'
 import { EditCollectionItemModal } from '@/components/collection/EditCollectionItemModal'
+import { RemoveCollectionItemModal } from '@/components/collection/RemoveCollectionItemModal'
 
 type CollectionResult =
   | { status: 'loading' }
@@ -157,6 +158,14 @@ function CollectionContent() {
             setAttempt((current) => current + 1)
             setSummaryAttempt((current) => current + 1)
           }}
+          onItemRemoved={(pageBecameEmpty) => {
+            if (pageBecameEmpty) {
+              setPage((current) => Math.max(0, current - 1))
+            }
+            setAttempt((current) => current + 1)
+            setSummaryAttempt((current) => current + 1)
+            setOptionsAttempt((current) => current + 1)
+          }}
         />
       </div>
     </div>
@@ -169,10 +178,12 @@ type CollectionPageDataProps = {
   onPageChange: (page: number) => void
   onRetry: () => void
   onCollectionUpdated: () => void
+  onItemRemoved: (pageBecameEmpty: boolean) => void
 }
 type CollectionModal =
   | { mode: 'details'; card: CatalogCard }
   | { mode: 'edit'; item: CollectionItem }
+  | { mode: 'remove'; item: CollectionItem }
   | null
 
 function CollectionPageData({
@@ -181,6 +192,7 @@ function CollectionPageData({
   onPageChange,
   onRetry,
   onCollectionUpdated,
+  onItemRemoved,
 }: CollectionPageDataProps) {
   const [activeModal, setActiveModal] = useState<CollectionModal>(null)
   const [result, setResult] = useState<CollectionResult>({
@@ -215,6 +227,10 @@ function CollectionPageData({
 
   function openEdit(item: CollectionItem) {
     setActiveModal({ mode: 'edit', item })
+  }
+
+  function openRemove(item: CollectionItem) {
+    setActiveModal({ mode: 'remove', item })
   }
 
   function closeModal() {
@@ -279,6 +295,7 @@ function CollectionPageData({
                       openDetails(selected.card)
                     }}
                     onEdit={openEdit}
+                    onRemove={openRemove}
                   />
                 ))}
               </div>
@@ -345,6 +362,22 @@ function CollectionPageData({
           onSaved={() => {
             closeModal()
             onCollectionUpdated()
+          }}
+        />
+      )}
+
+      {activeModal?.mode === 'remove' && (
+        <RemoveCollectionItemModal
+          key={activeModal.item.id}
+          item={activeModal.item}
+          onClose={closeModal}
+          onRemoved={() => {
+            closeModal()
+            onItemRemoved(
+              page > 0 &&
+                result.status === 'success' &&
+                result.data.content.length === 1,
+            )
           }}
         />
       )}
