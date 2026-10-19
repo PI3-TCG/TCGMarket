@@ -1,7 +1,7 @@
 import type { CollectionItem } from '@/types/Collection'
 
 // Dados fictícios usados apenas para desenvolver a interface.
-export const collectionMock: CollectionItem[] = [
+const mockItems: Omit<CollectionItem, 'availability'>[] = [
   {
     id: 'posse-demo-1',
     quantity: 3,
@@ -48,3 +48,12 @@ export const collectionMock: CollectionItem[] = [
     },
   },
 ]
+
+export const collectionMock: CollectionItem[] = mockItems.map((item) => ({
+  ...item,
+  availability: {
+    totalQuantity: item.quantity,
+    committedQuantity: 0,
+    availableQuantity: item.quantity,
+  },
+}))

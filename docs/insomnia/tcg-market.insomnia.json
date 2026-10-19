@@ -638,6 +638,81 @@
       "settingEncodeUrl": true,
       "settingRebuildPath": true,
       "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_collection_item_details",
+      "_type": "request",
+      "parentId": "fld_collection",
+      "name": "Detalhes do item da coleção",
+      "description": "Exige token. Devolve o item da coleção do usuário autenticado com a disponibilidade para anúncio (totalQuantity, committedQuantity e availableQuantity). Troque o id do exemplo. Devolve 404 se o item não existe ou é de outro usuário.",
+      "method": "GET",
+      "url": "{{ _.base_url }}/api/users/me/collection/000000000000000000000000",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": 2,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "fld_ads",
+      "_type": "request_group",
+      "parentId": "wrk_tcgmarket",
+      "name": "Meus anúncios",
+      "description": "Rotas de anúncios do usuário autenticado. Todas exigem token.",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": 5
+    },
+    {
+      "_id": "req_create_ad",
+      "_type": "request",
+      "parentId": "fld_ads",
+      "name": "Criar anúncio",
+      "description": "Exige token. Cria um anúncio ACTIVE a partir de um item da coleção. Pelo menos uma modalidade (venda ou troca) é obrigatória; unitPrice é obrigatório só com venda (0,01 a 999.999,99, até 2 casas). Troque o collectionItemId do exemplo. Devolve 201, 400 para dados inválidos, 404 se o item não existe ou é de outro usuário e 409 se a quantidade passa da disponível.",
+      "method": "POST",
+      "url": "{{ _.base_url }}/api/users/me/ads",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"collectionItemId\": \"000000000000000000000000\",\n  \"quantity\": 1,\n  \"saleEnabled\": true,\n  \"tradeEnabled\": true,\n  \"unitPrice\": 45.00\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": 1,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
     }
   ]
 }
