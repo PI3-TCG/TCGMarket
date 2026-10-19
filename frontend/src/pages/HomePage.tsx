@@ -173,7 +173,7 @@ export function HomePage() {
                 type="button"
 
                 onClick={() =>
-                  user ? soon('Criar anúncio') : navigate({ to: '/login' })
+                  navigate({ to: user ? '/anuncios/novo' : '/login' })
                 }
 
                 className="rounded-md border border-white/70 bg-white/10 px-5 py-3 text-sm font-semibold hover:bg-white/20"
@@ -371,7 +371,7 @@ export function HomePage() {
                 <button
                   type="button"
 
-                  onClick={() => soon('Criar anúncio')}
+                  onClick={() => navigate({ to: '/anuncios/novo' })}
 
                   className="mt-4 w-full rounded-md bg-primary-900 py-3 text-sm font-semibold text-white hover:bg-primary-800"
                 >

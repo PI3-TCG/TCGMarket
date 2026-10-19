@@ -8,6 +8,7 @@ public record CollectionItemResponse(
         Integer quantity,
         CardCondition condition,
         CardLanguage language,
-        CollectionCardResponse card
+        CollectionCardResponse card,
+        CollectionItemAvailabilityResponse availability
 ) {
 }

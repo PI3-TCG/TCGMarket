@@ -22,12 +22,20 @@ export interface CollectionCard {
   imageUrl: string
 }
 
+/** Disponibilidade para anúncio: quantidade na coleção menos a comprometida em anúncios ativos. */
+export interface CollectionItemAvailability {
+  totalQuantity: number
+  committedQuantity: number
+  availableQuantity: number
+}
+
 export interface CollectionItem {
   id: string
   quantity: number
   condition: CardCondition
   language: CardLanguage
   card: CollectionCard
+  availability: CollectionItemAvailability
 }
 
 export interface CollectionPage {

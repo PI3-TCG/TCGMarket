@@ -1,3 +1,4 @@
+import { Link } from '@tanstack/react-router'
 import { Icon } from '@/components/ui/Icon'
 
 type CollectionSummaryProps = {
@@ -76,15 +77,13 @@ export function CollectionSummary({
             ))}
 
             <div className="flex min-h-20 items-center rounded-xl border border-primary-100 bg-white p-3 shadow-sm">
-                <button
-                    type="button"
-                    disabled
-                    title="Criação de anúncios ainda não disponível"
-                    className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-primary-900 px-5 py-3 text-sm font-semibold whitespace-nowrap text-white transition-colors enabled:cursor-pointer enabled:hover:bg-primary-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500 disabled:cursor-not-allowed disabled:opacity-60"
+                <Link
+                    to="/anuncios/novo"
+                    className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-primary-900 px-5 py-3 text-sm font-semibold whitespace-nowrap text-white transition-colors hover:bg-primary-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500"
                 >
                     <Icon name="plus" size={20} />
                     Criar anúncio
-                </button>
+                </Link>
             </div>
         </section>
     )

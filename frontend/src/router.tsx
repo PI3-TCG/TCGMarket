@@ -23,6 +23,7 @@ import {
   createRouter,
 } from '@tanstack/react-router'
 import { MyCollectionPage } from '@/pages/MyCollectionPage'
+import { CreateAdPage } from '@/pages/CreateAdPage'
 
 const rootRoute = createRootRoute({
   component: RootLayout,
@@ -147,6 +148,20 @@ const myCollectionRoute = createRoute({
   ),
 })
 
+const createAdRoute = createRoute({
+  getParentRoute: () => siteLayoutRoute,
+  path: '/anuncios/novo',
+  validateSearch: (search: Record<string, unknown>): { item?: string } =>
+    typeof search.item === 'string' && search.item.trim() !== ''
+      ? { item: search.item }
+      : {},
+  component: () => (
+    <RequireAuth>
+      <CreateAdPage />
+    </RequireAuth>
+  ),
+})
+
 const routeTree = rootRoute.addChildren([
   siteLayoutRoute.addChildren([
     indexRoute,
@@ -161,6 +176,7 @@ const routeTree = rootRoute.addChildren([
       adminCatalogRoute,
     ]),
     myCollectionRoute,
+    createAdRoute,
   ]),
   registerRoute,
   loginRoute,

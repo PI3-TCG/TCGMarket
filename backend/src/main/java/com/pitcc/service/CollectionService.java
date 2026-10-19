@@ -1,7 +1,10 @@
 package com.pitcc.service;
 
 import com.pitcc.dto.CollectionCardResponse;
+import com.pitcc.dto.CollectionItemAvailabilityResponse;
 import com.pitcc.dto.CollectionItemResponse;
+import com.pitcc.exception.CollectionItemNotFoundException;
+import com.pitcc.exception.InvalidAuthenticationException;
 import com.pitcc.model.Card;
 import com.pitcc.model.CollectionItem;
 import com.pitcc.repository.CardRepository;
@@ -28,15 +31,18 @@ public class CollectionService {
     private final CollectionItemRepository collectionItemRepository;
     private final CardRepository cardRepository;
     private final CollectionSearchRepository collectionSearchRepository;
+    private final AdAvailabilityService adAvailabilityService;
 
     public CollectionService(
             CollectionItemRepository collectionItemRepository,
             CardRepository cardRepository,
-            CollectionSearchRepository collectionSearchRepository) {
+            CollectionSearchRepository collectionSearchRepository,
+            AdAvailabilityService adAvailabilityService) {
 
         this.collectionItemRepository = collectionItemRepository;
         this.cardRepository = cardRepository;
         this.collectionSearchRepository = collectionSearchRepository;
+        this.adAvailabilityService = adAvailabilityService;
     }
 
 
@@ -89,6 +95,9 @@ public class CollectionService {
             }
         }
 
+        Map<String, CollectionItemAvailabilityResponse> availabilityByItem =
+                adAvailabilityService.availabilityOf(items.getContent());
+
         return items.map(item -> {
             Card card = cardsById.get(item.getCardId());
 
@@ -97,13 +106,31 @@ public class CollectionService {
                         "Um item da coleção referencia uma carta inexistente.");
             }
 
-            return toResponse(item, card);
+            return toResponse(item, card, availabilityByItem.get(item.getId()));
         });
+    }
+
+    public CollectionItemResponse findOwnItem(String userId, String itemId) {
+        if (userId == null || userId.isBlank()) {
+            throw new InvalidAuthenticationException();
+        }
+
+        // Item de outro usuário responde como inexistente.
+        CollectionItem item = collectionItemRepository
+                .findByIdAndUserId(itemId, userId)
+                .orElseThrow(CollectionItemNotFoundException::new);
+
+        Card card = cardRepository.findById(item.getCardId())
+                .orElseThrow(() -> new IllegalStateException(
+                        "Um item da coleção referencia uma carta inexistente."));
+
+        return toResponse(item, card, adAvailabilityService.availabilityOf(item));
     }
 
     private CollectionItemResponse toResponse(
             CollectionItem item,
-            Card card) {
+            Card card,
+            CollectionItemAvailabilityResponse availability) {
 
         CollectionCardResponse cardResponse =
                 new CollectionCardResponse(
@@ -121,7 +148,8 @@ public class CollectionService {
                 item.getQuantity(),
                 item.getCondition(),
                 item.getLanguage(),
-                cardResponse
+                cardResponse,
+                availability
         );
     }
 

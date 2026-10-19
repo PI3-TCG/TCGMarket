@@ -3,6 +3,7 @@ import type {
   AddToCollectionRequest,
   CollectionFilterOptions,
   CollectionFilterValues,
+  CollectionItem,
   CollectionPage,
   CollectionSummaryResponse,
   UpdateCollectionItemRequest,
@@ -41,6 +42,16 @@ export async function getMyCollection({
       },
       signal,
     },
+  )
+
+  return response.data
+}
+
+export async function getMyCollectionItem(
+  itemId: string,
+): Promise<CollectionItem> {
+  const response = await api.get<CollectionItem>(
+    `/api/users/me/collection/${encodeURIComponent(itemId)}`,
   )
 
   return response.data

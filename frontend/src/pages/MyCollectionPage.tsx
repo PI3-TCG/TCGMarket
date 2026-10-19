@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import collectionBanner from '@/assets/images/image-collection.png'
+import { useNavigate } from '@tanstack/react-router'
+import { PageBanner } from '@/components/layout/PageBanner'
 import { CollectionItemCard } from '@/components/collection/CollectionItemCard'
 import { CollectionState } from '@/components/collection/CollectionState'
 import { CollectionSummary } from '@/components/collection/CollectionSummary'
@@ -41,38 +42,10 @@ export function MyCollectionPage() {
   return (
     <main className="min-h-screen bg-[#FAFBFE] pb-12 text-[#171443]">
       <div className="mx-auto w-full max-w-[1600px] px-4 pt-4 sm:px-6 xl:px-[38px]">
-        <header className="relative mb-4 flex min-h-[160px] items-center overflow-hidden rounded-xl border border-[#eeeafb] bg-primary-900 px-6 py-5 shadow-sm sm:min-h-[190px] sm:px-8">
-          <img
-            src={collectionBanner}
-            alt=""
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0 h-full w-full object-cover object-center"
-          />
-
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#130b30]/85 via-[#130b30]/50 to-transparent"
-          />
-
-          <div className="relative z-10 flex items-center gap-4">
-            <span
-              aria-hidden="true"
-              className="flex size-14 shrink-0 items-center justify-center rounded-full border-2 border-white/80 bg-white/15 text-3xl text-white shadow-sm backdrop-blur-sm"
-            >
-              ✦
-            </span>
-
-            <div>
-              <h1 className="font-display text-2xl font-bold leading-tight text-white drop-shadow-sm sm:text-4xl">
-                Minha Coleção
-              </h1>
-
-              <p className="mt-1 text-xs text-white/90 sm:text-sm">
-                Organize seu acervo e acompanhe sua jornada como colecionador.
-              </p>
-            </div>
-          </div>
-        </header>
+        <PageBanner
+          title="Minha Coleção"
+          subtitle="Organize seu acervo e acompanhe sua jornada como colecionador."
+        />
 
         {user && <CollectionContent key={user.id} />}
       </div>
@@ -181,7 +154,7 @@ type CollectionPageDataProps = {
   onItemRemoved: (pageBecameEmpty: boolean) => void
 }
 type CollectionModal =
-  | { mode: 'details'; card: CatalogCard }
+  | { mode: 'details'; card: CatalogCard; itemId: string }
   | { mode: 'edit'; item: CollectionItem }
   | { mode: 'remove'; item: CollectionItem }
   | null
@@ -194,6 +167,7 @@ function CollectionPageData({
   onCollectionUpdated,
   onItemRemoved,
 }: CollectionPageDataProps) {
+  const navigate = useNavigate()
   const [activeModal, setActiveModal] = useState<CollectionModal>(null)
   const [result, setResult] = useState<CollectionResult>({
     status: 'loading',
@@ -221,8 +195,12 @@ function CollectionPageData({
     return () => controller.abort()
   }, [page, filters])
 
-  function openDetails(card: CatalogCard) {
-    setActiveModal({ mode: 'details', card })
+  function openDetails(item: CollectionItem) {
+    setActiveModal({ mode: 'details', card: item.card, itemId: item.id })
+  }
+
+  function openCreateAd(itemId: string) {
+    void navigate({ to: '/anuncios/novo', search: { item: itemId } })
   }
 
   function openEdit(item: CollectionItem) {
@@ -291,11 +269,10 @@ function CollectionPageData({
                   <CollectionItemCard
                     key={item.id}
                     item={item}
-                    onDetails={(selected) => {
-                      openDetails(selected.card)
-                    }}
+                    onDetails={openDetails}
                     onEdit={openEdit}
                     onRemove={openRemove}
+                    onAdvertise={(selected) => openCreateAd(selected.id)}
                   />
                 ))}
               </div>
@@ -351,6 +328,7 @@ function CollectionPageData({
           cardId={activeModal.card.id}
           context="collection"
           onClose={closeModal}
+          onCreateListing={() => openCreateAd(activeModal.itemId)}
         />
       )}
       

@@ -2,6 +2,7 @@ package com.pitcc.exception;
 
 import com.pitcc.dto.ApiErrorResponse;
 import com.pitcc.dto.ApiErrorResponse.FieldErrorResponse;
+import com.pitcc.dto.CreateAdRequest;
 import com.pitcc.dto.HideCardRequest;
 import com.pitcc.dto.LoginRequest;
 import com.pitcc.dto.UpdateProfileRequest;
@@ -42,6 +43,7 @@ public class GlobalExceptionHandler {
                     case UpdateUserRoleRequest _ -> "Perfil inválido.";
                     case UpdateProfileRequest _ -> "Dados do perfil inválidos.";
                     case HideCardRequest _ -> "Motivo inválido.";
+                    case CreateAdRequest _ -> "Revise os dados do anúncio.";
                     case null, default -> "Dados de cadastro inválidos.";
                 };
         return ResponseEntity.badRequest().body(error(HttpStatus.BAD_REQUEST, message, fields));
@@ -175,6 +177,23 @@ public class GlobalExceptionHandler {
                         exception.getMessage(),
                         List.of()
                 ));
+    }
+
+    @ExceptionHandler(InvalidAdException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidAd(InvalidAdException exception) {
+        return ResponseEntity.badRequest()
+                .body(error(
+                        HttpStatus.BAD_REQUEST,
+                        exception.getMessage(),
+                        List.of(new FieldErrorResponse(exception.getField(), exception.getMessage()))
+                ));
+    }
+
+    @ExceptionHandler(AdQuantityUnavailableException.class)
+    public ResponseEntity<ApiErrorResponse> handleAdQuantityUnavailable(
+            AdQuantityUnavailableException exception
+    ) {
+        return conflict("quantity", exception.getMessage());
     }
 
     private ResponseEntity<ApiErrorResponse> unauthorized(String message) {
