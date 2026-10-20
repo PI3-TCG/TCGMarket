@@ -713,6 +713,158 @@
       "settingEncodeUrl": true,
       "settingRebuildPath": true,
       "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_list_own_ads",
+      "_type": "request",
+      "parentId": "fld_ads",
+      "name": "Listar meus anúncios",
+      "description": "Exige token. Lista os anúncios do usuário autenticado, do mais recente para o mais antigo. Filtros opcionais: search (nome da carta), game (POKEMON, YUGIOH ou MAGIC_THE_GATHERING), modality (SALE, TRADE ou BOTH) e status (ACTIVE, SOLD_OUT ou CANCELLED). page começa em 0 e size vai de 1 a 20 (padrão 20). Anúncios cancelados trazem releasedQuantity.",
+      "method": "GET",
+      "url": "{{ _.base_url }}/api/users/me/ads",
+      "body": {},
+      "parameters": [
+        {
+          "name": "page",
+          "value": "0"
+        },
+        {
+          "name": "size",
+          "value": "20"
+        },
+        {
+          "name": "search",
+          "value": "",
+          "disabled": true
+        },
+        {
+          "name": "game",
+          "value": "YUGIOH",
+          "disabled": true
+        },
+        {
+          "name": "modality",
+          "value": "SALE",
+          "disabled": true
+        },
+        {
+          "name": "status",
+          "value": "ACTIVE",
+          "disabled": true
+        }
+      ],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": 2,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_get_own_ad",
+      "_type": "request",
+      "parentId": "fld_ads",
+      "name": "Detalhes do meu anúncio",
+      "description": "Exige token. Devolve um anúncio do usuário autenticado. Troque o id do exemplo. Devolve 404 se o anúncio não existe ou é de outro usuário.",
+      "method": "GET",
+      "url": "{{ _.base_url }}/api/users/me/ads/000000000000000000000000",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": 3,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_update_own_ad",
+      "_type": "request",
+      "parentId": "fld_ads",
+      "name": "Editar meu anúncio",
+      "description": "Exige token. Altera só a modalidade e o preço de um anúncio ACTIVE. Pelo menos uma modalidade é obrigatória; unitPrice é obrigatório só com venda (0,01 a 999.999,99, até 2 casas) e é descartado quando o anúncio fica só com troca. Devolve 200, 400 para dados inválidos, 404 se o anúncio não existe ou é de outro usuário e 409 se ele não está mais ativo (o status atual vem em fields[0].message).",
+      "method": "PATCH",
+      "url": "{{ _.base_url }}/api/users/me/ads/000000000000000000000000",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"saleEnabled\": true,\n  \"tradeEnabled\": false,\n  \"unitPrice\": 50.00\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": 4,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_cancel_own_ad",
+      "_type": "request",
+      "parentId": "fld_ads",
+      "name": "Cancelar meu anúncio",
+      "description": "Exige token. Cancela um anúncio ACTIVE e libera os exemplares restantes para novos anúncios; o registro continua no histórico com releasedQuantity. Repetir o cancelamento devolve o mesmo resultado. Devolve 200, 404 se o anúncio não existe ou é de outro usuário e 409 se ele está em outro status (o status atual vem em fields[0].message).",
+      "method": "POST",
+      "url": "{{ _.base_url }}/api/users/me/ads/000000000000000000000000/cancel",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": 5,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
     }
   ]
 }

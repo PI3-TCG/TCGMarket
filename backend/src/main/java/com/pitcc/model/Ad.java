@@ -53,6 +53,8 @@ public class Ad {
     private AdStatus status;
     private Instant createdAt;
     private Instant updatedAt;
+    private Instant cancelledAt;
+    private Instant soldOutAt;
 
     protected Ad() {
     }
@@ -156,5 +158,13 @@ public class Ad {
 
     public Instant getUpdatedAt() {
         return updatedAt;
+    }
+
+    public Instant getCancelledAt() {
+        return cancelledAt;
+    }
+
+    public Instant getSoldOutAt() {
+        return soldOutAt;
     }
 }

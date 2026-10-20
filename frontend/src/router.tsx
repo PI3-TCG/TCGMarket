@@ -24,6 +24,7 @@ import {
 } from '@tanstack/react-router'
 import { MyCollectionPage } from '@/pages/MyCollectionPage'
 import { CreateAdPage } from '@/pages/CreateAdPage'
+import { MyAdsPage } from '@/pages/MyAdsPage'
 
 const rootRoute = createRootRoute({
   component: RootLayout,
@@ -162,6 +163,16 @@ const createAdRoute = createRoute({
   ),
 })
 
+const myAdsRoute = createRoute({
+  getParentRoute: () => siteLayoutRoute,
+  path: '/meus-anuncios',
+  component: () => (
+    <RequireAuth>
+      <MyAdsPage />
+    </RequireAuth>
+  ),
+})
+
 const routeTree = rootRoute.addChildren([
   siteLayoutRoute.addChildren([
     indexRoute,
@@ -177,6 +188,7 @@ const routeTree = rootRoute.addChildren([
     ]),
     myCollectionRoute,
     createAdRoute,
+    myAdsRoute,
   ]),
   registerRoute,
   loginRoute,
