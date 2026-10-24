@@ -1,13 +1,17 @@
+
 package com.pitcc.service;
 
 import com.pitcc.dto.AddToCollectionRequest;
-import com.pitcc.repository.CardRepository;
-import org.springframework.stereotype.Service;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Update;
 import com.pitcc.exception.CatalogCardNotFoundException;
+import com.pitcc.repository.CardRepository;
+
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class AddToCollectionService {
@@ -15,24 +19,26 @@ public class AddToCollectionService {
     private final CardRepository cardRepository;
     private final MongoTemplate mongoTemplate;
 
-    public AddToCollectionService(CardRepository cardRepository, MongoTemplate mongoTemplate) {
+    public AddToCollectionService(
+            CardRepository cardRepository,
+            MongoTemplate mongoTemplate
+    ) {
         this.cardRepository = cardRepository;
         this.mongoTemplate = mongoTemplate;
     }
 
     public void addToCollection(
             String userId,
-            AddToCollectionRequest request) {
-
-        // 1. Validar o usuário
+            AddToCollectionRequest request
+    ) {
         if (userId == null || userId.isBlank()) {
             throw new IllegalArgumentException(
                     "O usuário precisa ser informado."
             );
         }
-        // 2. Validar se a carta existe
+
         validateCardExists(request.cardId());
-        //TODO 3. Adicionar ou incrementar a posse
+
         Query query = new Query();
 
         query.addCriteria(
@@ -42,9 +48,10 @@ public class AddToCollectionService {
                         .and("language").is(request.language())
         );
 
-        // 4. Incrementar ou criar a posse
-        Update update = new Update();
-        update.inc("quantity", request.quantity());
+        Update update = new Update()
+                .inc("quantity", request.quantity())
+                .setOnInsert("committedQuantity", 0)
+                .setOnInsert("adReservations", List.of());
 
         mongoTemplate.upsert(
                 query,

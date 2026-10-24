@@ -35,3 +35,44 @@ export interface AdResponse {
   createdAt: string
   availability: CollectionItemAvailability
 }
+
+export interface OwnAd {
+  id: string
+  collectionItemId: string
+  status: AdStatus
+  quantity: number
+  remainingQuantity: number
+  saleEnabled: boolean
+  tradeEnabled: boolean
+  unitPrice: number | null
+  condition: CardCondition
+  language: CardLanguage
+  card: CollectionCard
+  createdAt: string
+  updatedAt: string
+  cancelledAt: string | null
+  releasedQuantity: number | null
+}
+
+export interface OwnAdPage {
+  content: OwnAd[]
+  totalElements: number
+  totalPages: number
+  number: number
+  size: number
+  first: boolean
+  last: boolean
+}
+
+export interface OwnAdFilterValues {
+  search: string
+  modality: AdModality | ''
+  game: string
+  status: AdStatus | ''
+}
+
+export interface UpdateAdRequest {
+  saleEnabled: boolean
+  tradeEnabled: boolean
+  unitPrice: number | null
+}

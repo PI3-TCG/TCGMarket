@@ -4,17 +4,10 @@ import type {
   CollectionFilterValues,
   CollectionItem,
 } from '@/types/Collection'
+import { emptyCollectionFilters } from './collectionFilterDefaults'
 
 export type { CollectionFilterValues } from '@/types/Collection'
 
-export const emptyCollectionFilters: CollectionFilterValues = {
-  search: '',
-  game: '',
-  edition: '',
-  rarity: '',
-  condition: '',
-  language: '',
-}
 
 type CollectionFiltersProps = {
   items?: CollectionItem[]

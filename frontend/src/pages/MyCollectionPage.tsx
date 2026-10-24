@@ -17,10 +17,8 @@ import type {
   CollectionFilterOptions,
   CollectionItem,
 } from '@/types/Collection'
-import {
-  CollectionFilters,
-  emptyCollectionFilters,
-} from '@/components/collection/CollectionFilters'
+import { CollectionFilters } from '@/components/collection/CollectionFilters'
+import { emptyCollectionFilters } from '@/components/collection/collectionFilterDefaults'
 import { CardDetailsModal } from '@/components/catalog/CardDetailsModal'
 import type { CatalogCard } from '@/types/Catalog'
 import { EditCollectionItemModal } from '@/components/collection/EditCollectionItemModal'

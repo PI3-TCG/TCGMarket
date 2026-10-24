@@ -33,7 +33,8 @@ public class OwnAdRepository {
     public Page<Ad> findOwnAds(String sellerId, OwnAdFilters filters, Pageable pageable) {
         List<Document> pipeline = new ArrayList<>();
 
-        Document ownershipMatch = new Document("sellerId", sellerId);
+        Document ownershipMatch = new Document("sellerId", sellerId)
+                .append("creationAborted", new Document("$ne", true));
 
         if (filters.status() != null) {
             ownershipMatch.append("status", filters.status().name());
@@ -168,10 +169,91 @@ public class OwnAdRepository {
         ));
     }
 
-    /**
-     * Cancela só se o anúncio for do vendedor e ainda estiver ativo. O
-     * remainingQuantity é mantido como registro do que foi liberado.
-     */
+
+    public Optional<Ad> updateQuantityIfActive(
+            String adId,
+            String sellerId,
+            int expectedQuantity,
+            int expectedRemainingQuantity,
+            int newQuantity,
+            int newRemainingQuantity,
+            boolean saleEnabled,
+            boolean tradeEnabled,
+            BigDecimal unitPrice,
+            String expectedWriteFenceToken,
+            String operationId,
+            Instant now
+    ) {
+        if (operationId == null || operationId.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Identificador da operação obrigatório."
+            );
+        }
+
+        if (expectedQuantity <= 0 ||
+                expectedRemainingQuantity <= 0 ||
+                newQuantity <= 0 ||
+                newRemainingQuantity <= 0) {
+            throw new IllegalArgumentException(
+                    "As quantidades precisam ser positivas."
+            );
+        }
+
+        if (expectedRemainingQuantity > expectedQuantity ||
+                newRemainingQuantity > newQuantity) {
+            throw new IllegalArgumentException(
+                    "A quantidade restante não pode superar o total."
+            );
+        }
+
+        if (!saleEnabled && !tradeEnabled) {
+            throw new IllegalArgumentException(
+                    "Selecione ao menos uma modalidade."
+            );
+        }
+
+        if (saleEnabled &&
+                (unitPrice == null || unitPrice.signum() <= 0)) {
+            throw new IllegalArgumentException(
+                    "Informe um preço válido."
+            );
+        }
+
+        Query query = Query.query(
+                Criteria.where("id").is(adId)
+                        .and("writeFenceToken").is(expectedWriteFenceToken)
+                        .and("sellerId").is(sellerId)
+                        .and("status").is(AdStatus.ACTIVE)
+                        .and("quantity").is(expectedQuantity)
+                        .and("remainingQuantity").is(
+                                expectedRemainingQuantity
+                        )
+        );
+
+        Update update = new Update()
+                .set("writeFenceToken", operationId)
+                .set("quantity", newQuantity)
+                .set("remainingQuantity", newRemainingQuantity)
+                .set("saleEnabled", saleEnabled)
+                .set("tradeEnabled", tradeEnabled)
+                .set(
+                        "unitPrice",
+                        saleEnabled ? unitPrice : null
+                )
+                .set("lastAppliedUpdateOperationId", operationId)
+                .set("updatedAt", now);
+
+        return Optional.ofNullable(
+                mongoTemplate.findAndModify(
+                        query,
+                        update,
+                        FindAndModifyOptions.options().returnNew(true),
+                        Ad.class
+                )
+        );
+    }
+
+
     public Optional<Ad> cancelIfActive(String adId, String sellerId, Instant now) {
         Update update = new Update()
                 .set("status", AdStatus.CANCELLED)
@@ -191,4 +273,43 @@ public class OwnAdRepository {
                 .and("sellerId").is(sellerId)
                 .and("status").is(AdStatus.ACTIVE));
     }
+
+    public boolean fenceUnappliedUpdate(
+            String adId,
+            String sellerId,
+            int expectedQuantity,
+            int expectedRemainingQuantity,
+            String expectedWriteFenceToken,
+            String newWriteFenceToken,
+            Instant now
+    ) {
+        if (newWriteFenceToken == null
+                || newWriteFenceToken.isBlank()) {
+            throw new IllegalArgumentException(
+                    "O novo token de escrita é obrigatório."
+            );
+        }
+
+        Query query = Query.query(
+                Criteria.where("id").is(adId)
+                        .and("sellerId").is(sellerId)
+                        .and("status").is(AdStatus.ACTIVE)
+                        .and("quantity").is(expectedQuantity)
+                        .and("remainingQuantity")
+                        .is(expectedRemainingQuantity)
+                        .and("writeFenceToken")
+                        .is(expectedWriteFenceToken)
+        );
+
+        Update update = new Update()
+                .set("writeFenceToken", newWriteFenceToken)
+                .set("updatedAt", now);
+
+        return mongoTemplate.updateFirst(
+                query,
+                update,
+                Ad.class
+        ).getModifiedCount() == 1;
+    }
+
 }
