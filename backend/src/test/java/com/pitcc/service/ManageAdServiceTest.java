@@ -66,7 +66,7 @@ class ManageAdServiceTest {
     CollectionItem item =
         new CollectionItem("u1", "card-1", 5, CardCondition.NEAR_MINT, CardLanguage.PORTUGUESE);
     ReflectionTestUtils.setField(item, "id", "item-1");
-    Ad ad = new Ad("u1", item, 3, true, true, new BigDecimal("45.00"), Instant.now());
+    Ad ad = new Ad("u1", item, 3, true, true, new BigDecimal("45.00"), null, Instant.now());
     ReflectionTestUtils.setField(ad, "id", "ad-1");
     ReflectionTestUtils.setField(ad, "status", status);
     ReflectionTestUtils.setField(ad, "remainingQuantity", remaining);

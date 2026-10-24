@@ -24,6 +24,7 @@ import {
 } from '@tanstack/react-router'
 import { MyCollectionPage } from '@/pages/MyCollectionPage'
 import { CreateAdPage } from '@/pages/CreateAdPage'
+import { MyAdsPage } from '@/pages/MyAdsPage'
 import { MarketplacePage } from '@/pages/MarketplacePage'
 import type { MarketplaceSort } from '@/types/Marketplace'
 
@@ -160,6 +161,16 @@ const createAdRoute = createRoute({
   component: () => (
     <RequireAuth>
       <CreateAdPage />
+    </RequireAuth>
+  ),
+})
+
+const myAdsRoute = createRoute({
+  getParentRoute: () => siteLayoutRoute,
+  path: '/meus-anuncios',
+  component: () => (
+    <RequireAuth>
+      <MyAdsPage />
     </RequireAuth>
   ),
 })

@@ -3,8 +3,6 @@ package com.pitcc.repository;
 import com.pitcc.model.Ad;
 import com.pitcc.model.AdStatus;
 
-import java.util.Optional;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -17,6 +15,8 @@ public interface AdRepository extends MongoRepository<Ad, String> {
             String collectionItemId,
             AdStatus status
     );
+
+    Optional<Ad> findByIdAndSellerId(String id, String sellerId);
 
     Page<Ad> findByStatusAndRemainingQuantityGreaterThan(
             AdStatus status,
