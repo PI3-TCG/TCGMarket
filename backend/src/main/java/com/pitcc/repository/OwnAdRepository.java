@@ -168,10 +168,88 @@ public class OwnAdRepository {
         ));
     }
 
-    /**
-     * Cancela só se o anúncio for do vendedor e ainda estiver ativo. O
-     * remainingQuantity é mantido como registro do que foi liberado.
-     */
+
+    public Optional<Ad> updateQuantityIfActive(
+            String adId,
+            String sellerId,
+            int expectedQuantity,
+            int expectedRemainingQuantity,
+            int newQuantity,
+            int newRemainingQuantity,
+            boolean saleEnabled,
+            boolean tradeEnabled,
+            BigDecimal unitPrice,
+            String operationId,
+            Instant now
+    ) {
+        if (operationId == null || operationId.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Identificador da operação obrigatório."
+            );
+        }
+
+        if (expectedQuantity <= 0 ||
+                expectedRemainingQuantity <= 0 ||
+                newQuantity <= 0 ||
+                newRemainingQuantity <= 0) {
+            throw new IllegalArgumentException(
+                    "As quantidades precisam ser positivas."
+            );
+        }
+
+        if (expectedRemainingQuantity > expectedQuantity ||
+                newRemainingQuantity > newQuantity) {
+            throw new IllegalArgumentException(
+                    "A quantidade restante não pode superar o total."
+            );
+        }
+
+        if (!saleEnabled && !tradeEnabled) {
+            throw new IllegalArgumentException(
+                    "Selecione ao menos uma modalidade."
+            );
+        }
+
+        if (saleEnabled &&
+                (unitPrice == null || unitPrice.signum() <= 0)) {
+            throw new IllegalArgumentException(
+                    "Informe um preço válido."
+            );
+        }
+
+        Query query = Query.query(
+                Criteria.where("id").is(adId)
+                        .and("sellerId").is(sellerId)
+                        .and("status").is(AdStatus.ACTIVE)
+                        .and("quantity").is(expectedQuantity)
+                        .and("remainingQuantity").is(
+                                expectedRemainingQuantity
+                        )
+        );
+
+        Update update = new Update()
+                .set("quantity", newQuantity)
+                .set("remainingQuantity", newRemainingQuantity)
+                .set("saleEnabled", saleEnabled)
+                .set("tradeEnabled", tradeEnabled)
+                .set(
+                        "unitPrice",
+                        saleEnabled ? unitPrice : null
+                )
+                .set("lastAppliedUpdateOperationId", operationId)
+                .set("updatedAt", now);
+
+        return Optional.ofNullable(
+                mongoTemplate.findAndModify(
+                        query,
+                        update,
+                        FindAndModifyOptions.options().returnNew(true),
+                        Ad.class
+                )
+        );
+    }
+
+
     public Optional<Ad> cancelIfActive(String adId, String sellerId, Instant now) {
         Update update = new Update()
                 .set("status", AdStatus.CANCELLED)

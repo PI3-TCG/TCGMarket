@@ -1,3 +1,4 @@
+
 package com.pitcc.model;
 
 import java.math.BigDecimal;
@@ -10,11 +11,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.data.mongodb.core.mapping.FieldType;
 
-/**
- * Anúncio de exemplares de um item da coleção.
- * Carta, condição e idioma são copiados do item para que o marketplace
- * consiga listar e filtrar sem consultar a coleção do vendedor.
- */
 @Document(collection = "ads")
 @CompoundIndexes({
         @CompoundIndex(
@@ -53,6 +49,7 @@ public class Ad {
     private AdStatus status;
     private Instant createdAt;
     private Instant updatedAt;
+    private String lastAppliedUpdateOperationId;
     private Instant cancelledAt;
     private Instant soldOutAt;
 
@@ -69,23 +66,34 @@ public class Ad {
             Instant now
     ) {
         if (sellerId == null || sellerId.isBlank()) {
-            throw new IllegalArgumentException("O vendedor precisa ser informado.");
+            throw new IllegalArgumentException(
+                    "O vendedor precisa ser informado."
+            );
         }
 
         if (item == null || !sellerId.equals(item.getUserId())) {
-            throw new IllegalArgumentException("O item precisa pertencer ao vendedor.");
+            throw new IllegalArgumentException(
+                    "O item precisa pertencer ao vendedor."
+            );
         }
 
         if (quantity <= 0) {
-            throw new IllegalArgumentException("A quantidade precisa ser maior que zero.");
+            throw new IllegalArgumentException(
+                    "A quantidade precisa ser maior que zero."
+            );
         }
 
         if (!saleEnabled && !tradeEnabled) {
-            throw new IllegalArgumentException("Selecione uma modalidade.");
+            throw new IllegalArgumentException(
+                    "Selecione uma modalidade."
+            );
         }
 
-        if (saleEnabled && (unitPrice == null || unitPrice.signum() <= 0)) {
-            throw new IllegalArgumentException("Informe o preço por unidade.");
+        if (saleEnabled &&
+                (unitPrice == null || unitPrice.signum() <= 0)) {
+            throw new IllegalArgumentException(
+                    "Informe o preço por unidade."
+            );
         }
 
         this.sellerId = sellerId;
@@ -93,15 +101,47 @@ public class Ad {
         this.cardId = item.getCardId();
         this.condition = item.getCondition();
         this.language = item.getLanguage();
+
         this.quantity = quantity;
         this.remainingQuantity = quantity;
+
         this.saleEnabled = saleEnabled;
         this.tradeEnabled = tradeEnabled;
-        // Anúncio só de troca nunca guarda preço.
+
         this.unitPrice = saleEnabled ? unitPrice : null;
+
         this.status = AdStatus.ACTIVE;
         this.createdAt = now;
         this.updatedAt = now;
+    }
+
+    public Ad(
+            String id,
+            String sellerId,
+            CollectionItem item,
+            int quantity,
+            boolean saleEnabled,
+            boolean tradeEnabled,
+            BigDecimal unitPrice,
+            Instant now
+    ) {
+        this(
+                sellerId,
+                item,
+                quantity,
+                saleEnabled,
+                tradeEnabled,
+                unitPrice,
+                now
+        );
+
+        if (id == null || id.isBlank()) {
+            throw new IllegalArgumentException(
+                    "O identificador do anúncio é obrigatório."
+            );
+        }
+
+        this.id = id;
     }
 
     public String getId() {
@@ -166,5 +206,8 @@ public class Ad {
 
     public Instant getSoldOutAt() {
         return soldOutAt;
+    }
+    public String getLastAppliedUpdateOperationId() {
+        return lastAppliedUpdateOperationId;
     }
 }
