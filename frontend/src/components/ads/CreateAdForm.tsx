@@ -629,14 +629,12 @@ function PublishedPanel({ ad }: { ad: AdResponse }) {
 
 function MyAdsButton() {
   return (
-    <Button
-      variant="outline"
-      disabled
-      title="Meus anúncios ainda não está disponível"
-      className="w-full sm:w-auto"
+    <Link
+      to="/meus-anuncios"
+      className="inline-flex h-10 w-full sm:w-auto items-center justify-center gap-2 rounded-control border border-primary-900 px-4 text-sm font-semibold text-primary-900 hover:bg-primary-100 focus-visible:outline-2 focus-visible:outline-secondary-500"
     >
       Meus anúncios
-    </Button>
+    </Link>
   )
 }
 

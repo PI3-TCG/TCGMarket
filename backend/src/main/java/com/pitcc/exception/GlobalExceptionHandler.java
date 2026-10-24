@@ -5,6 +5,7 @@ import com.pitcc.dto.ApiErrorResponse.FieldErrorResponse;
 import com.pitcc.dto.CreateAdRequest;
 import com.pitcc.dto.HideCardRequest;
 import com.pitcc.dto.LoginRequest;
+import com.pitcc.dto.UpdateAdRequest;
 import com.pitcc.dto.UpdateProfileRequest;
 import com.pitcc.dto.UpdateUserRoleRequest;
 import com.pitcc.integration.catalog.ExternalApiException;
@@ -43,7 +44,7 @@ public class GlobalExceptionHandler {
                     case UpdateUserRoleRequest _ -> "Perfil inválido.";
                     case UpdateProfileRequest _ -> "Dados do perfil inválidos.";
                     case HideCardRequest _ -> "Motivo inválido.";
-                    case CreateAdRequest _ -> "Revise os dados do anúncio.";
+                    case CreateAdRequest _, UpdateAdRequest _ -> "Revise os dados do anúncio.";
                     case null, default -> "Dados de cadastro inválidos.";
                 };
         return ResponseEntity.badRequest().body(error(HttpStatus.BAD_REQUEST, message, fields));
@@ -194,6 +195,23 @@ public class GlobalExceptionHandler {
             AdQuantityUnavailableException exception
     ) {
         return conflict("quantity", exception.getMessage());
+    }
+
+    @ExceptionHandler(AdNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleAdNotFound(AdNotFoundException exception) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(error(HttpStatus.NOT_FOUND, exception.getMessage(), List.of()));
+    }
+
+    // O campo "status" leva o status atual para o front sincronizar sem nova consulta.
+    @ExceptionHandler(AdNotActiveException.class)
+    public ResponseEntity<ApiErrorResponse> handleAdNotActive(AdNotActiveException exception) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(error(
+                        HttpStatus.CONFLICT,
+                        exception.getMessage(),
+                        List.of(new FieldErrorResponse("status", exception.getCurrentStatus().name()))
+                ));
     }
 
     private ResponseEntity<ApiErrorResponse> unauthorized(String message) {
