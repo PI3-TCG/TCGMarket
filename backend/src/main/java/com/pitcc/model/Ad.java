@@ -10,11 +10,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.data.mongodb.core.mapping.FieldType;
 
-/**
- * Anúncio de exemplares de um item da coleção.
- * Carta, condição e idioma são copiados do item para que o marketplace
- * consiga listar e filtrar sem consultar a coleção do vendedor.
- */
+
 @Document(collection = "ads")
 @CompoundIndexes({
         @CompoundIndex(
@@ -37,12 +33,10 @@ public class Ad {
 
     private String sellerId;
     private String collectionItemId;
-    private String cardId;
-    private CardCondition condition;
-    private CardLanguage language;
 
     private Integer quantity;
     private Integer remainingQuantity;
+    private String description;
 
     private boolean saleEnabled;
     private boolean tradeEnabled;
@@ -66,6 +60,7 @@ public class Ad {
             boolean saleEnabled,
             boolean tradeEnabled,
             BigDecimal unitPrice,
+            String description,
             Instant now
     ) {
         if (sellerId == null || sellerId.isBlank()) {
@@ -90,18 +85,20 @@ public class Ad {
 
         this.sellerId = sellerId;
         this.collectionItemId = item.getId();
-        this.cardId = item.getCardId();
-        this.condition = item.getCondition();
-        this.language = item.getLanguage();
         this.quantity = quantity;
         this.remainingQuantity = quantity;
         this.saleEnabled = saleEnabled;
         this.tradeEnabled = tradeEnabled;
+        this.description = description == null || description.isBlank()
+                ? null
+                : description.strip();
         // Anúncio só de troca nunca guarda preço.
         this.unitPrice = saleEnabled ? unitPrice : null;
         this.status = AdStatus.ACTIVE;
         this.createdAt = now;
         this.updatedAt = now;
+        this.cancelledAt = null;
+        this.soldOutAt = null;
     }
 
     public String getId() {
@@ -114,18 +111,6 @@ public class Ad {
 
     public String getCollectionItemId() {
         return collectionItemId;
-    }
-
-    public String getCardId() {
-        return cardId;
-    }
-
-    public CardCondition getCondition() {
-        return condition;
-    }
-
-    public CardLanguage getLanguage() {
-        return language;
     }
 
     public Integer getQuantity() {
@@ -144,6 +129,10 @@ public class Ad {
         return tradeEnabled;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
     public BigDecimal getUnitPrice() {
         return unitPrice;
     }
@@ -160,11 +149,12 @@ public class Ad {
         return updatedAt;
     }
 
-    public Instant getCancelledAt() {
+    public Instant getCancelledAt(){
         return cancelledAt;
     }
 
     public Instant getSoldOutAt() {
         return soldOutAt;
     }
+
 }

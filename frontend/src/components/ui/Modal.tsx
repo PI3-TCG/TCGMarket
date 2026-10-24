@@ -20,6 +20,7 @@ type ModalProps = {
   secondaryAction?: ModalAction
   primaryAction?: ModalAction
   className?: string
+  size?: 'md' | 'lg'
 }
 
 const FOCUSABLE =
@@ -35,6 +36,7 @@ export function Modal({
   secondaryAction,
   primaryAction,
   className,
+  size = 'md',
 }: ModalProps) {
   const titleId = useId()
   const dialogRef = useRef<HTMLDivElement>(null)
@@ -52,6 +54,7 @@ export function Modal({
     const nodes = dialog
       ? [...dialog.querySelectorAll<HTMLElement>(FOCUSABLE)]
       : []
+
     nodes[0]?.focus()
 
     function onKey(event: KeyboardEvent) {
@@ -61,10 +64,16 @@ export function Modal({
       }
 
       if (event.key !== 'Tab' || !dialog) return
-      const focusable = [...dialog.querySelectorAll<HTMLElement>(FOCUSABLE)]
+
+      const focusable = [
+        ...dialog.querySelectorAll<HTMLElement>(FOCUSABLE),
+      ]
+
       if (focusable.length === 0) return
+
       const first = focusable[0]
       const last = focusable[focusable.length - 1]
+
       if (event.shiftKey && document.activeElement === first) {
         event.preventDefault()
         last.focus()
@@ -75,6 +84,7 @@ export function Modal({
     }
 
     document.addEventListener('keydown', onKey)
+
     const previousOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
 
@@ -98,7 +108,6 @@ export function Modal({
         preview === 'hover'
           ? 'border-2 border-primary-900'
           : 'border-neutral-200',
-        !embedded && 'max-w-md',
         className,
       )}
     >
@@ -109,18 +118,21 @@ export function Modal({
         >
           {title}
         </h2>
+
         <button
           type="button"
           aria-label="Fechar"
           onClick={onClose}
-          className="grid size-8 cursor-pointer place-items-center rounded-control text-neutral-700 hover:bg-primary-100 hover:text-primary-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary-500"
+          className="grid size-8 shrink-0 cursor-pointer place-items-center rounded-control text-neutral-700 hover:bg-primary-100 hover:text-primary-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary-500"
         >
           <Icon name="close" size={20} />
         </button>
       </div>
+
       <div className="mt-4 space-y-2 text-base text-neutral-700">
         {children}
       </div>
+
       {secondaryAction || primaryAction ? (
         <div className="mt-6 flex flex-wrap justify-end gap-3">
           {secondaryAction ? (
@@ -131,6 +143,7 @@ export function Modal({
               {secondaryAction.label}
             </Button>
           ) : null}
+
           {primaryAction ? (
             <Button
               variant={primaryAction.variant ?? 'primary'}
@@ -152,8 +165,12 @@ export function Modal({
         className="absolute inset-0 bg-neutral-900/50"
         onMouseDown={onClose}
       />
+
       <div
-        className="relative z-10 w-full max-w-md"
+        className={cn(
+          'relative z-10 w-full',
+          size === 'lg' ? 'max-w-3xl' : 'max-w-md',
+        )}
         onMouseDown={(event) => event.stopPropagation()}
       >
         {panel}

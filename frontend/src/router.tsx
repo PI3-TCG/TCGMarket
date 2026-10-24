@@ -24,7 +24,8 @@ import {
 } from '@tanstack/react-router'
 import { MyCollectionPage } from '@/pages/MyCollectionPage'
 import { CreateAdPage } from '@/pages/CreateAdPage'
-import { MyAdsPage } from '@/pages/MyAdsPage'
+import { MarketplacePage } from '@/pages/MarketplacePage'
+import type { MarketplaceSort } from '@/types/Marketplace'
 
 const rootRoute = createRootRoute({
   component: RootLayout,
@@ -163,19 +164,29 @@ const createAdRoute = createRoute({
   ),
 })
 
-const myAdsRoute = createRoute({
+const marketplaceRoute = createRoute({
   getParentRoute: () => siteLayoutRoute,
-  path: '/meus-anuncios',
-  component: () => (
-    <RequireAuth>
-      <MyAdsPage />
-    </RequireAuth>
-  ),
+  path: '/marketplace',
+
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): { sort: MarketplaceSort } => ({
+    sort: search.sort === 'priceDesc' ? 'priceDesc' : 'recent',
+  }),
+
+  component: MarketplaceRouteView,
 })
+
+function MarketplaceRouteView() {
+  const { sort } = marketplaceRoute.useSearch()
+
+  return <MarketplacePage sort={sort} />
+}
 
 const routeTree = rootRoute.addChildren([
   siteLayoutRoute.addChildren([
     indexRoute,
+    marketplaceRoute,
     catalogRoute,
     cardDetailsRoute,
     profileRoute,

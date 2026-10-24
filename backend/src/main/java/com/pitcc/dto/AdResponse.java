@@ -14,6 +14,7 @@ public record AdResponse(
         boolean saleEnabled,
         boolean tradeEnabled,
         BigDecimal unitPrice,
+        String description,
         Instant createdAt,
         CollectionItemAvailabilityResponse availability
 ) {
