@@ -1,3 +1,5 @@
+import type { IconName } from '@/components/ui/Icon'
+import type { AdStatus } from '@/types/Ad'
 import type { CardCondition, CardLanguage } from '@/types/Collection'
 
 export const MAX_UNIT_PRICE = 999999.99
@@ -61,6 +63,33 @@ export function copies(quantity: number) {
 
 export function availableCopies(quantity: number) {
   return quantity === 1 ? '1 disponível' : `${quantity} disponíveis`
+}
+
+/** Cor e ícone juntos: a cor nunca é a única forma de identificar o status. */
+export const adStatusMeta: Record<
+  AdStatus,
+  { label: string; icon: IconName; className: string }
+> = {
+  ACTIVE: {
+    label: 'Ativo',
+    icon: 'check-circle',
+    className: 'bg-success-50 text-success-700',
+  },
+  PENDING: {
+    label: 'Pendente',
+    icon: 'alert',
+    className: 'bg-warning-50 text-warning-700',
+  },
+  SOLD_OUT: {
+    label: 'Finalizado',
+    icon: 'check-circle',
+    className: 'bg-info-50 text-info-700',
+  },
+  CANCELLED: {
+    label: 'Cancelado',
+    icon: 'close-circle',
+    className: 'bg-neutral-100 text-neutral-700',
+  },
 }
 
 export function modalityLabel(sale: boolean, trade: boolean) {

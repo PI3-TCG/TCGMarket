@@ -199,6 +199,7 @@ const routeTree = rootRoute.addChildren([
     ]),
     myCollectionRoute,
     createAdRoute,
+    myAdsRoute,
   ]),
   registerRoute,
   loginRoute,

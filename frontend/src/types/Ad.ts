@@ -1,6 +1,17 @@
-import type { CollectionItemAvailability } from './Collection'
+import type {
+  CardCondition,
+  CardLanguage,
+  CollectionCard,
+  CollectionItemAvailability,
+} from './Collection'
 
-export type AdStatus = 'ACTIVE' | 'CANCELLED' | 'SOLD_OUT'
+/**
+ * PENDING (aguardando pagamento) ainda não é produzido pelo backend; ele chega
+ * com o fluxo de compra. A interface já sabe exibi-lo.
+ */
+export type AdStatus = 'ACTIVE' | 'PENDING' | 'SOLD_OUT' | 'CANCELLED'
+
+export type AdModality = 'SALE' | 'TRADE' | 'BOTH'
 
 export interface CreateAdRequest {
   collectionItemId: string
