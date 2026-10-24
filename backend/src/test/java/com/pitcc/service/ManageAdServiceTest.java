@@ -98,6 +98,10 @@ class ManageAdServiceTest {
         ReflectionTestUtils.setField(card, "id", "card-1");
     }
 
+    // =========================================================
+    // HELPERS
+    // =========================================================
+
     private Ad ad(AdStatus status, int remaining) {
         return ad(status, 3, remaining);
     }
@@ -184,10 +188,57 @@ class ManageAdServiceTest {
         return item;
     }
 
+    private CollectionItem pendingUnappliedUpdate() {
+        CollectionItem item = itemWithReservation(
+                AdReservationStatus.PENDING_UPDATE,
+                3
+        );
+
+        AdReservation reservation =
+                item.getAdReservations().getFirst();
+
+        ReflectionTestUtils.setField(
+                reservation,
+                "pendingOperationId",
+                "op-pendente"
+        );
+
+        ReflectionTestUtils.setField(
+                reservation,
+                "pendingQuantity",
+                4
+        );
+
+        ReflectionTestUtils.setField(
+                reservation,
+                "pendingSaleEnabled",
+                true
+        );
+
+        ReflectionTestUtils.setField(
+                reservation,
+                "pendingTradeEnabled",
+                false
+        );
+
+        ReflectionTestUtils.setField(
+                reservation,
+                "pendingUnitPrice",
+                new BigDecimal("50.00")
+        );
+
+        ReflectionTestUtils.setField(
+                item,
+                "committedQuantity",
+                4
+        );
+
+        return item;
+    }
+
     private void givenEditableAd(Ad current) {
-        when(
-                adRepository.findByIdAndSellerId("ad-1", "u1")
-        ).thenReturn(Optional.of(current));
+        when(adRepository.findByIdAndSellerId("ad-1", "u1"))
+                .thenReturn(Optional.of(current));
 
         when(
                 collectionItemRepository.findByIdAndUserId(
@@ -238,6 +289,7 @@ class ManageAdServiceTest {
                         eq(sale),
                         eq(trade),
                         eq(price),
+                        isNull(),
                         anyString(),
                         any(Instant.class)
                 )
@@ -257,10 +309,13 @@ class ManageAdServiceTest {
                 )
         ).thenReturn(true);
 
-        when(
-                cardRepository.findById("card-1")
-        ).thenReturn(Optional.of(card));
+        when(cardRepository.findById("card-1"))
+                .thenReturn(Optional.of(card));
     }
+
+    // =========================================================
+    // LISTAGEM E SEGURANÇA
+    // =========================================================
 
     @Test
     void shouldListOwnAdsWithCardData() {
@@ -285,9 +340,8 @@ class ManageAdServiceTest {
                 )
         );
 
-        when(
-                cardRepository.findAllById(any())
-        ).thenReturn(List.of(card));
+        when(cardRepository.findAllById(any()))
+                .thenReturn(List.of(card));
 
         var page = service.findOwnAds(
                 "u1",
@@ -298,10 +352,19 @@ class ManageAdServiceTest {
 
         assertEquals(1, page.getTotalElements());
 
-        OwnAdResponse response = page.getContent().getFirst();
+        OwnAdResponse response =
+                page.getContent().getFirst();
 
-        assertEquals("Dark Magician", response.card().name());
-        assertEquals(CardCondition.NEAR_MINT, response.condition());
+        assertEquals(
+                "Dark Magician",
+                response.card().name()
+        );
+
+        assertEquals(
+                CardCondition.NEAR_MINT,
+                response.condition()
+        );
+
         assertNull(response.releasedQuantity());
         assertEquals("dark", filters.search());
     }
@@ -314,7 +377,9 @@ class ManageAdServiceTest {
                         "u1",
                         0,
                         21,
-                        new OwnAdFilters(null, null, null, null)
+                        new OwnAdFilters(
+                                null, null, null, null
+                        )
                 )
         );
 
@@ -324,7 +389,9 @@ class ManageAdServiceTest {
     @Test
     void shouldReturnNotFoundForAdOfAnotherUser() {
         when(
-                adRepository.findByIdAndSellerId("ad-1", "u1")
+                adRepository.findByIdAndSellerId(
+                        "ad-1", "u1"
+                )
         ).thenReturn(Optional.empty());
 
         assertThrows(
@@ -334,9 +401,38 @@ class ManageAdServiceTest {
     }
 
     @Test
+    void shouldRejectAbortedCreationMarker() {
+        Ad marker = ad(AdStatus.CANCELLED, 0);
+
+        ReflectionTestUtils.setField(
+                marker,
+                "creationAborted",
+                true
+        );
+
+        when(
+                adRepository.findByIdAndSellerId(
+                        "ad-1", "u1"
+                )
+        ).thenReturn(Optional.of(marker));
+
+        assertThrows(
+                AdNotFoundException.class,
+                () -> service.findOwnAd("u1", "ad-1")
+        );
+
+        verifyNoInteractions(cardRepository);
+    }
+
+    // =========================================================
+    // EDIÇÃO DE ANÚNCIOS
+    // =========================================================
+
+    @Test
     void shouldUpdateModalityAndPriceOfActiveAd() {
         Ad current = ad(AdStatus.ACTIVE, 3, 3);
         Ad updated = ad(AdStatus.ACTIVE, 3, 3);
+
         BigDecimal price = new BigDecimal("50.00");
 
         givenSuccessfulUpdate(
@@ -359,10 +455,7 @@ class ManageAdServiceTest {
 
         assertEquals("ad-1", response.id());
 
-        verify(
-                ownAdRepository,
-                never()
-        ).updateIfActive(
+        verify(ownAdRepository, never()).updateIfActive(
                 anyString(),
                 anyString(),
                 anyBoolean(),
@@ -405,6 +498,7 @@ class ManageAdServiceTest {
                 eq(false),
                 eq(true),
                 isNull(),
+                isNull(),
                 anyString(),
                 any(Instant.class)
         );
@@ -437,9 +531,14 @@ class ManageAdServiceTest {
         assertEquals(5, response.quantity());
         assertEquals(5, response.remainingQuantity());
 
-        ArgumentCaptor<String> preparedOperation = ArgumentCaptor.forClass(String.class);
-        ArgumentCaptor<String> appliedOperation = ArgumentCaptor.forClass(String.class);
-        ArgumentCaptor<String> confirmedOperation = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<String> preparedOperation =
+                ArgumentCaptor.forClass(String.class);
+
+        ArgumentCaptor<String> appliedOperation =
+                ArgumentCaptor.forClass(String.class);
+
+        ArgumentCaptor<String> confirmedOperation =
+                ArgumentCaptor.forClass(String.class);
 
         verify(reservationRepository).beginUpdate(
                 eq("item-1"),
@@ -463,6 +562,7 @@ class ManageAdServiceTest {
                 eq(true),
                 eq(false),
                 eq(new BigDecimal("50.00")),
+                isNull(),
                 appliedOperation.capture(),
                 any(Instant.class)
         );
@@ -479,8 +579,15 @@ class ManageAdServiceTest {
                 eq(new BigDecimal("50.00"))
         );
 
-        assertEquals(preparedOperation.getValue(), appliedOperation.getValue());
-        assertEquals(preparedOperation.getValue(), confirmedOperation.getValue());
+        assertEquals(
+                preparedOperation.getValue(),
+                appliedOperation.getValue()
+        );
+
+        assertEquals(
+                preparedOperation.getValue(),
+                confirmedOperation.getValue()
+        );
     }
 
     @Test
@@ -560,20 +667,32 @@ class ManageAdServiceTest {
                 eq(true),
                 eq(false),
                 eq(new BigDecimal("50.00")),
+                isNull(),
                 anyString(),
                 any(Instant.class)
         );
     }
 
+    // =========================================================
+    // RECUPERAÇÃO: EDIÇÃO JÁ APLICADA
+    // =========================================================
+
     @Test
     void shouldConfirmAppliedPendingEditOnRetryWithoutReservingAgain() {
         Ad applied = ad(AdStatus.ACTIVE, 4, 4);
+
         ReflectionTestUtils.setField(
                 applied,
                 "lastAppliedUpdateOperationId",
                 "op-previous"
         );
-        ReflectionTestUtils.setField(applied, "tradeEnabled", false);
+
+        ReflectionTestUtils.setField(
+                applied,
+                "tradeEnabled",
+                false
+        );
+
         ReflectionTestUtils.setField(
                 applied,
                 "unitPrice",
@@ -584,28 +703,98 @@ class ManageAdServiceTest {
                 AdReservationStatus.PENDING_UPDATE,
                 3
         );
-        AdReservation pending = pendingItem.getAdReservations().getFirst();
-        ReflectionTestUtils.setField(pending, "pendingOperationId", "op-previous");
-        ReflectionTestUtils.setField(pending, "pendingQuantity", 4);
-        ReflectionTestUtils.setField(pending, "pendingSaleEnabled", true);
-        ReflectionTestUtils.setField(pending, "pendingTradeEnabled", false);
+
+        AdReservation pending =
+                pendingItem.getAdReservations().getFirst();
+
+        ReflectionTestUtils.setField(
+                pending,
+                "pendingOperationId",
+                "op-previous"
+        );
+
+        ReflectionTestUtils.setField(
+                pending,
+                "pendingQuantity",
+                4
+        );
+
+        ReflectionTestUtils.setField(
+                pending,
+                "pendingSaleEnabled",
+                true
+        );
+
+        ReflectionTestUtils.setField(
+                pending,
+                "pendingTradeEnabled",
+                false
+        );
+
         ReflectionTestUtils.setField(
                 pending,
                 "pendingUnitPrice",
                 new BigDecimal("50.00")
         );
-        ReflectionTestUtils.setField(pendingItem, "committedQuantity", 4);
+
+        ReflectionTestUtils.setField(
+                pendingItem,
+                "committedQuantity",
+                4
+        );
 
         CollectionItem activeItem = itemWithReservation(
                 AdReservationStatus.ACTIVE,
                 4
         );
 
-        when(adRepository.findByIdAndSellerId("ad-1", "u1"))
-                .thenReturn(Optional.of(applied));
-        when(collectionItemRepository.findByIdAndUserId("item-1", "u1"))
-                .thenReturn(Optional.of(pendingItem), Optional.of(activeItem));
-        when(reservationRepository.confirmUpdate(
+        when(
+                adRepository.findByIdAndSellerId(
+                        "ad-1", "u1"
+                )
+        ).thenReturn(Optional.of(applied));
+
+        when(
+                collectionItemRepository.findByIdAndUserId(
+                        "item-1", "u1"
+                )
+        ).thenReturn(
+                Optional.of(pendingItem),
+                Optional.of(activeItem)
+        );
+
+        when(
+                reservationRepository.confirmUpdate(
+                        eq("item-1"),
+                        eq("u1"),
+                        eq("ad-1"),
+                        eq("op-previous"),
+                        eq(3),
+                        eq(4),
+                        eq(true),
+                        eq(false),
+                        eq(new BigDecimal("50.00"))
+                )
+        ).thenReturn(true);
+
+        when(cardRepository.findById("card-1"))
+                .thenReturn(Optional.of(card));
+
+        OwnAdResponse result = service.updateOwnAd(
+                "u1",
+                "ad-1",
+                new UpdateAdRequest(
+                        true,
+                        false,
+                        new BigDecimal("50"),
+                        4
+                )
+        );
+
+        assertEquals(4, result.quantity());
+        assertEquals(4, result.remainingQuantity());
+
+        verify(reservationRepository).confirmUpdate(
                 eq("item-1"),
                 eq("u1"),
                 eq("ad-1"),
@@ -615,64 +804,188 @@ class ManageAdServiceTest {
                 eq(true),
                 eq(false),
                 eq(new BigDecimal("50.00"))
-        )).thenReturn(true);
+        );
+
+        verify(reservationRepository, never()).beginUpdate(
+                anyString(),
+                anyString(),
+                anyString(),
+                anyString(),
+                anyInt(),
+                anyInt(),
+                anyBoolean(),
+                anyBoolean(),
+                any()
+        );
+
+        verifyNoInteractions(ownAdRepository);
+    }
+
+    // =========================================================
+    // RECUPERAÇÃO: EDIÇÃO NÃO APLICADA
+    // =========================================================
+
+    @Test
+    void shouldRecoverUnappliedPendingEditBeforeRetry() {
+        Ad current = ad(AdStatus.ACTIVE, 3, 3);
+
+        CollectionItem pendingItem = pendingUnappliedUpdate();
+
+        CollectionItem restoredItem = itemWithReservation(
+                AdReservationStatus.ACTIVE,
+                3
+        );
+
+        when(
+                adRepository.findByIdAndSellerId(
+                        "ad-1", "u1"
+                )
+        ).thenReturn(Optional.of(current));
+
+        when(
+                collectionItemRepository.findByIdAndUserId(
+                        "item-1", "u1"
+                )
+        ).thenReturn(
+                Optional.of(pendingItem),
+                Optional.of(restoredItem)
+        );
+
+        when(
+                ownAdRepository.fenceUnappliedUpdate(
+                        eq("ad-1"),
+                        eq("u1"),
+                        eq(3),
+                        eq(3),
+                        isNull(),
+                        startsWith("fence-"),
+                        any(Instant.class)
+                )
+        ).thenReturn(true);
+
+        when(
+                reservationRepository.abortUpdate(
+                        "item-1",
+                        "u1",
+                        "ad-1",
+                        "op-pendente",
+                        3,
+                        4
+                )
+        ).thenReturn(true);
+
         when(cardRepository.findById("card-1"))
                 .thenReturn(Optional.of(card));
 
         OwnAdResponse result = service.updateOwnAd(
                 "u1",
                 "ad-1",
-                new UpdateAdRequest(true, false, new BigDecimal("50"), 4)
+                new UpdateAdRequest(
+                        true,
+                        true,
+                        new BigDecimal("45.00"),
+                        3
+                )
         );
 
-        assertEquals(4, result.quantity());
-        assertEquals(4, result.remainingQuantity());
-        verify(reservationRepository).confirmUpdate(
-                eq("item-1"), eq("u1"), eq("ad-1"), eq("op-previous"),
-                eq(3), eq(4), eq(true), eq(false), eq(new BigDecimal("50.00"))
+        assertEquals(3, result.quantity());
+        assertEquals(3, result.remainingQuantity());
+
+        verify(ownAdRepository).fenceUnappliedUpdate(
+                eq("ad-1"),
+                eq("u1"),
+                eq(3),
+                eq(3),
+                isNull(),
+                startsWith("fence-"),
+                any(Instant.class)
         );
+
+        verify(reservationRepository).abortUpdate(
+                "item-1",
+                "u1",
+                "ad-1",
+                "op-pendente",
+                3,
+                4
+        );
+
         verify(reservationRepository, never()).beginUpdate(
-                anyString(), anyString(), anyString(), anyString(),
-                anyInt(), anyInt(), anyBoolean(), anyBoolean(), any()
+                anyString(),
+                anyString(),
+                anyString(),
+                anyString(),
+                anyInt(),
+                anyInt(),
+                anyBoolean(),
+                anyBoolean(),
+                any()
         );
-        verifyNoInteractions(ownAdRepository);
     }
 
     @Test
-    void shouldKeepUnappliedPendingEditReservedWithoutAbort() {
+    void shouldKeepPendingReservationWhenFencingFails() {
         Ad current = ad(AdStatus.ACTIVE, 3, 3);
-        CollectionItem pendingItem = itemWithReservation(
-                AdReservationStatus.PENDING_UPDATE,
-                3
-        );
-        AdReservation pending = pendingItem.getAdReservations().getFirst();
-        ReflectionTestUtils.setField(pending, "pendingOperationId", "op-unapplied");
-        ReflectionTestUtils.setField(pending, "pendingQuantity", 4);
-        ReflectionTestUtils.setField(pending, "pendingSaleEnabled", true);
-        ReflectionTestUtils.setField(pending, "pendingTradeEnabled", false);
-        ReflectionTestUtils.setField(
-                pending,
-                "pendingUnitPrice",
-                new BigDecimal("50.00")
-        );
 
-        when(adRepository.findByIdAndSellerId("ad-1", "u1"))
-                .thenReturn(Optional.of(current));
-        when(collectionItemRepository.findByIdAndUserId("item-1", "u1"))
-                .thenReturn(Optional.of(pendingItem));
+        CollectionItem pendingItem = pendingUnappliedUpdate();
+
+        when(
+                adRepository.findByIdAndSellerId(
+                        "ad-1", "u1"
+                )
+        ).thenReturn(Optional.of(current));
+
+        when(
+                collectionItemRepository.findByIdAndUserId(
+                        "item-1", "u1"
+                )
+        ).thenReturn(Optional.of(pendingItem));
+
+        when(
+                ownAdRepository.fenceUnappliedUpdate(
+                        eq("ad-1"),
+                        eq("u1"),
+                        eq(3),
+                        eq(3),
+                        isNull(),
+                        startsWith("fence-"),
+                        any(Instant.class)
+                )
+        ).thenReturn(false);
 
         IllegalStateException exception = assertThrows(
                 IllegalStateException.class,
                 () -> service.updateOwnAd(
                         "u1",
                         "ad-1",
-                        new UpdateAdRequest(true, false, new BigDecimal("50"), 4)
+                        new UpdateAdRequest(
+                                true,
+                                false,
+                                new BigDecimal("50.00"),
+                                4
+                        )
                 )
         );
 
-        assertTrue(exception.getMessage().contains("permanece protegida"));
-        verifyNoInteractions(reservationRepository, ownAdRepository);
+        assertTrue(
+                exception.getMessage().contains(
+                        "A edição mudou durante a recuperação"
+                )
+        );
+
+        verify(reservationRepository, never()).abortUpdate(
+                anyString(),
+                anyString(),
+                anyString(),
+                anyString(),
+                anyInt(),
+                anyInt()
+        );
     }
+
+    // =========================================================
+    // VALIDAÇÕES DE EDIÇÃO
+    // =========================================================
 
     @Test
     void shouldRequireModalityAndPriceWhenUpdating() {
@@ -681,18 +994,29 @@ class ManageAdServiceTest {
                 () -> service.updateOwnAd(
                         "u1",
                         "ad-1",
-                        new UpdateAdRequest(false, false, null)
+                        new UpdateAdRequest(
+                                false,
+                                false,
+                                null
+                        )
                 )
         );
 
-        assertEquals("modality", noModality.getField());
+        assertEquals(
+                "modality",
+                noModality.getField()
+        );
 
         InvalidAdException noPrice = assertThrows(
                 InvalidAdException.class,
                 () -> service.updateOwnAd(
                         "u1",
                         "ad-1",
-                        new UpdateAdRequest(true, false, null)
+                        new UpdateAdRequest(
+                                true,
+                                false,
+                                null
+                        )
                 )
         );
 
@@ -708,9 +1032,13 @@ class ManageAdServiceTest {
     @Test
     void shouldRejectUpdateWhenAdIsNoLongerActive() {
         when(
-                adRepository.findByIdAndSellerId("ad-1", "u1")
+                adRepository.findByIdAndSellerId(
+                        "ad-1", "u1"
+                )
         ).thenReturn(
-                Optional.of(ad(AdStatus.SOLD_OUT, 0))
+                Optional.of(
+                        ad(AdStatus.SOLD_OUT, 0)
+                )
         );
 
         AdNotActiveException exception = assertThrows(
@@ -740,7 +1068,9 @@ class ManageAdServiceTest {
     @Test
     void shouldRejectUpdateOfAdFromAnotherUser() {
         when(
-                adRepository.findByIdAndSellerId("ad-1", "u2")
+                adRepository.findByIdAndSellerId(
+                        "ad-1", "u2"
+                )
         ).thenReturn(Optional.empty());
 
         assertThrows(
@@ -748,7 +1078,11 @@ class ManageAdServiceTest {
                 () -> service.updateOwnAd(
                         "u2",
                         "ad-1",
-                        new UpdateAdRequest(false, true, null)
+                        new UpdateAdRequest(
+                                false,
+                                true,
+                                null
+                        )
                 )
         );
 
@@ -763,7 +1097,9 @@ class ManageAdServiceTest {
         Ad current = ad(AdStatus.ACTIVE, 3, 2);
 
         when(
-                adRepository.findByIdAndSellerId("ad-1", "u1")
+                adRepository.findByIdAndSellerId(
+                        "ad-1", "u1"
+                )
         ).thenReturn(Optional.of(current));
 
         InvalidAdException exception = assertThrows(
@@ -793,10 +1129,15 @@ class ManageAdServiceTest {
         Ad current = ad(AdStatus.ACTIVE, 3);
 
         CollectionItem initiallyLoaded =
-                itemWithReservation(AdReservationStatus.ACTIVE, 3);
+                itemWithReservation(
+                        AdReservationStatus.ACTIVE,
+                        3
+                );
 
-        CollectionItem latest =
-                itemWithReservation(AdReservationStatus.ACTIVE, 3);
+        CollectionItem latest = itemWithReservation(
+                AdReservationStatus.ACTIVE,
+                3
+        );
 
         ReflectionTestUtils.setField(
                 latest,
@@ -811,13 +1152,14 @@ class ManageAdServiceTest {
         );
 
         when(
-                adRepository.findByIdAndSellerId("ad-1", "u1")
+                adRepository.findByIdAndSellerId(
+                        "ad-1", "u1"
+                )
         ).thenReturn(Optional.of(current));
 
         when(
                 collectionItemRepository.findByIdAndUserId(
-                        "item-1",
-                        "u1"
+                        "item-1", "u1"
                 )
         ).thenReturn(
                 Optional.of(initiallyLoaded),
@@ -853,14 +1195,22 @@ class ManageAdServiceTest {
                         )
                 );
 
-        assertEquals(1, exception.getAvailableQuantity());
+        assertEquals(
+                1,
+                exception.getAvailableQuantity()
+        );
 
         verifyNoInteractions(ownAdRepository);
     }
 
+    // =========================================================
+    // FALHAS DURANTE ATUALIZAÇÃO
+    // =========================================================
+
     @Test
     void shouldAbortPreparationWhenAdWasNotUpdated() {
         Ad current = ad(AdStatus.ACTIVE, 3);
+
         givenEditableAd(current);
 
         when(
@@ -888,6 +1238,7 @@ class ManageAdServiceTest {
                         eq(true),
                         eq(false),
                         eq(new BigDecimal("10.00")),
+                        isNull(),
                         anyString(),
                         any(Instant.class)
                 )
@@ -931,6 +1282,7 @@ class ManageAdServiceTest {
     @Test
     void shouldKeepReservationPendingWhenAdWriteFails() {
         Ad current = ad(AdStatus.ACTIVE, 3);
+
         givenEditableAd(current);
 
         when(
@@ -958,11 +1310,14 @@ class ManageAdServiceTest {
                         eq(true),
                         eq(false),
                         eq(new BigDecimal("10.00")),
+                        isNull(),
                         anyString(),
                         any(Instant.class)
                 )
         ).thenThrow(
-                new IllegalStateException("Falha de comunicação")
+                new IllegalStateException(
+                        "Falha de comunicação"
+                )
         );
 
         IllegalStateException exception = assertThrows(
@@ -980,13 +1335,12 @@ class ManageAdServiceTest {
         );
 
         assertTrue(
-                exception.getMessage().contains("reconciliação")
+                exception.getMessage().contains(
+                        "reconciliação"
+                )
         );
 
-        verify(
-                reservationRepository,
-                never()
-        ).abortUpdate(
+        verify(reservationRepository, never()).abortUpdate(
                 anyString(),
                 anyString(),
                 anyString(),
@@ -995,10 +1349,7 @@ class ManageAdServiceTest {
                 anyInt()
         );
 
-        verify(
-                reservationRepository,
-                never()
-        ).confirmUpdate(
+        verify(reservationRepository, never()).confirmUpdate(
                 anyString(),
                 anyString(),
                 anyString(),
@@ -1043,6 +1394,7 @@ class ManageAdServiceTest {
                         eq(true),
                         eq(false),
                         eq(new BigDecimal("10.00")),
+                        isNull(),
                         anyString(),
                         any(Instant.class)
                 )
@@ -1077,13 +1429,12 @@ class ManageAdServiceTest {
         );
 
         assertTrue(
-                exception.getMessage().contains("reconciliação")
+                exception.getMessage().contains(
+                        "reconciliação"
+                )
         );
 
-        verify(
-                reservationRepository,
-                never()
-        ).abortUpdate(
+        verify(reservationRepository, never()).abortUpdate(
                 anyString(),
                 anyString(),
                 anyString(),
@@ -1093,19 +1444,24 @@ class ManageAdServiceTest {
         );
     }
 
+    // =========================================================
+    // CANCELAMENTO
+    // =========================================================
+
     @Test
     void shouldCancelAdAndReleaseReservation() {
         Ad active = ad(AdStatus.ACTIVE, 3);
         Ad cancelled = ad(AdStatus.CANCELLED, 3);
 
         when(
-                adRepository.findByIdAndSellerId("ad-1", "u1")
+                adRepository.findByIdAndSellerId(
+                        "ad-1", "u1"
+                )
         ).thenReturn(Optional.of(active));
 
         when(
                 collectionItemRepository.findByIdAndUserId(
-                        "item-1",
-                        "u1"
+                        "item-1", "u1"
                 )
         ).thenReturn(
                 Optional.of(
@@ -1142,17 +1498,23 @@ class ManageAdServiceTest {
                 )
         ).thenReturn(true);
 
-        when(
-                cardRepository.findById("card-1")
-        ).thenReturn(Optional.of(card));
+        when(cardRepository.findById("card-1"))
+                .thenReturn(Optional.of(card));
 
         OwnAdResponse response = service.cancelOwnAd(
                 "u1",
                 "ad-1"
         );
 
-        assertEquals(AdStatus.CANCELLED, response.status());
-        assertEquals(3, response.releasedQuantity());
+        assertEquals(
+                AdStatus.CANCELLED,
+                response.status()
+        );
+
+        assertEquals(
+                3,
+                response.releasedQuantity()
+        );
 
         InOrder order = inOrder(
                 reservationRepository,
@@ -1160,7 +1522,9 @@ class ManageAdServiceTest {
         );
 
         order.verify(reservationRepository)
-                .beginCancellation("item-1", "u1", "ad-1");
+                .beginCancellation(
+                        "item-1", "u1", "ad-1"
+                );
 
         order.verify(ownAdRepository)
                 .cancelIfActive(
@@ -1184,13 +1548,14 @@ class ManageAdServiceTest {
         Ad cancelled = ad(AdStatus.CANCELLED, 3);
 
         when(
-                adRepository.findByIdAndSellerId("ad-1", "u1")
+                adRepository.findByIdAndSellerId(
+                        "ad-1", "u1"
+                )
         ).thenReturn(Optional.of(cancelled));
 
         when(
                 collectionItemRepository.findByIdAndUserId(
-                        "item-1",
-                        "u1"
+                        "item-1", "u1"
                 )
         ).thenReturn(
                 Optional.of(
@@ -1201,16 +1566,18 @@ class ManageAdServiceTest {
                 )
         );
 
-        when(
-                cardRepository.findById("card-1")
-        ).thenReturn(Optional.of(card));
+        when(cardRepository.findById("card-1"))
+                .thenReturn(Optional.of(card));
 
         OwnAdResponse response = service.cancelOwnAd(
                 "u1",
                 "ad-1"
         );
 
-        assertEquals(AdStatus.CANCELLED, response.status());
+        assertEquals(
+                AdStatus.CANCELLED,
+                response.status()
+        );
 
         verifyNoInteractions(
                 reservationRepository,
@@ -1223,13 +1590,14 @@ class ManageAdServiceTest {
         Ad cancelled = ad(AdStatus.CANCELLED, 3);
 
         when(
-                adRepository.findByIdAndSellerId("ad-1", "u1")
+                adRepository.findByIdAndSellerId(
+                        "ad-1", "u1"
+                )
         ).thenReturn(Optional.of(cancelled));
 
         when(
                 collectionItemRepository.findByIdAndUserId(
-                        "item-1",
-                        "u1"
+                        "item-1", "u1"
                 )
         ).thenReturn(
                 Optional.of(
@@ -1250,16 +1618,18 @@ class ManageAdServiceTest {
                 )
         ).thenReturn(true);
 
-        when(
-                cardRepository.findById("card-1")
-        ).thenReturn(Optional.of(card));
+        when(cardRepository.findById("card-1"))
+                .thenReturn(Optional.of(card));
 
         OwnAdResponse response = service.cancelOwnAd(
                 "u1",
                 "ad-1"
         );
 
-        assertEquals(AdStatus.CANCELLED, response.status());
+        assertEquals(
+                AdStatus.CANCELLED,
+                response.status()
+        );
 
         verify(reservationRepository).release(
                 "item-1",
@@ -1272,17 +1642,170 @@ class ManageAdServiceTest {
         verifyNoInteractions(ownAdRepository);
     }
 
+    // =========================================================
+    // CANCELAMENTO APÓS RECUPERAÇÃO
+    // =========================================================
+
+    @Test
+    void shouldCancelAfterRecoveringUnappliedPendingUpdate() {
+        Ad active = ad(AdStatus.ACTIVE, 3);
+        Ad cancelled = ad(AdStatus.CANCELLED, 3);
+
+        CollectionItem pendingItem = pendingUnappliedUpdate();
+
+        CollectionItem restoredItem = itemWithReservation(
+                AdReservationStatus.ACTIVE,
+                3
+        );
+
+        when(
+                adRepository.findByIdAndSellerId(
+                        "ad-1", "u1"
+                )
+        ).thenReturn(Optional.of(active));
+
+        when(
+                collectionItemRepository.findByIdAndUserId(
+                        "item-1", "u1"
+                )
+        ).thenReturn(
+                Optional.of(pendingItem),
+                Optional.of(restoredItem)
+        );
+
+        when(
+                ownAdRepository.fenceUnappliedUpdate(
+                        eq("ad-1"),
+                        eq("u1"),
+                        eq(3),
+                        eq(3),
+                        isNull(),
+                        startsWith("fence-"),
+                        any(Instant.class)
+                )
+        ).thenReturn(true);
+
+        when(
+                reservationRepository.abortUpdate(
+                        "item-1",
+                        "u1",
+                        "ad-1",
+                        "op-pendente",
+                        3,
+                        4
+                )
+        ).thenReturn(true);
+
+        when(
+                reservationRepository.beginCancellation(
+                        "item-1",
+                        "u1",
+                        "ad-1"
+                )
+        ).thenReturn(true);
+
+        when(
+                ownAdRepository.cancelIfActive(
+                        eq("ad-1"),
+                        eq("u1"),
+                        any(Instant.class)
+                )
+        ).thenReturn(Optional.of(cancelled));
+
+        when(
+                reservationRepository.release(
+                        "item-1",
+                        "u1",
+                        "ad-1",
+                        3,
+                        AdReservationStatus.PENDING_CANCELLATION
+                )
+        ).thenReturn(true);
+
+        when(cardRepository.findById("card-1"))
+                .thenReturn(Optional.of(card));
+
+        OwnAdResponse result = service.cancelOwnAd(
+                "u1",
+                "ad-1"
+        );
+
+        assertEquals(
+                AdStatus.CANCELLED,
+                result.status()
+        );
+
+        assertEquals(
+                3,
+                result.releasedQuantity()
+        );
+
+        InOrder order = inOrder(
+                ownAdRepository,
+                reservationRepository
+        );
+
+        order.verify(ownAdRepository).fenceUnappliedUpdate(
+                eq("ad-1"),
+                eq("u1"),
+                eq(3),
+                eq(3),
+                isNull(),
+                startsWith("fence-"),
+                any(Instant.class)
+        );
+
+        order.verify(reservationRepository).abortUpdate(
+                "item-1",
+                "u1",
+                "ad-1",
+                "op-pendente",
+                3,
+                4
+        );
+
+        order.verify(reservationRepository).beginCancellation(
+                "item-1",
+                "u1",
+                "ad-1"
+        );
+
+        order.verify(ownAdRepository).cancelIfActive(
+                eq("ad-1"),
+                eq("u1"),
+                any(Instant.class)
+        );
+
+        order.verify(reservationRepository).release(
+                "item-1",
+                "u1",
+                "ad-1",
+                3,
+                AdReservationStatus.PENDING_CANCELLATION
+        );
+    }
+
+    // =========================================================
+    // CANCELAMENTO: VALIDAÇÕES
+    // =========================================================
+
     @Test
     void shouldRejectCancelOfSoldOutAd() {
         when(
-                adRepository.findByIdAndSellerId("ad-1", "u1")
+                adRepository.findByIdAndSellerId(
+                        "ad-1", "u1"
+                )
         ).thenReturn(
-                Optional.of(ad(AdStatus.SOLD_OUT, 0))
+                Optional.of(
+                        ad(AdStatus.SOLD_OUT, 0)
+                )
         );
 
         assertThrows(
                 AdNotActiveException.class,
-                () -> service.cancelOwnAd("u1", "ad-1")
+                () -> service.cancelOwnAd(
+                        "u1", "ad-1"
+                )
         );
 
         verifyNoInteractions(
@@ -1295,15 +1818,18 @@ class ManageAdServiceTest {
     @Test
     void shouldRejectCancelWhenReservationQuantityDiffers() {
         when(
-                adRepository.findByIdAndSellerId("ad-1", "u1")
+                adRepository.findByIdAndSellerId(
+                        "ad-1", "u1"
+                )
         ).thenReturn(
-                Optional.of(ad(AdStatus.ACTIVE, 2))
+                Optional.of(
+                        ad(AdStatus.ACTIVE, 2)
+                )
         );
 
         when(
                 collectionItemRepository.findByIdAndUserId(
-                        "item-1",
-                        "u1"
+                        "item-1", "u1"
                 )
         ).thenReturn(
                 Optional.of(
@@ -1316,7 +1842,9 @@ class ManageAdServiceTest {
 
         assertThrows(
                 IllegalStateException.class,
-                () -> service.cancelOwnAd("u1", "ad-1")
+                () -> service.cancelOwnAd(
+                        "u1", "ad-1"
+                )
         );
 
         verifyNoInteractions(
@@ -1328,15 +1856,18 @@ class ManageAdServiceTest {
     @Test
     void shouldRejectCancelWhenReservationAlreadyCancelled() {
         when(
-                adRepository.findByIdAndSellerId("ad-1", "u1")
+                adRepository.findByIdAndSellerId(
+                        "ad-1", "u1"
+                )
         ).thenReturn(
-                Optional.of(ad(AdStatus.ACTIVE, 3))
+                Optional.of(
+                        ad(AdStatus.ACTIVE, 3)
+                )
         );
 
         when(
                 collectionItemRepository.findByIdAndUserId(
-                        "item-1",
-                        "u1"
+                        "item-1", "u1"
                 )
         ).thenReturn(
                 Optional.of(
@@ -1349,7 +1880,9 @@ class ManageAdServiceTest {
 
         assertThrows(
                 IllegalStateException.class,
-                () -> service.cancelOwnAd("u1", "ad-1")
+                () -> service.cancelOwnAd(
+                        "u1", "ad-1"
+                )
         );
 
         verifyNoInteractions(
@@ -1359,17 +1892,22 @@ class ManageAdServiceTest {
     }
 
     @Test
-    void shouldRejectCancelDuringPendingUpdate() {
+    void shouldRejectCancelDuringInvalidPendingUpdate() {
         when(
-                adRepository.findByIdAndSellerId("ad-1", "u1")
+                adRepository.findByIdAndSellerId(
+                        "ad-1", "u1"
+                )
         ).thenReturn(
-                Optional.of(ad(AdStatus.ACTIVE, 3))
+                Optional.of(
+                        ad(AdStatus.ACTIVE, 3)
+                )
         );
 
+        // Reserva pendente sem operationId e sem quantidade-alvo:
+        // não é seguro confirmar nem abortar.
         when(
                 collectionItemRepository.findByIdAndUserId(
-                        "item-1",
-                        "u1"
+                        "item-1", "u1"
                 )
         ).thenReturn(
                 Optional.of(
@@ -1380,9 +1918,17 @@ class ManageAdServiceTest {
                 )
         );
 
-        assertThrows(
+        IllegalStateException exception = assertThrows(
                 IllegalStateException.class,
-                () -> service.cancelOwnAd("u1", "ad-1")
+                () -> service.cancelOwnAd(
+                        "u1", "ad-1"
+                )
+        );
+
+        assertTrue(
+                exception.getMessage().contains(
+                        "dados inválidos"
+                )
         );
 
         verifyNoInteractions(
@@ -1391,11 +1937,17 @@ class ManageAdServiceTest {
         );
     }
 
+    // =========================================================
+    // AUTENTICAÇÃO
+    // =========================================================
+
     @Test
     void shouldRequireAuthenticatedUser() {
         assertThrows(
                 InvalidAuthenticationException.class,
-                () -> service.cancelOwnAd(" ", "ad-1")
+                () -> service.cancelOwnAd(
+                        " ", "ad-1"
+                )
         );
 
         verifyNoInteractions(

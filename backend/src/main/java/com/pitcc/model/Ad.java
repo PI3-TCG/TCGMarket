@@ -53,6 +53,8 @@ public class Ad {
     private Instant cancelledAt;
     private Instant soldOutAt;
     private String description;
+    private boolean creationAborted;
+    private String writeFenceToken;
 
     protected Ad() {
     }
@@ -179,7 +181,7 @@ public class Ad {
                 ? null
                 : description.strip();
     }
-    
+
     public String getId() {
         return id;
     }
@@ -250,5 +252,47 @@ public class Ad {
 
     public String getDescription() {
         return description;
+    }
+
+    public boolean isCreationAborted() {
+        return creationAborted;
+    }
+
+    public String getWriteFenceToken() {
+        return writeFenceToken;
+    }
+
+    public Ad abortedCreationMarker(Instant now) {
+        if (id == null || id.isBlank()) {
+            throw new IllegalStateException(
+                    "A criação abortada exige um ID previamente definido."
+            );
+        }
+
+        Ad marker = new Ad();
+
+        marker.id = id;
+        marker.sellerId = sellerId;
+        marker.collectionItemId = collectionItemId;
+        marker.cardId = cardId;
+        marker.condition = condition;
+        marker.language = language;
+
+        marker.quantity = quantity;
+        marker.remainingQuantity = 0;
+
+        marker.saleEnabled = saleEnabled;
+        marker.tradeEnabled = tradeEnabled;
+        marker.unitPrice = unitPrice;
+        marker.description = description;
+
+        marker.status = AdStatus.CANCELLED;
+        marker.creationAborted = true;
+
+        marker.createdAt = createdAt;
+        marker.updatedAt = now;
+        marker.cancelledAt = now;
+
+        return marker;
     }
 }

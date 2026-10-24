@@ -25,6 +25,11 @@ import java.math.RoundingMode;
 import java.time.Instant;
 import java.util.UUID;
 
+import com.pitcc.model.AdStatus;
+import com.pitcc.model.AdReservationStatus;
+
+import java.util.Objects;
+
 @Service
 public class CreateAdService {
 
@@ -136,7 +141,7 @@ public class CreateAdService {
             throw new AdQuantityUnavailableException(available);
         }
 
-        Ad saved = adRepository.insert(newAd);
+        Ad saved = insertWithRecovery(newAd, userId);
 
         boolean confirmed = reservationRepository.confirmCreation(
                 item.getId(),
@@ -198,4 +203,115 @@ public class CreateAdService {
                 availability
         );
     }
+
+    private Ad insertWithRecovery(Ad newAd, String userId) {
+        try {
+            return adRepository.insert(newAd);
+
+        } catch (RuntimeException insertFailure) {
+
+            // Tenta ocupar definitivamente o mesmo ID.
+            // Se o anúncio original já existir, a unicidade de _id
+            // impedirá a inserção do marcador.
+            try {
+                adRepository.insert(
+                        newAd.abortedCreationMarker(Instant.now())
+                );
+
+            } catch (RuntimeException markerFailure) {
+                insertFailure.addSuppressed(markerFailure);
+            }
+
+            // Não usamos "não encontrado" como prova de que
+            // uma escrita atrasada não poderá acontecer.
+            Ad persisted;
+
+            try {
+                persisted = adRepository.findById(newAd.getId())
+                        .orElse(null);
+
+            } catch (RuntimeException readFailure) {
+                insertFailure.addSuppressed(readFailure);
+
+                throw new IllegalStateException(
+                        "Não foi possível determinar o resultado da criação. "
+                                + "A reserva permanece protegida.",
+                        insertFailure
+                );
+            }
+
+            if (persisted == null) {
+                throw new IllegalStateException(
+                        "O resultado da criação continua indefinido. "
+                                + "A reserva permanece protegida.",
+                        insertFailure
+                );
+            }
+
+            // O marcador foi gravado: o anúncio original não
+            // poderá mais ser inserido usando este ID.
+            if (persisted.isCreationAborted()) {
+                boolean released;
+
+                try {
+                    released = reservationRepository.release(
+                            newAd.getCollectionItemId(),
+                            userId,
+                            newAd.getId(),
+                            newAd.getQuantity(),
+                            AdReservationStatus.PENDING_CREATION
+                    );
+
+                } catch (RuntimeException releaseFailure) {
+                    insertFailure.addSuppressed(releaseFailure);
+
+                    throw new IllegalStateException(
+                            "A criação foi abortada, mas a liberação "
+                                    + "da reserva exige reconciliação.",
+                            insertFailure
+                    );
+                }
+
+                if (!released) {
+                    throw new IllegalStateException(
+                            "A criação foi abortada, mas a reserva "
+                                    + "não pôde ser liberada.",
+                            insertFailure
+                    );
+                }
+
+                throw new IllegalStateException(
+                        "A criação do anúncio falhou e "
+                                + "a quantidade reservada foi liberada.",
+                        insertFailure
+                );
+            }
+
+            // A gravação original aconteceu, mas a resposta
+            // da operação pode ter sido perdida.
+            if (persisted.getStatus() != AdStatus.ACTIVE
+                    || !Objects.equals(
+                    persisted.getSellerId(), userId
+            )
+                    || !Objects.equals(
+                    persisted.getCollectionItemId(),
+                    newAd.getCollectionItemId()
+            )
+                    || !Objects.equals(
+                    persisted.getId(), newAd.getId()
+            )) {
+
+                throw new IllegalStateException(
+                        "Foi encontrado um anúncio incompatível "
+                                + "com a reserva. Reconciliação necessária.",
+                        insertFailure
+                );
+            }
+
+            // O fluxo original continuará tentando confirmar
+            // a reserva PENDING_CREATION.
+            return persisted;
+        }
+    }
+
 }

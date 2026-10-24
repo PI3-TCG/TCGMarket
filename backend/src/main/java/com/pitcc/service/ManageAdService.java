@@ -180,7 +180,7 @@ public class ManageAdService {
         boolean reconciled = false;
 
         if (reservation.getStatus() == AdReservationStatus.PENDING_UPDATE) {
-            confirmPreviouslyAppliedUpdate(userId, adId, current, reservation);
+            reconcilePendingUpdate(userId, adId, current, reservation);
             current = findOwned(adId, userId);
             reservation = findReservation(
                     current.getCollectionItemId(),
@@ -278,6 +278,7 @@ public class ManageAdService {
                             sale,
                             trade,
                             unitPrice,
+                            current.getWriteFenceToken(),
                             operationId,
                             Instant.now()
                     )
@@ -500,6 +501,22 @@ public class ManageAdService {
                 userId,
                 adId
         );
+        if (reservation.getStatus() == AdReservationStatus.PENDING_UPDATE) {
+            reconcilePendingUpdate(
+                    userId,
+                    adId,
+                    ad,
+                    reservation
+            );
+
+            ad = findOwned(adId, userId);
+
+            reservation = findReservation(
+                    ad.getCollectionItemId(),
+                    userId,
+                    adId
+            );
+        }
 
         if (reservation.getStatus() == AdReservationStatus.CANCELLED) {
             if (ad.getStatus() == AdStatus.CANCELLED) {
@@ -655,13 +672,16 @@ public class ManageAdService {
         return new AdNotActiveException(current.getStatus());
     }
 
-    private Ad findOwned(
-            String adId,
-            String userId
-    ) {
-        return (Ad) adRepository
+    private Ad findOwned(String adId, String userId) {
+        Ad ad = adRepository
                 .findByIdAndSellerId(adId, userId)
                 .orElseThrow(AdNotFoundException::new);
+
+        if (ad.isCreationAborted()) {
+            throw new AdNotFoundException();
+        }
+
+        return ad;
     }
 
     private OwnAdResponse toResponse(Ad ad) {
@@ -721,4 +741,126 @@ public class ManageAdService {
             throw new InvalidAuthenticationException();
         }
     }
+
+    private void reconcilePendingUpdate(
+            String userId,
+            String adId,
+            Ad ad,
+            AdReservation reservation
+    ) {
+        String operationId = reservation.getPendingOperationId();
+        Integer targetQuantity = reservation.getPendingQuantity();
+
+        if (operationId == null || operationId.isBlank()
+                || targetQuantity == null || targetQuantity <= 0) {
+            throw new IllegalStateException(
+                    "A edição pendente possui dados inválidos."
+            );
+        }
+
+        // CASO 1: a edição foi gravada.
+        // Mantemos o mecanismo de confirmação existente.
+        if (operationId.equals(
+                ad.getLastAppliedUpdateOperationId()
+        )) {
+            confirmPreviouslyAppliedUpdate(
+                    userId, adId, ad, reservation
+            );
+            return;
+        }
+
+        // CASO 2: o anúncio aparenta conservar os
+        // dados anteriores à edição.
+        boolean unchanged =
+                ad.getStatus() == AdStatus.ACTIVE
+                        && ad.getQuantity() != null
+                        && ad.getRemainingQuantity() != null
+                        && ad.getRemainingQuantity()
+                        == reservation.getQuantity()
+                        && ad.getQuantity()
+                        >= ad.getRemainingQuantity()
+                        && ad.isSaleEnabled()
+                        == reservation.isSaleEnabled()
+                        && ad.isTradeEnabled()
+                        == reservation.isTradeEnabled()
+                        && samePrice(
+                        ad.getUnitPrice(),
+                        reservation.getUnitPrice()
+                );
+
+        if (!unchanged) {
+            throw new IllegalStateException(
+                    "O anúncio diverge da reserva pendente. "
+                            + "A quantidade permanece protegida."
+            );
+        }
+
+        // Invalida a versão que a escrita original
+        // precisaria encontrar para ser aplicada.
+        boolean fenced = ownAdRepository.fenceUnappliedUpdate(
+                adId,
+                userId,
+                ad.getQuantity(),
+                ad.getRemainingQuantity(),
+                ad.getWriteFenceToken(),
+                "fence-" + UUID.randomUUID(),
+                Instant.now()
+        );
+
+        if (!fenced) {
+            // Outra operação pode ter aplicado a edição
+            // antes de conseguirmos invalidar a versão.
+            Ad latest = findOwned(adId, userId);
+
+            AdReservation latestReservation = findReservation(
+                    latest.getCollectionItemId(),
+                    userId,
+                    adId
+            );
+
+            if (latestReservation.getStatus()
+                    == AdReservationStatus.ACTIVE) {
+                return;
+            }
+
+            if (latestReservation.getStatus()
+                    == AdReservationStatus.PENDING_UPDATE
+                    && operationId.equals(
+                    latest.getLastAppliedUpdateOperationId()
+            )) {
+
+                confirmPreviouslyAppliedUpdate(
+                        userId,
+                        adId,
+                        latest,
+                        latestReservation
+                );
+                return;
+            }
+
+            throw new IllegalStateException(
+                    "A edição mudou durante a recuperação. "
+                            + "Consulte o estado atual e tente novamente."
+            );
+        }
+
+        // A escrita antiga não pode mais ser aplicada.
+        // Agora é seguro desfazer a preparação da reserva.
+        boolean aborted = reservationRepository.abortUpdate(
+                ad.getCollectionItemId(),
+                userId,
+                adId,
+                operationId,
+                reservation.getQuantity(),
+                targetQuantity
+        );
+
+        if (!aborted) {
+            throw new IllegalStateException(
+                    "A versão antiga foi invalidada, "
+                            + "mas a reserva ainda precisa ser reconciliada."
+            );
+        }
+    }
+
 }

@@ -33,7 +33,8 @@ public class OwnAdRepository {
     public Page<Ad> findOwnAds(String sellerId, OwnAdFilters filters, Pageable pageable) {
         List<Document> pipeline = new ArrayList<>();
 
-        Document ownershipMatch = new Document("sellerId", sellerId);
+        Document ownershipMatch = new Document("sellerId", sellerId)
+                .append("creationAborted", new Document("$ne", true));
 
         if (filters.status() != null) {
             ownershipMatch.append("status", filters.status().name());
@@ -179,6 +180,7 @@ public class OwnAdRepository {
             boolean saleEnabled,
             boolean tradeEnabled,
             BigDecimal unitPrice,
+            String expectedWriteFenceToken,
             String operationId,
             Instant now
     ) {
@@ -219,6 +221,7 @@ public class OwnAdRepository {
 
         Query query = Query.query(
                 Criteria.where("id").is(adId)
+                        .and("writeFenceToken").is(expectedWriteFenceToken)
                         .and("sellerId").is(sellerId)
                         .and("status").is(AdStatus.ACTIVE)
                         .and("quantity").is(expectedQuantity)
@@ -228,6 +231,7 @@ public class OwnAdRepository {
         );
 
         Update update = new Update()
+                .set("writeFenceToken", operationId)
                 .set("quantity", newQuantity)
                 .set("remainingQuantity", newRemainingQuantity)
                 .set("saleEnabled", saleEnabled)
@@ -269,4 +273,43 @@ public class OwnAdRepository {
                 .and("sellerId").is(sellerId)
                 .and("status").is(AdStatus.ACTIVE));
     }
+
+    public boolean fenceUnappliedUpdate(
+            String adId,
+            String sellerId,
+            int expectedQuantity,
+            int expectedRemainingQuantity,
+            String expectedWriteFenceToken,
+            String newWriteFenceToken,
+            Instant now
+    ) {
+        if (newWriteFenceToken == null
+                || newWriteFenceToken.isBlank()) {
+            throw new IllegalArgumentException(
+                    "O novo token de escrita é obrigatório."
+            );
+        }
+
+        Query query = Query.query(
+                Criteria.where("id").is(adId)
+                        .and("sellerId").is(sellerId)
+                        .and("status").is(AdStatus.ACTIVE)
+                        .and("quantity").is(expectedQuantity)
+                        .and("remainingQuantity")
+                        .is(expectedRemainingQuantity)
+                        .and("writeFenceToken")
+                        .is(expectedWriteFenceToken)
+        );
+
+        Update update = new Update()
+                .set("writeFenceToken", newWriteFenceToken)
+                .set("updatedAt", now);
+
+        return mongoTemplate.updateFirst(
+                query,
+                update,
+                Ad.class
+        ).getModifiedCount() == 1;
+    }
+
 }
