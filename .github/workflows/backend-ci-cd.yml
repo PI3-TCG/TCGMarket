@@ -43,7 +43,8 @@ jobs:
       contents: read
     services:
       mongodb:
-        image: mongo:8
+        # mongo:8 não inicia nos runners com kernel 6.19+ (SERVER-121912).
+        image: mongo:7.0
         ports:
           - 27017:27017
         options: >-
