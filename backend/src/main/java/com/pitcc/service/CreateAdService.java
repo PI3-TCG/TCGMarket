@@ -79,6 +79,7 @@ public class CreateAdService {
                 sale,
                 trade,
                 unitPrice,
+                request.description(),
                 Instant.now()
         ));
 
@@ -97,6 +98,7 @@ public class CreateAdService {
                 ad.isSaleEnabled(),
                 ad.isTradeEnabled(),
                 ad.getUnitPrice(),
+                ad.getDescription(),
                 ad.getCreatedAt(),
                 updated
         );

@@ -95,6 +95,7 @@ function AdForm({
 }: AdFormProps) {
   const quantityId = useId()
   const priceId = useId()
+  const descriptionId = useId()
   const quantityRef = useRef<HTMLInputElement>(null)
   const saleRef = useRef<HTMLInputElement>(null)
   const priceRef = useRef<HTMLInputElement>(null)
@@ -106,6 +107,7 @@ function AdForm({
   const [sale, setSale] = useState(false)
   const [trade, setTrade] = useState(false)
   const [price, setPrice] = useState('')
+  const [description, setDescription] = useState('')
   const [submitAttempted, setSubmitAttempted] = useState(false)
   const [availabilityChanged, setAvailabilityChanged] = useState(false)
   const [publishing, setPublishing] = useState(false)
@@ -135,7 +137,14 @@ function AdForm({
   const errors = [quantityError, modalityError, priceError].filter(Boolean)
   const showErrors = submitAttempted
   const dirty =
-    !published && (quantity !== '1' || sale || trade || price !== '')
+    !published &&
+    (
+      quantity !== '1' ||
+      sale ||
+      trade ||
+      price !== '' ||
+      description !== ''
+    )
 
   useEffect(() => {
     onDirtyChange(dirty)
@@ -168,6 +177,7 @@ function AdForm({
         saleEnabled: sale,
         tradeEnabled: trade,
         unitPrice: sale ? parsedPrice : null,
+        description: description.trim() || null,
       })
       setAvailability(ad.availability)
       setPublished(ad)
@@ -267,11 +277,10 @@ function AdForm({
                   </label>
                   <div className="flex flex-wrap items-center gap-3">
                     <div
-                      className={`flex h-10 w-40 overflow-hidden rounded-control border bg-white focus-within:ring-2 focus-within:ring-secondary-500 ${
-                        showErrors && quantityError
-                          ? 'border-error-700'
-                          : 'border-neutral-300'
-                      }`}
+                      className={`flex h-10 w-40 overflow-hidden rounded-control border bg-white focus-within:ring-2 focus-within:ring-secondary-500 ${showErrors && quantityError
+                        ? 'border-error-700'
+                        : 'border-neutral-300'
+                        }`}
                     >
                       <button
                         type="button"
@@ -374,11 +383,10 @@ function AdForm({
                       <span className="text-error-700">*</span>
                     </label>
                     <div
-                      className={`flex h-10 items-center rounded-control border bg-white px-3 focus-within:ring-2 focus-within:ring-secondary-500 ${
-                        showErrors && priceError
-                          ? 'border-error-700'
-                          : 'border-neutral-300'
-                      }`}
+                      className={`flex h-10 items-center rounded-control border bg-white px-3 focus-within:ring-2 focus-within:ring-secondary-500 ${showErrors && priceError
+                        ? 'border-error-700'
+                        : 'border-neutral-300'
+                        }`}
                     >
                       <span className="mr-2 text-sm text-neutral-500">R$</span>
                       <input
@@ -411,6 +419,32 @@ function AdForm({
                     )}
                   </div>
                 )}
+
+                <div>
+                  <label
+                    htmlFor={descriptionId}
+                    className="mb-1.5 block text-sm font-semibold text-primary-900"
+                  >
+                    Descrição (opcional)
+                  </label>
+
+                  <textarea
+                    id={descriptionId}
+                    rows={4}
+                    value={description}
+                    onChange={(event) => setDescription(event.target.value)}
+                    aria-describedby={`${descriptionId}-hint`}
+                    placeholder="Conte mais sobre a carta ou suas preferências de troca..."
+                    className="w-full resize-y rounded-control border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 placeholder:text-neutral-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary-500 disabled:cursor-not-allowed disabled:opacity-60"
+                  />
+
+                  <p
+                    id={`${descriptionId}-hint`}
+                    className="mt-1 text-xs text-primary-700"
+                  >
+                    Acrescente informações que ajudem outros colecionadores a entender seu anúncio.
+                  </p>
+                </div>
 
                 <AdSummary
                   valid={errors.length === 0}
@@ -494,25 +528,24 @@ function ModalityOption({
   const colors =
     tone === 'sale'
       ? {
-          selected: 'border-primary-900 bg-primary-100',
-          text: 'text-primary-900',
-          accent: 'accent-primary-900',
-        }
+        selected: 'border-primary-900 bg-primary-100',
+        text: 'text-primary-900',
+        accent: 'accent-primary-900',
+      }
       : {
-          selected: 'border-secondary-500 bg-secondary-100',
-          text: 'text-secondary-700',
-          accent: 'accent-secondary-500',
-        }
+        selected: 'border-secondary-500 bg-secondary-100',
+        text: 'text-secondary-700',
+        accent: 'accent-secondary-500',
+      }
 
   return (
     <label
-      className={`relative flex cursor-pointer flex-col gap-1 rounded-xl border-2 p-4 transition-colors focus-within:ring-2 focus-within:ring-secondary-500 has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-60 ${
-        checked
-          ? colors.selected
-          : invalid
-            ? 'border-error-700 bg-white'
-            : 'border-neutral-200 bg-white hover:border-primary-300'
-      }`}
+      className={`relative flex cursor-pointer flex-col gap-1 rounded-xl border-2 p-4 transition-colors focus-within:ring-2 focus-within:ring-secondary-500 has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-60 ${checked
+        ? colors.selected
+        : invalid
+          ? 'border-error-700 bg-white'
+          : 'border-neutral-200 bg-white hover:border-primary-300'
+        }`}
     >
       <input
         ref={inputRef}

@@ -2,95 +2,22 @@ import { Alert } from '@/components/ui/Alert'
 import { GAMES } from '@/components/layout/siteGames'
 import { useSession } from '@/session'
 import { useNavigate } from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import hero from '@/assets/images/image-banner-home.png'
 import pokemonBanner from '@/assets/images/image-nav-pokemon.png'
 import magicBanner from '@/assets/images/image-nav-magic.png'
 import yugiohBanner from '@/assets/images/image-nav-yugioh.png'
 import onePieceBanner from '@/assets/images/image-nav-onePiece.png'
 import digimonBanner from '@/assets/images/image-nav-digimon.png'
+import { Button } from '@/components/ui/Button'
+import { MarketplaceAdCard } from '@/components/marketplace/MarketplaceAdCard'
+import { MarketplaceAdDetailsModal } from '@/components/marketplace/MarketplaceAdDetailsModal'
+import { formatCurrency } from '@/components/ads/adFormat'
+import { useRemoteData } from '@/hooks/useRemoteData'
+import { getMarketplaceAds } from '@/services/marketplace'
+import type { MarketplaceSort } from '@/types/Marketplace'
 
-const FEATURED = [
-  {
-    name: 'Charizard ex',
 
-    meta: '151 • Pokémon',
-
-    tag: 'Ultra Rara',
-
-    price: 'R$ 380,00',
-
-    from: '#f97316',
-
-    to: '#9a3412',
-  },
-
-  {
-    name: 'Black Lotus',
-
-    meta: 'Limited Edition • Magic',
-
-    tag: 'Mítica',
-
-    price: 'R$ 12.500,00',
-
-    from: '#4c1d95',
-
-    to: '#1e1b4b',
-  },
-
-  {
-    name: 'Dark Magician',
-
-    meta: 'Legend of Blue Eyes • Yu-Gi-Oh!',
-
-    tag: 'Ultra Rara',
-
-    price: 'R$ 420,00',
-
-    from: '#6d28d9',
-
-    to: '#312e81',
-  },
-
-  {
-    name: 'Monkey D. Luffy (OP-05)',
-
-    meta: 'Awakening • One Piece',
-
-    tag: 'Super Rara',
-
-    price: 'R$ 350,00',
-
-    from: '#e11d48',
-
-    to: '#881337',
-  },
-]
-
-const RECENT = [
-  {
-    name: 'Rayquaza VMAX',
-
-    meta: 'Evolving Skies • Pokémon',
-
-    price: 'R$ 290,00',
-  },
-
-  { name: 'Sol Ring', meta: 'Commander • Magic', price: 'R$ 120,00' },
-
-  {
-    name: 'Blue-Eyes White Dragon',
-
-    meta: 'LOB • Yu-Gi-Oh!',
-
-    price: 'R$ 450,00',
-  },
-
-  { name: 'Trafalgar Law (OP-04)', meta: 'One Piece', price: 'R$ 280,00' },
-
-  { name: 'Omnimon', meta: 'BT1 • Digimon', price: 'R$ 320,00' },
-]
 
 const exploreImages: Record<string, string> = {
   poke: pokemonBanner,
@@ -101,6 +28,9 @@ const exploreImages: Record<string, string> = {
 }
 
 export function HomePage() {
+  const [selectedAdId, setSelectedAdId] = useState<string | null>(
+    null,
+  )
   const navigate = useNavigate()
   const { user, sessionReady } = useSession()
   const [notice, setNotice] = useState<string | null>(null)
@@ -159,14 +89,14 @@ export function HomePage() {
 
                 onClick={() =>
                   navigate({
-                    to: '/catalogo/$game',
-                    params: { game: 'pokemon' },
+                    to: '/marketplace',
+                    search: { sort: 'recent' },
                   })
                 }
 
                 className="rounded-md bg-primary-900 px-5 py-3 text-sm font-semibold hover:bg-primary-800"
               >
-                Explorar catálogo
+                Explorar anúncios
               </button>
 
               <button
@@ -262,7 +192,12 @@ export function HomePage() {
               <button
                 type="button"
 
-                onClick={() => soon('Os anúncios')}
+                onClick={() =>
+                  navigate({
+                    to: '/marketplace',
+                    search: { sort: 'priceDesc' },
+                  })
+                }
 
                 className="text-sm font-semibold text-primary-900"
               >
@@ -270,45 +205,11 @@ export function HomePage() {
               </button>
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-              {FEATURED.map((card) => (
-                <button
-                  key={card.name}
-
-                  type="button"
-
-                  onClick={() => soon('Os anúncios')}
-
-                  className="overflow-hidden rounded-lg border border-neutral-200 bg-white text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-                >
-                  <span
-                    className="block h-32"
-
-                    style={{
-                      background: `linear-gradient(160deg, ${card.from}, ${card.to})`,
-                    }}
-                  />
-
-                  <span className="block p-3">
-                    <span className="block text-sm font-semibold">
-                      {card.name}
-                    </span>
-
-                    <span className="mt-1 block text-xs text-neutral-500">
-                      {card.meta}
-                    </span>
-
-                    <span className="mt-2 flex items-center justify-between">
-                      <span className="rounded-full bg-primary-100 px-2 py-0.5 text-[11px] font-medium text-primary-900">
-                        {card.tag}
-                      </span>
-
-                      <span className="text-sm font-bold">{card.price}</span>
-                    </span>
-                  </span>
-                </button>
-              ))}
-            </div>
+            <HomeAds
+              sort="priceDesc"
+              variant="cards"
+              onViewDetails={setSelectedAdId}
+            />
           </div>
 
           <div className="space-y-4">
@@ -319,7 +220,12 @@ export function HomePage() {
                 <button
                   type="button"
 
-                  onClick={() => soon('Os anúncios')}
+                  onClick={() =>
+                    navigate({
+                      to: '/marketplace',
+                      search: { sort: 'recent' },
+                    })
+                  }
 
                   className="text-xs font-semibold text-primary-900"
                 >
@@ -327,33 +233,11 @@ export function HomePage() {
                 </button>
               </div>
 
-              <ul className="divide-y divide-neutral-200">
-                {RECENT.map((item) => (
-                  <li key={item.name}>
-                    <button
-                      type="button"
-
-                      onClick={() => soon('Os anúncios')}
-
-                      className="flex w-full items-center justify-between gap-3 py-2.5 text-left"
-                    >
-                      <span>
-                        <span className="block text-sm font-medium">
-                          {item.name}
-                        </span>
-
-                        <span className="block text-xs text-neutral-500">
-                          {item.meta}
-                        </span>
-                      </span>
-
-                      <span className="shrink-0 text-sm font-semibold">
-                        {item.price}
-                      </span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
+              <HomeAds
+                sort="recent"
+                variant="list"
+                onViewDetails={setSelectedAdId}
+              />
             </div>
 
             <aside className="rounded-lg bg-linear-to-br from-primary-100 to-neutral-100 p-5">
@@ -363,7 +247,7 @@ export function HomePage() {
 
               <p className="mt-2 text-sm leading-relaxed text-neutral-700">
                 {user
-                  ? 'Sua conta já está pronta. Em breve você anuncia cartas, monta a coleção e troca com outros fãs.'
+                  ? 'Organize sua coleção, publique seus anúncios e encontre cartas para comprar ou trocar.'
                   : 'Siga outros colecionadores, participe de trocas e fique por dentro das novidades.'}
               </p>
 
@@ -400,6 +284,15 @@ export function HomePage() {
           </div>
         </section>
       </main>
+
+      {selectedAdId !== null && (
+        <MarketplaceAdDetailsModal
+          key={selectedAdId}
+          adId={selectedAdId}
+          onClose={() => setSelectedAdId(null)}
+        />
+      )}
+
     </div>
   )
 }
@@ -561,5 +454,189 @@ function GameMark({ kind }: { kind: (typeof GAMES)[number]['mark'] }) {
         />
       ) : null}
     </svg>
+  )
+}
+
+type HomeAdsProps = {
+  sort: MarketplaceSort
+  variant: 'cards' | 'list'
+  onViewDetails: (adId: string) => void
+}
+
+const homeAdsGrid =
+  'grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5'
+
+const homeGameLabels: Record<string, string> = {
+  POKEMON: 'Pokémon',
+  MAGIC_THE_GATHERING: 'Magic: The Gathering',
+  YUGIOH: 'Yu-Gi-Oh!',
+}
+
+function HomeAds({
+  sort,
+  variant,
+  onViewDetails,
+}: HomeAdsProps) {
+  const fetchAds = useCallback(
+    () => getMarketplaceAds(1, sort),
+    [sort],
+  )
+
+  const { state, retry } = useRemoteData(
+    `home-ads:${sort}`,
+    fetchAds,
+  )
+
+  if (state.status === 'loading') {
+    return (
+      <div
+        role="status"
+        aria-busy="true"
+        aria-label={
+          variant === 'cards'
+            ? 'Carregando anúncios em destaque'
+            : 'Carregando últimos anúncios'
+        }
+      >
+        <span className="sr-only">Carregando anúncios...</span>
+
+        <div
+          aria-hidden="true"
+          className={variant === 'cards' ? homeAdsGrid : 'space-y-3'}
+        >
+          {Array.from({ length: 5 }, (_, index) => (
+            <div
+              key={index}
+              className={
+                variant === 'cards'
+                  ? 'overflow-hidden rounded-xl border border-neutral-200 bg-white motion-safe:animate-pulse'
+                  : 'h-16 rounded-lg bg-primary-100/60 motion-safe:animate-pulse'
+              }
+            >
+              {variant === 'cards' && (
+                <>
+                  <div className="aspect-[4/5] bg-primary-100/70" />
+
+                  <div className="space-y-3 p-3">
+                    <div className="h-4 w-3/4 rounded bg-neutral-200" />
+                    <div className="h-3 w-1/2 rounded bg-neutral-200" />
+                    <div className="h-8 rounded bg-primary-100" />
+                  </div>
+                </>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  if (state.status !== 'ready') {
+    return (
+      <div
+        role="alert"
+        className="rounded-xl border border-primary-300/30 bg-white p-5 text-center"
+      >
+        <p className="text-sm text-neutral-700">
+          Não foi possível carregar os anúncios.
+        </p>
+
+        <Button
+          variant="outline"
+          className="mt-3"
+          onClick={retry}
+        >
+          Tentar novamente
+        </Button>
+      </div>
+    )
+  }
+
+  // A Home apresenta uma prévia dos cinco primeiros resultados.
+  // A ordenação já foi aplicada pelo backend.
+  const ads = state.data.content.slice(0, 5)
+
+  if (ads.length === 0) {
+    return (
+      <div
+        role="status"
+        className="rounded-xl border border-dashed border-primary-300/40 bg-white p-5 text-center"
+      >
+        <p className="text-sm font-semibold text-primary-900">
+          Ainda não há anúncios disponíveis.
+        </p>
+
+        <p className="mt-2 text-xs text-neutral-700">
+          Novos anúncios aparecerão aqui quando forem publicados.
+        </p>
+      </div>
+    )
+  }
+
+  if (variant === 'cards') {
+    return (
+      <div className={homeAdsGrid}>
+        {ads.map((ad) => (
+          <MarketplaceAdCard
+            key={ad.id}
+            ad={ad}
+            onViewDetails={onViewDetails}
+          />
+        ))}
+      </div>
+    )
+  }
+
+  return (
+    <ul className="divide-y divide-neutral-200">
+      {ads.map((ad) => (
+        <li key={ad.id}>
+          <button
+            type="button"
+            onClick={() => onViewDetails(ad.id)}
+            aria-label={`Ver anúncio de ${ad.cardName}`}
+            className="flex w-full cursor-pointer flex-wrap items-center justify-between gap-2 rounded-lg px-2 py-3 text-left transition hover:bg-primary-100/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500"
+          >
+            <span className="min-w-0 flex-1">
+              <span className="block break-words text-sm font-semibold text-primary-900">
+                {ad.cardName}
+              </span>
+
+              <span className="mt-1 block break-words text-xs text-neutral-700">
+                {homeGameLabels[ad.game] ?? ad.game}
+                {ad.edition ? ` • ${ad.edition}` : ''}
+              </span>
+
+              <span className="mt-1 block text-xs text-neutral-700">
+                {ad.remainingQuantity}{' '}
+                {ad.remainingQuantity === 1
+                  ? 'unidade disponível'
+                  : 'unidades disponíveis'}
+                {' • '}
+                {ad.saleEnabled && ad.tradeEnabled
+                  ? 'Venda e troca'
+                  : ad.saleEnabled
+                    ? 'Venda'
+                    : 'Troca'}
+              </span>
+            </span>
+
+            <span className="text-right text-sm font-semibold text-primary-900">
+              {ad.saleEnabled
+                ? ad.unitPrice !== null
+                  ? formatCurrency(ad.unitPrice)
+                  : 'Preço indisponível'
+                : 'Somente troca'}
+
+              {ad.saleEnabled && ad.unitPrice !== null && (
+                <span className="block text-[10px] font-normal text-neutral-700">
+                  por unidade
+                </span>
+              )}
+            </span>
+          </button>
+        </li>
+      ))}
+    </ul>
   )
 }

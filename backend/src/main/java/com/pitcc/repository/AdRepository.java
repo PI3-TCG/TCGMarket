@@ -3,9 +3,28 @@ package com.pitcc.repository;
 import com.pitcc.model.Ad;
 import com.pitcc.model.AdStatus;
 
+import java.util.Optional;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 public interface AdRepository extends MongoRepository<Ad, String> {
 
-    boolean existsByCollectionItemIdAndStatus(String collectionItemId, AdStatus status);
+    boolean existsByCollectionItemIdAndStatus(
+            String collectionItemId,
+            AdStatus status
+    );
+
+    Page<Ad> findByStatusAndRemainingQuantityGreaterThan(
+            AdStatus status,
+            Integer remainingQuantity,
+            Pageable pageable
+    );
+
+    Optional<Ad> findByIdAndStatusAndRemainingQuantityGreaterThan(
+            String id,
+            AdStatus status,
+            Integer remainingQuantity
+    );
 }

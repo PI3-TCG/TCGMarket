@@ -26,6 +26,8 @@ public record CreateAdRequest(
         @DecimalMin(value = "0.01", message = "Informe um preço válido.")
         @DecimalMax(value = "999999.99", message = "Informe um preço válido.")
         @Digits(integer = 6, fraction = 2, message = "Informe um preço válido.")
-        BigDecimal unitPrice
+        BigDecimal unitPrice,
+
+        String description
 ) {
 }

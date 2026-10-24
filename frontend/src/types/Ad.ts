@@ -8,6 +8,7 @@ export interface CreateAdRequest {
   saleEnabled: boolean
   tradeEnabled: boolean
   unitPrice: number | null
+  description?: string | null
 }
 
 export interface AdResponse {
@@ -19,6 +20,7 @@ export interface AdResponse {
   saleEnabled: boolean
   tradeEnabled: boolean
   unitPrice: number | null
+  description: string | null
   createdAt: string
   availability: CollectionItemAvailability
 }
