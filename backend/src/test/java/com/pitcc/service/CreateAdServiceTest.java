@@ -75,7 +75,7 @@ class CreateAdServiceTest {
 
     AdResponse response =
         service.createAd(
-            "u1", new CreateAdRequest("item-1", 2, true, true, new BigDecimal("45")));
+            "u1", new CreateAdRequest("item-1", 2, true, true, new BigDecimal("45"), null));
 
     ArgumentCaptor<Ad> captor = ArgumentCaptor.forClass(Ad.class);
     verify(adRepository).save(captor.capture());
@@ -102,7 +102,7 @@ class CreateAdServiceTest {
     givenOwnedItemWithAvailability(0);
     givenSaveReturnsAd();
 
-    service.createAd("u1", new CreateAdRequest("item-1", 1, false, true, new BigDecimal("10")));
+    service.createAd("u1", new CreateAdRequest("item-1", 1, false, true, new BigDecimal("10"), null));
 
     ArgumentCaptor<Ad> captor = ArgumentCaptor.forClass(Ad.class);
     verify(adRepository).save(captor.capture());
@@ -117,7 +117,7 @@ class CreateAdServiceTest {
 
     AdResponse response =
         service.createAd(
-            "u1", new CreateAdRequest("item-1", 3, true, false, new BigDecimal("1.50")));
+            "u1", new CreateAdRequest("item-1", 3, true, false, new BigDecimal("1.50"), null));
 
     assertEquals(0, response.availability().availableQuantity());
   }
@@ -131,7 +131,7 @@ class CreateAdServiceTest {
             AdQuantityUnavailableException.class,
             () ->
                 service.createAd(
-                    "u1", new CreateAdRequest("item-1", 2, true, false, new BigDecimal("10"))));
+                    "u1", new CreateAdRequest("item-1", 2, true, false, new BigDecimal("10"), null)));
 
     assertEquals(1, exception.getAvailableQuantity());
     verify(adRepository, never()).save(any());
@@ -145,7 +145,7 @@ class CreateAdServiceTest {
         CollectionItemNotFoundException.class,
         () ->
             service.createAd(
-                "u2", new CreateAdRequest("item-1", 1, true, false, new BigDecimal("10"))));
+                "u2", new CreateAdRequest("item-1", 1, true, false, new BigDecimal("10"), null)));
 
     verifyNoInteractions(adRepository, adAvailabilityService);
   }
@@ -157,7 +157,7 @@ class CreateAdServiceTest {
     InvalidAdException exception =
         assertThrows(
             InvalidAdException.class,
-            () -> service.createAd("u1", new CreateAdRequest("item-1", 1, false, false, null)));
+            () -> service.createAd("u1", new CreateAdRequest("item-1", 1, false, false, null, null)));
 
     assertEquals("modality", exception.getField());
     verifyNoInteractions(adRepository);
@@ -170,7 +170,7 @@ class CreateAdServiceTest {
     InvalidAdException exception =
         assertThrows(
             InvalidAdException.class,
-            () -> service.createAd("u1", new CreateAdRequest("item-1", 1, true, false, null)));
+            () -> service.createAd("u1", new CreateAdRequest("item-1", 1, true, false, null, null)));
 
     assertEquals("unitPrice", exception.getField());
     verifyNoInteractions(adRepository);
@@ -180,7 +180,7 @@ class CreateAdServiceTest {
   void shouldRequireAuthenticatedUser() {
     assertThrows(
         InvalidAuthenticationException.class,
-        () -> service.createAd(" ", new CreateAdRequest("item-1", 1, false, true, null)));
+        () -> service.createAd(" ", new CreateAdRequest("item-1", 1, false, true, null, null)));
 
     verifyNoInteractions(collectionItemRepository, adRepository, adAvailabilityService);
   }

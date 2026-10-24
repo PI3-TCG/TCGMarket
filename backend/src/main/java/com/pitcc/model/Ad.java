@@ -10,7 +10,11 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.data.mongodb.core.mapping.FieldType;
 
-
+/**
+ * Anúncio de exemplares de um item da coleção.
+ * Carta, condição e idioma são copiados do item para que o marketplace
+ * consiga listar e filtrar sem consultar a coleção do vendedor.
+ */
 @Document(collection = "ads")
 @CompoundIndexes({
         @CompoundIndex(
@@ -33,6 +37,9 @@ public class Ad {
 
     private String sellerId;
     private String collectionItemId;
+    private String cardId;
+    private CardCondition condition;
+    private CardLanguage language;
 
     private Integer quantity;
     private Integer remainingQuantity;
@@ -85,6 +92,9 @@ public class Ad {
 
         this.sellerId = sellerId;
         this.collectionItemId = item.getId();
+        this.cardId = item.getCardId();
+        this.condition = item.getCondition();
+        this.language = item.getLanguage();
         this.quantity = quantity;
         this.remainingQuantity = quantity;
         this.saleEnabled = saleEnabled;
@@ -111,6 +121,18 @@ public class Ad {
 
     public String getCollectionItemId() {
         return collectionItemId;
+    }
+
+    public String getCardId() {
+        return cardId;
+    }
+
+    public CardCondition getCondition() {
+        return condition;
+    }
+
+    public CardLanguage getLanguage() {
+        return language;
     }
 
     public Integer getQuantity() {

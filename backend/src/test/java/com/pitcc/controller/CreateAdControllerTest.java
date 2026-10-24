@@ -110,6 +110,7 @@ class CreateAdControllerTest {
                 true,
                 true,
                 new BigDecimal("45.00"),
+                null,
                 Instant.parse("2026-10-19T18:00:00Z"),
                 new CollectionItemAvailabilityResponse(5, 4, 1)));
 
