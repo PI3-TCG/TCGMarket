@@ -3,16 +3,11 @@ import { Icon } from '@/components/ui/Icon'
 import type {
   MarketplaceFilters as FilterValues,
 } from '@/types/Marketplace'
-
+import { emptyMarketplaceFilters } from './marketplaceFilterDefaults'
 type Props = {
   onApply: (filters: FilterValues) => void
 }
 
-export const emptyMarketplaceFilters: FilterValues = {
-  search: '',
-  game: '',
-  modality: '',
-}
 
 const fieldClass =
   'min-h-11 w-full rounded-lg border border-primary-300/40 bg-white px-3 py-2 text-sm text-primary-900 transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500'
