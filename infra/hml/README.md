@@ -90,13 +90,15 @@ Trust policy (só jobs do environment `hml` deste repositório):
       "Condition": {
         "StringEquals": {
           "token.actions.githubusercontent.com:aud": "sts.amazonaws.com",
-          "token.actions.githubusercontent.com:sub": "repo:PI3-TCG/TCGMarket:environment:hml"
+          "token.actions.githubusercontent.com:sub": "repo:PI3-TCG@328386734/TCGMarket@1367322219:environment:hml"
         }
       }
     }
   ]
 }
 ```
+
+O repositório usa o *subject* imutável do OIDC, que inclui os IDs numéricos da organização (`328386734`) e do repositório (`1367322219`). Assim, outro repositório criado com o mesmo nome não consegue assumir a role. Para conferir o formato atual: `gh api repos/PI3-TCG/TCGMarket/actions/oidc/customization/sub` (campo `sub_claim_prefix`).
 
 Política inline de permissões (só esta instância e só o documento `AWS-RunShellScript`):
 
@@ -298,7 +300,7 @@ Logs do Docker têm rotação (3 arquivos de 10 MB por contêiner). A saída do 
 | Sintoma | Causa provável |
 | --- | --- |
 | Job de deploy aparece como *skipped* | `HML_DEPLOY_ENABLED` não é `true` (variável de repositório), ou testes/publicação falharam. |
-| `Not authorized to perform sts:AssumeRoleWithWebIdentity` | Trust policy: `sub` deve ser `repo:PI3-TCG/TCGMarket:environment:hml`; provedor OIDC ausente. |
+| `Not authorized to perform sts:AssumeRoleWithWebIdentity` | Trust policy: `sub` deve ser `repo:PI3-TCG@328386734/TCGMarket@1367322219:environment:hml` (formato imutável, seção 3.3); provedor OIDC ausente. |
 | `InvalidInstanceId` no `send-command` | Instância sem a role `AmazonSSMManagedInstanceCore` ou agente SSM parado/offline. |
 | `não foi possível baixar ...` | Pacote privado sem `docker login` na EC2, ou a tag não existe (a publicação falhou). |
 | Readiness `503 DOWN` | Atlas recusando a conexão: IP da EC2 fora do Network Access, credenciais ou URI. |

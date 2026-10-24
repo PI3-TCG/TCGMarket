@@ -659,7 +659,7 @@ public class ManageAdService {
             String adId,
             String userId
     ) {
-        return adRepository
+        return (Ad) adRepository
                 .findByIdAndSellerId(adId, userId)
                 .orElseThrow(AdNotFoundException::new);
     }

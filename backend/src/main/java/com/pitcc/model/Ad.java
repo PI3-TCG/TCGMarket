@@ -52,6 +52,7 @@ public class Ad {
     private String lastAppliedUpdateOperationId;
     private Instant cancelledAt;
     private Instant soldOutAt;
+    private String description;
 
     protected Ad() {
     }
@@ -144,6 +145,41 @@ public class Ad {
         this.id = id;
     }
 
+    public Ad(
+            String sellerId,
+            CollectionItem item,
+            int quantity,
+            boolean saleEnabled,
+            boolean tradeEnabled,
+            BigDecimal unitPrice,
+            String description,
+            Instant now
+    ) {
+        this(sellerId, item, quantity, saleEnabled, tradeEnabled, unitPrice, now);
+
+        this.description = description == null || description.isBlank()
+                ? null
+                : description.strip();
+    }
+
+    public Ad(
+            String id,
+            String sellerId,
+            CollectionItem item,
+            int quantity,
+            boolean saleEnabled,
+            boolean tradeEnabled,
+            BigDecimal unitPrice,
+            String description,
+            Instant now
+    ) {
+        this(id, sellerId, item, quantity, saleEnabled, tradeEnabled, unitPrice, now);
+
+        this.description = description == null || description.isBlank()
+                ? null
+                : description.strip();
+    }
+    
     public String getId() {
         return id;
     }
@@ -207,7 +243,12 @@ public class Ad {
     public Instant getSoldOutAt() {
         return soldOutAt;
     }
+
     public String getLastAppliedUpdateOperationId() {
         return lastAppliedUpdateOperationId;
+    }
+
+    public String getDescription() {
+        return description;
     }
 }

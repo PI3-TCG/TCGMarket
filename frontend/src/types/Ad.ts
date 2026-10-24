@@ -19,6 +19,7 @@ export interface CreateAdRequest {
   saleEnabled: boolean
   tradeEnabled: boolean
   unitPrice: number | null
+  description?: string | null
 }
 
 export interface AdResponse {
@@ -30,48 +31,7 @@ export interface AdResponse {
   saleEnabled: boolean
   tradeEnabled: boolean
   unitPrice: number | null
+  description: string | null
   createdAt: string
   availability: CollectionItemAvailability
-}
-
-export interface OwnAd {
-  id: string
-  collectionItemId: string
-  status: AdStatus
-  quantity: number
-  remainingQuantity: number
-  saleEnabled: boolean
-  tradeEnabled: boolean
-  unitPrice: number | null
-  condition: CardCondition
-  language: CardLanguage
-  card: CollectionCard
-  createdAt: string
-  updatedAt: string
-  cancelledAt: string | null
-  /** Exemplares liberados no cancelamento; só existe em anúncios cancelados. */
-  releasedQuantity: number | null
-}
-
-export interface OwnAdPage {
-  content: OwnAd[]
-  totalElements: number
-  totalPages: number
-  number: number
-  size: number
-  first: boolean
-  last: boolean
-}
-
-export interface OwnAdFilterValues {
-  search: string
-  modality: AdModality | ''
-  game: string
-  status: AdStatus | ''
-}
-
-export interface UpdateAdRequest {
-  saleEnabled: boolean
-  tradeEnabled: boolean
-  unitPrice: number | null
 }

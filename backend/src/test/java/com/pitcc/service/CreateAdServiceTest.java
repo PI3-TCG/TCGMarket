@@ -97,7 +97,8 @@ class CreateAdServiceTest {
                 quantity,
                 sale,
                 trade,
-                price
+                price,
+                null
         );
     }
 
