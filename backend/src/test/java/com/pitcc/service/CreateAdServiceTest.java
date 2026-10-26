@@ -1,187 +1,524 @@
+
 package com.pitcc.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
-
 import com.pitcc.dto.AdResponse;
-import com.pitcc.dto.CollectionItemAvailabilityResponse;
 import com.pitcc.dto.CreateAdRequest;
 import com.pitcc.exception.AdQuantityUnavailableException;
 import com.pitcc.exception.CollectionItemNotFoundException;
 import com.pitcc.exception.InvalidAdException;
 import com.pitcc.exception.InvalidAuthenticationException;
 import com.pitcc.model.Ad;
+import com.pitcc.model.AdReservation;
 import com.pitcc.model.AdStatus;
 import com.pitcc.model.CardCondition;
 import com.pitcc.model.CardLanguage;
 import com.pitcc.model.CollectionItem;
 import com.pitcc.repository.AdRepository;
+import com.pitcc.repository.AdReservationRepository;
 import com.pitcc.repository.CollectionItemRepository;
-import java.math.BigDecimal;
-import java.util.Optional;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.math.BigDecimal;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
 @ExtendWith(MockitoExtension.class)
 class CreateAdServiceTest {
 
-  @Mock private CollectionItemRepository collectionItemRepository;
-  @Mock private AdRepository adRepository;
-  @Mock private AdAvailabilityService adAvailabilityService;
+    @Mock
+    private CollectionItemRepository collectionItemRepository;
 
-  private CreateAdService service;
-  private CollectionItem item;
+    @Mock
+    private AdRepository adRepository;
 
-  @BeforeEach
-  void setUp() {
-    service = new CreateAdService(collectionItemRepository, adRepository, adAvailabilityService);
-    item = new CollectionItem("u1", "card-1", 5, CardCondition.NEAR_MINT, CardLanguage.PORTUGUESE);
-    ReflectionTestUtils.setField(item, "id", "item-1");
-  }
+    @Mock
+    private AdReservationRepository reservationRepository;
 
-  private void givenOwnedItemWithAvailability(int committed) {
-    when(collectionItemRepository.findByIdAndUserId("item-1", "u1")).thenReturn(Optional.of(item));
-    when(adAvailabilityService.availabilityOf(item))
-        .thenReturn(new CollectionItemAvailabilityResponse(5, committed, 5 - committed));
-  }
+    private CreateAdService service;
+    private CollectionItem item;
 
-  private void givenSaveReturnsAd() {
-    when(adRepository.save(any(Ad.class)))
-        .thenAnswer(
-            invocation -> {
-              Ad ad = invocation.getArgument(0);
-              ReflectionTestUtils.setField(ad, "id", "ad-1");
-              return ad;
-            });
-  }
+    @BeforeEach
+    void setUp() {
+        service = new CreateAdService(
+                collectionItemRepository,
+                adRepository,
+                reservationRepository
+        );
 
-  @Test
-  void shouldCreateSaleAndTradeAdForOwnItem() {
-    givenOwnedItemWithAvailability(2);
-    givenSaveReturnsAd();
+        item = collectionItem(5, 0);
+    }
 
-    AdResponse response =
+    private CollectionItem collectionItem(
+            int quantity,
+            int committed
+    ) {
+        CollectionItem collectionItem = new CollectionItem(
+                "u1",
+                "card-1",
+                quantity,
+                CardCondition.NEAR_MINT,
+                CardLanguage.PORTUGUESE
+        );
+
+        ReflectionTestUtils.setField(
+                collectionItem,
+                "id",
+                "item-1"
+        );
+
+        ReflectionTestUtils.setField(
+                collectionItem,
+                "committedQuantity",
+                committed
+        );
+
+        return collectionItem;
+    }
+
+    private CreateAdRequest request(
+            int quantity,
+            boolean sale,
+            boolean trade,
+            BigDecimal price
+    ) {
+        return new CreateAdRequest(
+                "item-1",
+                quantity,
+                sale,
+                trade,
+                price,
+                null
+        );
+    }
+
+    private void givenSuccessfulCreation(
+            int requestedQuantity,
+            int previouslyCommitted
+    ) {
+        CollectionItem updated = collectionItem(
+                5,
+                previouslyCommitted + requestedQuantity
+        );
+
+        when(
+                collectionItemRepository.findByIdAndUserId(
+                        "item-1",
+                        "u1"
+                )
+        ).thenReturn(
+                Optional.of(item),
+                Optional.of(updated)
+        );
+
+        when(
+                reservationRepository.reserve(
+                        eq("item-1"),
+                        eq("u1"),
+                        any(AdReservation.class)
+                )
+        ).thenReturn(true);
+
+        when(
+                adRepository.insert(any(Ad.class))
+        ).thenAnswer(invocation -> invocation.getArgument(0));
+
+        when(
+                reservationRepository.confirmCreation(
+                        eq("item-1"),
+                        eq("u1"),
+                        anyString()
+                )
+        ).thenReturn(true);
+    }
+
+    @Test
+    void shouldCreateSaleAndTradeAdForOwnItem() {
+        givenSuccessfulCreation(2, 2);
+
+        AdResponse response = service.createAd(
+                "u1",
+                request(
+                        2,
+                        true,
+                        true,
+                        new BigDecimal("45")
+                )
+        );
+
+        ArgumentCaptor<Ad> adCaptor =
+                ArgumentCaptor.forClass(Ad.class);
+
+        ArgumentCaptor<AdReservation> reservationCaptor =
+                ArgumentCaptor.forClass(AdReservation.class);
+
+        verify(adRepository).insert(adCaptor.capture());
+
+        verify(reservationRepository).reserve(
+                eq("item-1"),
+                eq("u1"),
+                reservationCaptor.capture()
+        );
+
+        Ad saved = adCaptor.getValue();
+        AdReservation reservation = reservationCaptor.getValue();
+
+        assertEquals("u1", saved.getSellerId());
+        assertEquals("item-1", saved.getCollectionItemId());
+        assertEquals("card-1", saved.getCardId());
+        assertEquals(CardCondition.NEAR_MINT, saved.getCondition());
+        assertEquals(CardLanguage.PORTUGUESE, saved.getLanguage());
+        assertEquals(2, saved.getQuantity());
+        assertEquals(2, saved.getRemainingQuantity());
+        assertTrue(saved.isSaleEnabled());
+        assertTrue(saved.isTradeEnabled());
+        assertEquals(new BigDecimal("45.00"), saved.getUnitPrice());
+        assertEquals(AdStatus.ACTIVE, saved.getStatus());
+
+        assertNotNull(saved.getId());
+        assertEquals(saved.getId(), reservation.getAdId());
+        assertEquals(saved.getId(), response.id());
+        assertEquals(2, reservation.getQuantity());
+
+        assertEquals(5, response.availability().totalQuantity());
+        assertEquals(4, response.availability().committedQuantity());
+        assertEquals(1, response.availability().availableQuantity());
+    }
+
+    @Test
+    void shouldIgnorePriceOnTradeOnlyAd() {
+        givenSuccessfulCreation(1, 0);
+
         service.createAd(
-            "u1", new CreateAdRequest("item-1", 2, true, true, new BigDecimal("45"), null));
+                "u1",
+                request(
+                        1,
+                        false,
+                        true,
+                        new BigDecimal("10")
+                )
+        );
 
-    ArgumentCaptor<Ad> captor = ArgumentCaptor.forClass(Ad.class);
-    verify(adRepository).save(captor.capture());
-    Ad saved = captor.getValue();
+        ArgumentCaptor<Ad> captor =
+                ArgumentCaptor.forClass(Ad.class);
 
-    assertEquals("u1", saved.getSellerId());
-    assertEquals("item-1", saved.getCollectionItemId());
-    assertEquals("card-1", saved.getCardId());
-    assertEquals(CardCondition.NEAR_MINT, saved.getCondition());
-    assertEquals(CardLanguage.PORTUGUESE, saved.getLanguage());
-    assertEquals(2, saved.getQuantity());
-    assertEquals(2, saved.getRemainingQuantity());
-    assertTrue(saved.isSaleEnabled());
-    assertTrue(saved.isTradeEnabled());
-    assertEquals(new BigDecimal("45.00"), saved.getUnitPrice());
-    assertEquals(AdStatus.ACTIVE, saved.getStatus());
+        verify(adRepository).insert(captor.capture());
 
-    assertEquals("ad-1", response.id());
-    assertEquals(new CollectionItemAvailabilityResponse(5, 4, 1), response.availability());
-  }
+        assertFalse(captor.getValue().isSaleEnabled());
+        assertTrue(captor.getValue().isTradeEnabled());
+        assertNull(captor.getValue().getUnitPrice());
+    }
 
-  @Test
-  void shouldIgnorePriceOnTradeOnlyAd() {
-    givenOwnedItemWithAvailability(0);
-    givenSaveReturnsAd();
+    @Test
+    void shouldAllowAnnouncingAllAvailableCopies() {
+        givenSuccessfulCreation(3, 2);
 
-    service.createAd("u1", new CreateAdRequest("item-1", 1, false, true, new BigDecimal("10"), null));
+        AdResponse response = service.createAd(
+                "u1",
+                request(
+                        3,
+                        true,
+                        false,
+                        new BigDecimal("1.50")
+                )
+        );
 
-    ArgumentCaptor<Ad> captor = ArgumentCaptor.forClass(Ad.class);
-    verify(adRepository).save(captor.capture());
-    assertFalse(captor.getValue().isSaleEnabled());
-    assertNull(captor.getValue().getUnitPrice());
-  }
+        assertEquals(
+                5,
+                response.availability().committedQuantity()
+        );
 
-  @Test
-  void shouldAllowAnnouncingAllAvailableCopies() {
-    givenOwnedItemWithAvailability(2);
-    givenSaveReturnsAd();
+        assertEquals(
+                0,
+                response.availability().availableQuantity()
+        );
+    }
 
-    AdResponse response =
-        service.createAd(
-            "u1", new CreateAdRequest("item-1", 3, true, false, new BigDecimal("1.50"), null));
+    @Test
+    void shouldRejectQuantityAboveAvailability() {
+        CollectionItem current = collectionItem(5, 4);
 
-    assertEquals(0, response.availability().availableQuantity());
-  }
+        when(
+                collectionItemRepository.findByIdAndUserId(
+                        "item-1",
+                        "u1"
+                )
+        ).thenReturn(
+                Optional.of(item),
+                Optional.of(current)
+        );
 
-  @Test
-  void shouldRejectQuantityAboveAvailability() {
-    givenOwnedItemWithAvailability(4);
+        when(
+                reservationRepository.reserve(
+                        eq("item-1"),
+                        eq("u1"),
+                        any(AdReservation.class)
+                )
+        ).thenReturn(false);
 
-    AdQuantityUnavailableException exception =
+        AdQuantityUnavailableException exception =
+                assertThrows(
+                        AdQuantityUnavailableException.class,
+                        () -> service.createAd(
+                                "u1",
+                                request(
+                                        2,
+                                        true,
+                                        false,
+                                        new BigDecimal("10")
+                                )
+                        )
+                );
+
+        assertEquals(1, exception.getAvailableQuantity());
+
+        verify(adRepository, never()).insert(any(Ad.class));
+
+        verify(
+                reservationRepository,
+                never()
+        ).confirmCreation(anyString(), anyString(), anyString());
+    }
+
+    @Test
+    void shouldRejectItemOfAnotherUser() {
+        when(
+                collectionItemRepository.findByIdAndUserId(
+                        "item-1",
+                        "u2"
+                )
+        ).thenReturn(Optional.empty());
+
         assertThrows(
-            AdQuantityUnavailableException.class,
-            () ->
-                service.createAd(
-                    "u1", new CreateAdRequest("item-1", 2, true, false, new BigDecimal("10"), null)));
+                CollectionItemNotFoundException.class,
+                () -> service.createAd(
+                        "u2",
+                        request(
+                                1,
+                                true,
+                                false,
+                                new BigDecimal("10")
+                        )
+                )
+        );
 
-    assertEquals(1, exception.getAvailableQuantity());
-    verify(adRepository, never()).save(any());
-  }
+        verifyNoInteractions(
+                adRepository,
+                reservationRepository
+        );
+    }
 
-  @Test
-  void shouldRejectItemOfAnotherUser() {
-    when(collectionItemRepository.findByIdAndUserId("item-1", "u2")).thenReturn(Optional.empty());
+    @Test
+    void shouldRequireAtLeastOneModality() {
+        when(
+                collectionItemRepository.findByIdAndUserId(
+                        "item-1",
+                        "u1"
+                )
+        ).thenReturn(Optional.of(item));
 
-    assertThrows(
-        CollectionItemNotFoundException.class,
-        () ->
-            service.createAd(
-                "u2", new CreateAdRequest("item-1", 1, true, false, new BigDecimal("10"), null)));
+        InvalidAdException exception = assertThrows(
+                InvalidAdException.class,
+                () -> service.createAd(
+                        "u1",
+                        request(1, false, false, null)
+                )
+        );
 
-    verifyNoInteractions(adRepository, adAvailabilityService);
-  }
+        assertEquals("modality", exception.getField());
 
-  @Test
-  void shouldRequireAtLeastOneModality() {
-    when(collectionItemRepository.findByIdAndUserId("item-1", "u1")).thenReturn(Optional.of(item));
+        verifyNoInteractions(
+                adRepository,
+                reservationRepository
+        );
+    }
 
-    InvalidAdException exception =
+    @Test
+    void shouldRequirePriceWhenSaleIsEnabled() {
+        when(
+                collectionItemRepository.findByIdAndUserId(
+                        "item-1",
+                        "u1"
+                )
+        ).thenReturn(Optional.of(item));
+
+        InvalidAdException exception = assertThrows(
+                InvalidAdException.class,
+                () -> service.createAd(
+                        "u1",
+                        request(1, true, false, null)
+                )
+        );
+
+        assertEquals("unitPrice", exception.getField());
+
+        verifyNoInteractions(
+                adRepository,
+                reservationRepository
+        );
+    }
+
+    @Test
+    void shouldRequireAuthenticatedUser() {
         assertThrows(
-            InvalidAdException.class,
-            () -> service.createAd("u1", new CreateAdRequest("item-1", 1, false, false, null, null)));
+                InvalidAuthenticationException.class,
+                () -> service.createAd(
+                        " ",
+                        request(1, false, true, null)
+                )
+        );
 
-    assertEquals("modality", exception.getField());
-    verifyNoInteractions(adRepository);
-  }
+        verifyNoInteractions(
+                collectionItemRepository,
+                adRepository,
+                reservationRepository
+        );
+    }
 
-  @Test
-  void shouldRequirePriceWhenSaleIsEnabled() {
-    when(collectionItemRepository.findByIdAndUserId("item-1", "u1")).thenReturn(Optional.of(item));
+    @Test
+    void shouldReserveBeforePersistingAndConfirmingAd() {
+        givenSuccessfulCreation(2, 0);
 
-    InvalidAdException exception =
+        AdResponse response = service.createAd(
+                "u1",
+                request(
+                        2,
+                        true,
+                        false,
+                        new BigDecimal("10.00")
+                )
+        );
+
+        InOrder order = inOrder(
+                reservationRepository,
+                adRepository
+        );
+
+        order.verify(reservationRepository).reserve(
+                eq("item-1"),
+                eq("u1"),
+                any(AdReservation.class)
+        );
+
+        order.verify(adRepository).insert(any(Ad.class));
+
+        order.verify(reservationRepository).confirmCreation(
+                eq("item-1"),
+                eq("u1"),
+                eq(response.id())
+        );
+
+        assertEquals(
+                2,
+                response.availability().committedQuantity()
+        );
+
+        assertEquals(
+                3,
+                response.availability().availableQuantity()
+        );
+    }
+
+    @Test
+    void shouldRejectWhenReservationConfirmationFails() {
+        when(
+                collectionItemRepository.findByIdAndUserId(
+                        "item-1",
+                        "u1"
+                )
+        ).thenReturn(Optional.of(item));
+
+        when(
+                reservationRepository.reserve(
+                        eq("item-1"),
+                        eq("u1"),
+                        any(AdReservation.class)
+                )
+        ).thenReturn(true);
+
+        when(
+                adRepository.insert(any(Ad.class))
+        ).thenAnswer(invocation -> invocation.getArgument(0));
+
+        when(
+                reservationRepository.confirmCreation(
+                        eq("item-1"),
+                        eq("u1"),
+                        anyString()
+                )
+        ).thenReturn(false);
+
+        IllegalStateException exception = assertThrows(
+                IllegalStateException.class,
+                () -> service.createAd(
+                        "u1",
+                        request(
+                                2,
+                                true,
+                                false,
+                                new BigDecimal("10")
+                        )
+                )
+        );
+
+        assertTrue(
+                exception.getMessage().contains("reconciliação")
+        );
+
+        verify(reservationRepository).reserve(
+                eq("item-1"),
+                eq("u1"),
+                any(AdReservation.class)
+        );
+
+        verify(adRepository).insert(any(Ad.class));
+    }
+
+    @Test
+    void shouldNotPersistAdWhenReservationFails() {
+        CollectionItem current = collectionItem(5, 5);
+
+        when(
+                collectionItemRepository.findByIdAndUserId(
+                        "item-1",
+                        "u1"
+                )
+        ).thenReturn(
+                Optional.of(item),
+                Optional.of(current)
+        );
+
+        when(
+                reservationRepository.reserve(
+                        eq("item-1"),
+                        eq("u1"),
+                        any(AdReservation.class)
+                )
+        ).thenReturn(false);
+
         assertThrows(
-            InvalidAdException.class,
-            () -> service.createAd("u1", new CreateAdRequest("item-1", 1, true, false, null, null)));
+                AdQuantityUnavailableException.class,
+                () -> service.createAd(
+                        "u1",
+                        request(
+                                1,
+                                true,
+                                false,
+                                new BigDecimal("10")
+                        )
+                )
+        );
 
-    assertEquals("unitPrice", exception.getField());
-    verifyNoInteractions(adRepository);
-  }
-
-  @Test
-  void shouldRequireAuthenticatedUser() {
-    assertThrows(
-        InvalidAuthenticationException.class,
-        () -> service.createAd(" ", new CreateAdRequest("item-1", 1, false, true, null, null)));
-
-    verifyNoInteractions(collectionItemRepository, adRepository, adAvailabilityService);
-  }
+        verifyNoInteractions(adRepository);
+    }
 }

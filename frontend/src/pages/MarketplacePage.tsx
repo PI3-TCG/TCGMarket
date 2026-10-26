@@ -4,10 +4,8 @@ import { Button } from '@/components/ui/Button'
 import { Icon } from '@/components/ui/Icon'
 import { PageBanner } from '@/components/layout/PageBanner'
 import { MarketplaceAdCard } from '@/components/marketplace/MarketplaceAdCard'
-import {
-  MarketplaceFilters,
-  emptyMarketplaceFilters,
-} from '@/components/marketplace/MarketplaceFilters'
+import { MarketplaceFilters } from '@/components/marketplace/MarketplaceFilters'
+import { emptyMarketplaceFilters } from '@/components/marketplace/marketplaceFilterDefaults'
 import { useRemoteData } from '@/hooks/useRemoteData'
 import { getMarketplaceAds } from '@/services/marketplace'
 import type {
