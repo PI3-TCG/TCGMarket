@@ -17,14 +17,8 @@ public interface AdRepository extends MongoRepository<Ad, String> {
             AdStatus status
     );
 
-    // Necessário para o gerenciamento da #62
-    // e para as operações protegidas da #66.
-    Optional<Ad> findByIdAndSellerId(
-            String id,
-            String sellerId
-    );
+    Optional<Ad> findByIdAndSellerId(String id, String sellerId);
 
-    // Necessário para o Marketplace da #63.
     Page<Ad> findByStatusAndRemainingQuantityGreaterThan(
             AdStatus status,
             Integer remainingQuantity,

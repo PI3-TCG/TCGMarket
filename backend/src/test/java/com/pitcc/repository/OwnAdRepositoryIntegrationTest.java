@@ -141,7 +141,7 @@ class OwnAdRepositoryIntegrationTest {
     CollectionItem item =
         new CollectionItem(sellerId, card.getId(), 5, CardCondition.NEAR_MINT, CardLanguage.ENGLISH);
     ReflectionTestUtils.setField(item, "id", "item-" + UUID.randomUUID());
-    return new Ad(sellerId, item, 3, sale, trade, sale ? new BigDecimal("12.50") : null, createdAt);
+    return new Ad(sellerId, item, 3, sale, trade, sale ? new BigDecimal("12.50") : null, null, createdAt);
   }
 
   private Card trap(String name) {

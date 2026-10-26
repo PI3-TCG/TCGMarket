@@ -18,6 +18,7 @@ export interface MarketplaceAd {
   unitPrice: number | null
   sellerUsername: string | null
   description: string | null
+  ownAd: boolean
 }
 
 export interface MarketplacePageResponse {

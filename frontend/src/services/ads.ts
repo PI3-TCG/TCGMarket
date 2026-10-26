@@ -37,7 +37,6 @@ export async function getMyAds({
     },
     signal,
   })
-
   return response.data
 }
 
@@ -56,7 +55,6 @@ export async function updateMyAd(
     `/api/users/me/ads/${encodeURIComponent(adId)}`,
     request,
   )
-
   return response.data
 }
 
@@ -64,6 +62,5 @@ export async function cancelMyAd(adId: string): Promise<OwnAd> {
   const response = await api.post<OwnAd>(
     `/api/users/me/ads/${encodeURIComponent(adId)}/cancel`,
   )
-
   return response.data
 }

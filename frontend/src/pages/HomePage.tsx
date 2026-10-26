@@ -1,7 +1,7 @@
 import { Alert } from '@/components/ui/Alert'
 import { GAMES } from '@/components/layout/siteGames'
 import { useSession } from '@/session'
-import { useNavigate } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { useCallback, useEffect, useState } from 'react'
 import hero from '@/assets/images/image-banner-home.png'
 import pokemonBanner from '@/assets/images/image-nav-pokemon.png'
@@ -11,7 +11,6 @@ import onePieceBanner from '@/assets/images/image-nav-onePiece.png'
 import digimonBanner from '@/assets/images/image-nav-digimon.png'
 import { Button } from '@/components/ui/Button'
 import { MarketplaceAdCard } from '@/components/marketplace/MarketplaceAdCard'
-import { MarketplaceAdDetailsModal } from '@/components/marketplace/MarketplaceAdDetailsModal'
 import { formatCurrency } from '@/components/ads/adFormat'
 import { useRemoteData } from '@/hooks/useRemoteData'
 import { getMarketplaceAds } from '@/services/marketplace'
@@ -28,9 +27,6 @@ const exploreImages: Record<string, string> = {
 }
 
 export function HomePage() {
-  const [selectedAdId, setSelectedAdId] = useState<string | null>(
-    null,
-  )
   const navigate = useNavigate()
   const { user, sessionReady } = useSession()
   const [notice, setNotice] = useState<string | null>(null)
@@ -205,11 +201,7 @@ export function HomePage() {
               </button>
             </div>
 
-            <HomeAds
-              sort="priceDesc"
-              variant="cards"
-              onViewDetails={setSelectedAdId}
-            />
+            <HomeAds sort="priceDesc" variant="cards" />
           </div>
 
           <div className="space-y-4">
@@ -233,11 +225,7 @@ export function HomePage() {
                 </button>
               </div>
 
-              <HomeAds
-                sort="recent"
-                variant="list"
-                onViewDetails={setSelectedAdId}
-              />
+              <HomeAds sort="recent" variant="list" />
             </div>
 
             <aside className="rounded-lg bg-linear-to-br from-primary-100 to-neutral-100 p-5">
@@ -284,15 +272,6 @@ export function HomePage() {
           </div>
         </section>
       </main>
-
-      {selectedAdId !== null && (
-        <MarketplaceAdDetailsModal
-          key={selectedAdId}
-          adId={selectedAdId}
-          onClose={() => setSelectedAdId(null)}
-        />
-      )}
-
     </div>
   )
 }
@@ -460,7 +439,6 @@ function GameMark({ kind }: { kind: (typeof GAMES)[number]['mark'] }) {
 type HomeAdsProps = {
   sort: MarketplaceSort
   variant: 'cards' | 'list'
-  onViewDetails: (adId: string) => void
 }
 
 const homeAdsGrid =
@@ -472,11 +450,7 @@ const homeGameLabels: Record<string, string> = {
   YUGIOH: 'Yu-Gi-Oh!',
 }
 
-function HomeAds({
-  sort,
-  variant,
-  onViewDetails,
-}: HomeAdsProps) {
+function HomeAds({ sort, variant }: HomeAdsProps) {
   const fetchAds = useCallback(
     () => getMarketplaceAds(1, sort),
     [sort],
@@ -577,11 +551,7 @@ function HomeAds({
     return (
       <div className={homeAdsGrid}>
         {ads.map((ad) => (
-          <MarketplaceAdCard
-            key={ad.id}
-            ad={ad}
-            onViewDetails={onViewDetails}
-          />
+          <MarketplaceAdCard key={ad.id} ad={ad} />
         ))}
       </div>
     )
@@ -591,9 +561,9 @@ function HomeAds({
     <ul className="divide-y divide-neutral-200">
       {ads.map((ad) => (
         <li key={ad.id}>
-          <button
-            type="button"
-            onClick={() => onViewDetails(ad.id)}
+          <Link
+            to="/marketplace/anuncios/$id"
+            params={{ id: ad.id }}
             aria-label={`Ver anúncio de ${ad.cardName}`}
             className="flex w-full cursor-pointer flex-wrap items-center justify-between gap-2 rounded-lg px-2 py-3 text-left transition hover:bg-primary-100/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500"
           >
@@ -634,7 +604,7 @@ function HomeAds({
                 </span>
               )}
             </span>
-          </button>
+          </Link>
         </li>
       ))}
     </ul>

@@ -11,6 +11,11 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.data.mongodb.core.mapping.FieldType;
 
+/**
+ * Anúncio de exemplares de um item da coleção.
+ * Carta, condição e idioma são copiados do item para que o marketplace
+ * consiga listar e filtrar sem consultar a coleção do vendedor.
+ */
 @Document(collection = "ads")
 @CompoundIndexes({
         @CompoundIndex(

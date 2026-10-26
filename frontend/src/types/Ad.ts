@@ -51,6 +51,7 @@ export interface OwnAd {
   createdAt: string
   updatedAt: string
   cancelledAt: string | null
+  /** Exemplares liberados no cancelamento; só existe em anúncios cancelados. */
   releasedQuantity: number | null
 }
 
