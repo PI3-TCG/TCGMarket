@@ -27,13 +27,14 @@ Responsáveis por representar as cartas disponíveis no sistema e suas caracter�
 ### 🏷️ Marketplace
 
 * `Ad`
-* `Transaction`
-
-  * `Sale`
-  * `Exchange`
+* `Cart`
+* `Checkout`
+* `Order`
 * `Payment`
+* `Transaction`
+* `Exchange`
 
-Responsáveis pelas ofertas e pelas negociações realizadas entre os usuários.
+Responsáveis pelas ofertas e pelas negociações realizadas entre os usuários. O fluxo de compra (carrinho, pedido, pagamento e transação) está detalhado em [Modelagem de Carrinho, Pedido, Pagamento e Transação](./Modelagem%20de%20Carrinho%2C%20Pedido%2C%20Pagamento%20e%20Transa%C3%A7%C3%A3o.md).
 
 ### 👤 Usuários e reputação
 
@@ -70,10 +71,12 @@ Responsáveis pela comunicação entre os usuários, principalmente em relação
 | `OnePieceCard`    | Representar cartas de One Piece.                                     |
 | `Ad`              | Representar uma carta disponibilizada por um usuário no marketplace. |
 | `User`            | Representar os usuários da plataforma.                               |
-| `Transaction`     | Representar informações comuns às negociações.                       |
-| `Sale`            | Representar uma compra/venda de carta.                               |
+| `Cart`            | Guardar os anúncios que o comprador pretende comprar.                |
+| `Checkout`        | Agrupar os pedidos de uma ação de compra e evitar duplicidade.       |
+| `Order`           | Representar a compra de um comprador a um vendedor.                  |
+| `Payment`         | Representar a tentativa de pagamento de um pedido.                   |
+| `Transaction`     | Registrar no histórico uma negociação concluída.                     |
 | `Exchange`        | Representar uma troca de cartas.                                     |
-| `Payment`         | Representar o pagamento de uma venda.                                |
 | `Review`          | Registrar a avaliação de um usuário após uma transação.              |
 | `CollectionItem`  | Representar uma carta pertencente à coleção de um usuário.           |
 | `Wishlist`        | Representar uma carta que o usuário deseja adquirir.                 |
@@ -317,65 +320,60 @@ O usuário pode utilizar as funcionalidades do marketplace, como gerenciar seu p
 
 # 9. Classe `Transaction`
 
-### Tipo
-
-**Classe abstrata**
-
 ### Descrição
 
-A classe `Transaction` representa uma operação realizada entre dois usuários dentro do marketplace.
+A classe `Transaction` registra no histórico uma negociação **concluída** entre dois usuários. É criada na conclusão do pedido, não muda depois e guarda cópias da carta e dos valores, para que o histórico não dependa do estado atual do anúncio.
 
-Ela contém as informações comuns às diferentes formas de negociação disponíveis no sistema.
-
-As transações são especializadas pelas classes:
-
-* `Sale`
-* `Exchange`
+Substitui a antiga hierarquia `Transaction` → `Sale`/`Exchange`, que tinha um único anúncio por transação e não comportava o carrinho. A compra em andamento é representada por `Order` (seção 10).
 
 ### Atributos
 
-| Atributo            | Tipo          | Descrição                                                          |
-| ------------------- | ------------- | ------------------------------------------------------------------ |
-| `id`                | ObjectId      | Identificador único da transação.                                  |
-| `adId`              | ObjectId      | Referência ao anúncio envolvido na transação.                      |
-| `sellerId`          | ObjectId      | Referência ao usuário que está oferecendo a carta.                 |
-| `buyerId`           | ObjectId      | Referência ao usuário que está adquirindo a carta.                 |
-| `status`            | Enum          | Estado da transação: Pendente, Confirmada, Concluída ou Cancelada. |
-| `creationDate`      | LocalDateTime | Data e horário de criação da transação.                            |
-| `conclusionDate`    | LocalDateTime | Data e horário de conclusão da transação.                          |
+| Atributo      | Tipo                   | Descrição                                                                                  |
+| ------------- | ---------------------- | ------------------------------------------------------------------------------------------ |
+| `id`          | ObjectId               | Identificador único da transação.                                                          |
+| `type`        | Enum                   | Tipo da negociação: `SALE`. Trocas serão incluídas com a modelagem de propostas.            |
+| `sourceId`    | ObjectId               | Pedido que originou a transação; único por tipo.                                           |
+| `sellerId`    | ObjectId               | Usuário que vendeu.                                                                        |
+| `buyerId`     | ObjectId               | Usuário que comprou.                                                                       |
+| `items`       | Lista de subdocumentos | Cartas negociadas, com origem, destino, cópia da carta, quantidade e preço unitário.       |
+| `totalAmount` | BigDecimal             | Valor total.                                                                               |
+| `completedAt` | Instant                | Data e horário da conclusão.                                                               |
 
 ---
 
-# 10. Classe `Sale`
-
-### Tipo
-
-**Subclasse de `Transaction`**
+# 10. Classes `Cart`, `Checkout` e `Order`
 
 ### Descrição
 
-Representa uma transação de compra e venda de uma carta.
+`Cart` é o carrinho do comprador: um por usuário, com uma linha por anúncio (quantidade, preço aceito e seleção). Não reserva exemplares.
 
-Além das informações herdadas de `Transaction`, a venda possui informações relacionadas ao pagamento e à entrega do produto.
+`Checkout` representa uma ação "Simular pagamento" e garante, por uma chave de idempotência, que a mesma requisição não gere pedidos duplicados.
 
-### Atributos
+`Order` é a compra de um comprador a **um** vendedor. Um checkout com anúncios de vendedores diferentes gera um pedido por vendedor. O pedido guarda itens, preços e endereço de entrega copiados no momento da compra.
 
-| Atributo          | Tipo                | Descrição                                      |
-| ----------------- | ------------------- | ---------------------------------------------- |
-| `deliveryAddress` | String/Subdocumento | Endereço para onde a carta deverá ser enviada. |
+### Atributos de `Order`
+
+| Atributo          | Tipo                   | Descrição                                                                          |
+| ----------------- | ---------------------- | ---------------------------------------------------------------------------------- |
+| `id`              | ObjectId               | Identificador único do pedido.                                                     |
+| `checkoutId`      | ObjectId               | Checkout de origem.                                                                |
+| `buyerId`         | ObjectId               | Comprador.                                                                         |
+| `sellerId`        | ObjectId               | Vendedor.                                                                          |
+| `items`           | Lista de subdocumentos | Anúncio, item da coleção, cópia da carta, quantidade, preço unitário e subtotal.   |
+| `totalAmount`     | BigDecimal             | Soma dos subtotais.                                                                |
+| `deliveryAddress` | Subdocumento           | Endereço de entrega confirmado, copiado.                                           |
+| `status`          | Enum                   | `PENDING_PAYMENT`, `PAID`, `COMPLETED` ou `PAYMENT_FAILED`.                        |
+| `createdAt`       | Instant                | Data e horário de criação.                                                         |
+| `paidAt`, `completedAt`, `failedAt` | Instant | Marcos do ciclo de vida.                                                         |
 
 
 ---
 
 # 11. Classe `Exchange`
 
-### Tipo
-
-**Subclasse de `Transaction`**
-
 ### Descrição
 
-Representa uma negociação na qual os usuários realizam uma troca de cartas.
+Representa uma negociação na qual os usuários realizam uma troca de cartas. Será revista na modelagem de propostas de troca; quando concluída, a troca também gera uma `Transaction`.
 
 A classe permite registrar qual carta está sendo oferecida pelo usuário que deseja realizar a troca.
 
@@ -392,21 +390,21 @@ A classe permite registrar qual carta está sendo oferecida pelo usuário que de
 
 ### Descrição
 
-A classe `Payment` representa o pagamento associado a uma venda realizada no marketplace.
-
-Ela registra o método utilizado, o valor, o status do pagamento e as informações relacionadas à transação com um possível gateway externo.
+A classe `Payment` representa a tentativa de pagamento de um pedido, feita pelo simulador interno ou pelo Mercado Pago em sandbox. Guarda só identificadores e status do gateway; nenhum dado de cartão é armazenado.
 
 ### Atributos
 
-| Atributo                 | Tipo          | Descrição                                                                           |
-| ------------------------ | ------------- | ----------------------------------------------------------------------------------- |
-| `id`                     | ObjectId      | Identificador único do pagamento.                                                   |
-| `saleId`                 | ObjectId      | Referência à venda relacionada ao pagamento.                                        |
-| `method`                 | Enum          | Método utilizado para pagamento: Pix, Cartão de Crédito ou Boleto.                  |
-| `value`                  | BigDecimal    | Valor do pagamento.                                                                 |
-| `status`                 | Enum          | Situação do pagamento: Pendente, Aprovado, Recusado ou Estornado.                   |
-| `paymentDate`            | LocalDateTime | Data e horário em que o pagamento foi realizado.                                    |
-| `gatewayTransactionCode` | String        | Código retornado por um gateway externo de pagamento, caso seja utilizado/simulado. |
+| Atributo            | Tipo       | Descrição                                                                         |
+| ------------------- | ---------- | --------------------------------------------------------------------------------- |
+| `id`                | ObjectId   | Identificador único do pagamento.                                                 |
+| `orderId`           | ObjectId   | Pedido pago; cada pedido tem uma única tentativa.                                 |
+| `idempotencyKey`    | String     | Chave enviada ao gateway para que reenviar a criação não duplique a cobrança.     |
+| `amount`            | BigDecimal | Valor do pagamento, igual ao total do pedido.                                     |
+| `provider`          | Enum       | `SIMULATED` ou `MERCADO_PAGO`.                                                    |
+| `method`            | Enum       | `PIX`.                                                                            |
+| `status`            | Enum       | `PENDING`, `APPROVED`, `REJECTED`, `CANCELLED` ou `EXPIRED`.                      |
+| `providerPaymentId` | String     | Identificador do pagamento no gateway.                                            |
+| `resolvedAt`        | Instant    | Data e horário em que o resultado foi aplicado.                                   |
 
 ---
 
