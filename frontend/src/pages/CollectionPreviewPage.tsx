@@ -5,10 +5,8 @@ import { Link } from '@tanstack/react-router'
 import collectionBanner from '@/assets/images/image-collection.png'
 import { CollectionSummary } from '@/components/collection/CollectionSummary'
 import { useState } from 'react'
-import {
-    CollectionFilters,
-    emptyCollectionFilters,
-} from '@/components/collection/CollectionFilters'
+import { CollectionFilters } from '@/components/collection/CollectionFilters'
+import { emptyCollectionFilters } from '@/components/collection/collectionFilterDefaults'
 import { CollectionState } from '@/components/collection/CollectionState'
 
 
