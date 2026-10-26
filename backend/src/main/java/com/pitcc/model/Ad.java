@@ -3,6 +3,8 @@ package com.pitcc.model;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.CompoundIndex;
@@ -60,6 +62,9 @@ public class Ad {
     private String description;
     private boolean creationAborted;
     private String writeFenceToken;
+
+    // Exemplares separados para pedidos com pagamento pendente.
+    private List<AdPurchaseHold> purchaseHolds = new ArrayList<>();
 
     protected Ad() {
     }
@@ -265,6 +270,25 @@ public class Ad {
 
     public String getWriteFenceToken() {
         return writeFenceToken;
+    }
+
+    public List<AdPurchaseHold> getPurchaseHolds() {
+        return purchaseHolds == null ? List.of() : List.copyOf(purchaseHolds);
+    }
+
+    public int heldForPurchase() {
+        return getPurchaseHolds().stream()
+                .mapToInt(AdPurchaseHold::getQuantity)
+                .sum();
+    }
+
+    /** Exemplares que um comprador pode colocar em um novo pedido agora. */
+    public int availableForPurchase() {
+        if (status != AdStatus.ACTIVE || !saleEnabled || remainingQuantity == null) {
+            return 0;
+        }
+
+        return Math.max(0, remainingQuantity - heldForPurchase());
     }
 
     public Ad abortedCreationMarker(Instant now) {
