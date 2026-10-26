@@ -39,15 +39,15 @@ public class DeliveryAddress {
             String city,
             String state
     ) {
-        this.recipientName = required(recipientName, "Informe o nome do destinatário.");
-        this.street = required(street, "Informe a rua ou avenida.");
-        this.district = required(district, "Informe o bairro.");
-        this.city = required(city, "Informe a cidade.");
+        this.recipientName = required(recipientName, "recipientName", "Informe o nome do destinatário.");
+        this.street = required(street, "street", "Informe a rua ou avenida.");
+        this.district = required(district, "district", "Informe o bairro.");
+        this.city = required(city, "city", "Informe a cidade.");
 
         String digits = zipCode == null ? "" : zipCode.replaceAll("\\D", "");
 
         if (digits.length() != 8) {
-            throw new IllegalArgumentException("Informe um CEP com 8 dígitos.");
+            throw new InvalidFieldException("zipCode", "Informe um CEP com 8 dígitos.");
         }
 
         this.zipCode = digits;
@@ -55,13 +55,13 @@ public class DeliveryAddress {
         if (withoutNumber) {
             this.number = null;
         } else {
-            this.number = required(number, "Informe o número ou marque \"Sem número\".");
+            this.number = required(number, "number", "Informe o número ou marque \"Sem número\".");
         }
 
         this.withoutNumber = withoutNumber;
 
         if (state == null || !STATES.contains(state.strip().toUpperCase())) {
-            throw new IllegalArgumentException("Informe uma UF válida.");
+            throw new InvalidFieldException("state", "Informe uma UF válida.");
         }
 
         this.state = state.strip().toUpperCase();
@@ -70,12 +70,27 @@ public class DeliveryAddress {
                 : complement.strip();
     }
 
-    private static String required(String value, String message) {
+    private static String required(String value, String field, String message) {
         if (value == null || value.isBlank()) {
-            throw new IllegalArgumentException(message);
+            throw new InvalidFieldException(field, message);
         }
 
         return value.strip();
+    }
+
+    /** Campo do endereço recusado, para a mensagem aparecer junto a ele no formulário. */
+    public static final class InvalidFieldException extends IllegalArgumentException {
+
+        private final String field;
+
+        public InvalidFieldException(String field, String message) {
+            super(message);
+            this.field = field;
+        }
+
+        public String getField() {
+            return field;
+        }
     }
 
     public String getRecipientName() {

@@ -31,6 +31,19 @@ class DeliveryAddressTest {
     }
 
     @Test
+    void identifiesTheRejectedField() {
+        assertEquals("zipCode", assertThrows(DeliveryAddress.InvalidFieldException.class, () ->
+                address("1301", "12", false, "SP")
+        ).getField());
+        assertEquals("number", assertThrows(DeliveryAddress.InvalidFieldException.class, () ->
+                address("13010000", " ", false, "SP")
+        ).getField());
+        assertEquals("state", assertThrows(DeliveryAddress.InvalidFieldException.class, () ->
+                address("13010000", "12", false, "XX")
+        ).getField());
+    }
+
+    @Test
     void validatesRequiredFields() {
         assertEquals(
                 "Informe um CEP com 8 dígitos.",

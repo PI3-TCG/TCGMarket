@@ -2,7 +2,7 @@ import { copies, formatCurrency } from '@/components/ads/adFormat'
 import { Alert } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
 import type { CartItem } from '@/types/Cart'
-import { Link } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { useId } from 'react'
 import { itemSubtotal, needsReview } from './cartFormat'
 
@@ -12,6 +12,8 @@ export function CartSummary({ items }: { items: CartItem[] }) {
   const copiesSelected = selected.reduce((sum, item) => sum + item.quantity, 0)
   const subtotal = selected.reduce((sum, item) => sum + itemSubtotal(item), 0)
   const review = selected.some(needsReview)
+  const canContinue = selected.length > 0 && !review
+  const navigate = useNavigate()
 
   const rows = [
     { label: 'Anúncios selecionados', value: `${selected.length} de ${items.length}` },
@@ -61,12 +63,13 @@ export function CartSummary({ items }: { items: CartItem[] }) {
           Nenhum valor será cobrado.
         </Alert>
 
-        <Button className="h-12 w-full" disabled aria-describedby={hintId}>
+        <Button
+          className="h-12 w-full"
+          disabled={!canContinue}
+          onClick={() => navigate({ to: '/carrinho/entrega' })}
+        >
           Continuar
         </Button>
-        <p id={hintId} className="text-center text-xs text-neutral-700">
-          A finalização da compra estará disponível em breve.
-        </p>
 
         <div className="text-center">
           <Link
