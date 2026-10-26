@@ -22,6 +22,7 @@ public record MarketplaceAdResponse(
         boolean tradeEnabled,
         BigDecimal unitPrice,
         String sellerUsername,
-        String description
+        String description,
+        boolean ownAd
 ) {
 }

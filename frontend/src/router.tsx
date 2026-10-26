@@ -26,6 +26,7 @@ import { MyCollectionPage } from '@/pages/MyCollectionPage'
 import { CreateAdPage } from '@/pages/CreateAdPage'
 import { MyAdsPage } from '@/pages/MyAdsPage'
 import { MarketplacePage } from '@/pages/MarketplacePage'
+import { MarketplaceAdPage } from '@/pages/MarketplaceAdPage'
 import type { MarketplaceSort } from '@/types/Marketplace'
 
 const rootRoute = createRootRoute({
@@ -194,10 +195,17 @@ function MarketplaceRouteView() {
   return <MarketplacePage sort={sort} />
 }
 
+const marketplaceAdRoute = createRoute({
+  getParentRoute: () => siteLayoutRoute,
+  path: '/marketplace/anuncios/$id',
+  component: MarketplaceAdPage,
+})
+
 const routeTree = rootRoute.addChildren([
   siteLayoutRoute.addChildren([
     indexRoute,
     marketplaceRoute,
+    marketplaceAdRoute,
     catalogRoute,
     cardDetailsRoute,
     profileRoute,
