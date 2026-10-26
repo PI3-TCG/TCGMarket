@@ -1,11 +1,11 @@
 import { useState } from 'react'
+import { Link } from '@tanstack/react-router'
 import { Icon } from '@/components/ui/Icon'
 import { formatCurrency } from '@/components/ads/adFormat'
 import type { MarketplaceAd } from '@/types/Marketplace'
 
 type Props = {
   ad: MarketplaceAd
-  onViewDetails: (adId: string) => void
 }
 
 const gameLabels: Record<string, string> = {
@@ -28,7 +28,7 @@ const languageLabels: Record<string, string> = {
   JAPANESE: 'Japonês',
 }
 
-export function MarketplaceAdCard({ ad, onViewDetails }: Props) {
+export function MarketplaceAdCard({ ad }: Props) {
   const [failedImageUrl, setFailedImageUrl] = useState<string | null>(null)
 
   const hasImage = Boolean(
@@ -145,14 +145,14 @@ export function MarketplaceAdCard({ ad, onViewDetails }: Props) {
           )}
         </div>
 
-        <button
-          type="button"
-          onClick={() => onViewDetails(ad.id)}
+        <Link
+          to="/marketplace/anuncios/$id"
+          params={{ id: ad.id }}
           aria-label={`Ver detalhes do anúncio de ${ad.cardName}`}
-          className="mt-1 w-full rounded-control bg-primary-900 px-3 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-900"
+          className="mt-1 w-full rounded-control bg-primary-900 px-3 py-2.5 text-center text-sm font-semibold text-white transition-colors hover:bg-primary-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-900"
         >
           Ver detalhes
-        </button>
+        </Link>
       </div>
     </article>
   )

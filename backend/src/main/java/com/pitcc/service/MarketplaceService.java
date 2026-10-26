@@ -54,7 +54,8 @@ public class MarketplaceService {
     public MarketplacePageResponse listAvailableAds(
             int page,
             String sort,
-            MarketplaceFilters filters
+            MarketplaceFilters filters,
+            String viewerId
     ) {
         // A API recebe páginas começando em 1.
         if (page < 1) {
@@ -149,7 +150,8 @@ public class MarketplaceService {
                         ad,
                         itemsById,
                         cardsById,
-                        sellersById
+                        sellersById,
+                        viewerId
                 ))
                 .toList();
 
@@ -166,7 +168,8 @@ public class MarketplaceService {
             Ad ad,
             Map<String, CollectionItem> itemsById,
             Map<String, Card> cardsById,
-            Map<String, User> sellersById
+            Map<String, User> sellersById,
+            String viewerId
     ) {
         CollectionItem item = itemsById.get(ad.getCollectionItemId());
         User seller = sellersById.get(ad.getSellerId());
@@ -207,11 +210,12 @@ public class MarketplaceService {
                 ad.isTradeEnabled(),
                 ad.isSaleEnabled() ? ad.getUnitPrice() : null,
                 seller.getUsername(),
-                ad.getDescription()
+                ad.getDescription(),
+                viewerId != null && viewerId.equals(ad.getSellerId())
         );
     }
 
-    public MarketplaceAdResponse getAvailableAd(String id) {
+    public MarketplaceAdResponse getAvailableAd(String id, String viewerId) {
         Ad ad = adRepository
                 .findByIdAndStatusAndRemainingQuantityGreaterThan(
                         id,
@@ -245,7 +249,8 @@ public class MarketplaceService {
                 ad,
                 Map.of(item.getId(), item),
                 Map.of(card.getId(), card),
-                Map.of(seller.getId(), seller)
+                Map.of(seller.getId(), seller),
+                viewerId
         );
     }
 }
