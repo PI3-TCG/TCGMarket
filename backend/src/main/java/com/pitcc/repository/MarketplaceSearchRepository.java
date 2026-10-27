@@ -7,6 +7,7 @@ import com.pitcc.model.Card;
 import com.pitcc.model.CollectionItem;
 
 import org.bson.Document;
+import org.bson.types.Decimal128;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -60,10 +61,23 @@ public class MarketplaceSearchRepository {
             }
         }
 
+        // Reservas de pedidos pendentes não podem ser anunciadas como livres.
+        availabilityMatch.append("$expr", new Document("$gt", List.of(
+                new Document("$subtract", List.of("$remainingQuantity",
+                        new Document("$sum", "$purchaseHolds.quantity"))), 0)));
+        if (filters.minPrice() != null || filters.maxPrice() != null) {
+            availabilityMatch.append("saleEnabled", true);
+            Document price = new Document();
+            if (filters.minPrice() != null) price.append("$gte", new Decimal128(filters.minPrice()));
+            if (filters.maxPrice() != null) price.append("$lte", new Decimal128(filters.maxPrice()));
+            availabilityMatch.append("unitPrice", price);
+        }
         pipeline.add(new Document("$match", availabilityMatch));
 
         // Só consulta as cartas quando os filtros dependem delas.
-        if (filters.search() != null || filters.game() != null) {
+        if (filters.search() != null || filters.game() != null
+                || filters.edition() != null || filters.rarity() != null
+                || filters.condition() != null || filters.language() != null) {
             addCardFilters(pipeline, filters);
         }
 
@@ -164,6 +178,11 @@ public class MarketplaceSearchRepository {
                 new Document("$unwind", "$marketplaceItem")
         );
 
+        Document itemMatch = new Document();
+        if (filters.condition() != null) itemMatch.append("marketplaceItem.condition", filters.condition().name());
+        if (filters.language() != null) itemMatch.append("marketplaceItem.language", filters.language().name());
+        if (!itemMatch.isEmpty()) pipeline.add(new Document("$match", itemMatch));
+
         // CollectionItem -> Card.
         pipeline.add(
                 lookupIds(
@@ -201,7 +220,14 @@ public class MarketplaceSearchRepository {
             cardMatch.append("game", filters.game().name());
         }
 
-        // Nome e TCG devem corresponder à mesma carta.
+        if (filters.edition() != null) {
+            cardMatch.append("edition", new Document("$regex", Pattern.quote(filters.edition())).append("$options", "i"));
+        }
+        if (filters.rarity() != null) {
+            cardMatch.append("officialRarity", new Document("$regex", "^" + Pattern.quote(filters.rarity()) + "$").append("$options", "i"));
+        }
+
+        // Todos os filtros devem corresponder à mesma carta.
         pipeline.add(
                 new Document(
                         "$match",

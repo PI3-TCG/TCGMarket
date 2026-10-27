@@ -20,6 +20,12 @@ export async function getMarketplaceAds(
         search: filters?.search.trim() || undefined,
         game: filters?.game || undefined,
         modality: filters?.modality || undefined,
+        edition: filters?.edition.trim() || undefined,
+        rarity: filters?.rarity.trim() || undefined,
+        condition: filters?.condition || undefined,
+        language: filters?.language || undefined,
+        minPrice: filters?.minPrice || undefined,
+        maxPrice: filters?.maxPrice || undefined,
       },
     },
   )
