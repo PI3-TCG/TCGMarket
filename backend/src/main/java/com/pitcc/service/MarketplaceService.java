@@ -205,7 +205,7 @@ public class MarketplaceService {
                 card.getImageUrl(),
                 item.getCondition(),
                 item.getLanguage(),
-                ad.getRemainingQuantity(),
+                Math.max(0, ad.getRemainingQuantity() - ad.heldForPurchase()),
                 ad.isSaleEnabled(),
                 ad.isTradeEnabled(),
                 ad.isSaleEnabled() ? ad.getUnitPrice() : null,
@@ -226,6 +226,11 @@ public class MarketplaceService {
                         HttpStatus.NOT_FOUND,
                         "Anúncio não encontrado ou indisponível."
                 ));
+
+        if (ad.getRemainingQuantity() - ad.heldForPurchase() <= 0) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Anúncio não encontrado ou indisponível.");
+        }
 
         CollectionItem item = collectionItemRepository
                 .findById(ad.getCollectionItemId())
