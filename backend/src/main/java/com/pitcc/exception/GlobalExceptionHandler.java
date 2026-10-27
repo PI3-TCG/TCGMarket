@@ -2,13 +2,18 @@ package com.pitcc.exception;
 
 import com.pitcc.dto.ApiErrorResponse;
 import com.pitcc.dto.ApiErrorResponse.FieldErrorResponse;
+import com.pitcc.dto.AddCartItemRequest;
+import com.pitcc.dto.AddressRequest;
 import com.pitcc.dto.CreateAdRequest;
 import com.pitcc.dto.HideCardRequest;
 import com.pitcc.dto.LoginRequest;
 import com.pitcc.dto.UpdateAdRequest;
+import com.pitcc.dto.UpdateCartItemRequest;
+import com.pitcc.dto.UpdateCartSelectionRequest;
 import com.pitcc.dto.UpdateProfileRequest;
 import com.pitcc.dto.UpdateUserRoleRequest;
 import com.pitcc.integration.catalog.ExternalApiException;
+import com.pitcc.model.DeliveryAddress;
 import com.pitcc.security.SecurityConfig;
 
 import java.time.Instant;
@@ -31,6 +36,8 @@ public class GlobalExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
+    private static final String INVALID_ADDRESS = "Revise os dados do endereço.";
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiErrorResponse> handleValidation(MethodArgumentNotValidException exception) {
         List<FieldErrorResponse> fields =
@@ -45,6 +52,9 @@ public class GlobalExceptionHandler {
                     case UpdateProfileRequest _ -> "Dados do perfil inválidos.";
                     case HideCardRequest _ -> "Motivo inválido.";
                     case CreateAdRequest _, UpdateAdRequest _ -> "Revise os dados do anúncio.";
+                    case AddCartItemRequest _, UpdateCartItemRequest _, UpdateCartSelectionRequest _ ->
+                            "Revise os dados do carrinho.";
+                    case AddressRequest _ -> INVALID_ADDRESS;
                     case null, default -> "Dados de cadastro inválidos.";
                 };
         return ResponseEntity.badRequest().body(error(HttpStatus.BAD_REQUEST, message, fields));
@@ -201,6 +211,49 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiErrorResponse> handleAdNotFound(AdNotFoundException exception) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(error(HttpStatus.NOT_FOUND, exception.getMessage(), List.of()));
+    }
+
+    @ExceptionHandler(AdUnavailableForPurchaseException.class)
+    public ResponseEntity<ApiErrorResponse> handleAdUnavailableForPurchase(
+            AdUnavailableForPurchaseException exception
+    ) {
+        return conflict("quantity", exception.getMessage());
+    }
+
+    @ExceptionHandler(CartItemNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleCartItemNotFound(CartItemNotFoundException exception) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(error(HttpStatus.NOT_FOUND, exception.getMessage(), List.of()));
+    }
+
+    @ExceptionHandler(CartConflictException.class)
+    public ResponseEntity<ApiErrorResponse> handleCartConflict(CartConflictException exception) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(error(HttpStatus.CONFLICT, exception.getMessage(), List.of()));
+    }
+
+    @ExceptionHandler(DeliveryAddress.InvalidFieldException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidAddressField(
+            DeliveryAddress.InvalidFieldException exception
+    ) {
+        return ResponseEntity.badRequest()
+                .body(error(
+                        HttpStatus.BAD_REQUEST,
+                        INVALID_ADDRESS,
+                        List.of(new FieldErrorResponse(exception.getField(), exception.getMessage()))
+                ));
+    }
+
+    @ExceptionHandler(AddressNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleAddressNotFound(AddressNotFoundException exception) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(error(HttpStatus.NOT_FOUND, exception.getMessage(), List.of()));
+    }
+
+    @ExceptionHandler(AddressConflictException.class)
+    public ResponseEntity<ApiErrorResponse> handleAddressConflict(AddressConflictException exception) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(error(HttpStatus.CONFLICT, exception.getMessage(), List.of()));
     }
 
     // O campo "status" leva o status atual para o front sincronizar sem nova consulta.

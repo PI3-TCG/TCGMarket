@@ -24,6 +24,8 @@ export type IconName =
   | 'alert'
   | 'close-circle'
   | 'info'
+  | 'map-pin'
+  | 'edit'
   | 'crest-magic'
   | 'crest-pokemon'
   | 'crest-yugioh'
@@ -68,6 +70,20 @@ function paths(name: IconName, filled: boolean) {
     case 'home':
       return (
         <path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1z" />
+      )
+    case 'map-pin':
+      return (
+        <>
+          <path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z" />
+          <circle cx="12" cy="10" r="2.4" />
+        </>
+      )
+    case 'edit':
+      return (
+        <>
+          <path d="M4 20h4L18.6 9.4a2 2 0 0 0 0-2.8l-1.2-1.2a2 2 0 0 0-2.8 0L4 16z" />
+          <path d="m13.5 6.5 4 4" />
+        </>
       )
     case 'search':
       return (

@@ -26,6 +26,8 @@ import { MyCollectionPage } from '@/pages/MyCollectionPage'
 import { CreateAdPage } from '@/pages/CreateAdPage'
 import { MyAdsPage } from '@/pages/MyAdsPage'
 import { MarketplaceAdPage } from '@/pages/MarketplaceAdPage'
+import { CartPage } from '@/pages/CartPage'
+import { DeliveryPage } from '@/pages/DeliveryPage'
 import { MarketplaceRouteView } from '@/routes/MarketplaceRouteView'
 import type { MarketplaceSort } from '@/types/Marketplace'
 
@@ -195,11 +197,33 @@ const marketplaceAdRoute = createRoute({
   component: MarketplaceAdPage,
 })
 
+const cartRoute = createRoute({
+  getParentRoute: () => siteLayoutRoute,
+  path: '/carrinho',
+  component: () => (
+    <RequireAuth>
+      <CartPage />
+    </RequireAuth>
+  ),
+})
+
+const deliveryRoute = createRoute({
+  getParentRoute: () => siteLayoutRoute,
+  path: '/carrinho/entrega',
+  component: () => (
+    <RequireAuth>
+      <DeliveryPage />
+    </RequireAuth>
+  ),
+})
+
 const routeTree = rootRoute.addChildren([
   siteLayoutRoute.addChildren([
     indexRoute,
     marketplaceRoute,
     marketplaceAdRoute,
+    cartRoute,
+    deliveryRoute,
     catalogRoute,
     cardDetailsRoute,
     profileRoute,

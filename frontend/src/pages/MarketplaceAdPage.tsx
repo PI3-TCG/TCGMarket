@@ -10,7 +10,9 @@ import { Alert } from '@/components/ui/Alert'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Icon } from '@/components/ui/Icon'
+import { useCart } from '@/cart'
 import { useRemoteData } from '@/hooks/useRemoteData'
+import { addCartItem, cartFailure } from '@/services/cart'
 import { getMarketplaceAd } from '@/services/marketplace'
 import { useSession } from '@/session'
 import type { MarketplaceAd } from '@/types/Marketplace'
@@ -230,6 +232,11 @@ function PurchasePanel({ ad }: { ad: MarketplaceAd }) {
   )
 }
 
+type AddResult =
+  | { kind: 'added'; quantity: number }
+  | { kind: 'failed'; message: string }
+  | { kind: 'unknown' }
+
 function QuantitySelector({
   ad,
   unitPrice,
@@ -242,12 +249,61 @@ function QuantitySelector({
   const quantityId = useId()
   const navigate = useNavigate()
   const { setLoginNotice } = useSession()
+  const { state: cartState, apply, reload } = useCart()
   const [quantity, setQuantity] = useState('1')
+  const [adding, setAdding] = useState(false)
+  const [result, setResult] = useState<AddResult | null>(null)
 
-  const available = ad.remainingQuantity
+  const inCart =
+    cartState.status === 'ready'
+      ? (cartState.cart.items.find((item) => item.adId === ad.id)?.quantity ??
+        0)
+      : 0
+  const available = Math.max(ad.remainingQuantity - (loggedIn ? inCart : 0), 0)
   const parsed = /^\d+$/.test(quantity) ? Number(quantity) : NaN
   const valid =
     Number.isSafeInteger(parsed) && parsed >= 1 && parsed <= available
+
+  async function addToCart() {
+    if (!valid || adding) return
+    setAdding(true)
+    setResult(null)
+
+    try {
+      apply(await addCartItem(ad.id, parsed))
+      setResult({ kind: 'added', quantity: parsed })
+      setQuantity('1')
+    } catch (cause) {
+      const failure = cartFailure(cause)
+      if (failure.kind === 'unknown') {
+        reload()
+        setResult({ kind: 'unknown' })
+      } else {
+        setResult({
+          kind: 'failed',
+          message:
+            failure.message ??
+            'Tente novamente. A quantidade escolhida foi mantida.',
+        })
+      }
+    } finally {
+      setAdding(false)
+    }
+  }
+
+  if (loggedIn && available === 0 && inCart > 0) {
+    return (
+      <div className="space-y-4">
+        {result?.kind === 'added' ? <AddedNotice result={result} /> : null}
+        <InCartChip quantity={inCart} />
+        <Alert variant="info">
+          Todos os exemplares disponíveis já estão no seu carrinho.
+        </Alert>
+        <CartActions />
+        <PurchaseNotices />
+      </div>
+    )
+  }
 
   function changeQuantity(next: number) {
     setQuantity(String(Math.min(Math.max(next, 1), available)))
@@ -265,6 +321,20 @@ function QuantitySelector({
 
   return (
     <div className="space-y-4">
+      {result?.kind === 'added' ? <AddedNotice result={result} /> : null}
+      {result?.kind === 'failed' ? (
+        <Alert variant="error" title="Não foi possível adicionar ao carrinho.">
+          {result.message}
+        </Alert>
+      ) : null}
+      {result?.kind === 'unknown' ? (
+        <Alert variant="warning" title="Não foi possível confirmar a adição.">
+          Confira seu carrinho antes de tentar de novo.
+        </Alert>
+      ) : null}
+
+      {loggedIn && inCart > 0 ? <InCartChip quantity={inCart} /> : null}
+
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <label
@@ -328,22 +398,14 @@ function QuantitySelector({
       </div>
 
       {loggedIn ? (
-        <div className="space-y-2">
-          <Button
-            className="h-12 w-full"
-            icon={<Icon name="cart" size={20} />}
-            disabled
-            aria-describedby={`${quantityId}-soon`}
-          >
-            Adicionar ao carrinho
-          </Button>
-          <p
-            id={`${quantityId}-soon`}
-            className="text-center text-xs text-neutral-700"
-          >
-            O carrinho estará disponível em breve.
-          </p>
-        </div>
+        <Button
+          className="h-12 w-full"
+          icon={<Icon name="cart" size={20} />}
+          disabled={!valid || adding}
+          onClick={addToCart}
+        >
+          {adding ? 'Adicionando...' : 'Adicionar ao carrinho'}
+        </Button>
       ) : (
         <Button
           className="h-12 w-full"
@@ -354,6 +416,60 @@ function QuantitySelector({
         </Button>
       )}
 
+      <PurchaseNotices />
+    </div>
+  )
+}
+
+function AddedNotice({ result }: { result: { quantity: number } }) {
+  return (
+    <div className="space-y-3">
+      <Alert variant="success">
+        {result.quantity === 1
+          ? '1 exemplar adicionado ao carrinho.'
+          : `${result.quantity} exemplares adicionados ao carrinho.`}
+      </Alert>
+      <CartActions />
+    </div>
+  )
+}
+
+function CartActions() {
+  const navigate = useNavigate()
+
+  return (
+    <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
+      <Button
+        className="h-11 flex-1"
+        icon={<Icon name="cart" size={20} />}
+        onClick={() => navigate({ to: '/carrinho' })}
+      >
+        Ver carrinho
+      </Button>
+      <Link
+        to="/marketplace"
+        search={{ sort: 'recent' }}
+        className={backLinkClass}
+      >
+        <span aria-hidden="true">←</span>
+        Continuar comprando
+      </Link>
+    </div>
+  )
+}
+
+function InCartChip({ quantity }: { quantity: number }) {
+  return (
+    <p className="inline-flex items-center gap-2 rounded-control border border-neutral-200 bg-neutral-100 px-3 py-1.5 text-sm text-neutral-700">
+      Neste carrinho:
+      <span className="font-semibold text-primary-900">{copies(quantity)}</span>
+    </p>
+  )
+}
+
+function PurchaseNotices() {
+  return (
+    <>
       <Alert variant="info" title="Pagamento simulado">
         Nenhum valor será cobrado.
       </Alert>
@@ -361,7 +477,7 @@ function QuantitySelector({
       <Alert variant="warning">
         Adicionar ao carrinho não reserva os exemplares.
       </Alert>
-    </div>
+    </>
   )
 }
 

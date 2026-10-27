@@ -1,4 +1,5 @@
 import mark from '@/assets/mark-3cartas-branco.svg'
+import { useCart } from '@/cart'
 import { hasRole, useSession } from '@/session'
 import { useNavigate } from '@tanstack/react-router'
 import { type FormEvent, useState } from 'react'
@@ -7,10 +8,28 @@ type Props = { onSoon: (feature: string) => void }
 
 export function SiteHeader({ onSoon: soon }: Props) {
   const navigate = useNavigate()
-  const { user, sessionReady, logout } = useSession()
+  const { user, sessionReady, logout, setLoginNotice } = useSession()
+  const { state: cartState } = useCart()
   const [query, setQuery] = useState('')
   const [menuOpen, setMenuOpen] = useState(false)
   const firstName = user?.name.split(' ')[0]
+
+  // Enquanto o carrinho carrega, o badge fica oculto em vez de mostrar um número inventado.
+  const cartCount =
+    cartState.status === 'ready' ? cartState.cart.distinctItemCount : 0
+  const cartLabel =
+    cartCount > 0
+      ? `Carrinho de compras: ${cartCount} ${cartCount === 1 ? 'anúncio' : 'anúncios'}`
+      : 'Carrinho de compras'
+
+  function openCart() {
+    if (user) {
+      navigate({ to: '/carrinho' })
+      return
+    }
+    setLoginNotice('Entre na sua conta para ver seu carrinho.')
+    navigate({ to: '/login', search: { redirect: '/carrinho' } })
+  }
 
   function search(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -55,12 +74,20 @@ export function SiteHeader({ onSoon: soon }: Props) {
         <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-2">
           <button
             type="button"
-            onClick={() => soon('O carrinho de compras')}
-            className="rounded-full p-2 transition hover:bg-white/15 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500"
-            aria-label="Carrinho de compras"
+            onClick={openCart}
+            className="relative rounded-full p-2 transition hover:bg-white/15 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500"
+            aria-label={cartLabel}
             title="Carrinho de compras"
           >
             <CartIcon />
+            {cartCount > 0 ? (
+              <span
+                aria-hidden="true"
+                className="absolute top-0.5 right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-error-600 px-1 text-[10px] leading-none font-bold text-white"
+              >
+                {cartCount > 99 ? '99+' : cartCount}
+              </span>
+            ) : null}
           </button>
 
           <button
