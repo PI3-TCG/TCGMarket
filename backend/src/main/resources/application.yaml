@@ -33,3 +33,22 @@ external-apis:
   mtg:
     base-url: ${MTG_API_BASE_URL:https://api.scryfall.com}
     timeout: ${MTG_API_TIMEOUT:10s}
+
+# Pagamento. "simulated" não acessa a rede; "mercadopago" usa o sandbox com credenciais de teste.
+payment:
+  provider: ${PAYMENT_PROVIDER:simulated}
+  simulated:
+    # Resultado de toda cobrança do simulador: approved, rejected ou pending.
+    outcome: ${PAYMENT_SIMULATED_OUTCOME:approved}
+  mercadopago:
+    base-url: ${MP_BASE_URL:https://api.mercadopago.com}
+    access-token: ${MP_ACCESS_TOKEN:}
+    webhook-secret: ${MP_WEBHOOK_SECRET:}
+    notification-url: ${MP_NOTIFICATION_URL:}
+    # No sandbox, o nome do pagador define o cenário do Pix de teste (APRO aprova).
+    test-payer-name: ${MP_TEST_PAYER_NAME:APRO}
+    timeout: ${MP_TIMEOUT:10s}
+  reconciliation:
+    enabled: ${PAYMENT_RECONCILIATION_ENABLED:true}
+    interval: ${PAYMENT_RECONCILIATION_INTERVAL:1m}
+    pending-after: ${PAYMENT_RECONCILIATION_PENDING_AFTER:2m}
