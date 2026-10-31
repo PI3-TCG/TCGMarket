@@ -49,6 +49,33 @@ public class AdPurchaseHoldRepository {
         return mongoTemplate.updateFirst(query, update, Ad.class).getModifiedCount() == 1;
     }
 
+    /** Pagamento aprovado: a reserva vira venda e baixa a quantidade restante. */
+    public boolean consume(String adId, String orderId, int quantity, Instant now) {
+        Query query = Query.query(Criteria.where("id").is(adId)
+                .and("remainingQuantity").gte(quantity)
+                .and("purchaseHolds").elemMatch(Criteria.where("orderId").is(orderId)));
+
+        Update update = new Update()
+                .pull("purchaseHolds", new Document("orderId", orderId))
+                .inc("remainingQuantity", -quantity)
+                .set("updatedAt", now);
+
+        return mongoTemplate.updateFirst(query, update, Ad.class).getModifiedCount() == 1;
+    }
+
+    public void markSoldOutIfEmpty(String adId, Instant now) {
+        Query query = Query.query(Criteria.where("id").is(adId)
+                .and("status").is(AdStatus.ACTIVE)
+                .and("remainingQuantity").lte(0));
+
+        Update update = new Update()
+                .set("status", AdStatus.SOLD_OUT)
+                .set("soldOutAt", now)
+                .set("updatedAt", now);
+
+        mongoTemplate.updateFirst(query, update, Ad.class);
+    }
+
     public void release(String adId, String orderId) {
         Query query = Query.query(Criteria.where("id").is(adId)
                 .and("purchaseHolds.orderId").is(orderId));

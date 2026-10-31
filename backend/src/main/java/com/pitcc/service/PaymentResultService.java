@@ -17,7 +17,8 @@ import java.time.Instant;
 
 /**
  * Aplica o resultado do gateway ao pagamento e ao pedido uma única vez.
- * Aprovado deixa o pedido {@code PAID}; recusado, cancelado ou expirado
+ * Aprovado deixa o pedido {@code PAID} e dispara a conclusão da compra;
+ * recusado, cancelado ou expirado
  * deixa {@code PAYMENT_FAILED} e libera a reserva dos exemplares.
  *
  * <p>O pedido é atualizado antes do pagamento: se o processo cair no meio,
@@ -32,15 +33,18 @@ public class PaymentResultService {
     private final PaymentRepository paymentRepository;
     private final OrderRepository orderRepository;
     private final AdPurchaseHoldRepository holdRepository;
+    private final OrderCompletionService completionService;
 
     public PaymentResultService(
             PaymentRepository paymentRepository,
             OrderRepository orderRepository,
-            AdPurchaseHoldRepository holdRepository
+            AdPurchaseHoldRepository holdRepository,
+            OrderCompletionService completionService
     ) {
         this.paymentRepository = paymentRepository;
         this.orderRepository = orderRepository;
         this.holdRepository = holdRepository;
+        this.completionService = completionService;
     }
 
     public void apply(Payment payment, GatewayPayment result) {
@@ -84,5 +88,9 @@ public class PaymentResultService {
 
         payment.resolve(result.status(), result.statusDetail(), now);
         paymentRepository.save(payment);
+
+        if (approved) {
+            completionService.completeQuietly(order.getId());
+        }
     }
 }

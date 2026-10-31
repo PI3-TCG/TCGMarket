@@ -31,6 +31,7 @@ class PaymentResultServiceTest {
   @Mock private PaymentRepository paymentRepository;
   @Mock private OrderRepository orderRepository;
   @Mock private AdPurchaseHoldRepository holdRepository;
+  @Mock private OrderCompletionService completionService;
 
   private PaymentResultService service;
   private Order order;
@@ -38,7 +39,7 @@ class PaymentResultServiceTest {
 
   @BeforeEach
   void setUp() {
-    service = new PaymentResultService(paymentRepository, orderRepository, holdRepository);
+    service = new PaymentResultService(paymentRepository, orderRepository, holdRepository, completionService);
     order = order("order-1");
     payment = payment(order, PaymentProvider.SIMULATED);
     lenient().when(orderRepository.findById("order-1")).thenReturn(Optional.of(order));
@@ -53,6 +54,7 @@ class PaymentResultServiceTest {
     assertEquals("sim-1", payment.getProviderPaymentId());
     verify(orderRepository).save(order);
     verify(paymentRepository).save(payment);
+    verify(completionService).completeQuietly("order-1");
     verifyNoInteractions(holdRepository);
   }
 
@@ -64,6 +66,7 @@ class PaymentResultServiceTest {
     assertEquals(PaymentStatus.REJECTED, payment.getStatus());
     verify(holdRepository).release("ad-1", "order-1");
     verify(holdRepository).release("ad-2", "order-1");
+    verifyNoInteractions(completionService);
   }
 
   @Test
