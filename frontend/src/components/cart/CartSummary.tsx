@@ -3,29 +3,10 @@ import { Alert } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
 import { useCart } from '@/cart'
 import { validateCheckout } from '@/services/cart'
-import type { CartItem, CheckoutIssueCode, CheckoutValidation } from '@/types/Cart'
+import type { CartItem } from '@/types/Cart'
 import { Link, useNavigate } from '@tanstack/react-router'
 import { useId, useState } from 'react'
-import { itemSubtotal, needsReview } from './cartFormat'
-
-const issueLabels: Record<CheckoutIssueCode, string> = {
-  AD_NOT_FOUND: 'anúncio removido',
-  AD_CANCELLED: 'anúncio cancelado',
-  AD_SOLD_OUT: 'anúncio esgotado',
-  SALE_DISABLED: 'não está mais à venda',
-  QUANTITY_UNAVAILABLE: 'quantidade indisponível',
-  PRICE_CHANGED: 'preço alterado',
-  OWN_AD: 'anúncio próprio',
-  SELLER_CHANGED: 'vendedor alterado',
-  CARD_NOT_FOUND: 'carta não encontrada',
-}
-
-function issueLines(validation: CheckoutValidation, items: CartItem[]) {
-  return validation.items.map((issue) => {
-    const name = items.find((item) => item.adId === issue.adId)?.cardName ?? 'Anúncio indisponível'
-    return `${name}: ${issue.issues.map((code) => issueLabels[code]).join(', ')}`
-  })
-}
+import { issueLines, itemSubtotal, needsReview } from './cartFormat'
 
 export function CartSummary({ items }: { items: CartItem[] }) {
   const hintId = useId()

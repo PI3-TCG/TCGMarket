@@ -24,6 +24,14 @@ import java.util.regex.Pattern;
 @Repository
 public class OwnAdRepository {
 
+    // Compras aguardando pagamento travam cancelamento, venda desligada e
+    // quantidade restante abaixo do reservado (ver AdPurchaseHoldRepository).
+    private static final String FIRST_PURCHASE_HOLD = "purchaseHolds.0";
+    private static final Document HELD_FOR_PURCHASE = new Document(
+            "$sum",
+            new Document("$ifNull", List.of("$purchaseHolds.quantity", List.of()))
+    );
+
     private final MongoTemplate mongoTemplate;
 
     public OwnAdRepository(MongoTemplate mongoTemplate) {
@@ -161,8 +169,13 @@ public class OwnAdRepository {
                 .set("unitPrice", unitPrice)
                 .set("updatedAt", now);
 
+        Query query = activeOwnAd(adId, sellerId);
+        if (!saleEnabled) {
+            query.addCriteria(Criteria.where(FIRST_PURCHASE_HOLD).exists(false));
+        }
+
         return Optional.ofNullable(mongoTemplate.findAndModify(
-                activeOwnAd(adId, sellerId),
+                query,
                 update,
                 FindAndModifyOptions.options().returnNew(true),
                 Ad.class
@@ -219,16 +232,24 @@ public class OwnAdRepository {
             );
         }
 
-        Query query = Query.query(
-                Criteria.where("id").is(adId)
-                        .and("writeFenceToken").is(expectedWriteFenceToken)
-                        .and("sellerId").is(sellerId)
-                        .and("status").is(AdStatus.ACTIVE)
-                        .and("quantity").is(expectedQuantity)
-                        .and("remainingQuantity").is(
-                                expectedRemainingQuantity
-                        )
-        );
+        Criteria criteria = Criteria.where("id").is(adId)
+                .and("writeFenceToken").is(expectedWriteFenceToken)
+                .and("sellerId").is(sellerId)
+                .and("status").is(AdStatus.ACTIVE)
+                .and("quantity").is(expectedQuantity)
+                .and("remainingQuantity").is(
+                        expectedRemainingQuantity
+                )
+                .andOperator(Criteria.expr(() -> new Document(
+                        "$gte",
+                        List.of(newRemainingQuantity, HELD_FOR_PURCHASE)
+                )));
+
+        if (!saleEnabled) {
+            criteria.and(FIRST_PURCHASE_HOLD).exists(false);
+        }
+
+        Query query = Query.query(criteria);
 
         Update update = new Update()
                 .set("writeFenceToken", operationId)
@@ -260,8 +281,11 @@ public class OwnAdRepository {
                 .set("cancelledAt", now)
                 .set("updatedAt", now);
 
+        Query query = activeOwnAd(adId, sellerId);
+        query.addCriteria(Criteria.where(FIRST_PURCHASE_HOLD).exists(false));
+
         return Optional.ofNullable(mongoTemplate.findAndModify(
-                activeOwnAd(adId, sellerId),
+                query,
                 update,
                 FindAndModifyOptions.options().returnNew(true),
                 Ad.class

@@ -58,6 +58,7 @@ export interface CheckoutValidation {
   valid: boolean
   emptySelection: boolean
   items: CheckoutItemIssue[]
-  sellers: { sellerId: string; adIds: string[]; subtotal: number }[]
+  // sellerUsername é nulo se o vendedor ainda não escolheu um nome de usuário.
+  sellers: { sellerId: string; sellerUsername: string | null; adIds: string[]; subtotal: number }[]
   total: number
 }

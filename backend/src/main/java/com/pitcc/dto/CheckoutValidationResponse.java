@@ -28,6 +28,7 @@ public record CheckoutValidationResponse(
 
     public record SellerGroup(
             String sellerId,
+            String sellerUsername,
             List<String> adIds,
             BigDecimal subtotal
     ) {

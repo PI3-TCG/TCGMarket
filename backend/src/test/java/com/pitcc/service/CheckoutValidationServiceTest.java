@@ -18,11 +18,13 @@ import com.pitcc.model.CardCondition;
 import com.pitcc.model.CardLanguage;
 import com.pitcc.model.Cart;
 import com.pitcc.model.CollectionItem;
+import com.pitcc.model.User;
 import com.pitcc.model.YugiohCard;
 import com.pitcc.model.YugiohCardType;
 import com.pitcc.repository.AdRepository;
 import com.pitcc.repository.CardRepository;
 import com.pitcc.repository.CartRepository;
+import com.pitcc.repository.UserRepository;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -46,6 +48,7 @@ class CheckoutValidationServiceTest {
   @Mock private CartRepository cartRepository;
   @Mock private AdRepository adRepository;
   @Mock private CardRepository cardRepository;
+  @Mock private UserRepository userRepository;
 
   private CheckoutValidationService service;
   private Cart cart;
@@ -54,7 +57,12 @@ class CheckoutValidationServiceTest {
 
   @BeforeEach
   void setUp() {
-    service = new CheckoutValidationService(cartRepository, adRepository, cardRepository);
+    service =
+        new CheckoutValidationService(cartRepository, adRepository, cardRepository, userRepository);
+    User seller = new User();
+    seller.setId(SELLER);
+    seller.setUsername("vendedor1");
+    lenient().when(userRepository.findAllById(anyIterable())).thenReturn(List.of(seller));
     cart = new Cart(BUYER, Instant.now());
 
     lenient().when(cartRepository.findByUserId(BUYER)).thenAnswer(call -> Optional.ofNullable(cart));
@@ -114,6 +122,8 @@ class CheckoutValidationServiceTest {
     assertTrue(result.items().isEmpty());
     assertEquals(2, result.sellers().size());
     assertEquals(List.of("ad-1", "ad-2"), result.sellers().get(0).adIds());
+    assertEquals("vendedor1", result.sellers().get(0).sellerUsername());
+    assertNull(result.sellers().get(1).sellerUsername());
     assertEquals(0, new BigDecimal("30.00").compareTo(result.sellers().get(0).subtotal()));
     assertEquals(0, new BigDecimal("15.00").compareTo(result.sellers().get(1).subtotal()));
     assertEquals(0, new BigDecimal("45.00").compareTo(result.total()));

@@ -28,6 +28,7 @@ import { MyAdsPage } from '@/pages/MyAdsPage'
 import { MarketplaceAdPage } from '@/pages/MarketplaceAdPage'
 import { CartPage } from '@/pages/CartPage'
 import { DeliveryPage } from '@/pages/DeliveryPage'
+import { ReviewPage } from '@/pages/ReviewPage'
 import { MarketplaceRouteView } from '@/routes/MarketplaceRouteView'
 import type { MarketplaceSort } from '@/types/Marketplace'
 
@@ -217,6 +218,16 @@ const deliveryRoute = createRoute({
   ),
 })
 
+const reviewRoute = createRoute({
+  getParentRoute: () => siteLayoutRoute,
+  path: '/carrinho/revisao',
+  component: () => (
+    <RequireAuth>
+      <ReviewPage />
+    </RequireAuth>
+  ),
+})
+
 const routeTree = rootRoute.addChildren([
   siteLayoutRoute.addChildren([
     indexRoute,
@@ -224,6 +235,7 @@ const routeTree = rootRoute.addChildren([
     marketplaceAdRoute,
     cartRoute,
     deliveryRoute,
+    reviewRoute,
     catalogRoute,
     cardDetailsRoute,
     profileRoute,

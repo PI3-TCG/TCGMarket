@@ -9,9 +9,11 @@ import com.pitcc.model.AdStatus;
 import com.pitcc.model.Card;
 import com.pitcc.model.Cart;
 import com.pitcc.model.CartItem;
+import com.pitcc.model.User;
 import com.pitcc.repository.AdRepository;
 import com.pitcc.repository.CardRepository;
 import com.pitcc.repository.CartRepository;
+import com.pitcc.repository.UserRepository;
 
 import org.springframework.stereotype.Service;
 
@@ -35,15 +37,18 @@ public class CheckoutValidationService {
     private final CartRepository cartRepository;
     private final AdRepository adRepository;
     private final CardRepository cardRepository;
+    private final UserRepository userRepository;
 
     public CheckoutValidationService(
             CartRepository cartRepository,
             AdRepository adRepository,
-            CardRepository cardRepository
+            CardRepository cardRepository,
+            UserRepository userRepository
     ) {
         this.cartRepository = cartRepository;
         this.adRepository = adRepository;
         this.cardRepository = cardRepository;
+        this.userRepository = userRepository;
     }
 
     public CheckoutValidationResponse validate(String buyerId) {
@@ -88,6 +93,13 @@ public class CheckoutValidationService {
             ));
         }
 
+        Map<String, String> usernames = new HashMap<>();
+        if (!bySeller.isEmpty()) {
+            for (User seller : userRepository.findAllById(bySeller.keySet())) {
+                usernames.put(seller.getId(), seller.getUsername());
+            }
+        }
+
         List<SellerGroup> sellers = new ArrayList<>();
         BigDecimal total = BigDecimal.ZERO;
 
@@ -97,6 +109,7 @@ public class CheckoutValidationService {
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
             sellers.add(new SellerGroup(
                     entry.getKey(),
+                    usernames.get(entry.getKey()),
                     entry.getValue().stream().map(CartItem::getAdId).toList(),
                     subtotal
             ));
