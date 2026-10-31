@@ -1,10 +1,31 @@
 import { copies, formatCurrency } from '@/components/ads/adFormat'
 import { Alert } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
-import type { CartItem } from '@/types/Cart'
+import { useCart } from '@/cart'
+import { validateCheckout } from '@/services/cart'
+import type { CartItem, CheckoutIssueCode, CheckoutValidation } from '@/types/Cart'
 import { Link, useNavigate } from '@tanstack/react-router'
-import { useId } from 'react'
+import { useId, useState } from 'react'
 import { itemSubtotal, needsReview } from './cartFormat'
+
+const issueLabels: Record<CheckoutIssueCode, string> = {
+  AD_NOT_FOUND: 'anúncio removido',
+  AD_CANCELLED: 'anúncio cancelado',
+  AD_SOLD_OUT: 'anúncio esgotado',
+  SALE_DISABLED: 'não está mais à venda',
+  QUANTITY_UNAVAILABLE: 'quantidade indisponível',
+  PRICE_CHANGED: 'preço alterado',
+  OWN_AD: 'anúncio próprio',
+  SELLER_CHANGED: 'vendedor alterado',
+  CARD_NOT_FOUND: 'carta não encontrada',
+}
+
+function issueLines(validation: CheckoutValidation, items: CartItem[]) {
+  return validation.items.map((issue) => {
+    const name = items.find((item) => item.adId === issue.adId)?.cardName ?? 'Anúncio indisponível'
+    return `${name}: ${issue.issues.map((code) => issueLabels[code]).join(', ')}`
+  })
+}
 
 export function CartSummary({ items }: { items: CartItem[] }) {
   const hintId = useId()
@@ -14,6 +35,29 @@ export function CartSummary({ items }: { items: CartItem[] }) {
   const review = selected.some(needsReview)
   const canContinue = selected.length > 0 && !review
   const navigate = useNavigate()
+  const { reload } = useCart()
+  const [checking, setChecking] = useState(false)
+  const [blocked, setBlocked] = useState<string[] | null>(null)
+  const [failed, setFailed] = useState(false)
+
+  async function handleContinue() {
+    setChecking(true)
+    setFailed(false)
+    try {
+      const validation = await validateCheckout()
+      if (validation.valid) {
+        setBlocked(null)
+        navigate({ to: '/carrinho/entrega' })
+        return
+      }
+      setBlocked(validation.emptySelection ? [] : issueLines(validation, items))
+      reload()
+    } catch {
+      setFailed(true)
+    } finally {
+      setChecking(false)
+    }
+  }
 
   const rows = [
     { label: 'Anúncios selecionados', value: `${selected.length} de ${items.length}` },
@@ -59,16 +103,38 @@ export function CartSummary({ items }: { items: CartItem[] }) {
           </Alert>
         ) : null}
 
+        {blocked ? (
+          <Alert variant="warning" title="Alguns itens mudaram">
+            {blocked.length === 0 ? (
+              'Selecione um anúncio para continuar.'
+            ) : (
+              <>
+                Revise os itens abaixo antes de continuar:
+                <ul className="mt-1 list-disc pl-5">
+                  {blocked.map((line) => (
+                    <li key={line}>{line}</li>
+                  ))}
+                </ul>
+              </>
+            )}
+          </Alert>
+        ) : null}
+        {failed ? (
+          <Alert variant="error">
+            Não foi possível validar o carrinho. Tente novamente.
+          </Alert>
+        ) : null}
+
         <Alert variant="info" title="Pagamento simulado">
           Nenhum valor será cobrado.
         </Alert>
 
         <Button
           className="h-12 w-full"
-          disabled={!canContinue}
-          onClick={() => navigate({ to: '/carrinho/entrega' })}
+          disabled={!canContinue || checking}
+          onClick={handleContinue}
         >
-          Continuar
+          {checking ? 'Validando...' : 'Continuar'}
         </Button>
 
         <div className="text-center">

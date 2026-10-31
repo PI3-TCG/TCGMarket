@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { api } from '@/services/api'
-import type { Cart, UpdateCartItemRequest } from '@/types/Cart'
+import type { Cart, CheckoutValidation, UpdateCartItemRequest } from '@/types/Cart'
 
 // "unknown": a resposta se perdeu e a operação pode ter sido gravada.
 export type CartFailure =
@@ -49,5 +49,10 @@ export async function removeCartItem(adId: string): Promise<Cart> {
 
 export async function updateCartSelection(selected: boolean): Promise<Cart> {
   const response = await api.put<Cart>(`${CART_URL}/selection`, { selected })
+  return response.data
+}
+
+export async function validateCheckout(): Promise<CheckoutValidation> {
+  const response = await api.post<CheckoutValidation>('/api/users/me/checkout/validate')
   return response.data
 }
