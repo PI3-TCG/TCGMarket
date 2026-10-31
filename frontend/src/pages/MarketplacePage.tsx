@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react'
+import { conditionLabels, languageLabels } from '@/components/ads/adFormat'
 import { Link } from '@tanstack/react-router'
 import { Button } from '@/components/ui/Button'
 import { Icon } from '@/components/ui/Icon'
@@ -105,11 +106,17 @@ function MarketplaceResults({
   const data = state.status === 'ready' ? state.data : null
 
   const hasFilters = Boolean(
-    filters.search || filters.game || filters.modality,
+    Object.values(filters).some(Boolean),
   )
 
   const appliedFilters = [
     filters.search ? `Nome: ${filters.search}` : null,
+    filters.edition ? `Edição: ${filters.edition}` : null,
+    filters.rarity ? `Raridade: ${filters.rarity}` : null,
+    filters.condition ? `Condição: ${conditionLabels[filters.condition]}` : null,
+    filters.language ? `Idioma: ${languageLabels[filters.language]}` : null,
+    filters.minPrice ? `Preço mínimo: R$ ${filters.minPrice}` : null,
+    filters.maxPrice ? `Preço máximo: R$ ${filters.maxPrice}` : null,
     filters.game
       ? `TCG: ${gameLabels[filters.game] ?? filters.game}`
       : null,

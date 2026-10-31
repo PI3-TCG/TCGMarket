@@ -1,5 +1,6 @@
 import { useId, useState, type FormEvent } from 'react'
 import { Icon } from '@/components/ui/Icon'
+import { MAX_UNIT_PRICE, conditionLabels, languageLabels } from '@/components/ads/adFormat'
 import type {
   MarketplaceFilters as FilterValues,
 } from '@/types/Marketplace'
@@ -14,6 +15,7 @@ const fieldClass =
 
 export function MarketplaceFilters({ onApply }: Props) {
   const id = useId()
+  const [error, setError] = useState('')
   const [draft, setDraft] = useState<FilterValues>({
     ...emptyMarketplaceFilters,
   })
@@ -21,8 +23,15 @@ export function MarketplaceFilters({ onApply }: Props) {
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
+    if (draft.minPrice && draft.maxPrice && Number(draft.minPrice) > Number(draft.maxPrice)) {
+      setError('O preço mínimo não pode ser maior que o máximo.')
+      return
+    }
+    setError('')
     const filters = {
       ...draft,
+      edition: draft.edition.trim(),
+      rarity: draft.rarity.trim(),
       search: draft.search.trim(),
     }
 
@@ -31,6 +40,7 @@ export function MarketplaceFilters({ onApply }: Props) {
   }
 
   function clearFilters() {
+    setError('')
     const filters = { ...emptyMarketplaceFilters }
 
     setDraft(filters)
@@ -143,6 +153,49 @@ export function MarketplaceFilters({ onApply }: Props) {
             <option value="YUGIOH">Yu-Gi-Oh!</option>
           </select>
         </div>
+
+        {(['edition', 'rarity'] as const).map((field) => (
+          <div key={field}>
+            <label htmlFor={`${id}-${field}`} className="mb-2 block text-sm font-semibold text-primary-900">
+              {field === 'edition' ? 'Set / edição' : 'Raridade'}
+            </label>
+            <input id={`${id}-${field}`} value={draft[field]} maxLength={field === 'edition' ? 200 : 100}
+              placeholder={field === 'edition' ? 'Nome ou parte da edição' : 'Nome exato da raridade'}
+              onChange={(event) => setDraft((current) => ({ ...current, [field]: event.target.value }))}
+              className={fieldClass} />
+          </div>
+        ))}
+
+        {(['condition', 'language'] as const).map((field) => (
+          <div key={field}>
+            <label htmlFor={`${id}-${field}`} className="mb-2 block text-sm font-semibold text-primary-900">
+              {field === 'condition' ? 'Condição' : 'Idioma'}
+            </label>
+            <select id={`${id}-${field}`} value={draft[field]}
+              onChange={(event) => setDraft((current) => ({ ...current, [field]: event.target.value }))}
+              className={fieldClass}>
+              <option value="">Todos</option>
+              {Object.entries(field === 'condition' ? conditionLabels : languageLabels)
+                .map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+            </select>
+          </div>
+        ))}
+
+        <fieldset className="space-y-2">
+          <legend className="text-sm font-semibold text-primary-900">Preço unitário (R$)</legend>
+          <p className="text-xs text-neutral-700">Ao informar preço, somente anúncios que aceitam venda serão exibidos.</p>
+          {(['minPrice', 'maxPrice'] as const).map((field) => (
+            <div key={field}>
+              <label htmlFor={`${id}-${field}`} className="mb-1 block text-sm text-primary-900">
+                {field === 'minPrice' ? 'Mínimo' : 'Máximo'}
+              </label>
+              <input id={`${id}-${field}`} type="number" min="0" max={MAX_UNIT_PRICE} step="0.01"
+                value={draft[field]} onChange={(event) => setDraft((current) => ({ ...current, [field]: event.target.value }))}
+                className={fieldClass} />
+            </div>
+          ))}
+        </fieldset>
+        {error && <p role="alert" className="text-sm text-error-700">{error}</p>}
 
         <div className="space-y-3 pt-1">
           <button

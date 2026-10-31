@@ -36,5 +36,11 @@ export type MarketplaceModality = '' | 'SALE' | 'TRADE' | 'BOTH'
 export interface MarketplaceFilters {
   search: string
   game: '' | MarketplaceAd['game']
+  edition: string
+  rarity: string
+  condition: '' | CardCondition
+  language: '' | CardLanguage
+  minPrice: string
+  maxPrice: string
   modality: MarketplaceModality
 }
