@@ -1,5 +1,6 @@
 import { useId, useState, type FormEvent } from 'react'
 import { Icon } from '@/components/ui/Icon'
+import { MAX_UNIT_PRICE, conditionLabels, languageLabels } from '@/components/ads/adFormat'
 import type {
   MarketplaceFilters as FilterValues,
 } from '@/types/Marketplace'
@@ -174,11 +175,7 @@ export function MarketplaceFilters({ onApply }: Props) {
               onChange={(event) => setDraft((current) => ({ ...current, [field]: event.target.value }))}
               className={fieldClass}>
               <option value="">Todos</option>
-              {(field === 'condition' ? [
-                ['NEAR_MINT', 'Quase nova (NM)'], ['LIGHTLY_PLAYED', 'Pouco jogada (LP)'],
-                ['MODERATELY_PLAYED', 'Moderadamente jogada (MP)'], ['HEAVILY_PLAYED', 'Muito jogada (HP)'],
-                ['DAMAGED', 'Danificada (DMG)'],
-              ] : [['PORTUGUESE', 'Português'], ['ENGLISH', 'Inglês'], ['JAPANESE', 'Japonês']])
+              {Object.entries(field === 'condition' ? conditionLabels : languageLabels)
                 .map(([value, label]) => <option key={value} value={value}>{label}</option>)}
             </select>
           </div>
@@ -192,7 +189,7 @@ export function MarketplaceFilters({ onApply }: Props) {
               <label htmlFor={`${id}-${field}`} className="mb-1 block text-sm text-primary-900">
                 {field === 'minPrice' ? 'Mínimo' : 'Máximo'}
               </label>
-              <input id={`${id}-${field}`} type="number" min="0" max="999999999999.99" step="0.01"
+              <input id={`${id}-${field}`} type="number" min="0" max={MAX_UNIT_PRICE} step="0.01"
                 value={draft[field]} onChange={(event) => setDraft((current) => ({ ...current, [field]: event.target.value }))}
                 className={fieldClass} />
             </div>

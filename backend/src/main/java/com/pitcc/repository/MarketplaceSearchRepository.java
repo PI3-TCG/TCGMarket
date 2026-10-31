@@ -72,12 +72,13 @@ public class MarketplaceSearchRepository {
             if (filters.maxPrice() != null) price.append("$lte", new Decimal128(filters.maxPrice()));
             availabilityMatch.append("unitPrice", price);
         }
+        if (filters.condition() != null) availabilityMatch.append("condition", filters.condition().name());
+        if (filters.language() != null) availabilityMatch.append("language", filters.language().name());
         pipeline.add(new Document("$match", availabilityMatch));
 
         // Só consulta as cartas quando os filtros dependem delas.
         if (filters.search() != null || filters.game() != null
-                || filters.edition() != null || filters.rarity() != null
-                || filters.condition() != null || filters.language() != null) {
+                || filters.edition() != null || filters.rarity() != null) {
             addCardFilters(pipeline, filters);
         }
 
@@ -177,11 +178,6 @@ public class MarketplaceSearchRepository {
         pipeline.add(
                 new Document("$unwind", "$marketplaceItem")
         );
-
-        Document itemMatch = new Document();
-        if (filters.condition() != null) itemMatch.append("marketplaceItem.condition", filters.condition().name());
-        if (filters.language() != null) itemMatch.append("marketplaceItem.language", filters.language().name());
-        if (!itemMatch.isEmpty()) pipeline.add(new Document("$match", itemMatch));
 
         // CollectionItem -> Card.
         pipeline.add(

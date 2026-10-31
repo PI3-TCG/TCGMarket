@@ -4,6 +4,7 @@ import com.pitcc.model.CardGame;
 import com.pitcc.model.CardCondition;
 import com.pitcc.model.CardLanguage;
 import java.math.BigDecimal;
+import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.AssertTrue;
@@ -29,8 +30,8 @@ public record MarketplaceFilters(
         @Size(max = 100) String rarity,
         CardCondition condition,
         CardLanguage language,
-        @DecimalMin("0.00") @Digits(integer = 12, fraction = 2) BigDecimal minPrice,
-        @DecimalMin("0.00") @Digits(integer = 12, fraction = 2) BigDecimal maxPrice
+        @DecimalMin("0.00") @DecimalMax(value = "999999.99", message = "Informe um preço válido.") @Digits(integer = 6, fraction = 2) BigDecimal minPrice,
+        @DecimalMin("0.00") @DecimalMax(value = "999999.99", message = "Informe um preço válido.") @Digits(integer = 6, fraction = 2) BigDecimal maxPrice
 
 ) {
 
