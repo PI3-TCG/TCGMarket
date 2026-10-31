@@ -1,6 +1,7 @@
 import axios from 'axios'
 import { api } from '@/services/api'
-import type { Cart, UpdateCartItemRequest } from '@/types/Cart'
+import type { Cart, CheckoutValidation, UpdateCartItemRequest } from '@/types/Cart'
+import type { CheckoutOrders } from '@/types/Order'
 
 // "unknown": a resposta se perdeu e a operação pode ter sido gravada.
 export type CartFailure =
@@ -49,5 +50,32 @@ export async function removeCartItem(adId: string): Promise<Cart> {
 
 export async function updateCartSelection(selected: boolean): Promise<Cart> {
   const response = await api.put<Cart>(`${CART_URL}/selection`, { selected })
+  return response.data
+}
+
+export async function validateCheckout(): Promise<CheckoutValidation> {
+  const response = await api.post<CheckoutValidation>('/api/users/me/checkout/validate')
+  return response.data
+}
+
+export type PlaceOrderFailure =
+  | { kind: 'conflict'; validation: CheckoutValidation }
+  | CartFailure
+
+export function placeOrderFailure(cause: unknown): PlaceOrderFailure {
+  if (axios.isAxiosError<CheckoutValidation>(cause) && cause.response?.status === 409) {
+    return { kind: 'conflict', validation: cause.response.data }
+  }
+  return cartFailure(cause)
+}
+
+// Reenviar a mesma chave quando a resposta se perder: o servidor devolve os
+// pedidos já criados em vez de criar outros.
+export async function placeOrder(addressId: string, idempotencyKey: string): Promise<CheckoutOrders> {
+  const response = await api.post<CheckoutOrders>(
+    '/api/users/me/checkout',
+    { addressId },
+    { headers: { 'Idempotency-Key': idempotencyKey } },
+  )
   return response.data
 }

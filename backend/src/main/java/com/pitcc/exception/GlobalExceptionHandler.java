@@ -4,9 +4,11 @@ import com.pitcc.dto.ApiErrorResponse;
 import com.pitcc.dto.ApiErrorResponse.FieldErrorResponse;
 import com.pitcc.dto.AddCartItemRequest;
 import com.pitcc.dto.AddressRequest;
+import com.pitcc.dto.CheckoutValidationResponse;
 import com.pitcc.dto.CreateAdRequest;
 import com.pitcc.dto.HideCardRequest;
 import com.pitcc.dto.LoginRequest;
+import com.pitcc.dto.PlaceOrderRequest;
 import com.pitcc.dto.UpdateAdRequest;
 import com.pitcc.dto.UpdateCartItemRequest;
 import com.pitcc.dto.UpdateCartSelectionRequest;
@@ -55,6 +57,7 @@ public class GlobalExceptionHandler {
                     case AddCartItemRequest _, UpdateCartItemRequest _, UpdateCartSelectionRequest _ ->
                             "Revise os dados do carrinho.";
                     case AddressRequest _ -> INVALID_ADDRESS;
+                    case PlaceOrderRequest _ -> "Selecione um endereço de entrega.";
                     case null, default -> "Dados de cadastro inválidos.";
                 };
         return ResponseEntity.badRequest().body(error(HttpStatus.BAD_REQUEST, message, fields));
@@ -228,6 +231,19 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(CartConflictException.class)
     public ResponseEntity<ApiErrorResponse> handleCartConflict(CartConflictException exception) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(error(HttpStatus.CONFLICT, exception.getMessage(), List.of()));
+    }
+
+    @ExceptionHandler(CheckoutConflictException.class)
+    public ResponseEntity<CheckoutValidationResponse> handleCheckoutConflict(
+            CheckoutConflictException exception) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(exception.getValidation());
+    }
+
+    @ExceptionHandler(AdHasPendingPurchasesException.class)
+    public ResponseEntity<ApiErrorResponse> handleAdHasPendingPurchases(
+            AdHasPendingPurchasesException exception) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(error(HttpStatus.CONFLICT, exception.getMessage(), List.of()));
     }

@@ -4,7 +4,7 @@ import { Alert } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
 import { Icon } from '@/components/ui/Icon'
 import type { CartItem } from '@/types/Cart'
-import { Link } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { useId } from 'react'
 
 type DeliverySummaryProps = {
@@ -15,6 +15,7 @@ type DeliverySummaryProps = {
 
 export function DeliverySummary({ items, blocker }: DeliverySummaryProps) {
   const id = useId()
+  const navigate = useNavigate()
   const totalCopies = items.reduce((sum, item) => sum + item.quantity, 0)
   const subtotal = items.reduce((sum, item) => sum + itemSubtotal(item), 0)
 
@@ -74,12 +75,19 @@ export function DeliverySummary({ items, blocker }: DeliverySummaryProps) {
           Nenhum valor será cobrado.
         </Alert>
 
-        <Button className="h-12 w-full" disabled aria-describedby={`${id}-hint`}>
+        <Button
+          className="h-12 w-full"
+          disabled={blocker !== null}
+          aria-describedby={blocker ? `${id}-hint` : undefined}
+          onClick={() => navigate({ to: '/carrinho/revisao' })}
+        >
           Continuar
         </Button>
-        <p id={`${id}-hint`} className="text-center text-xs text-neutral-700">
-          {blocker ?? 'A revisão da compra estará disponível em breve.'}
-        </p>
+        {blocker ? (
+          <p id={`${id}-hint`} className="text-center text-xs text-neutral-700">
+            {blocker}
+          </p>
+        ) : null}
 
         <div className="border-t border-neutral-100 pt-3 text-center">
           <Link

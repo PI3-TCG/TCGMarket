@@ -33,3 +33,32 @@ export interface UpdateCartItemRequest {
   selected?: boolean
   acceptCurrentPrice?: boolean
 }
+
+export type CheckoutIssueCode =
+  | 'AD_NOT_FOUND'
+  | 'AD_CANCELLED'
+  | 'AD_SOLD_OUT'
+  | 'SALE_DISABLED'
+  | 'QUANTITY_UNAVAILABLE'
+  | 'PRICE_CHANGED'
+  | 'OWN_AD'
+  | 'SELLER_CHANGED'
+  | 'CARD_NOT_FOUND'
+
+export interface CheckoutItemIssue {
+  adId: string
+  issues: CheckoutIssueCode[]
+  requestedQuantity: number
+  availableQuantity: number
+  acceptedUnitPrice: number
+  currentUnitPrice: number | null
+}
+
+export interface CheckoutValidation {
+  valid: boolean
+  emptySelection: boolean
+  items: CheckoutItemIssue[]
+  // sellerUsername é nulo se o vendedor ainda não escolheu um nome de usuário.
+  sellers: { sellerId: string; sellerUsername: string | null; adIds: string[]; subtotal: number }[]
+  total: number
+}

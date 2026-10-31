@@ -5,6 +5,7 @@ import com.pitcc.dto.OwnAdFilters;
 import com.pitcc.dto.OwnAdResponse;
 import com.pitcc.dto.UpdateAdRequest;
 
+import com.pitcc.exception.AdHasPendingPurchasesException;
 import com.pitcc.exception.AdNotActiveException;
 import com.pitcc.exception.AdNotFoundException;
 import com.pitcc.exception.AdQuantityUnavailableException;
@@ -232,6 +233,8 @@ public class ManageAdService {
 
         int targetRemaining = targetTotal - soldQuantity;
 
+        requireRoomForPurchaseHolds(current, sale, targetRemaining);
+
         if (reconciled
                 && targetTotal == currentTotal
                 && sale == current.isSaleEnabled()
@@ -324,6 +327,8 @@ public class ManageAdService {
             if (latest.getStatus() != AdStatus.ACTIVE) {
                 throw new AdNotActiveException(latest.getStatus());
             }
+
+            requireRoomForPurchaseHolds(latest, sale, targetRemaining);
 
             throw new IllegalStateException(
                     "O anúncio foi alterado durante a edição. "
@@ -483,6 +488,25 @@ public class ManageAdService {
         );
     }
 
+    private static void requireRoomForPurchaseHolds(Ad ad, boolean sale, int targetRemaining) {
+        int held = ad.heldForPurchase();
+
+        if (held > 0 && !sale) {
+            throw new InvalidAdException(
+                    "saleEnabled",
+                    "Há compras aguardando pagamento. Não é possível desativar a venda agora."
+            );
+        }
+
+        if (targetRemaining < held) {
+            throw new InvalidAdException(
+                    "quantity",
+                    "A quantidade disponível não pode ficar abaixo dos "
+                            + held + " exemplares aguardando pagamento."
+            );
+        }
+    }
+
     public OwnAdResponse cancelOwnAd(
             String userId,
             String adId
@@ -494,6 +518,10 @@ public class ManageAdService {
         if (ad.getStatus() != AdStatus.ACTIVE
                 && ad.getStatus() != AdStatus.CANCELLED) {
             throw new AdNotActiveException(ad.getStatus());
+        }
+
+        if (ad.heldForPurchase() > 0) {
+            throw new AdHasPendingPurchasesException();
         }
 
         AdReservation reservation = findReservation(
@@ -591,6 +619,16 @@ public class ManageAdService {
 
                         if (latest.getStatus() == AdStatus.CANCELLED) {
                             return latest;
+                        }
+
+                        if (latest.getStatus() == AdStatus.ACTIVE
+                                && latest.heldForPurchase() > 0) {
+                            reservationRepository.abortCancellation(
+                                    latest.getCollectionItemId(),
+                                    userId,
+                                    adId
+                            );
+                            throw new AdHasPendingPurchasesException();
                         }
 
                         throw new AdNotActiveException(
