@@ -34,6 +34,9 @@ public class CollectionItem {
     // Reservas individuais vinculadas aos anúncios.
     private List<AdReservation> adReservations = new ArrayList<>();
 
+    // Marcas "pedido:anúncio" das vendas já aplicadas, para não repetir a transferência.
+    private List<String> appliedTransfers = new ArrayList<>();
+
     protected CollectionItem() {
     }
 
@@ -111,6 +114,10 @@ public class CollectionItem {
 
     public Integer getCommittedQuantity() {
         return committedQuantity;
+    }
+
+    public List<String> getAppliedTransfers() {
+        return appliedTransfers == null ? List.of() : List.copyOf(appliedTransfers);
     }
 
     public List<AdReservation> getAdReservations() {
