@@ -38,6 +38,7 @@ class OwnAdRepositoryIntegrationTest {
   @Autowired OwnAdRepository ownAdRepository;
   @Autowired AdRepository adRepository;
   @Autowired CardRepository cardRepository;
+  @Autowired AdPurchaseHoldRepository holdRepository;
 
   private final String run = UUID.randomUUID().toString().substring(0, 8);
   private final String seller = "seller-" + run;
@@ -127,6 +128,32 @@ class OwnAdRepositoryIntegrationTest {
     assertNotNull(cancelled.getCancelledAt());
     assertEquals(3, cancelled.getRemainingQuantity());
     assertTrue(ownAdRepository.cancelIfActive(adId, seller, Instant.now()).isEmpty());
+  }
+
+  @Test
+  void shouldRespectPurchaseHoldsWhenEditingOrCancelling() {
+    String adId = ads.get(0).getId();
+    BigDecimal price = new BigDecimal("12.50");
+    holdRepository.reserve(adId, "order-" + run, 2, Instant.now());
+
+    assertTrue(ownAdRepository.cancelIfActive(adId, seller, Instant.now()).isEmpty());
+    assertTrue(
+        ownAdRepository
+            .updateQuantityIfActive(
+                adId, seller, 3, 3, 1, 1, true, false, price, null, "op-1", Instant.now())
+            .isEmpty());
+    assertTrue(
+        ownAdRepository
+            .updateQuantityIfActive(
+                adId, seller, 3, 3, 3, 3, false, true, null, null, "op-2", Instant.now())
+            .isEmpty());
+
+    Ad updated =
+        ownAdRepository
+            .updateQuantityIfActive(
+                adId, seller, 3, 3, 2, 2, true, false, price, null, "op-3", Instant.now())
+            .orElseThrow();
+    assertEquals(2, updated.getRemainingQuantity());
   }
 
   private org.springframework.data.domain.Page<Ad> search(OwnAdFilters filters) {

@@ -4,12 +4,14 @@ package com.pitcc.service;
 import com.pitcc.dto.OwnAdFilters;
 import com.pitcc.dto.OwnAdResponse;
 import com.pitcc.dto.UpdateAdRequest;
+import com.pitcc.exception.AdHasPendingPurchasesException;
 import com.pitcc.exception.AdNotActiveException;
 import com.pitcc.exception.AdNotFoundException;
 import com.pitcc.exception.AdQuantityUnavailableException;
 import com.pitcc.exception.InvalidAdException;
 import com.pitcc.exception.InvalidAuthenticationException;
 import com.pitcc.model.Ad;
+import com.pitcc.model.AdPurchaseHold;
 import com.pitcc.model.AdReservation;
 import com.pitcc.model.AdReservationStatus;
 import com.pitcc.model.AdStatus;
@@ -1932,6 +1934,128 @@ class ManageAdServiceTest {
         );
 
         verifyNoInteractions(
+                reservationRepository,
+                ownAdRepository
+        );
+    }
+
+    // =========================================================
+    // COMPRAS AGUARDANDO PAGAMENTO
+    // =========================================================
+
+    private Ad withPurchaseHold(Ad ad, int quantity) {
+        ReflectionTestUtils.setField(
+                ad,
+                "purchaseHolds",
+                List.of(new AdPurchaseHold("order-1", quantity, Instant.now()))
+        );
+        return ad;
+    }
+
+    @Test
+    void shouldRejectQuantityBelowPurchaseHolds() {
+        givenEditableAd(withPurchaseHold(ad(AdStatus.ACTIVE, 3, 3), 2));
+
+        InvalidAdException exception = assertThrows(
+                InvalidAdException.class,
+                () -> service.updateOwnAd(
+                        "u1",
+                        "ad-1",
+                        new UpdateAdRequest(true, false, new BigDecimal("10"), 1)
+                )
+        );
+
+        assertEquals("quantity", exception.getField());
+        verifyNoInteractions(ownAdRepository);
+    }
+
+    @Test
+    void shouldRejectDisablingSaleWithPurchaseHolds() {
+        givenEditableAd(withPurchaseHold(ad(AdStatus.ACTIVE, 3, 3), 1));
+
+        InvalidAdException exception = assertThrows(
+                InvalidAdException.class,
+                () -> service.updateOwnAd(
+                        "u1",
+                        "ad-1",
+                        new UpdateAdRequest(false, true, null, 3)
+                )
+        );
+
+        assertEquals("saleEnabled", exception.getField());
+        verifyNoInteractions(ownAdRepository);
+    }
+
+    @Test
+    void shouldReportPurchaseHoldCreatedDuringEdit() {
+        Ad current = ad(AdStatus.ACTIVE, 3);
+        givenEditableAd(current);
+        when(adRepository.findByIdAndSellerId("ad-1", "u1"))
+                .thenReturn(
+                        Optional.of(current),
+                        Optional.of(withPurchaseHold(ad(AdStatus.ACTIVE, 3), 3))
+                );
+        when(reservationRepository.beginUpdate(
+                eq("item-1"), eq("u1"), eq("ad-1"), anyString(),
+                eq(3), eq(2), eq(true), eq(false), eq(new BigDecimal("10.00"))
+        )).thenReturn(true);
+        when(ownAdRepository.updateQuantityIfActive(
+                eq("ad-1"), eq("u1"), eq(3), eq(3), eq(2), eq(2), eq(true), eq(false),
+                eq(new BigDecimal("10.00")), isNull(), anyString(), any(Instant.class)
+        )).thenReturn(Optional.empty());
+        when(reservationRepository.abortUpdate(
+                eq("item-1"), eq("u1"), eq("ad-1"), anyString(), eq(3), eq(2)
+        )).thenReturn(true);
+
+        InvalidAdException exception = assertThrows(
+                InvalidAdException.class,
+                () -> service.updateOwnAd(
+                        "u1",
+                        "ad-1",
+                        new UpdateAdRequest(true, false, new BigDecimal("10"), 2)
+                )
+        );
+
+        assertEquals("quantity", exception.getField());
+    }
+
+    @Test
+    void shouldUndoCancellationWhenPurchaseHoldAppearsDuringCancel() {
+        when(adRepository.findByIdAndSellerId("ad-1", "u1"))
+                .thenReturn(
+                        Optional.of(ad(AdStatus.ACTIVE, 3)),
+                        Optional.of(withPurchaseHold(ad(AdStatus.ACTIVE, 3), 1))
+                );
+        when(collectionItemRepository.findByIdAndUserId("item-1", "u1"))
+                .thenReturn(Optional.of(itemWithReservation(AdReservationStatus.ACTIVE, 3)));
+        when(reservationRepository.beginCancellation("item-1", "u1", "ad-1"))
+                .thenReturn(true);
+        when(ownAdRepository.cancelIfActive(eq("ad-1"), eq("u1"), any(Instant.class)))
+                .thenReturn(Optional.empty());
+
+        assertThrows(
+                AdHasPendingPurchasesException.class,
+                () -> service.cancelOwnAd("u1", "ad-1")
+        );
+
+        verify(reservationRepository).abortCancellation("item-1", "u1", "ad-1");
+        verify(reservationRepository, never()).release(
+                anyString(), anyString(), anyString(), anyInt(), any()
+        );
+    }
+
+    @Test
+    void shouldRejectCancelWithPurchaseHolds() {
+        when(adRepository.findByIdAndSellerId("ad-1", "u1"))
+                .thenReturn(Optional.of(withPurchaseHold(ad(AdStatus.ACTIVE, 3), 1)));
+
+        assertThrows(
+                AdHasPendingPurchasesException.class,
+                () -> service.cancelOwnAd("u1", "ad-1")
+        );
+
+        verifyNoInteractions(
+                collectionItemRepository,
                 reservationRepository,
                 ownAdRepository
         );

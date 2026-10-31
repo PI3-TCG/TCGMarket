@@ -164,6 +164,31 @@ public class AdReservationRepository {
         return result.getModifiedCount() == 1;
     }
 
+    /** Volta a reserva para ativa quando o anúncio não pôde ser cancelado. */
+    public boolean abortCancellation(
+            String collectionItemId,
+            String userId,
+            String adId
+    ) {
+        Query query = Query.query(
+                Criteria.where("_id").is(collectionItemId)
+                        .and("userId").is(userId)
+                        .and("adReservations").elemMatch(
+                                Criteria.where("adId").is(adId)
+                                        .and("status").is(
+                                                AdReservationStatus.PENDING_CANCELLATION
+                                        )
+                        )
+        );
+
+        Update update = new Update()
+                .set("adReservations.$.status", AdReservationStatus.ACTIVE)
+                .set("adReservations.$.updatedAt", Instant.now());
+
+        return mongoTemplate.updateFirst(query, update, CollectionItem.class)
+                .getModifiedCount() == 1;
+    }
+
     public boolean beginUpdate(
             String collectionItemId,
             String userId,
