@@ -41,7 +41,7 @@ import java.util.Optional;
 
 /**
  * Cria os pedidos (um por vendedor) a partir dos itens selecionados do carrinho
- * e reserva os exemplares até o resultado do pagamento. O carrinho e a
+ * reserva os exemplares e inicia o pagamento de cada pedido. O carrinho e a
  * quantidade restante dos anúncios só mudam quando o pagamento é aprovado.
  *
  * <p>Se alguma reserva falhar, as reservas, os pedidos e o checkout criados são
@@ -60,6 +60,7 @@ public class PlaceOrderService {
     private final UserAddressRepository addressRepository;
     private final UserRepository userRepository;
     private final AdPurchaseHoldRepository holdRepository;
+    private final PaymentService paymentService;
 
     public PlaceOrderService(
             CheckoutValidationService validationService,
@@ -70,7 +71,8 @@ public class PlaceOrderService {
             CardRepository cardRepository,
             UserAddressRepository addressRepository,
             UserRepository userRepository,
-            AdPurchaseHoldRepository holdRepository
+            AdPurchaseHoldRepository holdRepository,
+            PaymentService paymentService
     ) {
         this.validationService = validationService;
         this.checkoutRepository = checkoutRepository;
@@ -81,6 +83,7 @@ public class PlaceOrderService {
         this.addressRepository = addressRepository;
         this.userRepository = userRepository;
         this.holdRepository = holdRepository;
+        this.paymentService = paymentService;
     }
 
     public CheckoutOrdersResponse placeOrder(String buyerId, String idempotencyKey, String addressId) {
@@ -157,7 +160,9 @@ public class PlaceOrderService {
             throw failure;
         }
 
-        return toResponse(checkout, orders);
+        paymentService.startPayments(buyerId, orders);
+
+        return toResponse(checkout);
     }
 
     private static OrderItem toOrderItem(CartItem item, Ad ad, Card card) {

@@ -75,6 +75,7 @@ class PlaceOrderServiceTest {
   @Mock private UserAddressRepository addressRepository;
   @Mock private UserRepository userRepository;
   @Mock private AdPurchaseHoldRepository holdRepository;
+  @Mock private PaymentService paymentService;
 
   private PlaceOrderService service;
   private Cart cart;
@@ -86,7 +87,7 @@ class PlaceOrderServiceTest {
     service =
         new PlaceOrderService(
             validationService, checkoutRepository, orderRepository, cartRepository, adRepository,
-            cardRepository, addressRepository, userRepository, holdRepository);
+            cardRepository, addressRepository, userRepository, holdRepository, paymentService);
     cart = new Cart(BUYER, Instant.now());
 
     Card card =
@@ -133,6 +134,7 @@ class PlaceOrderServiceTest {
               return order;
             });
     lenient().when(holdRepository.reserve(anyString(), anyString(), anyInt(), any())).thenReturn(true);
+    lenient().when(orderRepository.findByCheckoutId("checkout-1")).thenAnswer(call -> savedOrders);
 
     User seller = new User();
     seller.setId("seller-1");
@@ -180,6 +182,7 @@ class PlaceOrderServiceTest {
     verify(holdRepository).reserve(eq("ad-2"), eq("order-1"), eq(1), any());
     verify(holdRepository).reserve(eq("ad-3"), eq("order-2"), eq(3), any());
     verify(cartRepository, never()).save(any());
+    verify(paymentService).startPayments(BUYER, savedOrders);
   }
 
   @Test
@@ -249,5 +252,6 @@ class PlaceOrderServiceTest {
     verify(holdRepository).release("ad-2", "order-2");
     verify(orderRepository).deleteAll(savedOrders);
     verify(checkoutRepository).delete(any(Checkout.class));
+    verifyNoInteractions(paymentService);
   }
 }

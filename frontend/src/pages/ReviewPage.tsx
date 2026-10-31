@@ -12,7 +12,7 @@ import { readCheckoutAddress } from '@/services/checkoutAddress'
 import { useSession } from '@/session'
 import type { Address } from '@/types/Address'
 import type { Cart, CartItem, CheckoutValidation } from '@/types/Cart'
-import type { CheckoutOrders, Order } from '@/types/Order'
+import type { CheckoutOrders, Order, OrderStatus } from '@/types/Order'
 import { Link } from '@tanstack/react-router'
 import { useEffect, useId, useRef, useState } from 'react'
 
@@ -338,7 +338,7 @@ function ReviewSummary({ items, orderCount, blocked, submit, onConfirm }: Review
           disabled={blocked || submitting}
           onClick={onConfirm}
         >
-          {submitting ? 'Confirmando...' : 'Confirmar pedido'}
+          {submitting ? 'Processando pagamento simulado...' : 'Simular pagamento'}
         </Button>
 
         <div className="border-t border-neutral-100 pt-3 text-center">
@@ -351,19 +351,68 @@ function ReviewSummary({ items, orderCount, blocked, submit, onConfirm }: Review
   )
 }
 
+const orderStatus: Record<OrderStatus, { label: string; className: string }> = {
+  PENDING_PAYMENT: { label: 'Processando pagamento', className: 'text-warning-700' },
+  PAID: { label: 'Pagamento aprovado', className: 'text-success-700' },
+  COMPLETED: { label: 'Compra concluída', className: 'text-success-700' },
+  PAYMENT_FAILED: { label: 'Pagamento recusado', className: 'text-error-700' },
+}
+
+function resultHeadline(orders: Order[]) {
+  const approved = orders.filter((order) => order.status === 'PAID' || order.status === 'COMPLETED')
+  const failed = orders.filter((order) => order.status === 'PAYMENT_FAILED')
+
+  if (approved.length === orders.length) {
+    return {
+      title: 'Pagamento aprovado',
+      text: 'Recebemos a confirmação do pagamento simulado.',
+      icon: 'check-circle' as const,
+      tone: 'bg-success-50 text-success-700',
+    }
+  }
+  if (failed.length === orders.length) {
+    return {
+      title: 'Pagamento recusado',
+      text: 'Nenhuma carta foi transferida. Os itens continuam no seu carrinho para tentar de novo.',
+      icon: 'close-circle' as const,
+      tone: 'bg-error-50 text-error-700',
+    }
+  }
+  if (approved.length > 0 && failed.length > 0) {
+    return {
+      title: 'Resultado parcial',
+      text: 'Alguns pedidos foram aprovados e outros recusados. Os itens recusados continuam no carrinho.',
+      icon: 'alert' as const,
+      tone: 'bg-warning-50 text-warning-700',
+    }
+  }
+  return {
+    title: 'Processando pagamento',
+    text: 'Os exemplares estão reservados para você enquanto o pagamento é confirmado.',
+    icon: 'info' as const,
+    tone: 'bg-warning-50 text-warning-700',
+  }
+}
+
 function OrdersCreated({ result }: { result: CheckoutOrders }) {
+  const headline = resultHeadline(result.orders)
+  const anyFailed = result.orders.some((order) => order.status === 'PAYMENT_FAILED')
+
   return (
     <section aria-labelledby="created-title" className="mx-auto max-w-3xl space-y-4">
       <div className={`${panelClass} flex flex-col items-center gap-3 py-10 text-center`}>
-        <span className="flex size-16 items-center justify-center rounded-full bg-success-50 text-success-700">
-          <Icon name="check-circle" size={32} />
+        <span className={`flex size-16 items-center justify-center rounded-full ${headline.tone}`}>
+          <Icon name={headline.icon} size={32} />
         </span>
         <h2 id="created-title" className="font-display text-3xl font-bold text-primary-900">
-          {result.orders.length > 1 ? 'Pedidos criados' : 'Pedido criado'}
+          {headline.title}
         </h2>
-        <p className="text-neutral-700">
-          Os exemplares estão reservados para você enquanto o pagamento é processado.
-        </p>
+        <p className="text-neutral-700">{headline.text}</p>
+        {anyFailed ? (
+          <Link to="/carrinho" className={linkClass}>
+            Voltar ao carrinho
+          </Link>
+        ) : null}
       </div>
 
       {result.orders.map((order) => (
@@ -404,7 +453,9 @@ function CreatedOrder({ order }: { order: Order }) {
           <p className="font-display text-lg font-bold text-primary-900">
             {formatCurrency(order.totalAmount)}
           </p>
-          <p className="text-sm font-semibold text-warning-700">Aguardando pagamento</p>
+          <p className={`text-sm font-semibold ${orderStatus[order.status].className}`}>
+            {orderStatus[order.status].label}
+          </p>
         </div>
       </div>
     </div>

@@ -6,3 +6,8 @@ spring:
   data:
     mongodb:
       auto-index-creation: true
+
+# Sem job de reconciliação rodando no meio dos testes.
+payment:
+  reconciliation:
+    enabled: false
