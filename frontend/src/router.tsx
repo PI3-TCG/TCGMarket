@@ -36,6 +36,10 @@ import { TransactionDetailPage } from '@/pages/TransactionDetailPage'
 import { parseHistorySearch } from '@/components/history/historyFormat'
 import type { MarketplaceSort } from '@/types/Marketplace'
 
+import { MyTradeProposalsPage } from '@/pages/MyTradeProposalsPage'
+
+import { parseTradeProposalsSearch } from '@/components/trade/proposalViewFormat'
+
 const rootRoute = createRootRoute({
   component: RootLayout,
   notFoundComponent: NotFound,
@@ -183,6 +187,17 @@ const myAdsRoute = createRoute({
   ),
 })
 
+const myTradeProposalsRoute = createRoute({
+  getParentRoute: () => siteLayoutRoute,
+  path: '/perfil/propostas',
+  validateSearch: parseTradeProposalsSearch,
+  component: () => (
+    <RequireAuth>
+      <MyTradeProposalsPage />
+    </RequireAuth>
+  ),
+})
+
 const transactionHistoryRoute = createRoute({
   getParentRoute: () => siteLayoutRoute,
   path: '/perfil/historico',
@@ -286,6 +301,7 @@ const routeTree = rootRoute.addChildren([
     myCollectionRoute,
     createAdRoute,
     myAdsRoute,
+    myTradeProposalsRoute,
     transactionHistoryRoute,
     transactionDetailRoute,
   ]),
