@@ -14,6 +14,7 @@ import { useCart } from '@/cart'
 import { useRemoteData } from '@/hooks/useRemoteData'
 import { addCartItem, cartFailure } from '@/services/cart'
 import { getMarketplaceAd } from '@/services/marketplace'
+import { TradeProposalFlow } from '@/components/trade/TradeProposalFlow'
 import { useSession } from '@/session'
 import type { MarketplaceAd } from '@/types/Marketplace'
 import { Link, useNavigate, useParams } from '@tanstack/react-router'
@@ -46,7 +47,7 @@ function MarketplaceAdView({ id }: { id: string }) {
       <div className="mx-auto w-full max-w-[1400px] px-4 pt-4 sm:px-6 xl:px-[38px]">
         <PageBanner
           title="Detalhes do anúncio"
-          subtitle="Confira as informações da carta e adicione ao carrinho."
+          subtitle="Confira as informações da carta e escolha como negociar."
         />
 
         {state.status === 'loading' ? <AdSkeleton /> : null}
@@ -152,7 +153,8 @@ function AdDetails({ ad }: { ad: MarketplaceAd }) {
         ) : null}
 
         <div className="mt-5 border-t border-neutral-100 pt-5">
-          {ad.saleEnabled ? <PurchasePanel ad={ad} /> : <TradeOnlyNotice />}
+          {ad.saleEnabled ? <PurchasePanel ad={ad} /> : null}
+          {ad.tradeEnabled ? <TradeEntry ad={ad} /> : null}
         </div>
 
         <Link
@@ -481,12 +483,42 @@ function PurchaseNotices() {
   )
 }
 
-function TradeOnlyNotice() {
+function TradeEntry({ ad }: { ad: MarketplaceAd }) {
+  const { user, setLoginNotice } = useSession()
+  const navigate = useNavigate()
+  const [open, setOpen] = useState(false)
+
+  if (ad.ownAd) {
+    return ad.saleEnabled ? null : (
+      <Alert variant="neutral" title="Este anúncio é seu.">
+        Você não pode propor uma troca consigo mesmo.
+      </Alert>
+    )
+  }
+
+  function openTrade() {
+    if (!user) {
+      setLoginNotice('Entre na sua conta para propor uma troca.')
+      navigate({
+        to: '/login',
+        search: { redirect: '/marketplace/anuncios/' + encodeURIComponent(ad.id) },
+      })
+      return
+    }
+    setOpen(true)
+  }
+
   return (
-    <Alert variant="info" title="Somente troca">
-      Este anúncio não aceita venda. A proposta de troca estará disponível em
-      breve.
-    </Alert>
+    <div className="mt-4 space-y-3">
+      <Button
+        className="h-12 w-full"
+        icon={<Icon name="share" size={20} />}
+        onClick={openTrade}
+      >
+        {user ? 'Propor troca' : 'Entrar para propor troca'}
+      </Button>
+      <TradeProposalFlow ad={ad} open={open} onClose={() => setOpen(false)} />
+    </div>
   )
 }
 
