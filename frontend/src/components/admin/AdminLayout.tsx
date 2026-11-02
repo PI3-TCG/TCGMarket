@@ -1,3 +1,5 @@
+import { PageBanner } from '@/components/layout/PageBanner'
+import { pageBanners } from '@/config/pageBanners'
 import { Badge } from '@/components/ui/Badge'
 import { Icon, type IconName } from '@/components/ui/Icon'
 import { ProfileBreadcrumb } from '@/components/profile/ProfileView'
@@ -26,6 +28,14 @@ export function AdminLayout() {
     <main className="mx-auto w-full max-w-6xl space-y-5 px-4 py-6 sm:px-6">
       <ProfileBreadcrumb items={[{ label: 'Área administrativa' }]} />
 
+      {pageBanners.admin ? (
+        <PageBanner
+          title="Área Administrativa"
+          subtitle="Gerencie usuários, o catálogo e o funcionamento do TCG Market."
+          image={pageBanners.admin}
+          symbol="✦"
+        />
+      ) : (
       <header className="flex items-center gap-4 rounded-surface border border-neutral-200 bg-gradient-to-r from-white via-primary-100/40 to-primary-100 px-6 py-5">
         <span
           aria-hidden="true"
@@ -42,6 +52,7 @@ export function AdminLayout() {
           </p>
         </div>
       </header>
+      )}
 
       <div className="grid items-start gap-5 lg:grid-cols-[220px_minmax(0,1fr)]">
         <nav

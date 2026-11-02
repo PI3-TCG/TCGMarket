@@ -128,14 +128,14 @@ export function CardDetailsModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="flex max-h-[90dvh] w-full max-w-[880px] flex-col overflow-hidden rounded-[22px] border border-primary-300/40 bg-[#f7f3fd] shadow-[0_28px_90px_rgba(16,3,31,0.48)]"
+        className="tcg-modal-frame flex max-h-[90dvh] w-full max-w-[880px] flex-col overflow-hidden rounded-[22px] border border-primary-300/40 bg-[#f7f3fd] shadow-[0_28px_90px_rgba(16,3,31,0.48)]"
       >
         {/* Cabeçalho com a identidade roxa do TCGMarket. */}
-        <header className="relative shrink-0 overflow-hidden bg-gradient-to-r from-primary-900 via-[#4e176f] to-[#64228a] px-4 py-3.5 text-white sm:px-6">
+        <header className="tcg-modal-header relative shrink-0 overflow-hidden bg-gradient-to-r from-primary-900 via-[#4e176f] to-[#64228a] px-4 py-3.5 text-white sm:px-6">
           <div className="pointer-events-none absolute -right-10 -top-20 size-44 rounded-full bg-white/10 blur-2xl" />
           <div className="relative flex items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-3">
-              <div className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-white/20 bg-white/10">
+              <div data-modal-heading-icon className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-white/20 bg-white/10">
                 <Icon name="gem" size={24} />
               </div>
               <div className="min-w-0">
@@ -162,7 +162,7 @@ export function CardDetailsModal({
           </div>
         </header>
 
-        <div className="min-h-0 flex-1 overflow-y-auto p-3.5 sm:p-5">
+        <div className="tcg-modal-body min-h-0 flex-1 overflow-y-auto p-3.5 sm:p-5">
           {state.status === 'loading' && (
             <div
               role="status"
@@ -397,7 +397,7 @@ export function CardDetailsModal({
           )}
         </div>
 
-        <footer className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-t border-primary-200/70 bg-[#eee6f8] px-4 py-3 sm:px-6">
+        <footer className="tcg-modal-footer flex shrink-0 flex-wrap items-center justify-between gap-2 border-t border-primary-200/70 bg-[#eee6f8] px-4 py-3 sm:px-6">
           <p className="hidden text-xs text-primary-800 sm:block">
             {isCollection
               ? 'Visualizando sua coleção'

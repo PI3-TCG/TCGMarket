@@ -1,0 +1,193 @@
+/* TCG Market · Issue #181 · Refinamento visual dos modais independentes.
+   Carregado explicitamente APÓS index.css por main.tsx.
+   Estilos restritos a tcg-modal-*, sem alterar semântica de status/ações. */
+
+.tcg-modal-frame {
+  box-sizing: border-box;
+  border: 2px solid rgba(252, 210, 3, .83) !important;
+  border-radius: 21px !important;
+  box-shadow: 0 26px 80px rgba(41, 13, 54, .28), 0 0 0 1px rgba(252,210,3,.09) !important;
+  background: #fff;
+  overflow: hidden;
+}
+
+.tcg-modal-header {
+  position: relative !important;
+  isolation: isolate;
+  flex-shrink: 0;
+  overflow: hidden;
+  border-bottom: 1px solid rgba(252, 210, 3, .72) !important;
+  background-color: #4c195f !important;
+  background-image: linear-gradient(115deg, #4C195F 0%, #74317F 58%, #8C5897 100%) !important;
+  color: #fff !important;
+  padding: 16px 22px;
+}
+
+/* Ornamentos dourados iguais à linguagem aprovada no fluxo de trocas. */
+.tcg-modal-header::before {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  right: 5%;
+  top: -78px;
+  width: 230px;
+  height: 215px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(255, 255, 255, .16) 0%, rgba(255,255,255,0) 72%);
+  pointer-events: none;
+}
+/* Ícones SVG com o MESMO traçado do componente Icon (sparkle/gem).
+   Não usamos caracteres Unicode, que variam de formato entre sistemas. */
+.tcg-modal-header::after {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  top: 6px;
+  right: 48px;
+  width: 172px;
+  height: 63px;
+  opacity: .37;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23FCD203' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 2.8 13.6 8.4 19.2 10 13.6 11.6 12 17.2 10.4 11.6 4.8 10 10.4 8.4z'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23FCD203' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 4h10l4 6-9 10L3 10z'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23FCD203' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 2.8 13.6 8.4 19.2 10 13.6 11.6 12 17.2 10.4 11.6 4.8 10 10.4 8.4z'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23FCD203' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 2.8 13.6 8.4 19.2 10 13.6 11.6 12 17.2 10.4 11.6 4.8 10 10.4 8.4z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: 2px 11px, 50px 36px, 99px 5px, 145px 24px;
+  background-size: 29px 29px, 16px 16px, 21px 21px, 14px 14px;
+  pointer-events: none;
+}
+/* A marca do brilho já é position:absolute no JSX. O seletor antigo
+   position:relative em TODOS os filhos era a causa do header gigante. */
+.tcg-modal-header > .relative { z-index: 1; }
+
+.tcg-modal-header h2,
+.tcg-modal-header h2[class],
+.tcg-modal-header p:not([class*="badge"]):not([class*="status"]),
+.tcg-modal-header button[aria-label^="Fechar"] {
+  color: #fff !important;
+}
+.tcg-modal-header p { opacity: .93; }
+.tcg-modal-header button[aria-label^="Fechar"] {
+  border-radius: 9px;
+}
+.tcg-modal-header button[aria-label^="Fechar"]:hover {
+  background: rgba(255,255,255,.17) !important;
+}
+
+/* Ícone principal à esquerda: gema dourada em moldura translúcida. */
+.tcg-modal-header [data-modal-heading-icon],
+.tcg-modal-header > div > span:first-child:has(> svg),
+.tcg-modal-header > div > div > div:first-child:has(> svg) {
+  box-sizing: border-box;
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgba(252, 210, 3, .56) !important;
+  border-radius: 12px;
+  color: #fcd203 !important;
+  background: rgba(255,255,255,.10) !important;
+}
+/* As ações de remoção/cancelamento continuam em vermelho no conteúdo e no rodapé.
+   O cabeçalho usa ícone dourado como elemento de identidade. */
+.tcg-modal-header [data-modal-heading-icon] svg,
+.tcg-modal-header > div > span:first-child:has(> svg) svg,
+.tcg-modal-header > div > div > div:first-child:has(> svg) svg {
+  color: #fcd203 !important;
+}
+/* Selos de status, incluindo Ativo, preservam as cores e tamanhos próprios.
+   Apenas o PRIMEIRO span com SVG recebe a moldura do ícone de cabeçalho. */
+
+.tcg-modal-body {
+  background: linear-gradient(158deg, #faf8fc, #fff 68%) !important;
+}
+/* Vários componentes antigos usam primary-200, token não definido em index.css.
+   Sem a cor, o contorno pode herdar uma tonalidade escura inesperada. */
+.tcg-modal-body [class*="border-primary-200"],
+.tcg-modal-body [class*="border-secondary-200"],
+.tcg-modal-body :is(section, aside, article, div).rounded-xl[class*="border-neutral-200"],
+.tcg-modal-body :is(section, aside, article, div).rounded-lg[class*="border-neutral-200"],
+.tcg-modal-body :is(section, aside, article, div).rounded-2xl[class*="border-neutral-200"] {
+  border-color: #d8c4df !important;
+}
+
+.tcg-modal-footer,
+.tcg-modal-action-row {
+  border-top-color: rgba(252,210,3,.56) !important;
+  background: #fcfafe !important;
+}
+.tcg-modal-footer {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  border-top: 1px solid rgba(252,210,3,.56) !important;
+  padding: 14px 24px;
+}
+
+/* Coleção: cabeçalho + corpo rolável + rodapé fixo, igual ao modal refinado. */
+.tcg-modal-frame.tcg-modal-collection {
+  display: flex !important;
+  flex-direction: column;
+  max-height: 90dvh !important;
+  overflow: hidden !important;
+}
+.tcg-modal-collection > .tcg-modal-header { flex-shrink: 0; }
+.tcg-modal-collection > .tcg-modal-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.tcg-modal-collection > .tcg-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+.tcg-modal-collection .tcg-modal-action-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: none !important;
+  background: transparent !important;
+}
+.tcg-modal-collection .tcg-modal-body > aside,
+.tcg-modal-collection .tcg-modal-body > form {
+  min-width: 0;
+}
+.tcg-modal-collection .tcg-modal-body > aside {
+  border-color: #d8c4df !important;
+}
+
+/* Confirmação de descarte: estrutura vertical, sem aumentar altura. */
+.tcg-modal-confirm { padding: 0 !important; }
+.tcg-modal-confirm > .tcg-modal-header { padding: 18px 20px; }
+.tcg-modal-confirm > .tcg-modal-footer { margin-top: 0; padding: 15px 20px; }
+
+/* Não forçamos backgrounds dos botões destrutivos por substring de classe:
+   `hover:bg-error-50` NÃO significa que o botão possui fundo vermelho.
+   Os componentes Button e os estilos Tailwind mantêm o comportamento correto. */
+
+@media (max-width: 640px) {
+  .tcg-modal-header { padding: 16px !important; }
+  .tcg-modal-header::after {
+    top: 7px;
+    right: 39px;
+    width: 82px;
+    height: 48px;
+    opacity: .24;
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23FCD203' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 2.8 13.6 8.4 19.2 10 13.6 11.6 12 17.2 10.4 11.6 4.8 10 10.4 8.4z'/%3E%3C/svg%3E"),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23FCD203' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 4h10l4 6-9 10L3 10z'/%3E%3C/svg%3E");
+    background-size: 20px 20px, 12px 12px;
+    background-position: 0 6px, 42px 25px;
+  }
+  .tcg-modal-footer { padding: 12px 16px; }
+  .tcg-modal-collection .tcg-modal-body { display: block; }
+  .tcg-modal-collection .tcg-modal-body > aside { margin-bottom: 18px; }
+}

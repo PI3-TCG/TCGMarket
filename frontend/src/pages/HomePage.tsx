@@ -56,19 +56,19 @@ export function HomePage() {
           </p>
         ) : null}
 
-        <section className="relative min-h-[300px] overflow-hidden rounded-lg bg-neutral-900 text-white shadow-lg">
+        <section className="relative grid overflow-hidden rounded-lg border-2 border-[#FCD203]/70 bg-[#130b30] text-white shadow-lg">
           <img
             src={hero}
             alt=""
-            className="absolute inset-0 h-full w-full object-cover object-center"
+            className="pointer-events-none col-start-1 row-start-1 block h-auto w-full min-w-0 self-start"
           />
 
           <div
             aria-hidden="true"
-            className="absolute inset-0 bg-linear-to-r from-neutral-900/75 from-0% via-neutral-900/55 via-45% to-transparent to-80%"
+            className="pointer-events-none col-start-1 row-start-1 hidden bg-linear-to-r from-[#130b30]/85 from-0% via-[#130b30]/55 via-45% to-transparent to-80% xl:block"
           />
 
-          <div className="relative flex min-h-[300px] max-w-xl flex-col justify-center px-6 py-6 sm:px-8 sm:py-8">
+          <div className="relative col-start-1 row-start-2 flex max-w-xl flex-col justify-center px-6 py-6 sm:px-8 sm:py-8 xl:row-start-1">
             <h1 className="text-3xl leading-tight font-bold tracking-tight sm:text-4xl">
               Mais que cartas,{' '}
               <span className="text-primary-100">uma comunidade.</span>

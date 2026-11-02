@@ -293,8 +293,7 @@ export function MyAdModal({ ad: initialAd, initialView, onClose, onChanged }: Pr
           ? 'Cancelar anúncio?'
           : 'Detalhes do anúncio'
 
-  const titleIcon: IconName =
-    view.kind === 'cancel' ? 'close-circle' : view.kind === 'discard' ? 'alert' : 'cart'
+  const titleIcon: IconName = 'gem'
 
   return createPortal(
     <div
@@ -309,9 +308,9 @@ export function MyAdModal({ ad: initialAd, initialView, onClose, onChanged }: Pr
         aria-modal="true"
         aria-labelledby={titleId}
         aria-busy={busy ? true : undefined}
-        className="flex max-h-[calc(100vh-2rem)] w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-white shadow-xl"
+        className="tcg-modal-frame flex max-h-[calc(100vh-2rem)] w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-white shadow-xl"
       >
-        <header className="flex items-start justify-between gap-3 border-b border-neutral-100 px-5 pt-5 pb-4 sm:px-6">
+        <header className="tcg-modal-header flex items-start justify-between gap-3 border-b border-neutral-100 px-5 pt-5 pb-4 sm:px-6">
           <div className="flex min-w-0 flex-wrap items-center gap-3">
             <span
               className={
@@ -342,7 +341,7 @@ export function MyAdModal({ ad: initialAd, initialView, onClose, onChanged }: Pr
           </button>
         </header>
 
-        <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5 sm:px-6">
+        <div className="tcg-modal-body min-h-0 flex-1 overflow-y-auto px-5 py-5 sm:px-6">
           {view.kind === 'discard' ? (
             <div className="space-y-2 text-neutral-700">
               <p className="font-semibold text-neutral-900">
@@ -426,7 +425,7 @@ export function MyAdModal({ ad: initialAd, initialView, onClose, onChanged }: Pr
           )}
         </div>
 
-        <footer className="flex flex-wrap items-center justify-end gap-2 border-t border-neutral-100 px-5 py-4 sm:px-6">
+        <footer className="tcg-modal-footer flex flex-wrap items-center justify-end gap-2 border-t border-neutral-100 px-5 py-4 sm:px-6">
           {view.kind === 'details' &&
             (active && notice?.kind !== 'notFound' ? (
               <>

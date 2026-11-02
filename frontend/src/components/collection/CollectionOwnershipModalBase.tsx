@@ -72,6 +72,7 @@ export function CollectionOwnershipModalBase({
 }: ModalBaseProps) {
   const titleId = useId()
   const descriptionId = useId()
+  const collectionFormId = useId()
   const closeButtonRef = useRef<HTMLButtonElement>(null)
   const dialogRef = useRef<HTMLElement>(null)
 
@@ -140,29 +141,12 @@ export function CollectionOwnershipModalBase({
         aria-modal="true"
         aria-labelledby={titleId}
         aria-describedby={descriptionId}
-        className="max-h-[94dvh] w-full max-w-[790px] overflow-y-auto rounded-[22px] border border-primary-100 bg-white shadow-[0_26px_85px_rgba(24,6,38,0.35)] sm:rounded-[24px]"
+        className="tcg-modal-collection tcg-modal-frame max-h-[94dvh] w-full max-w-[790px] overflow-y-auto rounded-[22px] border border-primary-100 bg-white shadow-[0_26px_85px_rgba(24,6,38,0.35)] sm:rounded-[24px]"
       >
-        <header className="flex items-start justify-between gap-3 border-b border-primary-100 bg-gradient-to-r from-primary-100 via-[#faf6ff] to-white px-5 py-4 sm:px-6 sm:py-5">
+        <header className="tcg-modal-header flex items-start justify-between gap-3 border-b border-primary-100 bg-gradient-to-r from-primary-100 via-[#faf6ff] to-white px-5 py-4 sm:px-6 sm:py-5">
           <div className="flex min-w-0 items-start gap-3">
-            <div className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-primary-300/30 bg-white text-primary-900 shadow-sm">
-              {mode === 'add' ? (
-                <Icon name="plus" size={24} />
-              ) : mode === 'remove' ? (
-                <Icon name="trash" size={24} className="text-error-700" />
-              ) : (
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="size-6"
-                  aria-hidden="true"
-                >
-                  <path d="m15 5 4 4M4 20l4.5-1 11-11a2.8 2.8 0 0 0-4-4l-11 11L4 20Z" />
-                </svg>
-              )}
+            <div data-modal-heading-icon className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-primary-300/30 bg-white text-primary-900 shadow-sm">
+              <Icon name="gem" size={24} />
             </div>
             <div className="min-w-0">
               <h2
@@ -191,7 +175,7 @@ export function CollectionOwnershipModalBase({
           </button>
         </header>
 
-        <div className="grid gap-5 p-4 sm:grid-cols-[235px_minmax(0,1fr)] sm:gap-6 sm:p-6">
+        <div className="tcg-modal-body grid gap-5 p-4 sm:grid-cols-[235px_minmax(0,1fr)] sm:gap-6 sm:p-6">
           <aside className="min-w-0 rounded-xl border border-neutral-200 bg-white p-3 shadow-sm">
             <div className="overflow-hidden rounded-lg bg-neutral-50 p-2">
               {card.imageUrl ? (
@@ -264,6 +248,7 @@ export function CollectionOwnershipModalBase({
           </aside>
 
           <form
+            id={collectionFormId}
             noValidate
             className="flex min-w-0 flex-col"
             onSubmit={(event) => {
@@ -286,7 +271,10 @@ export function CollectionOwnershipModalBase({
               )}
             </div>
 
-            <div className="mt-auto flex flex-wrap justify-end gap-2 border-t border-neutral-200 pt-4">
+                      </form>
+        </div>
+        <footer data-issue181-collection-footer className="tcg-modal-footer">
+          <div className="tcg-modal-action-row flex flex-wrap justify-end gap-2">
               <button
                 type="button"
                 onClick={onClose}
@@ -306,6 +294,7 @@ export function CollectionOwnershipModalBase({
               ) : (
                 <button
                   type="submit"
+                  form={collectionFormId}
                   disabled={isSaving || disablePrimary}
                   className={`flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition-colors focus-visible:outline-2 focus-visible:outline-secondary-500 disabled:cursor-not-allowed disabled:opacity-60 ${
                     mode === 'remove'
@@ -317,9 +306,8 @@ export function CollectionOwnershipModalBase({
                   {isSaving ? busyLabel : primaryLabel}
                 </button>
               )}
-            </div>
-          </form>
-        </div>
+          </div>
+        </footer>
       </section>
     </div>,
     document.body,

@@ -122,9 +122,9 @@ export function DetailsModal({
         aria-modal="true"
         aria-labelledby={titleId}
         tabIndex={-1}
-        className="flex max-h-[90dvh] w-full max-w-[880px] flex-col overflow-hidden rounded-[22px] bg-neutral-50 shadow-[0_24px_80px_rgba(102,3,102,0.20)]"
+        className="tcg-modal-frame flex max-h-[90dvh] w-full max-w-[880px] flex-col overflow-hidden rounded-[22px] bg-neutral-50 shadow-[0_24px_80px_rgba(102,3,102,0.20)]"
       >
-        <header className="relative shrink-0 overflow-hidden bg-gradient-to-r from-primary-900 via-primary-500 to-primary-700 px-4 py-3.5 text-white sm:px-6">
+        <header className="tcg-modal-header relative shrink-0 overflow-hidden bg-gradient-to-r from-primary-900 via-primary-500 to-primary-700 px-4 py-3.5 text-white sm:px-6">
           <div
             aria-hidden="true"
             className="pointer-events-none absolute -right-10 -top-20 size-44 rounded-full bg-white/10 blur-2xl"
@@ -132,7 +132,7 @@ export function DetailsModal({
 
           <div className="relative flex items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-3">
-              <div className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-white/20 bg-white/10">
+              <div data-modal-heading-icon className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-white/20 bg-white/10">
                 <Icon name="gem" size={24} />
               </div>
 
@@ -162,11 +162,11 @@ export function DetailsModal({
           </div>
         </header>
 
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain bg-gradient-to-br from-primary-100/40 via-neutral-50 to-white p-3.5 sm:p-5">
+        <div className="tcg-modal-body min-h-0 flex-1 overflow-y-auto overscroll-contain bg-gradient-to-br from-primary-100/40 via-neutral-50 to-white p-3.5 sm:p-5">
           {children}
         </div>
 
-        <footer className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-t border-primary-300/30 bg-primary-100/70 px-4 py-3 sm:px-6">
+        <footer className="tcg-modal-footer flex shrink-0 flex-wrap items-center justify-between gap-2 border-t border-primary-300/30 bg-primary-100/70 px-4 py-3 sm:px-6">
           {footerText && (
             <p className="hidden text-xs text-primary-800 sm:block">
               {footerText}

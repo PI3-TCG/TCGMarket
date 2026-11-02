@@ -128,11 +128,13 @@ export function AddressFormModal({
 
   return (
     <Modal
+      presentation="refined"
       open
       title={title}
+      subtitle="Cadastre ou atualize os dados de entrega."
       onClose={requestClose}
       size="lg"
-      className="mx-auto max-h-[calc(100vh-2rem)] max-w-xl overflow-y-auto"
+      className="mx-auto max-w-xl"
     >
       <p className="text-sm text-neutral-700">
         Preencha os dados de entrega.{' '}

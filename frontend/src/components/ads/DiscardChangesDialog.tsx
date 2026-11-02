@@ -81,9 +81,9 @@ export function DiscardChangesDialog({
         aria-modal="true"
         aria-labelledby={titleId}
         aria-describedby={descriptionId}
-        className="w-full max-w-md rounded-xl border border-neutral-200 bg-white p-6 shadow-lg"
+        className="tcg-modal-confirm tcg-modal-frame w-full max-w-md rounded-xl border border-neutral-200 bg-white p-6 shadow-lg"
       >
-        <div className="flex items-start justify-between gap-4">
+        <div className="tcg-modal-header flex items-start justify-between gap-4">
           <div className="flex items-start gap-3">
             <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-warning-50 text-warning-700">
               <Icon name="alert" size={24} />
@@ -110,7 +110,7 @@ export function DiscardChangesDialog({
           </button>
         </div>
 
-        <div className="mt-6 flex flex-wrap justify-end gap-2">
+        <div className="tcg-modal-footer mt-6 flex flex-wrap justify-end gap-2">
           <Button data-autofocus variant="primary" onClick={onContinue}>
             Continuar preenchendo
           </Button>

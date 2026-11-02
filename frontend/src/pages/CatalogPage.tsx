@@ -1,3 +1,4 @@
+import { PageBanner } from '@/components/layout/PageBanner'
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams, useSearch } from '@tanstack/react-router'
 import { CatalogCard } from '@/components/catalog/CatalogCard'
@@ -214,36 +215,12 @@ function CatalogView({ game }: { game: string }) {
     <main className="min-h-screen bg-[#FAFBFE] pb-12 text-[#171443]">
       {/* Header global e footer continuam fora do escopo desta página. */}
       <div className="mx-auto w-full max-w-[1600px] px-4 pt-4 sm:px-6 xl:px-[38px]">
-        <header className="relative mb-4 flex min-h-[160px] items-center overflow-hidden rounded-xl border border-[#eeeafb] bg-primary-900 px-6 py-5 shadow-sm sm:min-h-[190px] sm:px-8">
-          {gameBanners[game] && (
-            <img
-              src={gameBanners[game]}
-              alt=""
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-0 h-full w-full object-cover object-center"
-            />
-          )}
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#130b30]/85 via-[#130b30]/50 to-transparent"
-          />
-          <div className="relative z-10 flex items-center gap-4">
-            <span
-              aria-hidden="true"
-              className="flex size-14 shrink-0 items-center justify-center rounded-full border-2 border-white/80 bg-white/15 text-3xl text-white shadow-sm backdrop-blur-sm"
-            >
-              {game === 'pokemon' ? '◉' : '✦'}
-            </span>
-            <div>
-              <h1 className="font-display text-2xl font-bold leading-tight text-white drop-shadow-sm sm:text-4xl">
-                {gameName}
-              </h1>
-              <p className="mt-1 text-xs text-white/90 sm:text-sm">
-                Explore todas as cartas de {gameName}.
-              </p>
-            </div>
-          </div>
-        </header>
+        <PageBanner
+          title={gameName}
+          subtitle={`Explore todas as cartas de ${gameName}.`}
+          image={gameBanners[game]}
+          symbol={game === 'pokemon' ? '◉' : '✦'}
+        />
 
         <div className="mb-3 lg:hidden">
           <button
