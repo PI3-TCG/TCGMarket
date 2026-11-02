@@ -143,6 +143,16 @@ export function SiteHeader({ onSoon: soon }: Props) {
                   >
                     Meus anúncios
                   </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMenuOpen(false)
+                      navigate({ to: '/perfil/historico' })
+                    }}
+                    className="w-full rounded-lg px-2 py-2 text-left text-sm font-medium hover:bg-primary-100"
+                  >
+                    Histórico de transações
+                  </button>
                   {hasRole(user, 'ADMIN') && (
                     <button
                       type="button"

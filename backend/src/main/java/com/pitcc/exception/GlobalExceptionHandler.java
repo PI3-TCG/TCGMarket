@@ -223,6 +223,14 @@ public class GlobalExceptionHandler {
         return conflict("quantity", exception.getMessage());
     }
 
+    @ExceptionHandler(TransactionNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleTransactionNotFound(
+            TransactionNotFoundException exception
+    ) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(error(HttpStatus.NOT_FOUND, exception.getMessage(), List.of()));
+    }
+
     @ExceptionHandler(CartItemNotFoundException.class)
     public ResponseEntity<ApiErrorResponse> handleCartItemNotFound(CartItemNotFoundException exception) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
