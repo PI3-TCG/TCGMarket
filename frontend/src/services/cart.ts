@@ -79,3 +79,14 @@ export async function placeOrder(addressId: string, idempotencyKey: string): Pro
   )
   return response.data
 }
+
+export function isCheckoutNotFound(cause: unknown) {
+  return axios.isAxiosError(cause) && cause.response?.status === 404
+}
+
+export async function getCheckout(checkoutId: string): Promise<CheckoutOrders> {
+  const response = await api.get<CheckoutOrders>(
+    `/api/users/me/checkout/${encodeURIComponent(checkoutId)}`,
+  )
+  return response.data
+}

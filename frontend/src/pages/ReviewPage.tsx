@@ -12,8 +12,7 @@ import { readCheckoutAddress } from '@/services/checkoutAddress'
 import { useSession } from '@/session'
 import type { Address } from '@/types/Address'
 import type { Cart, CartItem, CheckoutValidation } from '@/types/Cart'
-import type { CheckoutOrders, Order, OrderStatus } from '@/types/Order'
-import { Link } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { useEffect, useId, useRef, useState } from 'react'
 
 const panelClass = 'rounded-xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-6'
@@ -59,10 +58,11 @@ export function ReviewPage() {
 }
 
 function ReviewContent({ cart, userId }: { cart: Cart; userId: string }) {
+  const navigate = useNavigate()
+  const { reload: reloadCart } = useCart()
   const [state, setState] = useState<LoadState>({ status: 'loading' })
   const [attempt, setAttempt] = useState(0)
   const [submit, setSubmit] = useState<Submit>({ status: 'idle' })
-  const [created, setCreated] = useState<CheckoutOrders | null>(null)
   const idempotencyKey = useRef<string | null>(null)
 
   useEffect(() => {
@@ -82,10 +82,6 @@ function ReviewContent({ cart, userId }: { cart: Cart; userId: string }) {
   function retryLoad() {
     setState({ status: 'loading' })
     setAttempt((value) => value + 1)
-  }
-
-  if (created) {
-    return <OrdersCreated result={created} />
   }
 
   if (state.status === 'loading') {
@@ -120,7 +116,11 @@ function ReviewContent({ cart, userId }: { cart: Cart; userId: string }) {
     try {
       const result = await placeOrder(address.id, idempotencyKey.current)
       idempotencyKey.current = null
-      setCreated(result)
+      void reloadCart()
+      await navigate({
+        to: '/carrinho/resultado/$checkoutId',
+        params: { checkoutId: result.checkoutId },
+      })
     } catch (cause) {
       const failure = placeOrderFailure(cause)
       if (failure.kind === 'conflict') {
@@ -324,8 +324,12 @@ function ReviewSummary({ items, orderCount, blocked, submit, onConfirm }: Review
 
       <div className="mt-5 space-y-3">
         {submit.status === 'failed' ? (
-          <Alert variant="error">
-            {submit.message ?? 'Não foi possível confirmar o pedido. Tente novamente.'}
+          <Alert
+            variant={submit.message ? 'error' : 'warning'}
+            title={submit.message ? undefined : 'Não foi possível confirmar o resultado'}
+          >
+            {submit.message ??
+              'A compra pode ter sido registrada. Tente de novo com a mesma chave — isso não cria outro pedido.'}
           </Alert>
         ) : null}
 
@@ -338,7 +342,11 @@ function ReviewSummary({ items, orderCount, blocked, submit, onConfirm }: Review
           disabled={blocked || submitting}
           onClick={onConfirm}
         >
-          {submitting ? 'Processando pagamento simulado...' : 'Simular pagamento'}
+          {submitting
+            ? 'Processando pagamento simulado...'
+            : submit.status === 'failed' && !submit.message
+              ? 'Verificar resultado'
+              : 'Simular pagamento'}
         </Button>
 
         <div className="border-t border-neutral-100 pt-3 text-center">
@@ -348,117 +356,6 @@ function ReviewSummary({ items, orderCount, blocked, submit, onConfirm }: Review
         </div>
       </div>
     </aside>
-  )
-}
-
-const orderStatus: Record<OrderStatus, { label: string; className: string }> = {
-  PENDING_PAYMENT: { label: 'Processando pagamento', className: 'text-warning-700' },
-  PAID: { label: 'Pagamento aprovado', className: 'text-success-700' },
-  COMPLETED: { label: 'Compra concluída', className: 'text-success-700' },
-  PAYMENT_FAILED: { label: 'Pagamento recusado', className: 'text-error-700' },
-}
-
-function resultHeadline(orders: Order[]) {
-  const approved = orders.filter((order) => order.status === 'PAID' || order.status === 'COMPLETED')
-  const failed = orders.filter((order) => order.status === 'PAYMENT_FAILED')
-
-  if (approved.length === orders.length) {
-    return {
-      title: 'Pagamento aprovado',
-      text: 'Recebemos a confirmação do pagamento simulado.',
-      icon: 'check-circle' as const,
-      tone: 'bg-success-50 text-success-700',
-    }
-  }
-  if (failed.length === orders.length) {
-    return {
-      title: 'Pagamento recusado',
-      text: 'Nenhuma carta foi transferida. Os itens continuam no seu carrinho para tentar de novo.',
-      icon: 'close-circle' as const,
-      tone: 'bg-error-50 text-error-700',
-    }
-  }
-  if (approved.length > 0 && failed.length > 0) {
-    return {
-      title: 'Resultado parcial',
-      text: 'Alguns pedidos foram aprovados e outros recusados. Os itens recusados continuam no carrinho.',
-      icon: 'alert' as const,
-      tone: 'bg-warning-50 text-warning-700',
-    }
-  }
-  return {
-    title: 'Processando pagamento',
-    text: 'Os exemplares estão reservados para você enquanto o pagamento é confirmado.',
-    icon: 'info' as const,
-    tone: 'bg-warning-50 text-warning-700',
-  }
-}
-
-function OrdersCreated({ result }: { result: CheckoutOrders }) {
-  const headline = resultHeadline(result.orders)
-  const anyFailed = result.orders.some((order) => order.status === 'PAYMENT_FAILED')
-
-  return (
-    <section aria-labelledby="created-title" className="mx-auto max-w-3xl space-y-4">
-      <div className={`${panelClass} flex flex-col items-center gap-3 py-10 text-center`}>
-        <span className={`flex size-16 items-center justify-center rounded-full ${headline.tone}`}>
-          <Icon name={headline.icon} size={32} />
-        </span>
-        <h2 id="created-title" className="font-display text-3xl font-bold text-primary-900">
-          {headline.title}
-        </h2>
-        <p className="text-neutral-700">{headline.text}</p>
-        {anyFailed ? (
-          <Link to="/carrinho" className={linkClass}>
-            Voltar ao carrinho
-          </Link>
-        ) : null}
-      </div>
-
-      {result.orders.map((order) => (
-        <CreatedOrder key={order.id} order={order} />
-      ))}
-
-      <div className={`${panelClass} flex items-baseline justify-between gap-4`}>
-        <span className="text-neutral-900">Total</span>
-        <span className="font-display text-2xl font-bold text-primary-900">
-          {formatCurrency(result.total)}
-        </span>
-      </div>
-
-      <div className="text-center">
-        <Link to="/marketplace" search={{ sort: 'recent' }} className={linkClass}>
-          Voltar ao marketplace
-        </Link>
-      </div>
-    </section>
-  )
-}
-
-function CreatedOrder({ order }: { order: Order }) {
-  const totalCopies = order.items.reduce((sum, item) => sum + item.quantity, 0)
-
-  return (
-    <div className={panelClass}>
-      <div className="flex flex-wrap items-baseline justify-between gap-3">
-        <div>
-          <h3 className="font-display text-xl font-bold text-primary-900">
-            {order.sellerUsername ? `Vendedor @${order.sellerUsername}` : 'Pedido'}
-          </h3>
-          <p className="text-sm text-neutral-700">
-            {adsCount(order.items.length)} • {copies(totalCopies)}
-          </p>
-        </div>
-        <div className="text-right">
-          <p className="font-display text-lg font-bold text-primary-900">
-            {formatCurrency(order.totalAmount)}
-          </p>
-          <p className={`text-sm font-semibold ${orderStatus[order.status].className}`}>
-            {orderStatus[order.status].label}
-          </p>
-        </div>
-      </div>
-    </div>
   )
 }
 

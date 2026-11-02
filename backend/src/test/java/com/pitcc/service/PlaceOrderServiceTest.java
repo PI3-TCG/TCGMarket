@@ -21,6 +21,7 @@ import com.pitcc.dto.CheckoutValidationResponse.IssueCode;
 import com.pitcc.dto.CheckoutValidationResponse.ItemIssue;
 import com.pitcc.exception.AddressNotFoundException;
 import com.pitcc.exception.CheckoutConflictException;
+import com.pitcc.exception.CheckoutNotFoundException;
 import com.pitcc.model.Ad;
 import com.pitcc.model.Card;
 import com.pitcc.model.CardCondition;
@@ -198,6 +199,26 @@ class PlaceOrderServiceTest {
     assertEquals("checkout-1", response.checkoutId());
     verifyNoInteractions(validationService, holdRepository);
     verify(checkoutRepository, never()).save(any());
+  }
+
+  @Test
+  void returnsCheckoutOwnedByBuyer() {
+    Checkout checkout = new Checkout(BUYER, KEY, Instant.now());
+    ReflectionTestUtils.setField(checkout, "id", "checkout-1");
+    when(checkoutRepository.findByIdAndBuyerId("checkout-1", BUYER))
+        .thenReturn(Optional.of(checkout));
+    when(orderRepository.findByCheckoutId("checkout-1")).thenReturn(List.of());
+
+    CheckoutOrdersResponse response = service.getCheckout(BUYER, "checkout-1");
+
+    assertEquals("checkout-1", response.checkoutId());
+  }
+
+  @Test
+  void rejectsCheckoutOfAnotherBuyer() {
+    when(checkoutRepository.findByIdAndBuyerId("checkout-1", BUYER)).thenReturn(Optional.empty());
+
+    assertThrows(CheckoutNotFoundException.class, () -> service.getCheckout(BUYER, "checkout-1"));
   }
 
   @Test
