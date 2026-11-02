@@ -283,6 +283,19 @@ public class GlobalExceptionHandler {
                 ));
     }
 
+    @ExceptionHandler(TradeAvailabilityConflictException.class)
+    public ResponseEntity<ApiErrorResponse> handleTradeAvailabilityConflict(
+            TradeAvailabilityConflictException exception
+    ) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(error(
+                        HttpStatus.CONFLICT,
+                        exception.getMessage(),
+                        List.of()
+                ));
+    }
+
+
     private ResponseEntity<ApiErrorResponse> unauthorized(String message) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(error(HttpStatus.UNAUTHORIZED, message, List.of()));
