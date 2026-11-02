@@ -8,6 +8,7 @@ import com.pitcc.dto.CheckoutValidationResponse.IssueCode;
 import com.pitcc.dto.CheckoutValidationResponse.ItemIssue;
 import com.pitcc.exception.AddressNotFoundException;
 import com.pitcc.exception.CheckoutConflictException;
+import com.pitcc.exception.CheckoutNotFoundException;
 import com.pitcc.model.Ad;
 import com.pitcc.model.Card;
 import com.pitcc.model.CardSnapshot;
@@ -162,6 +163,13 @@ public class PlaceOrderService {
 
         paymentService.startPayments(buyerId, orders);
 
+        return toResponse(checkout);
+    }
+
+    /** Consulta o resultado de um checkout do comprador autenticado. */
+    public CheckoutOrdersResponse getCheckout(String buyerId, String checkoutId) {
+        Checkout checkout = checkoutRepository.findByIdAndBuyerId(checkoutId, buyerId)
+                .orElseThrow(CheckoutNotFoundException::new);
         return toResponse(checkout);
     }
 

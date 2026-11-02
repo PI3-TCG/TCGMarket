@@ -29,6 +29,7 @@ import { MarketplaceAdPage } from '@/pages/MarketplaceAdPage'
 import { CartPage } from '@/pages/CartPage'
 import { DeliveryPage } from '@/pages/DeliveryPage'
 import { ReviewPage } from '@/pages/ReviewPage'
+import { CheckoutResultPage } from '@/pages/CheckoutResultPage'
 import { MarketplaceRouteView } from '@/routes/MarketplaceRouteView'
 import type { MarketplaceSort } from '@/types/Marketplace'
 
@@ -228,6 +229,16 @@ const reviewRoute = createRoute({
   ),
 })
 
+const checkoutResultRoute = createRoute({
+  getParentRoute: () => siteLayoutRoute,
+  path: '/carrinho/resultado/$checkoutId',
+  component: () => (
+    <RequireAuth>
+      <CheckoutResultPage />
+    </RequireAuth>
+  ),
+})
+
 const routeTree = rootRoute.addChildren([
   siteLayoutRoute.addChildren([
     indexRoute,
@@ -236,6 +247,7 @@ const routeTree = rootRoute.addChildren([
     cartRoute,
     deliveryRoute,
     reviewRoute,
+    checkoutResultRoute,
     catalogRoute,
     cardDetailsRoute,
     profileRoute,

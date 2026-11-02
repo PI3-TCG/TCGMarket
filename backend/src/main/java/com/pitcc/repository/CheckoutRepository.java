@@ -9,4 +9,6 @@ import java.util.Optional;
 public interface CheckoutRepository extends MongoRepository<Checkout, String> {
 
     Optional<Checkout> findByBuyerIdAndIdempotencyKey(String buyerId, String idempotencyKey);
+
+    Optional<Checkout> findByIdAndBuyerId(String id, String buyerId);
 }

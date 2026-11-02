@@ -266,6 +266,12 @@ public class GlobalExceptionHandler {
                 .body(error(HttpStatus.NOT_FOUND, exception.getMessage(), List.of()));
     }
 
+    @ExceptionHandler(CheckoutNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleCheckoutNotFound(CheckoutNotFoundException exception) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(error(HttpStatus.NOT_FOUND, exception.getMessage(), List.of()));
+    }
+
     @ExceptionHandler(AddressConflictException.class)
     public ResponseEntity<ApiErrorResponse> handleAddressConflict(AddressConflictException exception) {
         return ResponseEntity.status(HttpStatus.CONFLICT)

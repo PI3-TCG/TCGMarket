@@ -10,6 +10,8 @@ import com.pitcc.service.PlaceOrderService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -45,6 +47,14 @@ public class CheckoutController {
             @Valid @RequestBody PlaceOrderRequest request
     ) {
         return placeOrderService.placeOrder(requireUser(current), idempotencyKey, request.addressId());
+    }
+
+    @GetMapping("/{checkoutId}")
+    public CheckoutOrdersResponse getCheckout(
+            @AuthenticationPrincipal AuthenticatedUser current,
+            @PathVariable String checkoutId
+    ) {
+        return placeOrderService.getCheckout(requireUser(current), checkoutId);
     }
 
     private static String requireUser(AuthenticatedUser current) {

@@ -1,6 +1,7 @@
 package com.pitcc.controller;
 
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -11,6 +12,7 @@ import com.pitcc.dto.CheckoutValidationResponse;
 import com.pitcc.dto.CheckoutValidationResponse.IssueCode;
 import com.pitcc.dto.CheckoutValidationResponse.ItemIssue;
 import com.pitcc.exception.CheckoutConflictException;
+import com.pitcc.exception.CheckoutNotFoundException;
 import com.pitcc.exception.GlobalExceptionHandler;
 import com.pitcc.model.OrderStatus;
 import com.pitcc.model.User;
@@ -159,5 +161,35 @@ class CheckoutControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{}"))
         .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void returnsCheckoutById() throws Exception {
+    when(placeOrderService.getCheckout("u1", "checkout-1"))
+        .thenReturn(
+            new CheckoutOrdersResponse(
+                "checkout-1",
+                List.of(
+                    new OrderResponse(
+                        "order-1", "seller-1", "vendedor1", OrderStatus.PAID,
+                        List.of(), new BigDecimal("20.00"), null, Instant.now())),
+                new BigDecimal("20.00")));
+
+    mockMvc
+        .perform(get("/api/users/me/checkout/checkout-1").header(HttpHeaders.AUTHORIZATION, token))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.checkoutId").value("checkout-1"))
+        .andExpect(jsonPath("$.orders[0].status").value("PAID"))
+        .andExpect(jsonPath("$.total").value(20.00));
+  }
+
+  @Test
+  void returnsNotFoundWhenCheckoutMissing() throws Exception {
+    when(placeOrderService.getCheckout("u1", "missing"))
+        .thenThrow(new CheckoutNotFoundException());
+
+    mockMvc
+        .perform(get("/api/users/me/checkout/missing").header(HttpHeaders.AUTHORIZATION, token))
+        .andExpect(status().isNotFound());
   }
 }
