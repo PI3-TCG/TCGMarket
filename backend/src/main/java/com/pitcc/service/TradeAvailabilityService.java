@@ -95,8 +95,7 @@ public class TradeAvailabilityService {
                         proposal.adId().equals(line.sourceAdId())
                                 && targetAd.getCollectionItemId()
                                 .equals(line.collectionItemId())
-                                && targetAd.getCardId()
-                                .equals(line.cardId())
+                                && matchesAdCard(targetAd, line.cardId())
                 );
 
         if (!hasAnchor) {
@@ -125,6 +124,11 @@ public class TradeAvailabilityService {
         // Esta é apenas a pré-validação.
         // Na próxima etapa será necessário fazer o bloqueio
         // atômico de TODAS as quantidades verificadas.
+    }
+
+    // Anúncios antigos podem não ter cardId: a carta é a da posse vinculada.
+    private static boolean matchesAdCard(Ad ad, String cardId) {
+        return ad.getCardId() == null || ad.getCardId().equals(cardId);
     }
 
     private void validateSide(
@@ -194,7 +198,7 @@ public class TradeAvailabilityService {
                     || ad.isCreationAborted()
                     || !expectedOwner.equals(ad.getSellerId())
                     || !item.getId().equals(ad.getCollectionItemId())
-                    || !item.getCardId().equals(ad.getCardId())
+                    || !matchesAdCard(ad, item.getCardId())
                     || item.getCondition() != ad.getCondition()
                     || item.getLanguage() != ad.getLanguage()
                     || ad.getRemainingQuantity() == null) {

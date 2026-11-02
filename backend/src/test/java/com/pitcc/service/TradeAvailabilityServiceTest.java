@@ -467,6 +467,65 @@ class TradeAvailabilityServiceTest {
     }
 
     @Test
+    void shouldValidateLegacyAdWithoutCardId() {
+
+        var condition = com.pitcc.model.CardCondition.values()[0];
+        var language = com.pitcc.model.CardLanguage.values()[0];
+
+        var offeredItem = mock(com.pitcc.model.CollectionItem.class);
+        when(collectionRepository.findByIdAndUserId("item-offer", "proposer-1"))
+                .thenReturn(java.util.Optional.of(offeredItem));
+        when(offeredItem.getId()).thenReturn("item-offer");
+        when(offeredItem.getCardId()).thenReturn("card-offer");
+        when(offeredItem.getCondition()).thenReturn(condition);
+        when(offeredItem.getLanguage()).thenReturn(language);
+        when(offeredItem.getQuantity()).thenReturn(1);
+        when(offeredItem.getCommittedQuantity()).thenReturn(0);
+
+        var requestedItem = mock(com.pitcc.model.CollectionItem.class);
+        when(collectionRepository.findByIdAndUserId("item-target", "recipient-1"))
+                .thenReturn(java.util.Optional.of(requestedItem));
+        when(requestedItem.getId()).thenReturn("item-target");
+        when(requestedItem.getCardId()).thenReturn("card-target");
+        when(requestedItem.getCondition()).thenReturn(condition);
+        when(requestedItem.getLanguage()).thenReturn(language);
+        when(requestedItem.getQuantity()).thenReturn(1);
+        when(requestedItem.getCommittedQuantity()).thenReturn(1);
+
+        var reservation = mock(com.pitcc.model.AdReservation.class);
+        when(reservation.getAdId()).thenReturn("ad-1");
+        when(reservation.getStatus())
+                .thenReturn(com.pitcc.model.AdReservationStatus.ACTIVE);
+        when(reservation.getQuantity()).thenReturn(1);
+        when(requestedItem.getAdReservations()).thenReturn(List.of(reservation));
+
+        var ad = mock(com.pitcc.model.Ad.class);
+        when(adRepository.findById("ad-1")).thenReturn(java.util.Optional.of(ad));
+        when(ad.getId()).thenReturn("ad-1");
+        when(ad.getStatus()).thenReturn(com.pitcc.model.AdStatus.ACTIVE);
+        when(ad.isTradeEnabled()).thenReturn(true);
+        when(ad.getSellerId()).thenReturn("recipient-1");
+        when(ad.getCollectionItemId()).thenReturn("item-target");
+        when(ad.getCardId()).thenReturn(null);
+        when(ad.getCondition()).thenReturn(condition);
+        when(ad.getLanguage()).thenReturn(language);
+        when(ad.getRemainingQuantity()).thenReturn(1);
+        when(ad.getPurchaseHolds()).thenReturn(List.of());
+
+        var proposal = new TradeAvailabilityService.TradeContext(
+                "recipient-1", "proposer-1", "recipient-1", "ad-1", "PENDING",
+                List.of(new TradeAvailabilityService.TradeLine(
+                        "item-offer", "card-offer", condition, language, null, 1)),
+                List.of(new TradeAvailabilityService.TradeLine(
+                        "item-target", "card-target", condition, language, "ad-1", 1))
+        );
+
+        org.junit.jupiter.api.Assertions.assertDoesNotThrow(
+                () -> service.validate(proposal)
+        );
+    }
+
+    @Test
     void shouldRejectDuplicateLinesExceedingAvailableQuantity() {
 
         var condition = com.pitcc.model.CardCondition.values()[0];
