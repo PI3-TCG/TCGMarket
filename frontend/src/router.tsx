@@ -30,6 +30,9 @@ import { CartPage } from '@/pages/CartPage'
 import { DeliveryPage } from '@/pages/DeliveryPage'
 import { ReviewPage } from '@/pages/ReviewPage'
 import { MarketplaceRouteView } from '@/routes/MarketplaceRouteView'
+import { TransactionHistoryPage } from '@/pages/TransactionHistoryPage'
+import { TransactionDetailPage } from '@/pages/TransactionDetailPage'
+import { parseHistorySearch } from '@/components/history/historyFormat'
 import type { MarketplaceSort } from '@/types/Marketplace'
 
 const rootRoute = createRootRoute({
@@ -179,6 +182,28 @@ const myAdsRoute = createRoute({
   ),
 })
 
+const transactionHistoryRoute = createRoute({
+  getParentRoute: () => siteLayoutRoute,
+  path: '/perfil/historico',
+  validateSearch: parseHistorySearch,
+  component: () => (
+    <RequireAuth>
+      <TransactionHistoryPage />
+    </RequireAuth>
+  ),
+})
+
+const transactionDetailRoute = createRoute({
+  getParentRoute: () => siteLayoutRoute,
+  path: '/perfil/historico/$transactionId',
+  validateSearch: parseHistorySearch,
+  component: () => (
+    <RequireAuth>
+      <TransactionDetailPage />
+    </RequireAuth>
+  ),
+})
+
 const marketplaceRoute = createRoute({
   getParentRoute: () => siteLayoutRoute,
   path: '/marketplace',
@@ -249,6 +274,8 @@ const routeTree = rootRoute.addChildren([
     myCollectionRoute,
     createAdRoute,
     myAdsRoute,
+    transactionHistoryRoute,
+    transactionDetailRoute,
   ]),
   registerRoute,
   loginRoute,

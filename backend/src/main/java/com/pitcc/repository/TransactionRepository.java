@@ -11,4 +11,10 @@ public interface TransactionRepository extends MongoRepository<Transaction, Stri
     Page<Transaction> findByBuyerIdOrderByCompletedAtDesc(String buyerId, Pageable pageable);
 
     Page<Transaction> findBySellerIdOrderByCompletedAtDesc(String sellerId, Pageable pageable);
+
+    Page<Transaction> findByBuyerIdOrSellerIdOrderByCompletedAtDesc(
+            String buyerId,
+            String sellerId,
+            Pageable pageable
+    );
 }
