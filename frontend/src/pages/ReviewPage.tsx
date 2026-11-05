@@ -44,7 +44,11 @@ export function ReviewPage() {
   return (
     <main className="min-h-screen bg-neutral-50 pb-12 text-neutral-900">
       <div className="mx-auto w-full max-w-[1400px] px-4 pt-4 sm:px-6 xl:px-[38px]">
-        <PageBanner image={pageBanners.checkout} title="Revisão" subtitle="Confira os itens e o endereço antes de confirmar." />
+        <PageBanner
+          image={pageBanners.checkout}
+          title="Revisão"
+          subtitle="Confira os itens e o endereço antes de confirmar."
+        />
 
         {cartState.status === 'error' ? (
           <LoadError title="Não foi possível carregar seu carrinho" onRetry={reloadCart} />

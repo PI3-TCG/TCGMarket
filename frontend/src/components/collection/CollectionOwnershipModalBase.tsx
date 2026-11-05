@@ -3,7 +3,17 @@ import { createPortal } from 'react-dom'
 
 import { Alert } from '@/components/ui/Alert'
 import { Badge } from '@/components/ui/Badge'
+import { cn } from '@/components/ui/cn'
 import { Icon } from '@/components/ui/Icon'
+import {
+  ModalHeaderOrnaments,
+  modalBody,
+  modalCloseButton,
+  modalFooter,
+  modalFrame,
+  modalHeader,
+  modalHeadingIcon,
+} from '@/components/ui/modalTheme'
 import type { CardCondition, CardLanguage } from '@/types/Collection'
 
 const MAX_QUANTITY = 2147483647
@@ -141,23 +151,41 @@ export function CollectionOwnershipModalBase({
         aria-modal="true"
         aria-labelledby={titleId}
         aria-describedby={descriptionId}
-        className="tcg-modal-collection tcg-modal-frame max-h-[94dvh] w-full max-w-[790px] overflow-y-auto rounded-[22px] border border-primary-100 bg-white shadow-[0_26px_85px_rgba(24,6,38,0.35)] sm:rounded-[24px]"
+        className={cn('flex max-h-[90dvh] w-full max-w-[790px] flex-col overflow-hidden rounded-[22px] bg-white sm:rounded-[24px]', modalFrame)}
       >
-        <header className="tcg-modal-header flex items-start justify-between gap-3 border-b border-primary-100 bg-gradient-to-r from-primary-100 via-[#faf6ff] to-white px-5 py-4 sm:px-6 sm:py-5">
+        <header className={cn('flex shrink-0 items-start justify-between gap-3 px-5 py-4 sm:px-6 sm:py-5', modalHeader)}>
+          <ModalHeaderOrnaments />
           <div className="flex min-w-0 items-start gap-3">
-            <div data-modal-heading-icon className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-primary-300/30 bg-white text-primary-900 shadow-sm">
-              <Icon name="gem" size={24} />
+            <div className={modalHeadingIcon}>
+              {mode === 'add' ? (
+                <Icon name="plus" size={24} />
+              ) : mode === 'remove' ? (
+                <Icon name="trash" size={24} className="text-error-200" />
+              ) : (
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="size-6"
+                  aria-hidden="true"
+                >
+                  <path d="m15 5 4 4M4 20l4.5-1 11-11a2.8 2.8 0 0 0-4-4l-11 11L4 20Z" />
+                </svg>
+              )}
             </div>
             <div className="min-w-0">
               <h2
                 id={titleId}
-                className="font-display text-lg font-bold leading-tight text-primary-900 sm:text-[22px]"
+                className="font-display text-lg font-bold leading-tight text-white sm:text-[22px]"
               >
                 {title}
               </h2>
               <p
                 id={descriptionId}
-                className="mt-1 text-xs leading-relaxed text-neutral-700 sm:text-sm"
+                className="mt-1 text-xs leading-relaxed text-white/90 sm:text-sm"
               >
                 {subtitle}
               </p>
@@ -169,14 +197,14 @@ export function CollectionOwnershipModalBase({
             onClick={onClose}
             disabled={isSaving}
             aria-label="Fechar modal"
-            className="shrink-0 rounded-lg p-1.5 text-primary-900 transition-colors hover:bg-primary-100 focus-visible:outline-2 focus-visible:outline-secondary-500 disabled:opacity-50"
+            className={cn('shrink-0 rounded-lg p-1.5 transition-colors disabled:opacity-50', modalCloseButton)}
           >
             <Icon name="close" size={20} />
           </button>
         </header>
 
-        <div className="tcg-modal-body grid gap-5 p-4 sm:grid-cols-[235px_minmax(0,1fr)] sm:gap-6 sm:p-6">
-          <aside className="min-w-0 rounded-xl border border-neutral-200 bg-white p-3 shadow-sm">
+        <div className={cn('grid min-h-0 flex-1 gap-5 overflow-y-auto overscroll-contain p-4 sm:grid-cols-[235px_minmax(0,1fr)] sm:gap-6 sm:p-6', modalBody)}>
+          <aside className="min-w-0 rounded-xl border border-[#d8c4df] bg-white p-3 shadow-sm">
             <div className="overflow-hidden rounded-lg bg-neutral-50 p-2">
               {card.imageUrl ? (
                 <img
@@ -270,42 +298,41 @@ export function CollectionOwnershipModalBase({
                 </Alert>
               )}
             </div>
-
-                      </form>
+          </form>
         </div>
-        <footer data-issue181-collection-footer className="tcg-modal-footer">
-          <div className="tcg-modal-action-row flex flex-wrap justify-end gap-2">
+        <footer className={cn('shrink-0 px-6 py-3.5', modalFooter)}>
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={isSaving}
+              className="rounded-lg border border-primary-900 px-4 py-2.5 text-sm font-semibold text-primary-900 transition-colors hover:bg-primary-100 focus-visible:outline-2 focus-visible:outline-secondary-500 disabled:opacity-50"
+            >
+              {isComplete ? 'Fechar' : 'Cancelar'}
+            </button>
+            {isComplete ? (
               <button
                 type="button"
                 onClick={onClose}
-                disabled={isSaving}
-                className="rounded-lg border border-primary-900 px-4 py-2.5 text-sm font-semibold text-primary-900 transition-colors hover:bg-primary-100 focus-visible:outline-2 focus-visible:outline-secondary-500 disabled:opacity-50"
+                className="flex items-center justify-center gap-2 rounded-lg bg-primary-900 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary-800 focus-visible:outline-2 focus-visible:outline-secondary-500"
               >
-                {isComplete ? 'Fechar' : 'Cancelar'}
+                <Icon name="check" size={16} /> Concluir
               </button>
-              {isComplete ? (
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="flex items-center justify-center gap-2 rounded-lg bg-primary-900 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary-800 focus-visible:outline-2 focus-visible:outline-secondary-500"
-                >
-                  <Icon name="check" size={16} /> Concluir
-                </button>
-              ) : (
-                <button
-                  type="submit"
-                  form={collectionFormId}
-                  disabled={isSaving || disablePrimary}
-                  className={`flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition-colors focus-visible:outline-2 focus-visible:outline-secondary-500 disabled:cursor-not-allowed disabled:opacity-60 ${
-                    mode === 'remove'
-                      ? 'bg-error-700 hover:bg-error-600'
-                      : 'bg-primary-900 hover:bg-primary-800'
-                  }`}
-                >
-                  <Icon name={PRIMARY_ICONS[mode]} size={16} />
-                  {isSaving ? busyLabel : primaryLabel}
-                </button>
-              )}
+            ) : (
+              <button
+                type="submit"
+                form={collectionFormId}
+                disabled={isSaving || disablePrimary}
+                className={`flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition-colors focus-visible:outline-2 focus-visible:outline-secondary-500 disabled:cursor-not-allowed disabled:opacity-60 ${
+                  mode === 'remove'
+                    ? 'bg-error-700 hover:bg-error-600'
+                    : 'bg-primary-900 hover:bg-primary-800'
+                }`}
+              >
+                <Icon name={PRIMARY_ICONS[mode]} size={16} />
+                {isSaving ? busyLabel : primaryLabel}
+              </button>
+            )}
           </div>
         </footer>
       </section>

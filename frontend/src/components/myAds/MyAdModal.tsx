@@ -19,7 +19,17 @@ import {
   parsePrice,
 } from '@/components/ads/adFormat'
 import { Button } from '@/components/ui/Button'
+import { cn } from '@/components/ui/cn'
 import { Icon, type IconName } from '@/components/ui/Icon'
+import {
+  ModalHeaderOrnaments,
+  modalBody,
+  modalCloseButton,
+  modalFooter,
+  modalFrame,
+  modalHeader,
+  modalHeadingIcon,
+} from '@/components/ui/modalTheme'
 import { cancelMyAd, getMyAd, updateMyAd } from '@/services/ads'
 import type { AdStatus, OwnAd } from '@/types/Ad'
 import { AdStatusBadge } from './AdStatusBadge'
@@ -293,7 +303,8 @@ export function MyAdModal({ ad: initialAd, initialView, onClose, onChanged }: Pr
           ? 'Cancelar anúncio?'
           : 'Detalhes do anúncio'
 
-  const titleIcon: IconName = 'gem'
+  const titleIcon: IconName =
+    view.kind === 'cancel' ? 'close-circle' : view.kind === 'discard' ? 'alert' : 'cart'
 
   return createPortal(
     <div
@@ -308,21 +319,18 @@ export function MyAdModal({ ad: initialAd, initialView, onClose, onChanged }: Pr
         aria-modal="true"
         aria-labelledby={titleId}
         aria-busy={busy ? true : undefined}
-        className="tcg-modal-frame flex max-h-[calc(100vh-2rem)] w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-white shadow-xl"
+        className={cn('flex max-h-[calc(100vh-2rem)] w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-white', modalFrame)}
       >
-        <header className="tcg-modal-header flex items-start justify-between gap-3 border-b border-neutral-100 px-5 pt-5 pb-4 sm:px-6">
+        <header className={cn('flex items-start justify-between gap-3 px-5 pt-5 pb-4 sm:px-6', modalHeader)}>
+          <ModalHeaderOrnaments />
           <div className="flex min-w-0 flex-wrap items-center gap-3">
-            <span
-              className={
-                view.kind === 'cancel' ? 'text-error-700' : 'text-primary-900'
-              }
-            >
+            <span className={modalHeadingIcon}>
               <Icon name={titleIcon} size={24} />
             </span>
             <h2
               id={titleId}
               tabIndex={-1}
-              className="font-display text-xl font-bold text-primary-900 outline-none sm:text-2xl"
+              className="font-display text-xl font-bold text-white outline-none sm:text-2xl"
             >
               {title}
             </h2>
@@ -335,13 +343,13 @@ export function MyAdModal({ ad: initialAd, initialView, onClose, onChanged }: Pr
             aria-label="Fechar"
             disabled={busy !== null}
             onClick={requestClose}
-            className="grid size-9 shrink-0 cursor-pointer place-items-center rounded-control text-neutral-700 hover:bg-primary-100 hover:text-primary-900 focus-visible:outline-2 focus-visible:outline-secondary-500 disabled:cursor-not-allowed disabled:opacity-40"
+            className={cn('grid size-9 shrink-0 cursor-pointer place-items-center rounded-control disabled:cursor-not-allowed disabled:opacity-40', modalCloseButton)}
           >
             <Icon name="close" size={20} />
           </button>
         </header>
 
-        <div className="tcg-modal-body min-h-0 flex-1 overflow-y-auto px-5 py-5 sm:px-6">
+        <div className={cn('min-h-0 flex-1 overflow-y-auto px-5 py-5 sm:px-6', modalBody)}>
           {view.kind === 'discard' ? (
             <div className="space-y-2 text-neutral-700">
               <p className="font-semibold text-neutral-900">
@@ -425,7 +433,7 @@ export function MyAdModal({ ad: initialAd, initialView, onClose, onChanged }: Pr
           )}
         </div>
 
-        <footer className="tcg-modal-footer flex flex-wrap items-center justify-end gap-2 border-t border-neutral-100 px-5 py-4 sm:px-6">
+        <footer className={cn('flex flex-wrap items-center justify-end gap-2 px-5 py-4 sm:px-6', modalFooter)}>
           {view.kind === 'details' &&
             (active && notice?.kind !== 'notFound' ? (
               <>

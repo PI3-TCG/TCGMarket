@@ -61,7 +61,8 @@ export function MarketplacePage({ sort = 'recent' }: Props) {
   return (
     <main className="min-h-screen bg-neutral-50 pb-12 text-neutral-900">
       <div className="mx-auto w-full max-w-[1600px] px-4 pt-4 sm:px-6 xl:px-[38px]">
-        <PageBanner image={pageBanners.marketplace}
+        <PageBanner
+          image={pageBanners.marketplace}
           title="Marketplace"
           subtitle="Encontre cartas para comprar ou trocar e complete sua coleção."
         />

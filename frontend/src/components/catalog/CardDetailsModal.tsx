@@ -16,7 +16,17 @@ import {
   toCatalogCard,
 } from './cardDetailsFormat'
 import { Badge } from '@/components/ui/Badge'
+import { cn } from '@/components/ui/cn'
 import { Icon } from '@/components/ui/Icon'
+import {
+  ModalHeaderOrnaments,
+  modalBody,
+  modalCloseButton,
+  modalFooter,
+  modalFrame,
+  modalHeader,
+  modalHeadingIcon,
+} from '@/components/ui/modalTheme'
 import type { CatalogCard, CatalogCardDetails } from '@/types/Catalog'
 
 type Props = {
@@ -128,14 +138,14 @@ export function CardDetailsModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="tcg-modal-frame flex max-h-[90dvh] w-full max-w-[880px] flex-col overflow-hidden rounded-[22px] border border-primary-300/40 bg-[#f7f3fd] shadow-[0_28px_90px_rgba(16,3,31,0.48)]"
+        className={cn('flex max-h-[90dvh] w-full max-w-[880px] flex-col overflow-hidden rounded-[22px] bg-[#f7f3fd]', modalFrame)}
       >
         {/* Cabeçalho com a identidade roxa do TCGMarket. */}
-        <header className="tcg-modal-header relative shrink-0 overflow-hidden bg-gradient-to-r from-primary-900 via-[#4e176f] to-[#64228a] px-4 py-3.5 text-white sm:px-6">
-          <div className="pointer-events-none absolute -right-10 -top-20 size-44 rounded-full bg-white/10 blur-2xl" />
+        <header className={cn('shrink-0 px-4 py-3.5 sm:px-6', modalHeader)}>
+          <ModalHeaderOrnaments />
           <div className="relative flex items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-3">
-              <div data-modal-heading-icon className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-white/20 bg-white/10">
+              <div className={modalHeadingIcon}>
                 <Icon name="gem" size={24} />
               </div>
               <div className="min-w-0">
@@ -155,14 +165,14 @@ export function CardDetailsModal({
               type="button"
               onClick={onClose}
               aria-label="Fechar detalhes"
-              className="rounded-lg p-2 text-white transition hover:bg-white/15 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              className={cn('rounded-lg p-2 transition focus-visible:outline-offset-2', modalCloseButton)}
             >
               <Icon name="close" size={20} />
             </button>
           </div>
         </header>
 
-        <div className="tcg-modal-body min-h-0 flex-1 overflow-y-auto p-3.5 sm:p-5">
+        <div className={cn('min-h-0 flex-1 overflow-y-auto p-3.5 sm:p-5', modalBody)}>
           {state.status === 'loading' && (
             <div
               role="status"
@@ -199,7 +209,7 @@ export function CardDetailsModal({
             <div className="space-y-3.5">
               <div className="grid gap-3.5 sm:grid-cols-[228px_minmax(0,1fr)]">
                 {/* Somente a imagem principal: sem miniaturas ou outras impressões. */}
-                <aside className="rounded-2xl border border-primary-200/70 bg-gradient-to-b from-[#ebe0fa] via-[#f3ecfd] to-[#e9e1f6] p-3 shadow-sm">
+                <aside className="rounded-2xl border border-[#d8c4df] bg-gradient-to-b from-[#ebe0fa] via-[#f3ecfd] to-[#e9e1f6] p-3 shadow-sm">
                   <div className="flex min-h-[230px] items-center justify-center rounded-xl bg-white/60 p-2 sm:min-h-[255px]">
                     {card.imageUrl ? (
                       <a
@@ -235,7 +245,7 @@ export function CardDetailsModal({
                   )}
                 </aside>
 
-                <div className="min-w-0 rounded-2xl border border-primary-200/60 bg-white/80 p-4 shadow-sm sm:p-5">
+                <div className="min-w-0 rounded-2xl border border-[#d8c4df] bg-white/80 p-4 shadow-sm sm:p-5">
                   <div className="flex flex-wrap items-center gap-2">
                     <Badge variant="primary">
                       {GAME_INFO[card.cardGame].name}
@@ -298,7 +308,7 @@ export function CardDetailsModal({
               </div>
 
               {/* Abas mantêm o modal compacto e deixam o dashboard preparado. */}
-              <section className="overflow-hidden rounded-2xl border border-primary-200/70 bg-white/75 shadow-sm">
+              <section className="overflow-hidden rounded-2xl border border-[#d8c4df] bg-white/75 shadow-sm">
                 <div className="flex items-center gap-1 border-b border-primary-100 bg-[#efe7f8] px-3 pt-2">
                   <TabButton
                     selected={activeTab === 'details'}
@@ -397,7 +407,7 @@ export function CardDetailsModal({
           )}
         </div>
 
-        <footer className="tcg-modal-footer flex shrink-0 flex-wrap items-center justify-between gap-2 border-t border-primary-200/70 bg-[#eee6f8] px-4 py-3 sm:px-6">
+        <footer className={cn('flex shrink-0 flex-wrap items-center justify-between gap-2 px-4 py-3 sm:px-6', modalFooter)}>
           <p className="hidden text-xs text-primary-800 sm:block">
             {isCollection
               ? 'Visualizando sua coleção'
@@ -461,7 +471,7 @@ function StatusPanel({
   onRetry: () => void
 }) {
   return (
-    <div className="rounded-xl border border-primary-200 bg-white/80 p-6 text-center">
+    <div className="rounded-xl border border-[#d8c4df] bg-white/80 p-6 text-center">
       <Icon name="info" size={32} className="mx-auto text-primary-800" />
       <h3 className="mt-2 font-display text-lg font-bold text-primary-900">
         {title}

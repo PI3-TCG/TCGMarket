@@ -84,35 +84,35 @@ export function ProfileHero({
   profile: ProfileViewData
   action?: ReactNode
 }) {
-  const banner = pageBanners.profile
   const location = formatLocation(profile.city, profile.state)
   const games = PROFILE_GAMES.filter((game) =>
     profile.favoriteGames.includes(game.value),
   )
 
   return (
-    <Card
-      className={cn('relative overflow-hidden', banner ? 'grid border-2 bg-[#130b30]' : 'bg-gradient-to-r from-white via-white to-primary-100')}
-      style={{ borderColor: banner ? 'rgba(252, 210, 3, 0.7)' : undefined }}
-    >
-      {banner ? (
-        <>
-          <img src={banner} alt="" aria-hidden="true" className="pointer-events-none col-start-1 row-start-1 block h-auto w-full min-w-0" />
-          <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#130b30]/90 via-[#280f41]/70 to-[#280f41]/10" />
-        </>
-      ) : null}
-      <div className={cn('relative flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:p-7', banner && 'col-start-1 row-start-2 md:row-start-1')}>
+    <Card className="relative overflow-hidden border-2 border-[#FCD203]/70 bg-[#130b30]">
+      <img
+        src={pageBanners.profile}
+        alt=""
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 h-full w-full object-cover"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#130b30]/90 via-[#280f41]/70 to-[#280f41]/10"
+      />
+      <div className="relative flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:p-7">
         <Avatar name={profile.name} />
         <div className="min-w-0 flex-1 space-y-2">
           <div className="flex flex-wrap items-center gap-2">
-            <h1 className={cn('font-display text-2xl font-bold break-words sm:text-3xl', banner ? 'text-white drop-shadow-sm' : 'text-primary-900')}>
+            <h1 className="font-display text-2xl font-bold break-words text-white drop-shadow-sm sm:text-3xl">
               {profile.name}
             </h1>
             {profile.administrator ? (
               <Badge variant="primary">Administrador</Badge>
             ) : null}
           </div>
-          <ul className={cn('flex flex-wrap gap-x-4 gap-y-1 text-sm', banner ? 'text-white/90' : 'text-neutral-700')}>
+          <ul className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-white/90">
             <li>@{profile.username}</li>
             <li className="flex items-center gap-1">
               <CalendarIcon />
@@ -126,7 +126,7 @@ export function ProfileHero({
             ) : null}
           </ul>
           {profile.bio ? (
-            <p className={cn('line-clamp-2 max-w-2xl text-sm', banner ? 'text-white/90' : 'text-neutral-700')}>
+            <p className="line-clamp-2 max-w-2xl text-sm text-white/90">
               {profile.bio}
             </p>
           ) : null}

@@ -18,13 +18,13 @@ export function PageBanner({
   imagePosition = 'center',
 }: Props) {
   return (
-    <header className="relative mb-4 grid overflow-hidden rounded-xl border-2 border-[#FCD203]/70 bg-[#130b30] shadow-sm">
+    <header className="relative mb-4 flex h-[160px] items-center overflow-hidden rounded-xl border-2 border-[#FCD203]/70 bg-[#130b30] shadow-sm sm:h-[200px]">
       <img
         src={image}
         alt=""
         aria-hidden="true"
         style={{ objectPosition: imagePosition }}
-        className="pointer-events-none col-start-1 row-start-1 block h-auto w-full min-w-0"
+        className="pointer-events-none absolute inset-0 h-full w-full object-cover"
       />
 
       <div
@@ -32,7 +32,7 @@ export function PageBanner({
         className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#130b30]/85 via-[#280f41]/50 to-transparent"
       />
 
-      <div className="relative z-10 col-start-1 row-start-2 flex items-center gap-4 px-6 py-5 sm:row-start-1 sm:px-8">
+      <div className="relative z-10 flex items-center gap-4 px-6 py-5 sm:px-8">
         <span
           aria-hidden="true"
           className="flex size-14 shrink-0 items-center justify-center rounded-full border-2 border-white/80 bg-white/15 text-3xl text-white shadow-sm backdrop-blur-sm"

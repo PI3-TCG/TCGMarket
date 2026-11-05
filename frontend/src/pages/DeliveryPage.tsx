@@ -33,7 +33,11 @@ export function DeliveryPage() {
   return (
     <main className="min-h-screen bg-neutral-50 pb-12 text-neutral-900">
       <div className="mx-auto w-full max-w-[1400px] px-4 pt-4 sm:px-6 xl:px-[38px]">
-        <PageBanner image={pageBanners.checkout} title="Entrega" subtitle="Escolha onde receber suas cartas." />
+        <PageBanner
+          image={pageBanners.checkout}
+          title="Entrega"
+          subtitle="Escolha onde receber suas cartas."
+        />
 
         {cartState.status === 'error' ? (
           <LoadError

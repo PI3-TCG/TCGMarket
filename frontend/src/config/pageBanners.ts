@@ -1,25 +1,16 @@
-/** Issue #181: associacao entre paginas e imagens. Sem imports estaticos. */
-const images = import.meta.glob<string>(
-  '../assets/images/*.{png,jpg,jpeg,webp}',
-  { eager: true, query: '?url', import: 'default' },
-)
+import adsBanner from '@/assets/images/image-ads.png'
+import checkoutBanner from '@/assets/images/image-checkout.png'
+import createAdsBanner from '@/assets/images/image-createAds.png'
+import managementBanner from '@/assets/images/image-management.png'
+import myAdsBanner from '@/assets/images/image-myAds.png'
+import profileBanner from '@/assets/images/image-profile.png'
 
-function findBanner(...names: string[]): string | undefined {
-  for (const name of names) {
-    for (const extension of ['png', 'webp', 'jpg', 'jpeg']) {
-      const match = images[`../assets/images/${name}.${extension}`]
-      if (match) return match
-    }
-  }
-  return undefined
-}
-
-/** Home e Minha Colecao usam imagens aprovadas diretamente; nao sao alteradas aqui. */
+/** Associação entre páginas e imagens. Home e Minha Coleção importam suas imagens diretamente. */
 export const pageBanners = {
-  marketplace: findBanner('image-ads', 'banner-marketplace'),
-  myAds: findBanner('image-myAds', 'banner-meus-anuncios'),
-  createAd: findBanner('image-createAds', 'banner-criar-anuncio'),
-  profile: findBanner('image-profile', 'banner-perfil'),
-  admin: findBanner('image-management', 'banner-administracao'),
-  checkout: findBanner('image-checkout', 'banner-checkout'),
+  marketplace: adsBanner,
+  myAds: myAdsBanner,
+  createAd: createAdsBanner,
+  profile: profileBanner,
+  admin: managementBanner,
+  checkout: checkoutBanner,
 } as const

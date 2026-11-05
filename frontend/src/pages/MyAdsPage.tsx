@@ -27,7 +27,8 @@ export function MyAdsPage() {
   return (
     <main className="min-h-screen bg-[#FAFBFE] pb-12 text-[#171443]">
       <div className="mx-auto w-full max-w-[1600px] px-4 pt-4 sm:px-6 xl:px-[38px]">
-        <PageBanner image={pageBanners.myAds}
+        <PageBanner
+          image={pageBanners.myAds}
           title="Meus anúncios"
           subtitle="Acompanhe e gerencie seus anúncios."
         />

@@ -48,7 +48,8 @@ export function CreateAdPage() {
   return (
     <main className="min-h-screen bg-[#FAFBFE] pb-12 text-[#171443]">
       <div className="mx-auto w-full max-w-[1600px] px-4 pt-4 sm:px-6 xl:px-[38px]">
-        <PageBanner image={pageBanners.createAd}
+        <PageBanner
+          image={pageBanners.createAd}
           title="Criar anúncio"
           subtitle="Defina como você deseja negociar esta carta da sua coleção."
         />

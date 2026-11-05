@@ -1,7 +1,16 @@
 import { useEffect, useId, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { Button } from '@/components/ui/Button'
+import { cn } from '@/components/ui/cn'
 import { Icon } from '@/components/ui/Icon'
+import {
+  ModalHeaderOrnaments,
+  modalCloseButton,
+  modalFooter,
+  modalFrame,
+  modalHeader,
+  modalHeadingIcon,
+} from '@/components/ui/modalTheme'
 
 type Props = {
   title: string
@@ -81,21 +90,22 @@ export function DiscardChangesDialog({
         aria-modal="true"
         aria-labelledby={titleId}
         aria-describedby={descriptionId}
-        className="tcg-modal-confirm tcg-modal-frame w-full max-w-md rounded-xl border border-neutral-200 bg-white p-6 shadow-lg"
+        className={cn('w-full max-w-md overflow-hidden rounded-[21px] bg-white', modalFrame)}
       >
-        <div className="tcg-modal-header flex items-start justify-between gap-4">
+        <div className={cn('flex items-start justify-between gap-4 px-5 py-[18px]', modalHeader)}>
+          <ModalHeaderOrnaments />
           <div className="flex items-start gap-3">
-            <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-warning-50 text-warning-700">
+            <span className={modalHeadingIcon}>
               <Icon name="alert" size={24} />
             </span>
             <div>
               <h2
                 id={titleId}
-                className="font-display text-xl font-bold text-primary-900"
+                className="font-display text-xl font-bold text-white"
               >
                 {title}
               </h2>
-              <p id={descriptionId} className="mt-1 text-sm text-neutral-700">
+              <p id={descriptionId} className="mt-1 text-sm text-white/90">
                 {description}
               </p>
             </div>
@@ -104,13 +114,13 @@ export function DiscardChangesDialog({
             type="button"
             aria-label="Fechar"
             onClick={onContinue}
-            className="grid size-8 shrink-0 cursor-pointer place-items-center rounded-control text-neutral-700 hover:bg-primary-100 focus-visible:outline-2 focus-visible:outline-secondary-500"
+            className={cn('grid size-8 shrink-0 cursor-pointer place-items-center rounded-control', modalCloseButton)}
           >
             <Icon name="close" size={20} />
           </button>
         </div>
 
-        <div className="tcg-modal-footer mt-6 flex flex-wrap justify-end gap-2">
+        <div className={cn('flex flex-wrap justify-end gap-2 px-5 py-[15px]', modalFooter)}>
           <Button data-autofocus variant="primary" onClick={onContinue}>
             Continuar preenchendo
           </Button>
