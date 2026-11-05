@@ -1,3 +1,4 @@
+import { pageBanners } from '@/config/pageBanners'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
@@ -89,19 +90,29 @@ export function ProfileHero({
   )
 
   return (
-    <Card className="relative bg-gradient-to-r from-white via-white to-primary-100">
+    <Card className="relative overflow-hidden border-2 border-[#FCD203]/70 bg-[#130b30]">
+      <img
+        src={pageBanners.profile}
+        alt=""
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 h-full w-full object-cover"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#130b30]/90 via-[#280f41]/70 to-[#280f41]/10"
+      />
       <div className="relative flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:p-7">
         <Avatar name={profile.name} />
         <div className="min-w-0 flex-1 space-y-2">
           <div className="flex flex-wrap items-center gap-2">
-            <h1 className="font-display text-2xl font-bold break-words text-primary-900 sm:text-3xl">
+            <h1 className="font-display text-2xl font-bold break-words text-white drop-shadow-sm sm:text-3xl">
               {profile.name}
             </h1>
             {profile.administrator ? (
               <Badge variant="primary">Administrador</Badge>
             ) : null}
           </div>
-          <ul className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-neutral-700">
+          <ul className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-white/90">
             <li>@{profile.username}</li>
             <li className="flex items-center gap-1">
               <CalendarIcon />
@@ -115,7 +126,7 @@ export function ProfileHero({
             ) : null}
           </ul>
           {profile.bio ? (
-            <p className="line-clamp-2 max-w-2xl text-sm text-neutral-700">
+            <p className="line-clamp-2 max-w-2xl text-sm text-white/90">
               {profile.bio}
             </p>
           ) : null}

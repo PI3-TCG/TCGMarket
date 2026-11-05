@@ -2,7 +2,7 @@ import { useEffect, useId, useRef, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { Button, type ButtonVariant } from './Button'
 import { cn } from './cn'
-import { Icon } from './Icon'
+import { Icon, type IconName } from './Icon'
 
 export type ModalAction = {
   label: string
@@ -24,6 +24,8 @@ type ModalProps = {
   /** O estilo antigo permanece por padrão para não alterar os outros fluxos. */
   presentation?: 'classic' | 'refined'
   subtitle?: string
+  /** Ícone contextual do cabeçalho refinado (quando não informado, usa gema). */
+  headerIcon?: IconName
   footer?: ReactNode
   closeDisabled?: boolean
 }
@@ -44,6 +46,7 @@ export function Modal({
   size = 'md',
   presentation = 'classic',
   subtitle,
+  headerIcon = 'gem',
   footer,
   closeDisabled = false,
 }: ModalProps) {
@@ -133,37 +136,56 @@ export function Modal({
       aria-describedby={subtitle ? subtitleId : undefined}
       className={cn(
         isRefined
-          ? 'flex max-h-[90dvh] w-full flex-col overflow-hidden rounded-[20px] border border-neutral-200 bg-white shadow-lg focus:outline-none'
+          ? 'flex max-h-[90dvh] w-full flex-col overflow-hidden rounded-[20px] border-2 bg-white shadow-[0_20px_55px_rgba(68,16,79,0.18)] focus:outline-none'
           : 'w-full rounded-surface border bg-white p-6 shadow-lg',
-        preview === 'hover' ? 'border-2 border-primary-900' : 'border-neutral-200',
+        preview === 'hover'
+          ? (isRefined ? 'border-[#FCD203]' : 'border-2 border-primary-900')
+          : (isRefined ? 'border-[rgba(252,210,3,0.68)]' : 'border-neutral-200'),
         className,
       )}
     >
       <div className={cn(
         'flex shrink-0 items-start justify-between gap-4',
-        isRefined ? 'relative isolate overflow-hidden bg-[linear-gradient(115deg,#4C195F_0%,#74317F_58%,#8C5897_100%)] px-5 py-5 text-white sm:px-6' : '',
+        isRefined ? 'relative isolate overflow-hidden border-b border-[#FCD203]/65 bg-[linear-gradient(115deg,#4C195F_0%,#74317F_58%,#8C5897_100%)] px-5 py-5 text-white sm:px-6' : '',
       )}>
         {isRefined ? (
           <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
             <div className="absolute -top-16 right-10 size-44 rounded-full bg-white/10 blur-3xl" />
-            <div className="absolute right-16 top-1/2 -translate-y-1/2 text-white/20">
+            <div className="absolute right-16 top-1/2 -translate-y-1/2 text-[#FCD203]/25">
               <Icon name="sparkle" size={32} />
             </div>
-            <div className="absolute right-36 top-4 text-white/10">
+            <div className="absolute right-36 top-4 text-[#FCD203]/20">
               <Icon name="sparkle" size={20} />
+            </div>
+            {/* Dois detalhes adicionais, sem interferir no texto nem no botão de fechar. */}
+            <div className="absolute right-28 bottom-3 hidden text-[#FCD203]/30 sm:block">
+              <Icon name="gem" size={16} />
+            </div>
+            <div className="absolute right-52 top-3 hidden text-[#FCD203]/20 md:block">
+              <Icon name="sparkle" size={16} />
             </div>
           </div>
         ) : null}
-        <div className="relative z-10 min-w-0">
-          <h2
-            ref={headingRef}
-            tabIndex={-1}
-            id={titleId}
-            className={cn('font-display text-2xl leading-tight font-bold focus:outline-none', isRefined ? 'text-white' : 'text-neutral-900')}
-          >
-            {title}
-          </h2>
-          {subtitle ? <p id={subtitleId} className={cn('mt-1 text-sm', isRefined ? 'text-white/90' : 'text-neutral-700')}>{subtitle}</p> : null}
+        <div className="relative z-10 flex min-w-0 items-start gap-3">
+          {isRefined ? (
+            <span
+              aria-hidden="true"
+              className="grid size-10 shrink-0 place-items-center rounded-xl border border-[#FCD203]/40 bg-white/10 text-[#FCD203] shadow-sm"
+            >
+              <Icon name={headerIcon} size={24} />
+            </span>
+          ) : null}
+          <div className="min-w-0">
+            <h2
+              ref={headingRef}
+              tabIndex={-1}
+              id={titleId}
+              className={cn('font-display text-2xl leading-tight font-bold focus:outline-none', isRefined ? 'text-white' : 'text-neutral-900')}
+            >
+              {title}
+            </h2>
+            {subtitle ? <p id={subtitleId} className={cn('mt-1 text-sm', isRefined ? 'text-white/90' : 'text-neutral-700')}>{subtitle}</p> : null}
+          </div>
         </div>
         {onClose ? (
           <button
@@ -177,11 +199,11 @@ export function Modal({
           </button>
         ) : null}
       </div>
-      <div className={cn(isRefined ? 'min-h-0 flex-1 overflow-y-auto bg-neutral-50 p-4 text-sm text-neutral-700 sm:p-6' : 'mt-4 space-y-2 text-base text-neutral-700')}>
+      <div className={cn(isRefined ? 'min-h-0 flex-1 overflow-y-auto overscroll-contain bg-[linear-gradient(155deg,#FBF8FD_0%,#FFFFFF_66%)] p-4 text-sm text-neutral-700 sm:p-6' : 'mt-4 space-y-2 text-base text-neutral-700')}>
         {children}
       </div>
       {actions ? (
-        <div className={cn('flex shrink-0 flex-wrap justify-end gap-3', isRefined ? 'border-t border-neutral-200 bg-white px-4 py-4 sm:px-6' : 'mt-6')}>
+        <div className={cn('flex shrink-0 flex-wrap justify-end gap-3', isRefined ? 'border-t border-[#FCD203]/45 bg-[#FCFAFE] px-4 py-4 sm:px-6' : 'mt-6')}>
           {actions}
         </div>
       ) : null}
@@ -192,7 +214,7 @@ export function Modal({
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
-      <div className="absolute inset-0 bg-neutral-900/50" onMouseDown={onClose} />
+      <div className="absolute inset-0 bg-neutral-900/55 backdrop-blur-[2px]" onMouseDown={onClose} />
       <div
         className={cn('relative z-10 w-full', size === 'lg' ? (isRefined ? 'max-w-5xl' : 'max-w-3xl') : size === 'sm' ? 'max-w-[440px]' : (isRefined ? 'max-w-2xl' : 'max-w-md'))}
         onMouseDown={(event) => event.stopPropagation()}

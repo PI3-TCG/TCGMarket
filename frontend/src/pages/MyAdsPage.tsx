@@ -1,3 +1,4 @@
+import { pageBanners } from '@/config/pageBanners'
 import { useEffect, useState, type ReactNode } from 'react'
 import { Link } from '@tanstack/react-router'
 import { PageBanner } from '@/components/layout/PageBanner'
@@ -27,6 +28,7 @@ export function MyAdsPage() {
     <main className="min-h-screen bg-[#FAFBFE] pb-12 text-[#171443]">
       <div className="mx-auto w-full max-w-[1600px] px-4 pt-4 sm:px-6 xl:px-[38px]">
         <PageBanner
+          image={pageBanners.myAds}
           title="Meus anúncios"
           subtitle="Acompanhe e gerencie seus anúncios."
         />

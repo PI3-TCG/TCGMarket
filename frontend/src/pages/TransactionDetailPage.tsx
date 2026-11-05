@@ -1,3 +1,4 @@
+import { pageBanners } from '@/config/pageBanners'
 import { useCallback } from 'react'
 import { Link, useParams, useSearch } from '@tanstack/react-router'
 import { PageBanner } from '@/components/layout/PageBanner'
@@ -34,6 +35,7 @@ export function TransactionDetailPage() {
     <main className="min-h-screen bg-neutral-50 pb-12 text-neutral-900">
       <div className="mx-auto w-full max-w-[1400px] px-4 pt-4 sm:px-6 xl:px-[38px]">
         <PageBanner
+          image={pageBanners.profile}
           title="Detalhes da transação"
           subtitle="Informações registradas no momento da negociação."
         />

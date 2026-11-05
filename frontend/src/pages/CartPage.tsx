@@ -1,3 +1,4 @@
+import { pageBanners } from '@/config/pageBanners'
 import { useCart } from '@/cart'
 import { copies } from '@/components/ads/adFormat'
 import { CartItemRow, type RowError } from '@/components/cart/CartItemRow'
@@ -34,6 +35,7 @@ export function CartPage() {
     <main className="min-h-screen bg-neutral-50 pb-12 text-neutral-900">
       <div className="mx-auto w-full max-w-[1400px] px-4 pt-4 sm:px-6 xl:px-[38px]">
         <PageBanner
+          image={pageBanners.checkout}
           title="Meu carrinho"
           subtitle="Revise os itens antes de continuar."
         />

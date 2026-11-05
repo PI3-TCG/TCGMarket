@@ -1,3 +1,4 @@
+import { pageBanners } from '@/config/pageBanners'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useSearch } from '@tanstack/react-router'
 import { PageBanner } from '@/components/layout/PageBanner'
@@ -39,6 +40,7 @@ export function MyTradeProposalsPage() {
     <main className="min-h-screen bg-neutral-50 pb-12 text-neutral-900">
       <div className="mx-auto w-full max-w-[1400px] px-4 pt-4 sm:px-6 xl:px-[38px]">
         <PageBanner
+          image={pageBanners.profile}
           title="Minhas propostas"
           subtitle="Acompanhe as propostas de troca que você enviou ou recebeu."
           symbol="⇄"

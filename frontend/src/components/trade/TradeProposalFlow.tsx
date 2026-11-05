@@ -15,21 +15,53 @@ type Step = 'compose' | 'picker' | 'review' | 'confirm' | 'discard' | 'success'
 type OfferedItem = { item: CollectionItem; quantity: number }
 type SendError = { kind: 'rejected' | 'unknown'; message: string }
 
-const surface = 'rounded-xl border border-neutral-200 bg-white p-4 shadow-sm'
+const surface = 'rounded-xl border border-[#D8C4DF] bg-white p-4 shadow-[0_2px_9px_rgba(102,3,102,0.065)]'
 const field = 'h-10 w-full rounded-control border border-neutral-300 bg-white px-3 text-sm text-neutral-900 focus-visible:outline-2 focus-visible:outline-secondary-500'
 
 function validPositiveQuantity(n: number, maximum: number): boolean {
   return Number.isSafeInteger(n) && n >= 1 && n <= maximum
 }
 
-function TradeCardArt({ src, name }: { src: string | null | undefined; name: string }) {
+function TradeCardArt({ src, name, compact = false }: {
+  src: string | null | undefined
+  name: string
+  compact?: boolean
+}) {
   const [failed, setFailed] = useState(false)
+  const dimensions = compact ? 'h-20 w-14' : 'h-28 w-20'
   return src && !failed ? (
-    <img src={src} alt="" onError={() => setFailed(true)} className="h-28 w-20 shrink-0 rounded-control object-contain" />
+    <img src={src} alt="" onError={() => setFailed(true)} className={`${dimensions} shrink-0 rounded-control object-contain`} />
   ) : (
-    <div className="flex h-28 w-20 shrink-0 flex-col items-center justify-center gap-1 rounded-control bg-neutral-100 text-xs text-neutral-500" role="img" aria-label={`Imagem indisponível: ${name}`}>
-      <Icon name="gem" size={24} /><span>Sem imagem</span>
+    <div className={`flex ${dimensions} shrink-0 flex-col items-center justify-center gap-1 rounded-control bg-neutral-100 text-[10px] text-neutral-500`} role="img" aria-label={`Imagem indisponível: ${name}`}>
+      <Icon name="gem" size={20} /><span>Sem imagem</span>
     </div>
+  )
+}
+
+/** O mesmo resumo visual serve às cartas oferecidas e à carta solicitada. */
+function ReviewCardItem({ imageUrl, name, game, edition, condition, language, quantity }: {
+  imageUrl: string | null | undefined
+  name: string
+  game: string
+  edition: string | null | undefined
+  condition: string
+  language: string
+  quantity: number
+}) {
+  return (
+    <li className="rounded-xl border border-[#D8C4DF]/85 bg-[#FCFAFE] p-3">
+      <div className="flex min-w-0 items-start gap-3">
+        <TradeCardArt src={imageUrl} name={name} compact />
+        <div className="min-w-0 flex-1">
+          <p className="break-words text-sm font-bold text-neutral-900">{name}</p>
+          <p className="mt-1 text-xs text-neutral-700">{game}{edition ? ` · ${edition}` : ''}</p>
+          <p className="mt-1 text-xs text-neutral-700">{condition} · {language}</p>
+          <span className="mt-2 inline-flex rounded-full border border-[#D8C4DF] bg-primary-100 px-3 py-1 text-xs font-semibold text-primary-900">
+            {copies(quantity)}
+          </span>
+        </div>
+      </div>
+    </li>
   )
 }
 
@@ -233,7 +265,7 @@ export function TradeProposalFlow({ ad, open, onClose }: {
                   <span className="rounded-full bg-primary-100 px-3 py-1 text-xs font-semibold text-primary-900">{distinct} itens · {offeredCopies} exemplares</span>
                 </div>
                 {offered.length === 0 ? (
-                  <div className="rounded-xl border border-dashed border-neutral-300 px-4 py-8 text-center text-sm">
+                  <div className="rounded-xl border border-dashed border-[#D8C4DF] px-4 py-8 text-center text-sm">
                     <Icon name="gem" size={32} className="mx-auto text-primary-700" />
                     <p className="mt-2 font-semibold text-neutral-900">Nenhuma carta selecionada</p>
                     <p className="mt-1">Adicione cartas da sua coleção para montar a oferta.</p>
@@ -241,7 +273,7 @@ export function TradeProposalFlow({ ad, open, onClose }: {
                 ) : (
                   <ul className="space-y-3">
                     {offered.map(({ item, quantity }) => (
-                      <li key={item.id} className="rounded-xl border border-neutral-200 bg-neutral-50 p-3">
+                      <li key={item.id} className="rounded-xl border border-[#D8C4DF]/85 bg-[#FCFAFE] p-3">
                         <div className="flex gap-3">
                           <TradeCardArt src={item.card.imageUrl} name={item.card.name} />
                           <div className="min-w-0 flex-1">
@@ -263,7 +295,7 @@ export function TradeProposalFlow({ ad, open, onClose }: {
 
               <section className={surface} aria-labelledby="trade-request-title">
                 <h3 id="trade-request-title" className="font-display mb-3 text-lg font-bold text-primary-900">Cartas que você solicita</h3>
-                <div className="flex gap-3 rounded-xl border border-secondary-200 bg-secondary-100/40 p-3">
+                <div className="flex gap-3 rounded-xl border border-[#CBAFD8] bg-[#F7F0F8] p-3">
                   <TradeCardArt src={ad.imageUrl} name={ad.cardName} />
                   <div className="min-w-0">
                     <p className="font-semibold text-neutral-900">{ad.cardName}</p>
@@ -306,17 +338,49 @@ export function TradeProposalFlow({ ad, open, onClose }: {
 
         {step === 'review' || step === 'confirm' ? (
           <>
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid items-start gap-4 md:grid-cols-2">
               <section className={surface}>
-                <h3 className="font-display text-lg font-bold text-primary-900">Você oferece</h3>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <h3 className="font-display text-lg font-bold text-primary-900">Você oferece</h3>
+                  <span className="rounded-full bg-primary-100 px-2.5 py-1 text-xs font-semibold text-primary-900">{copies(offeredCopies)}</span>
+                </div>
                 <ul className="mt-3 space-y-3">
-                  {offered.map(({ item, quantity }) => <li key={item.id} className="border-b border-neutral-200 pb-3 text-sm"><strong className="text-neutral-900">{item.card.name}</strong><span className="block text-xs">{gameLabels[item.card.game] ?? item.card.game} · {item.card.edition}</span><span className="block text-xs">{conditionLabels[item.condition]} · {languageLabels[item.language]}</span><span className="mt-1 block font-semibold">{copies(quantity)}</span></li>)}
+                  {offered.map(({ item, quantity }) => (
+                    <ReviewCardItem
+                      key={item.id}
+                      imageUrl={item.card.imageUrl}
+                      name={item.card.name}
+                      game={gameLabels[item.card.game] ?? item.card.game}
+                      edition={item.card.edition}
+                      condition={conditionLabels[item.condition]}
+                      language={languageLabels[item.language]}
+                      quantity={quantity}
+                    />
+                  ))}
                 </ul>
-                <p className="mt-3 text-sm font-semibold">{distinct} itens diferentes · {offeredCopies} exemplares</p>
+                <p className="mt-3 border-t border-[#D8C4DF]/80 pt-3 text-xs font-semibold text-neutral-700">
+                  {distinct} {distinct === 1 ? 'carta diferente' : 'cartas diferentes'} · {copies(offeredCopies)}
+                </p>
               </section>
               <section className={surface}>
-                <h3 className="font-display text-lg font-bold text-primary-900">Você solicita</h3>
-                <div className="mt-3 text-sm"><strong className="text-neutral-900">{ad.cardName}</strong><p className="text-xs">{gameLabels[ad.game] ?? ad.game} · {ad.edition}</p><p className="text-xs">{conditionLabels[ad.condition]} · {languageLabels[ad.language]}</p><p className="mt-1 font-semibold">{copies(requestedQuantity)}</p></div>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <h3 className="font-display text-lg font-bold text-primary-900">Você solicita</h3>
+                  <span className="rounded-full bg-primary-100 px-2.5 py-1 text-xs font-semibold text-primary-900">{copies(requestedQuantity)}</span>
+                </div>
+                <ul className="mt-3 space-y-3">
+                  <ReviewCardItem
+                    imageUrl={ad.imageUrl}
+                    name={ad.cardName}
+                    game={gameLabels[ad.game] ?? ad.game}
+                    edition={ad.edition}
+                    condition={conditionLabels[ad.condition]}
+                    language={languageLabels[ad.language]}
+                    quantity={requestedQuantity}
+                  />
+                </ul>
+                <p className="mt-3 border-t border-[#D8C4DF]/80 pt-3 text-xs font-semibold text-neutral-700">
+                  Carta do anúncio · {copies(requestedQuantity)}
+                </p>
               </section>
             </div>
             {hasAdjustment && parsedAmount !== null && Number.isFinite(parsedAmount) ? (
@@ -337,9 +401,16 @@ export function TradeProposalFlow({ ad, open, onClose }: {
             <Icon name="check-circle" size={32} className="mx-auto text-success-700" />
             <Alert variant="success" title="Proposta enviada com sucesso!">Ela foi registrada e está aguardando a resposta do vendedor.</Alert>
             <div className={`${surface} text-left`}>
-              <p className="text-xs font-semibold text-neutral-700">Identificador da proposta</p>
-              <p className="mt-1 break-all font-mono text-sm text-neutral-900">{created.id}</p>
-              <p className="mt-3 text-sm">Situação: <strong className="text-warning-700">Aguardando resposta (PENDING)</strong></p>
+              <div className="grid gap-4 sm:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] sm:gap-0">
+                <div className="min-w-0 sm:pr-4">
+                  <p className="text-xs font-semibold text-neutral-700">Identificador da proposta</p>
+                  <p className="mt-1 break-all font-mono text-xs text-neutral-900 sm:text-sm">{created.id}</p>
+                </div>
+                <div className="min-w-0 border-t border-[#D8C4DF] pt-3 sm:border-l sm:border-t-0 sm:py-0 sm:pl-4">
+                  <p className="text-xs font-semibold text-neutral-700">Situação</p>
+                  <p className="mt-1 text-sm font-semibold text-warning-700">Aguardando resposta (PENDING)</p>
+                </div>
+              </div>
             </div>
             <p className="text-sm">Nenhuma carta foi transferida e nenhum valor foi cobrado.</p>
           </div>

@@ -1,3 +1,4 @@
+import { pageBanners } from '@/config/pageBanners'
 import { copies, conditionLabels, formatCurrency, languageLabels } from '@/components/ads/adFormat'
 import { adsCount } from '@/components/cart/cartFormat'
 import { PageBanner } from '@/components/layout/PageBanner'
@@ -72,7 +73,11 @@ export function CheckoutResultPage() {
   return (
     <main className="min-h-screen bg-neutral-50 pb-12 text-neutral-900">
       <div className="mx-auto w-full max-w-[1400px] px-4 pt-4 sm:px-6 xl:px-[38px]">
-        <PageBanner title="Resultado da compra" subtitle="Acompanhe o status do pagamento simulado." />
+        <PageBanner
+          image={pageBanners.checkout}
+          title="Resultado da compra"
+          subtitle="Acompanhe o status do pagamento simulado."
+        />
 
         {state.status === 'loading' ? <ResultSkeleton /> : null}
         {state.status === 'notFound' ? <NotFound /> : null}
