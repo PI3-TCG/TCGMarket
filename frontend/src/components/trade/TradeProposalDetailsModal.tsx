@@ -16,6 +16,11 @@ import {
   proposalPerspective,
   statusPresentation,
 } from './proposalViewFormat'
+import {
+  decideTradeProposal,
+  tradeDecisionFailure,
+  type TradeProposalAction,
+} from '@/services/tradeProposalDecision'
 
 type Result =
   | { kind: 'loading' }
@@ -25,60 +30,302 @@ type Result =
 
 const surface = 'rounded-xl border border-neutral-200 bg-white p-4 shadow-sm'
 
-export function TradeProposalDetailsModal({ id, onClose }: { id: string; onClose: () => void }) {
+const decisionContent: Record<
+  TradeProposalAction,
+  {
+    title: string
+    message: string
+    confirmLabel: string
+    successMessage: string
+  }
+> = {
+  accept: {
+    title: 'Confirmar aceite',
+    message:
+      'Você concorda com os termos desta proposta. A disponibilidade das cartas será verificada novamente. O aceite não transfere as cartas automaticamente.',
+    confirmLabel: 'Confirmar aceite',
+    successMessage: 'Proposta aceita com sucesso.',
+  },
+  reject: {
+    title: 'Confirmar recusa',
+    message:
+      'Ao recusar, esta proposta será encerrada e não poderá ser aceita posteriormente.',
+    confirmLabel: 'Recusar proposta',
+    successMessage: 'Proposta recusada com sucesso.',
+  },
+  cancel: {
+    title: 'Confirmar cancelamento',
+    message:
+      'Ao cancelar, esta proposta será encerrada. O destinatário não poderá mais aceitá-la.',
+    confirmLabel: 'Cancelar proposta',
+    successMessage: 'Proposta cancelada com sucesso.',
+  },
+}
+
+
+
+export function TradeProposalDetailsModal({
+  id,
+  onClose,
+  onDecision,
+}: {
+  id: string
+  onClose: () => void
+  onDecision?: () => void
+}) {
   const [attempt, setAttempt] = useState(0)
-  const [settled, setSettled] = useState<({ key: string } & Exclude<Result, { kind: 'loading' }>) | null>(null)
+  const [settled, setSettled] = useState<
+    ({ key: string } & Exclude<Result, { kind: 'loading' }>) | null
+  >(null)
+
+  const [confirming, setConfirming] =
+    useState<TradeProposalAction | null>(null)
+
+  const [processing, setProcessing] = useState(false)
+  const [feedback, setFeedback] = useState<{
+    kind: 'success' | 'error'
+    message: string
+  } | null>(null)
+
+  const [requiresRefresh, setRequiresRefresh] = useState(false)
+
   const key = `${id}:${attempt}`
-  const current: Result = settled?.key === key ? settled : { kind: 'loading' }
+
+  const current: Result =
+    settled?.key === key ? settled : { kind: 'loading' }
 
   useEffect(() => {
     const abort = new AbortController()
+
     getTradeProposalDetails(id, abort.signal)
       .then((data) => {
-        if (!abort.signal.aborted) setSettled({ key, kind: 'ready', data })
+        if (!abort.signal.aborted) {
+          setSettled({ key, kind: 'ready', data })
+          setRequiresRefresh(false)
+        }
       })
       .catch((error: unknown) => {
         if (abort.signal.aborted) return
+
         setSettled({
           key,
-          kind: axios.isAxiosError(error) && error.response?.status === 404 ? 'notFound' : 'error',
+          kind:
+            axios.isAxiosError(error) &&
+            error.response?.status === 404
+              ? 'notFound'
+              : 'error',
         })
       })
+
     return () => abort.abort()
   }, [id, attempt, key])
+
+  function refreshDetails() {
+    setConfirming(null)
+    setRequiresRefresh(true)
+    setAttempt((value) => value + 1)
+    onDecision?.()
+  }
+
+  async function confirmDecision() {
+    if (!confirming || processing || current.kind !== 'ready') {
+      return
+    }
+
+    const action = confirming
+    setProcessing(true)
+    setFeedback(null)
+
+    try {
+      await decideTradeProposal(id, action)
+
+      setFeedback({
+        kind: 'success',
+        message: decisionContent[action].successMessage,
+      })
+
+      refreshDetails()
+    } catch (error: unknown) {
+      const failure = tradeDecisionFailure(error)
+
+      setFeedback({
+        kind: 'error',
+        message: failure.message,
+      })
+
+      // O estado pode ter mudado, inclusive se houve timeout.
+      // Nunca repetir automaticamente uma decisão.
+      refreshDetails()
+    } finally {
+      setProcessing(false)
+    }
+  }
+
+  const data = current.kind === 'ready' ? current.data : null
+
+  const canDecide =
+    data?.status === 'PENDING' &&
+    !processing &&
+    !requiresRefresh
+
+  const availableActions: TradeProposalAction[] =
+    !canDecide
+      ? []
+      : data.direction === 'RECEIVED'
+        ? ['accept', 'reject']
+        : ['cancel']
+
+  const confirmation =
+    confirming ? decisionContent[confirming] : null
 
   return (
     <Modal
       open
       presentation="refined"
       size="lg"
-      title="Detalhes da proposta"
-      subtitle="Confira os termos registrados na negociação."
-      onClose={onClose}
-      footer={<Button onClick={onClose}>Fechar detalhes</Button>}
+      title={
+        confirmation
+          ? confirmation.title
+          : 'Detalhes da proposta'
+      }
+      subtitle={
+        confirmation
+          ? 'Confira sua decisão antes de continuar.'
+          : 'Confira os termos registrados na negociação.'
+      }
+      onClose={processing ? undefined : onClose}
+      closeDisabled={processing}
+      footer={
+        confirmation ? (
+          <>
+            <Button
+              variant="outline"
+              disabled={processing}
+              onClick={() => setConfirming(null)}
+            >
+              Voltar aos detalhes
+            </Button>
+
+            <Button
+              variant={
+                confirming === 'accept' ? 'primary' : 'danger'
+              }
+              disabled={processing}
+              onClick={confirmDecision}
+            >
+              {processing
+                ? 'Processando...'
+                : confirmation.confirmLabel}
+            </Button>
+          </>
+        ) : (
+          <>
+            <Button
+              variant="outline"
+              disabled={processing}
+              onClick={onClose}
+            >
+              Fechar detalhes
+            </Button>
+
+            {availableActions.map((action) => (
+              <Button
+                key={action}
+                variant={
+                  action === 'accept' ? 'primary' : 'danger'
+                }
+                disabled={processing}
+                onClick={() => {
+                  setFeedback(null)
+                  setConfirming(action)
+                }}
+              >
+                {action === 'accept'
+                  ? 'Aceitar'
+                  : action === 'reject'
+                    ? 'Recusar'
+                    : 'Cancelar'}
+              </Button>
+            ))}
+          </>
+        )
+      }
     >
-      <div aria-busy={current.kind === 'loading'} aria-live="polite">
+      <div
+        aria-busy={processing || current.kind === 'loading'}
+        aria-live="polite"
+        className="space-y-4"
+      >
+        {feedback && (
+          <Alert
+            variant={
+              feedback.kind === 'success' ? 'success' : 'error'
+            }
+            title={
+              feedback.kind === 'success'
+                ? 'Operação concluída'
+                : 'Não foi possível confirmar a decisão'
+            }
+          >
+            {feedback.message}
+          </Alert>
+        )}
+
         {current.kind === 'loading' && <DetailsSkeleton />}
+
         {current.kind === 'notFound' && (
-          <Alert variant="warning" title="Proposta não encontrada">
+          <Alert
+            variant="warning"
+            title="Proposta não encontrada"
+          >
             Esta proposta não está disponível para sua conta.
           </Alert>
         )}
+
         {current.kind === 'error' && (
           <div className="space-y-4">
-            <Alert variant="error" title="Não foi possível carregar a proposta">
-              Verifique sua conexão e tente novamente. Nenhum dado foi alterado.
+            <Alert
+              variant="error"
+              title="Não foi possível atualizar a proposta"
+            >
+              Verifique sua conexão antes de realizar outra ação.
             </Alert>
-            <Button variant="outline" onClick={() => setAttempt((value) => value + 1)}>
+
+            <Button
+              variant="outline"
+              onClick={() => setAttempt((value) => value + 1)}
+            >
               Tentar novamente
             </Button>
           </div>
         )}
-        {current.kind === 'ready' && <ProposalDetails data={current.data} />}
+
+        {data && confirmation && (
+          <section className="space-y-4">
+            <div className={surface}>
+              <p className="text-sm text-neutral-700">
+                {confirmation.message}
+              </p>
+            </div>
+
+            <ProposalDetails data={data} />
+
+            {processing && (
+              <p role="status" className="text-sm font-semibold">
+                Processando sua decisão. Não feche esta janela.
+              </p>
+            )}
+          </section>
+        )}
+
+        {data && !confirmation && (
+          <ProposalDetails data={data} />
+        )}
       </div>
     </Modal>
   )
 }
+
 
 function ProposalDetails({ data }: { data: TradeProposalView }) {
   const { receive, deliver } = proposalPerspective(data)
