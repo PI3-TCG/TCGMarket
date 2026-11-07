@@ -137,6 +137,16 @@ export function SiteHeader({ onSoon: soon }: Props) {
                     type="button"
                     onClick={() => {
                       setMenuOpen(false)
+                      navigate({ to: '/minha-colecao' })
+                    }}
+                    className="w-full rounded-lg px-2 py-2 text-left text-sm font-medium hover:bg-primary-100"
+                  >
+                    Minha coleção
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMenuOpen(false)
                       navigate({ to: '/meus-anuncios' })
                     }}
                     className="w-full rounded-lg px-2 py-2 text-left text-sm font-medium hover:bg-primary-100"
