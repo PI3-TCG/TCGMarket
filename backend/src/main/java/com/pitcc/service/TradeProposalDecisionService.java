@@ -81,6 +81,13 @@ public class TradeProposalDecisionService {
     ) {
         TradeProposal proposal = repository.findById(proposalId)
                 .orElseThrow(TradeProposalNotFoundException::new);
+        // Não revela a existência de propostas para usuários externos.
+        boolean isProposer = authenticatedUserId.equals(proposal.getProposerId());
+        boolean isRecipient = authenticatedUserId.equals(proposal.getRecipientId());
+
+        if (!isProposer && !isRecipient) {
+            throw new TradeProposalNotFoundException();
+        }
 
         // Valida o status atual e a permissao do usuario.
         String next = policy.nextStatus(

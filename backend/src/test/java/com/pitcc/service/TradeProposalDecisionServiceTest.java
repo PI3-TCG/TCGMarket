@@ -257,6 +257,24 @@ class TradeProposalDecisionServiceTest {
     }
 
     @Test
+    void shouldNotRevealProposalToNonParticipant() {
+        when(repository.findById(PROPOSAL_ID))
+                .thenReturn(Optional.of(proposal));
+
+        when(proposal.getProposerId()).thenReturn(PROPOSER_ID);
+        when(proposal.getRecipientId()).thenReturn(RECIPIENT_ID);
+
+        String externalUserId = "user-3";
+
+        assertThrows(
+                TradeProposalNotFoundException.class,
+                () -> service.reject(PROPOSAL_ID, externalUserId)
+        );
+
+        verifyNoInteractions(policy, availabilityService, mongoTemplate);
+    }
+
+    @Test
     void shouldNotAcceptWhenAvailabilityValidationFails() {
         mockPendingProposal();
 

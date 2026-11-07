@@ -37,7 +37,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         GlobalExceptionHandler.class,
         TradeProposalCreationExceptionHandler.class,
         TradeProposalReadExceptionHandler.class,
-        TradeProposalDecisionExceptionHandler.class
 })
 @TestPropertySource(properties = {
         "security.jwt.secret=test-secret-key-must-be-at-least-32-bytes!",
