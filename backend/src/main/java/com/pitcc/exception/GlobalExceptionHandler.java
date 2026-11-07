@@ -309,6 +309,18 @@ public class GlobalExceptionHandler {
                 ));
     }
 
+    @ExceptionHandler(TradeProposalConflictException.class)
+    public ResponseEntity<ApiErrorResponse> handleTradeProposalConflict(
+            TradeProposalConflictException exception
+    ) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(error(
+                        HttpStatus.CONFLICT,
+                        exception.getMessage(),
+                        List.of()
+                ));
+    }
+
 
     private ResponseEntity<ApiErrorResponse> unauthorized(String message) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)

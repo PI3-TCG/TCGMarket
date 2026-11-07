@@ -13,6 +13,7 @@ import com.pitcc.security.ApiErrorWriter;
 import com.pitcc.security.JwtService;
 import com.pitcc.security.SecurityConfig;
 import com.pitcc.service.CreateTradeProposalService;
+import com.pitcc.service.TradeProposalDecisionService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,6 +62,8 @@ class TradeProposalControllerTest {
     @Autowired MockMvc mockMvc;
     @Autowired JwtService jwtService;
     @MockitoBean CreateTradeProposalService service;
+    @MockitoBean
+    private TradeProposalDecisionService decisionService;
     @MockitoBean UserRepository userRepository;
     private String token;
 
