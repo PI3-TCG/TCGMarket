@@ -5,6 +5,7 @@ import com.pitcc.dto.ApiErrorResponse.FieldErrorResponse;
 import com.pitcc.dto.AddCartItemRequest;
 import com.pitcc.dto.AddressRequest;
 import com.pitcc.dto.CheckoutValidationResponse;
+import com.pitcc.dto.CreateReviewRequest;
 import com.pitcc.dto.CreateAdRequest;
 import com.pitcc.dto.HideCardRequest;
 import com.pitcc.dto.LoginRequest;
@@ -58,6 +59,7 @@ public class GlobalExceptionHandler {
                             "Revise os dados do carrinho.";
                     case AddressRequest _ -> INVALID_ADDRESS;
                     case PlaceOrderRequest _ -> "Selecione um endereço de entrega.";
+                    case CreateReviewRequest _ -> "Revise os dados da avaliação.";
                     case null, default -> "Dados de cadastro inválidos.";
                 };
         return ResponseEntity.badRequest().body(error(HttpStatus.BAD_REQUEST, message, fields));
@@ -229,6 +231,12 @@ public class GlobalExceptionHandler {
     ) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(error(HttpStatus.NOT_FOUND, exception.getMessage(), List.of()));
+    }
+
+    @ExceptionHandler(ReviewConflictException.class)
+    public ResponseEntity<ApiErrorResponse> handleReviewConflict(ReviewConflictException exception) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(error(HttpStatus.CONFLICT, exception.getMessage(), List.of()));
     }
 
     @ExceptionHandler(CartItemNotFoundException.class)
