@@ -5,6 +5,7 @@ import com.pitcc.dto.MarketplacePageResponse;
 import com.pitcc.model.Ad;
 import com.pitcc.model.AdStatus;
 import com.pitcc.model.Card;
+import com.pitcc.model.CardLanguage;
 import com.pitcc.model.CollectionItem;
 import com.pitcc.model.User;
 import com.pitcc.repository.AdRepository;
@@ -194,6 +195,16 @@ public class MarketplaceService {
             );
         }
 
+        String ptImage = item.getLanguage() == CardLanguage.PORTUGUESE
+                && card.getLocalizations() != null
+                && card.getLocalizations().get("pt") != null
+                ? card.getLocalizations().get("pt").imageUrl()
+                : null;
+        String imageUrl = ptImage != null ? ptImage : card.getImageUrl();
+        boolean illustrativeImage = imageUrl != null
+                && ptImage == null
+                && item.getLanguage() != CardLanguage.ENGLISH;
+
         return new MarketplaceAdResponse(
                 ad.getId(),
                 card.getId(),
@@ -202,7 +213,8 @@ public class MarketplaceService {
                 card.getEdition(),
                 card.getCardNumber(),
                 card.getOfficialRarity(),
-                card.getImageUrl(),
+                imageUrl,
+                illustrativeImage,
                 item.getCondition(),
                 item.getLanguage(),
                 Math.max(0, ad.getRemainingQuantity() - ad.heldForPurchase()),

@@ -36,6 +36,11 @@ export function CatalogCard({ card, onSelect }: CatalogCardProps) {
         <h3 className="font-display line-clamp-1 text-sm font-bold text-neutral-900">
           {card.name}
         </h3>
+        {card.namePt && (
+          <p lang="pt-BR" className="-mt-1.5 line-clamp-1 text-xs text-neutral-600">
+            {card.namePt}
+          </p>
+        )}
 
         <p className="line-clamp-1 text-xs text-neutral-500">
           {card.edition}

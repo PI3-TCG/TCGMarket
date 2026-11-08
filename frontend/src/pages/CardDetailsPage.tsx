@@ -21,7 +21,8 @@ import { cn } from '@/components/ui/cn'
 import { Icon } from '@/components/ui/Icon'
 import { Modal } from '@/components/ui/Modal'
 import { useRemoteData } from '@/hooks/useRemoteData'
-import { fetchCatalogCard } from '@/services/catalogApi'
+import { fetchCatalogCard, localizedName } from '@/services/catalogApi'
+import { ImageLanguageToggle } from '@/components/catalog/ImageLanguageToggle'
 import { useSession } from '@/session'
 import type { CatalogCardDetails } from '@/types/Catalog'
 import {
@@ -178,6 +179,7 @@ function Details({
   const line = setLine(card)
   const chips = highlightChips(card)
   const info = commonRows(card)
+  const namePt = localizedName(card.name, card.localizations)
 
   return (
     <>
@@ -193,6 +195,11 @@ function Details({
             >
               {card.name}
             </h1>
+            {namePt ? (
+              <p lang="pt-BR" className="text-base text-neutral-700">
+                Em português: <span className="font-semibold">{namePt}</span>
+              </p>
+            ) : null}
             {line ? <p className="text-sm text-neutral-700">{line}</p> : null}
           </div>
 
@@ -254,19 +261,23 @@ function AddButton({
 }
 
 function CardImage({ card }: { card: CatalogCardDetails }) {
-  const [failed, setFailed] = useState(false)
+  const ptImage = card.localizations?.pt?.imageUrl ?? null
+  const [showPt, setShowPt] = useState(false)
+  const imageUrl = showPt && ptImage ? ptImage : card.imageUrl
+  const [failedUrl, setFailedUrl] = useState<string | null>(null)
   const [zoomed, setZoomed] = useState(false)
-  const available = Boolean(card.imageUrl) && !failed
+  const available = Boolean(imageUrl) && imageUrl !== failedUrl
   const alt = imageAlt(card)
 
   return (
     <div className="mx-auto w-full max-w-[300px] space-y-2 md:row-span-2 xl:row-span-1">
+      {ptImage ? <ImageLanguageToggle showPt={showPt} onChange={setShowPt} /> : null}
       <div className="aspect-[63/88] overflow-hidden rounded-surface border border-neutral-200 bg-white shadow-sm">
         {available ? (
           <img
-            src={card.imageUrl ?? undefined}
+            src={imageUrl ?? undefined}
             alt={alt}
-            onError={() => setFailed(true)}
+            onError={() => setFailedUrl(imageUrl)}
             className="h-full w-full object-contain"
           />
         ) : (
@@ -293,7 +304,7 @@ function CardImage({ card }: { card: CatalogCardDetails }) {
       ) : null}
       <Modal open={zoomed} title={card.name} onClose={() => setZoomed(false)}>
         <img
-          src={card.imageUrl ?? undefined}
+          src={imageUrl ?? undefined}
           alt={alt}
           className="mx-auto max-h-[75dvh] w-full object-contain"
         />

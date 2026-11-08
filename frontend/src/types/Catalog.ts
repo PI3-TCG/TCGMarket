@@ -1,6 +1,16 @@
+/** Nome e imagem da carta impressa em outro idioma; `imageUrl` só existe quando a fonte tem o scan. */
+export interface CardLocalization {
+  name: string
+  imageUrl: string | null
+}
+
+export type CardLocalizations = Partial<Record<'pt', CardLocalization>>
+
 export interface CatalogCard {
   id: string
   name: string
+  /** Nome em português, só quando difere do nome em inglês. */
+  namePt?: string | null
   game: string
   edition: string
   cardNumber: string
@@ -55,6 +65,7 @@ export interface CatalogCardResponse {
   cardNumber: string | null
   rarity: string | null
   imageUrl: string | null
+  localizations: CardLocalizations | null
 }
 
 export interface PokemonAttack {
@@ -116,6 +127,7 @@ export interface CatalogCardDetails {
   rarity: string | null
   imageUrl: string | null
   source: 'POKEMON_TCG_API' | 'YGOPRODECK' | 'SCRYFALL' | null
+  localizations: CardLocalizations | null
   pokemon: PokemonDetails | null
   yugioh: YugiohDetails | null
   magic: MagicDetails | null

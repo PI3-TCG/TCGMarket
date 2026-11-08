@@ -32,8 +32,15 @@ public class YugiohClient {
   }
 
   public List<YugiohCardDto> fetchAll() {
+    return fetchAll(null);
+  }
+
+  /** Carga completa com nomes no idioma pedido (ex.: "pt"); null traz o inglês. */
+  public List<YugiohCardDto> fetchAll(String language) {
     return ExternalApiErrors.fetch(CardGame.YUGIOH, () -> restClient.get()
-                    .uri("/cardinfo.php")
+                    .uri(uriBuilder -> uriBuilder.path("/cardinfo.php")
+                            .queryParamIfPresent("language", Optional.ofNullable(language))
+                            .build())
                     .retrieve()
                     .onStatus(
                             status -> status.isError(),

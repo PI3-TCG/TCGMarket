@@ -2,8 +2,11 @@ package com.pitcc.service;
 
 import com.pitcc.exception.InvalidCatalogRequestException;
 import com.pitcc.integration.catalog.*;
+import com.pitcc.integration.catalog.pokemon.PokemonDumpReader;
+import com.pitcc.integration.catalog.pokemon.PokemonTcgProvider;
 import com.pitcc.model.Card;
 import com.pitcc.model.CardGame;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +23,7 @@ import org.springframework.stereotype.Service;
 public class CatalogImportService {
 
   private static final Logger log = LoggerFactory.getLogger(CatalogImportService.class);
+  private static final int MAX_CONSECUTIVE_FETCH_FAILURES = 3;
 
   private final Map<CardGame, CatalogImportProvider> providers;
   private final CardImportService persistence;
@@ -69,6 +73,32 @@ public class CatalogImportService {
     return executeImport(selected, provider, provider::fetchAllForImport);
   }
 
+  /** Importa o catálogo Pokémon a partir de um clone local do pokemon-tcg-data. */
+  public CatalogImportReport importPokemonDump(String dumpDir) {
+    if (dumpDir == null || dumpDir.isBlank()) {
+      throw new InvalidCatalogRequestException(
+              "Informe catalog.import.pokemon.dump-dir para importar o dump.");
+    }
+    if (!(providerFor(CardGame.POKEMON) instanceof PokemonTcgProvider provider)) {
+      throw new IllegalStateException("Provedor Pokémon não suporta o dump.");
+    }
+
+    PokemonDumpReader reader = new PokemonDumpReader(Path.of(dumpDir.trim()));
+    List<String> setIds = reader.setIds();
+    log.info("IMPORT_START source={} mode=DUMP sets={}", provider.getSource(), setIds.size());
+    ImportProgress progress = new ImportProgress();
+
+    for (String setId : setIds) {
+      progress.persistBatch(CardGame.POKEMON, provider, provider.mapBatch(reader.readSet(setId)));
+      log.info("IMPORT_SET_PERSISTED source={} set={} mappedTotal={} persistedTotal={} issuesTotal={}",
+              provider.getSource(), setId, progress.mapped, progress.persisted, progress.issues.size());
+      if (progress.aborted) {
+        break;
+      }
+    }
+    return progress.toReport(provider);
+  }
+
   private CatalogImportProvider providerFor(CardGame game) {
     CatalogImportProvider provider = providers.get(game);
     if (provider == null) {
@@ -101,7 +131,8 @@ public class CatalogImportService {
 
   /**
    * Busca, mapeia e persiste cada pagina antes de buscar a proxima.
-   * Falhas de API encerram o processo, mas nao descartam paginas ja persistidas.
+   * Uma pagina que falha na API e registrada como issue e ignorada; falhas
+   * consecutivas encerram o processo, sem descartar paginas ja persistidas.
    */
   private CatalogImportReport executePagedImport(
           CardGame selected,
@@ -115,16 +146,26 @@ public class CatalogImportService {
               "catalog.import.pokemon.start-page deve ser maior ou igual a 1");
     }
     log.info("IMPORT_START_PAGE source={} page={}", provider.getSource(), page);
+    int consecutiveFetchFailures = 0;
 
     while (true) {
       final CatalogImportPage result;
       try {
         result = provider.fetchPageForImport(page);
+        consecutiveFetchFailures = 0;
       } catch (ExternalApiException exception) {
-        log.error("IMPORT_FETCH_FAILED source={} page={}",
+        consecutiveFetchFailures++;
+        if (consecutiveFetchFailures >= MAX_CONSECUTIVE_FETCH_FAILURES) {
+          log.error("IMPORT_FETCH_FAILED source={} page={}",
+                  provider.getSource(), page, exception);
+          progress.abortFetch(provider, exception, page);
+          return progress.toReport(provider);
+        }
+        log.error("IMPORT_PAGE_SKIPPED source={} page={}",
                 provider.getSource(), page, exception);
-        progress.abortFetch(provider, exception, page);
-        return progress.toReport(provider);
+        progress.skipPage(provider, exception, page);
+        page++;
+        continue;
       }
 
       int persistedBefore = progress.persisted;
@@ -168,6 +209,18 @@ public class CatalogImportService {
               location + exception.getErrorType() + ": " + exception.getMessage()
       ));
       // Nao contabilizar paginas futuras como 'notAttempted': quantidade desconhecida.
+    }
+
+    private void skipPage(CatalogImportProvider provider,
+                          ExternalApiException exception,
+                          int page) {
+      issues.add(new ImportIssue(
+              provider.getSource(),
+              null,
+              "FETCH",
+              "page=" + page + " ignorada " + exception.getErrorType()
+                      + ": " + exception.getMessage()
+      ));
     }
 
     private void persistBatch(CardGame selected,

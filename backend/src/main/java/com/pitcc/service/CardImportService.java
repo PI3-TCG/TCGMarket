@@ -41,9 +41,19 @@ public class CardImportService {
         Document document = new Document();
         mongoTemplate.getConverter().write(incoming, document);
         document.remove("_id");
-        Card replacement = mongoTemplate.getConverter().read(Card.class, document);
         Query query = Query.query(Criteria.where("source").is(incoming.getSource())
                 .and("externalId").is(incoming.getExternalId()));
+        // As fontes do catálogo só trazem inglês; as traduções vêm de outro import.
+        if (document.get("localizations") == null) {
+            Query current = Query.query(Criteria.where("source").is(incoming.getSource())
+                    .and("externalId").is(incoming.getExternalId()));
+            current.fields().include("localizations");
+            Document existing = mongoTemplate.findOne(current, Document.class, "cards");
+            if (existing != null && existing.get("localizations") != null) {
+                document.put("localizations", existing.get("localizations"));
+            }
+        }
+        Card replacement = mongoTemplate.getConverter().read(Card.class, document);
         try {
             return Objects.requireNonNull(mongoTemplate.findAndReplace(query, replacement,
                     FindAndReplaceOptions.options().upsert().returnNew(),

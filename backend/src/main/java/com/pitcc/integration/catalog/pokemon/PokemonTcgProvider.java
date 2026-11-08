@@ -58,7 +58,7 @@ public class PokemonTcgProvider implements CardCatalogProvider, PagedCatalogImpo
     return new CatalogImportPage(batch, dtos.size(), hasNext);
   }
 
-  private ImportBatch mapBatch(List<PokemonCardDto> cards) {
+  public ImportBatch mapBatch(List<PokemonCardDto> cards) {
     return ImportBatch.map(
             cards,
             getSource(),

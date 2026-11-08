@@ -177,7 +177,10 @@ function AdImage({ ad }: { ad: MarketplaceAd }) {
   const available = Boolean(ad.imageUrl) && !failed
 
   return (
-    <div className={`${panelClass} flex justify-center`}>
+    <div className={`${panelClass} flex flex-col items-center gap-3`}>
+      <span className="rounded-full bg-primary-900 px-3 py-1 text-sm font-semibold text-white">
+        Carta em {languageLabels[ad.language]}
+      </span>
       <div className="aspect-[63/88] w-full max-w-[340px] overflow-hidden rounded-surface">
         {available ? (
           <img
@@ -197,6 +200,13 @@ function AdImage({ ad }: { ad: MarketplaceAd }) {
           </div>
         )}
       </div>
+      {available && ad.illustrativeImage ? (
+        <p className="max-w-[340px] text-center text-xs text-neutral-700">
+          Imagem ilustrativa: mostramos a versão em inglês porque não temos a imagem da
+          carta em {languageLabels[ad.language].toLowerCase()}. O vendedor anunciou a carta
+          em {languageLabels[ad.language].toLowerCase()}.
+        </p>
+      ) : null}
     </div>
   )
 }

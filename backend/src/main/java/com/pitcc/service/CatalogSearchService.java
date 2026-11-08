@@ -123,7 +123,11 @@ public class CatalogSearchService {
         : Criteria.where("game").is(game.name());
     String name = TextNormalizer.normalizeOptionalText(q);
     if (name != null) {
-      criteria.and("name").regex(Pattern.quote(name), "i");
+      String pattern = Pattern.quote(name);
+      // Em $and para não colidir com o $or que o catálogo do admin acrescenta.
+      criteria.andOperator(new Criteria().orOperator(
+          Criteria.where("name").regex(pattern, "i"),
+          Criteria.where("localizations.pt.name").regex(pattern, "i")));
     }
     String edition = TextNormalizer.normalizeOptionalText(set);
     if (edition != null) {

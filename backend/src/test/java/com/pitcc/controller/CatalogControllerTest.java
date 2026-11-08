@@ -20,12 +20,14 @@ import com.pitcc.exception.InvalidCatalogRequestException;
 import com.pitcc.integration.catalog.ExternalApiErrorType;
 import com.pitcc.integration.catalog.ExternalApiException;
 import com.pitcc.model.CardGame;
+import com.pitcc.model.CardLocalization;
 import com.pitcc.model.CardSource;
 import com.pitcc.model.PokemonCardType;
 import com.pitcc.model.PokemonEnergyType;
 import com.pitcc.model.PokemonEvolutionStage;
 import com.pitcc.service.CatalogSearchService;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -56,7 +58,8 @@ class CatalogControllerTest {
             "base1",
             "4",
             "Rare Holo",
-            "https://img.example/charizard.png")), 1, 10, 11));
+            "https://img.example/charizard.png",
+            null)), 1, 10, 11));
 
     mockMvc.perform(get("/api/catalog/pokemon/cards")
             .param("q", "charizard")
@@ -112,7 +115,7 @@ class CatalogControllerTest {
     when(catalogSearchService.findByExternalId("magic", "alpha"))
         .thenReturn(new CatalogCardResponse(
             "6650a2", "alpha", "oracle", "Black Lotus", CardGame.MAGIC_THE_GATHERING, null, "lea",
-            "232", "rare", null));
+            "232", "rare", null, null));
 
     mockMvc.perform(get("/api/catalog/magic/cards/by-external-id").param("externalId", "alpha"))
         .andExpect(status().isOk())
@@ -126,6 +129,7 @@ class CatalogControllerTest {
         .thenReturn(new CatalogCardDetailsResponse(
             "6650a3", "sv3pt5-25", null, "Pikachu", CardGame.POKEMON, "151", "sv3pt5", "025/165",
             "Common", null, CardSource.POKEMON_TCG_API,
+            Map.of("pt", new CardLocalization("Pikachu", "https://img.example/pikachu-pt.png")),
             new CatalogCardDetailsResponse.PokemonDetails(
                 PokemonCardType.POKEMON, 60, List.of(PokemonEnergyType.LIGHTNING),
                 PokemonEvolutionStage.BASIC, 1,
@@ -138,6 +142,7 @@ class CatalogControllerTest {
         .andExpect(jsonPath("$.id").value("6650a3"))
         .andExpect(jsonPath("$.name").value("Pikachu"))
         .andExpect(jsonPath("$.source").value("POKEMON_TCG_API"))
+        .andExpect(jsonPath("$.localizations.pt.imageUrl").value("https://img.example/pikachu-pt.png"))
         .andExpect(jsonPath("$.pokemon.hp").value(60))
         .andExpect(jsonPath("$.pokemon.attacks[0].name").value("Thunder Jolt"))
         .andExpect(jsonPath("$.yugioh").isEmpty())

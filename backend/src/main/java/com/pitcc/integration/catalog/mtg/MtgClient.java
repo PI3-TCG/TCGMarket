@@ -7,6 +7,8 @@ import com.pitcc.integration.catalog.mtg.dto.MtgCardDto;
 import com.pitcc.integration.catalog.mtg.dto.MtgCardFaceDto;
 import com.pitcc.integration.catalog.mtg.dto.MtgCardsResponse;
 import com.pitcc.integration.catalog.mtg.dto.MtgImageUris;
+import com.pitcc.integration.catalog.mtg.dto.MtgLocalizedCardDto;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.pitcc.model.CardGame;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -74,6 +76,69 @@ public class MtgClient {
                     .body(MtgCardsResponse.class))
             .map(response -> cardsOf(response.data()))
             .orElse(List.of());
+  }
+
+  private static final long LOCALIZED_PAGE_DELAY_MS = 500;
+  private static final int LOCALIZED_PAGE_ATTEMPTS = 3;
+
+  public record LocalizedPage(
+          List<MtgLocalizedCardDto> data,
+          @JsonProperty("has_more") boolean hasMore) {}
+
+  /**
+   * Todas as impressões no idioma (ex.: "pt"). A Scryfall limita /cards/search a
+   * 2 requisições por segundo, daí a pausa entre páginas.
+   */
+  public List<MtgLocalizedCardDto> fetchAllPrintsInLanguage(String language) {
+    Assert.hasText(language, "language must not be blank");
+    List<MtgLocalizedCardDto> cards = new ArrayList<>();
+    for (int page = 1; ; page++) {
+      LocalizedPage result = fetchLocalizedPage(language.trim(), page);
+      cards.addAll(result.data() == null ? List.of() : result.data());
+      if (page % 25 == 0) {
+        log.info("MTG_LOCALIZED_PAGE language={} page={} accumulated={}", language, page, cards.size());
+      }
+      if (!result.hasMore()) {
+        return cards;
+      }
+      pause(LOCALIZED_PAGE_DELAY_MS);
+    }
+  }
+
+  private LocalizedPage fetchLocalizedPage(String language, int page) {
+    for (int attempt = 1; ; attempt++) {
+      try {
+        return ExternalApiErrors.fetch(GAME, () -> restClient.get()
+                        .uri(uriBuilder -> uriBuilder.path("/cards/search")
+                                .queryParam("q", "lang:" + language)
+                                .queryParam("unique", "prints")
+                                .queryParam("include_multilingual", true)
+                                .queryParam("page", page)
+                                .build())
+                        .header("User-Agent", USER_AGENT)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .retrieve()
+                        .onStatus(status -> status.isError(), ExternalApiErrors.errorHandler(GAME))
+                        .body(LocalizedPage.class))
+                .orElse(new LocalizedPage(List.of(), false));
+      } catch (ExternalApiException exception) {
+        if (attempt >= LOCALIZED_PAGE_ATTEMPTS) {
+          throw exception;
+        }
+        log.warn("MTG_LOCALIZED_RETRY page={} attempt={} type={}",
+                page, attempt, exception.getErrorType());
+        pause(attempt * 2000L);
+      }
+    }
+  }
+
+  private static void pause(long millis) {
+    try {
+      Thread.sleep(millis);
+    } catch (InterruptedException exception) {
+      Thread.currentThread().interrupt();
+      throw new IllegalStateException("Importação interrompida.", exception);
+    }
   }
 
   public Optional<MtgCardDto> findById(String externalId) {
