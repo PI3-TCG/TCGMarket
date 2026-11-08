@@ -2,6 +2,8 @@ package com.pitcc.repository;
 
 import com.pitcc.model.TradeProposal;
 import com.pitcc.model.TradeProposalStatus;
+import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,4 +21,6 @@ public interface TradeProposalRepository extends MongoRepository<TradeProposal, 
             String proposerId, TradeProposalStatus status, Pageable pageable);
     Page<TradeProposal> findByRecipientIdAndStatus(
             String recipientId, TradeProposalStatus status, Pageable pageable);
+
+    List<TradeProposal> findByStatusAndUpdatedAtBefore(TradeProposalStatus status, Instant updatedBefore);
 }

@@ -63,6 +63,38 @@ public class AdPurchaseHoldRepository {
         return mongoTemplate.updateFirst(query, update, Ad.class).getModifiedCount() == 1;
     }
 
+    /**
+     * Troca concluída: baixa a quantidade restante sem invadir o que está
+     * reservado para pagamentos pendentes. Repetir com a mesma marca não tem efeito.
+     */
+    public boolean consumeForTrade(String adId, String mark, int quantity, Instant now) {
+        Document heldQuantity = new Document("$sum", new Document(
+                "$ifNull", List.of("$purchaseHolds.quantity", List.of())
+        ));
+        Document available = new Document("$subtract", List.of("$remainingQuantity", heldQuantity));
+
+        Query query = Query.query(Criteria.where("id").is(adId)
+                .and("status").is(AdStatus.ACTIVE)
+                .and("appliedTrades").ne(mark)
+                .andOperator(Criteria.expr(
+                        () -> new Document("$gte", List.of(available, quantity))
+                )));
+
+        Update update = new Update()
+                .inc("remainingQuantity", -quantity)
+                .push("appliedTrades", mark)
+                .set("updatedAt", now);
+
+        return mongoTemplate.updateFirst(query, update, Ad.class).getModifiedCount() == 1;
+    }
+
+    public boolean hasAppliedTrade(String adId, String mark) {
+        return mongoTemplate.exists(
+                Query.query(Criteria.where("id").is(adId).and("appliedTrades").is(mark)),
+                Ad.class
+        );
+    }
+
     public void markSoldOutIfEmpty(String adId, Instant now) {
         Query query = Query.query(Criteria.where("id").is(adId)
                 .and("status").is(AdStatus.ACTIVE)

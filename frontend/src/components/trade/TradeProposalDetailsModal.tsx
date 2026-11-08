@@ -42,9 +42,9 @@ const decisionContent: Record<
   accept: {
     title: 'Confirmar aceite',
     message:
-      'Você concorda com os termos desta proposta. A disponibilidade das cartas será verificada novamente. O aceite não transfere as cartas automaticamente.',
+      'Você concorda com os termos desta proposta. A disponibilidade das cartas será verificada novamente e, em seguida, as cartas serão transferidas entre as coleções.',
     confirmLabel: 'Confirmar aceite',
-    successMessage: 'Proposta aceita com sucesso.',
+    successMessage: 'Troca concluída! As cartas já foram transferidas entre as coleções.',
   },
   reject: {
     title: 'Confirmar recusa',
@@ -137,11 +137,13 @@ export function TradeProposalDetailsModal({
     setFeedback(null)
 
     try {
-      await decideTradeProposal(id, action)
+      const { status } = await decideTradeProposal(id, action)
 
       setFeedback({
         kind: 'success',
-        message: decisionContent[action].successMessage,
+        message: action === 'accept' && status === 'ACCEPTED'
+          ? 'Proposta aceita. A transferência das cartas está sendo concluída e pode levar alguns minutos.'
+          : decisionContent[action].successMessage,
       })
 
       refreshDetails()

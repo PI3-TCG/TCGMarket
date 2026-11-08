@@ -28,28 +28,44 @@ public class TradeProposalDecisionService {
     private final TradeProposalDecisionPolicy policy;
     private final MongoTemplate mongoTemplate;
     private final TradeAvailabilityService availabilityService;
+    private final TradeCompletionService completionService;
 
     public TradeProposalDecisionService(
             TradeProposalRepository repository,
             TradeProposalDecisionPolicy policy,
             MongoTemplate mongoTemplate,
-            TradeAvailabilityService availabilityService
+            TradeAvailabilityService availabilityService,
+            TradeCompletionService completionService
     ) {
         this.repository = repository;
         this.policy = policy;
         this.mongoTemplate = mongoTemplate;
         this.availabilityService = availabilityService;
+        this.completionService = completionService;
     }
 
+    /**
+     * Aceitar já conclui a troca. Se a transferência falhar, a proposta fica
+     * ACCEPTED e o destinatário (ou o job) pode repetir o aceite para retomar.
+     */
     public TradeProposalStatus accept(
             String proposalId,
             String authenticatedUserId
     ) {
-        return changeStatus(
+        TradeProposal proposal = repository.findById(proposalId)
+                .orElseThrow(TradeProposalNotFoundException::new);
+
+        if (proposal.getStatus() == TradeProposalStatus.ACCEPTED
+                && authenticatedUserId.equals(proposal.getRecipientId())) {
+            return completionService.completeQuietly(proposalId);
+        }
+
+        changeStatus(
                 proposalId,
                 authenticatedUserId,
                 Action.ACCEPT
         );
+        return completionService.completeQuietly(proposalId);
     }
 
     public TradeProposalStatus reject(
