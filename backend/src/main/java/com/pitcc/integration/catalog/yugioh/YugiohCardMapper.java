@@ -78,7 +78,7 @@ final class YugiohCardMapper {
       String externalId = new YugiohPrintingId(dto.id(), set.setCode(), set.setRarity()).value();
       YugiohCard card = new YugiohCard(
               dto.name(), set.setName(), set.setCode(), null, set.setRarity(), image,
-              externalId, monster ? dto.atk() : null, monster && !link ? dto.def() : null,
+              externalId, monster ? stat(dto.atk()) : null, monster && !link ? stat(dto.def()) : null,
               level, rank, linkRating, attribute, monsterType, cardType, forms);
       card.setConceptualId(dto.id().toString());
       cards.putIfAbsent(externalId, card);
@@ -136,6 +136,11 @@ final class YugiohCardMapper {
       return image.imageUrl();
     }
     return image.imageUrlSmall();
+  }
+
+  // A API representa ATK/DEF "?" como -1.
+  private static Integer stat(Integer value) {
+    return value == null || value < 0 ? null : value;
   }
 
   private static boolean isBlank(String value) {

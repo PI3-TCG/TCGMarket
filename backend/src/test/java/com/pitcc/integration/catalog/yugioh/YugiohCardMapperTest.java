@@ -11,6 +11,7 @@ import com.pitcc.integration.catalog.yugioh.dto.YugiohCardSetDto;
 import java.util.List;
 
 import com.pitcc.model.CardGame;
+import com.pitcc.model.YugiohCard;
 import org.junit.jupiter.api.Test;
 
 class YugiohCardMapperTest {
@@ -43,6 +44,19 @@ class YugiohCardMapperTest {
     assertEquals("Starter Deck: Kaiba", cards.get(1).setName());
     assertEquals("LC01-EN004", cards.get(2).setCode());
     assertTrue(cards.stream().allMatch(card -> "89631139".equals(card.conceptualId())));
+  }
+
+  @Test
+  void shouldTreatUnknownAtkAndDefAsMissing() {
+    YugiohCardDto dto = new YugiohCardDto(
+        10678778L, "Aegaion the Sea Castrum", "XYZ Monster", "Machine", "WATER", -1, -1, 8, null,
+        List.of(new YugiohCardSetDto("Breakers of Shadow", "BOSH-EN055", "Common")), null);
+
+    List<YugiohCard> cards = YugiohCardMapper.toYugiohCards(dto);
+
+    assertEquals(1, cards.size());
+    assertNull(cards.get(0).getAtk());
+    assertNull(cards.get(0).getDef());
   }
 
   @Test
