@@ -54,6 +54,9 @@ public class Transaction {
     @Field(targetType = FieldType.DECIMAL128)
     private BigDecimal totalAmount;
 
+    // Complemento combinado na troca; apenas registro, sem pagamento executado.
+    private FinancialAdjustment financialAdjustment;
+
     private Instant completedAt;
 
     protected Transaction() {
@@ -127,6 +130,7 @@ public class Transaction {
                         null
                 ))
         ).toList();
+        transaction.financialAdjustment = proposal.getFinancialAdjustment();
         transaction.completedAt = now;
 
         return transaction;
@@ -158,6 +162,10 @@ public class Transaction {
 
     public BigDecimal getTotalAmount() {
         return totalAmount;
+    }
+
+    public FinancialAdjustment getFinancialAdjustment() {
+        return financialAdjustment;
     }
 
     public Instant getCompletedAt() {
