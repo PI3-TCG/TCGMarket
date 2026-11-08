@@ -1,7 +1,10 @@
 import type { CardCondition, CardLanguage } from '@/types/Collection'
 
 /** Relativo a quem consulta: a mesma venda é compra para um e venda para o outro. */
-export type TransactionHistoryType = 'PURCHASE' | 'SALE'
+export type TransactionHistoryType = 'PURCHASE' | 'SALE' | 'TRADE'
+
+/** Sentido em relação a quem consulta: entregue (SENT) ou recebido (RECEIVED). */
+export type TransactionHistoryDirection = 'SENT' | 'RECEIVED'
 
 export type TransactionHistoryStatus = 'COMPLETED'
 
@@ -16,6 +19,7 @@ export interface TransactionHistoryItem {
   language: CardLanguage
   quantity: number
   unitPrice: number | null
+  direction: TransactionHistoryDirection
 }
 
 export interface TransactionHistoryEntry {
@@ -27,7 +31,16 @@ export interface TransactionHistoryEntry {
   counterparty: { username: string | null; name: string } | null
   items: TransactionHistoryItem[]
   totalQuantity: number
-  totalAmount: number
+  /** Nulo em trocas, que não têm preço. */
+  totalAmount: number | null
+  /** Complemento combinado na troca; apenas registro, sem pagamento. */
+  financialAdjustment: {
+    amount: number
+    currency: string
+    direction: TransactionHistoryDirection
+  } | null
+  /** Proposta que originou a troca. */
+  tradeProposalId: string | null
 }
 
 export interface TransactionHistoryPage {
