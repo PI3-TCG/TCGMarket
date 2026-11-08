@@ -78,9 +78,12 @@ class CatalogSearchServiceTest {
     assertEquals("Base", filter.get("edition"));
     assertEquals("Common", filter.get("officialRarity"));
     assertEquals("POKEMON", filter.get("pokemonCardType"));
-    var name = (java.util.regex.Pattern) filter.get("name");
+    var nameOr = (List<?>) ((Document) ((List<?>) filter.get("$and")).get(0)).get("$or");
+    var name = (java.util.regex.Pattern) ((Document) nameOr.get(0)).get("name");
+    var ptName = (java.util.regex.Pattern) ((Document) nameOr.get(1)).get("localizations.pt.name");
     assertTrue(name.matcher("PIKA.CHU").find());
     assertFalse(name.matcher("Pikachu").find(), "o ponto da busca deve ser literal");
+    assertEquals(name.pattern(), ptName.pattern(), "a busca também considera o nome em português");
     assertEquals(new Document("name", -1).append("id", 1), query.getValue().getSortObject());
     assertEquals(20, query.getValue().getSkip());
     assertEquals(10, query.getValue().getLimit());

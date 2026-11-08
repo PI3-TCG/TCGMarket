@@ -2,6 +2,7 @@ package com.pitcc.dto;
 
 import com.pitcc.model.Card;
 import com.pitcc.model.CardGame;
+import com.pitcc.model.CardLocalization;
 import com.pitcc.model.CardSource;
 import com.pitcc.model.MagicCard;
 import com.pitcc.model.MagicCardType;
@@ -16,6 +17,7 @@ import com.pitcc.model.YugiohCard;
 import com.pitcc.model.YugiohCardType;
 import com.pitcc.model.YugiohInvocation;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Carta completa do catálogo interno. Só um entre {@code pokemon}, {@code yugioh} e
@@ -33,6 +35,7 @@ public record CatalogCardDetailsResponse(
     String rarity,
     String imageUrl,
     CardSource source,
+    Map<String, CardLocalization> localizations,
     PokemonDetails pokemon,
     YugiohDetails yugioh,
     MagicDetails magic,
@@ -93,6 +96,7 @@ public record CatalogCardDetailsResponse(
         card.getOfficialRarity(),
         card.getImageUrl(),
         card.getSource(),
+        card.getLocalizations(),
         pokemon,
         yugioh,
         magic,

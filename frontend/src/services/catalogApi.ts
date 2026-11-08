@@ -1,5 +1,6 @@
 import { api } from '@/services/api'
 import type {
+  CardLocalizations,
   CatalogCard,
   CatalogCardDetails,
   CatalogCardResponse,
@@ -57,10 +58,20 @@ function toCatalogCard(card: CatalogCardResponse, game: string): CatalogCard {
   return {
     id: card.id,
     name: card.name,
+    namePt: localizedName(card.name, card.localizations),
     game: game,
     edition: card.setName ?? '',
     cardNumber: card.cardNumber ?? '',
     officialRarity: card.rarity || 'Não informada',
     imageUrl: card.imageUrl || '',
   }
+}
+
+/** Nome em português para exibir junto do inglês; null quando não há tradução ou é igual. */
+export function localizedName(
+  name: string,
+  localizations: CardLocalizations | null | undefined,
+): string | null {
+  const pt = localizations?.pt?.name?.trim()
+  return pt && pt.toLowerCase() !== name.trim().toLowerCase() ? pt : null
 }

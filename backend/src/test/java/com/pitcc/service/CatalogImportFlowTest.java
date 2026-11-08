@@ -85,6 +85,23 @@ class CatalogImportFlowTest {
     pokemon.server().verify(); magic.server().verify(); yugioh.server().verify();
   }
 
+  @Test void shouldKeepTheTranslationWhenTheCardIsReimported() {
+    String id=UUID.randomUUID().toString(); track(CardSource.POKEMON_TCG_API,id);
+    var endpoint=endpoint();
+    endpoint.server().expect(anything()).andRespond(withSuccess(pokemonJson(id,"Pikachu","60"),MediaType.APPLICATION_JSON));
+    endpoint.server().expect(anything()).andRespond(withSuccess(pokemonJson(id,"Pikachu","70"),MediaType.APPLICATION_JSON));
+    var importer=importer(endpoint);
+    assertTrue(importer.importByQuery("pokemon","Pikachu").successful());
+    Card card=repository.findBySourceAndExternalId(CardSource.POKEMON_TCG_API,id).orElseThrow();
+    card.setLocalizations(java.util.Map.of("pt",new CardLocalization("Pikachu PT","https://img.example/pt.png")));
+    repository.save(card);
+    assertTrue(importer.importByQuery("pokemon","Pikachu").successful());
+    Card reimported=repository.findBySourceAndExternalId(CardSource.POKEMON_TCG_API,id).orElseThrow();
+    assertEquals(70,assertInstanceOf(PokemonCard.class,reimported).getHp());
+    assertEquals("Pikachu PT",reimported.getLocalizations().get("pt").name());
+    assertEquals("https://img.example/pt.png",reimported.getLocalizations().get("pt").imageUrl());
+  }
+
   @Test void shouldUpdateWithoutChangingIdAndRejectAnInvalidReplacement() {
     String id=UUID.randomUUID().toString(); track(CardSource.POKEMON_TCG_API,id);
     var endpoint=endpoint();
