@@ -4,6 +4,7 @@ import com.pitcc.dto.LoginRequest;
 import com.pitcc.dto.LoginResponse;
 import com.pitcc.dto.UserResponse;
 import com.pitcc.dto.UserResponses;
+import com.pitcc.exception.AccountSuspendedException;
 import com.pitcc.exception.InvalidAuthenticationException;
 import com.pitcc.exception.InvalidCredentialsException;
 import com.pitcc.model.User;
@@ -40,6 +41,9 @@ public class AuthService {
     boolean passwordMatches = passwordEncoder.matches(request.password(), hash);
     if (user == null || !passwordMatches) {
       throw new InvalidCredentialsException();
+    }
+    if (user.isSuspended()) {
+      throw new AccountSuspendedException();
     }
 
     String token = jwtService.generate(user.getId(), user.getRole());
