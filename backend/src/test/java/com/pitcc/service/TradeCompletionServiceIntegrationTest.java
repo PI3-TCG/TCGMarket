@@ -9,6 +9,7 @@ import com.pitcc.model.CardGame;
 import com.pitcc.model.CardLanguage;
 import com.pitcc.model.CardSnapshot;
 import com.pitcc.model.CollectionItem;
+import com.pitcc.model.FinancialAdjustment;
 import com.pitcc.model.TargetAdSnapshot;
 import com.pitcc.model.TradeProposal;
 import com.pitcc.model.TradeProposalEventType;
@@ -33,6 +34,7 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -112,6 +114,30 @@ class TradeCompletionServiceIntegrationTest {
         assertEquals(recipient, transaction.getSellerId());
         assertEquals(proposer, transaction.getBuyerId());
         assertEquals(2, transaction.getItems().size());
+        assertNull(transaction.getFinancialAdjustment());
+    }
+
+    @Test
+    void financialAdjustmentIsKeptInTheTransactionWithoutMovingMoney() {
+        CollectionItem offered = collectionRepository.save(item(proposer, "card-a", 1));
+        FinancialAdjustment adjustment = new FinancialAdjustment(
+                new BigDecimal("15.50"), "BRL", proposer, recipient);
+
+        TradeProposal proposal = accepted(
+                List.of(line(offered, null, 1)),
+                List.of(line(anchor, ad.getId(), 1)),
+                adjustment);
+
+        service.complete(proposal.getId());
+
+        String transactionId = proposalRepository.findById(proposal.getId()).orElseThrow().getTransactionId();
+        FinancialAdjustment recorded = transactionRepository.findById(transactionId).orElseThrow()
+                .getFinancialAdjustment();
+        assertEquals(0, new BigDecimal("15.50").compareTo(recorded.getAmount()));
+        assertEquals("BRL", recorded.getCurrency());
+        assertEquals(proposer, recorded.getPayerId());
+        assertEquals(recipient, recorded.getPayeeId());
+        assertEquals(1, quantityOf(proposer, "card-anchor"));
     }
 
     @Test
@@ -218,10 +244,18 @@ class TradeCompletionServiceIntegrationTest {
     }
 
     private TradeProposal accepted(List<TradeProposalItem> offered, List<TradeProposalItem> requested) {
+        return accepted(offered, requested, null);
+    }
+
+    private TradeProposal accepted(
+            List<TradeProposalItem> offered,
+            List<TradeProposalItem> requested,
+            FinancialAdjustment adjustment
+    ) {
         TradeProposal proposal = TradeProposal.create(
                 proposer, recipient, ad.getId(),
                 new TargetAdSnapshot(recipient, anchor.getId(), anchor.getCardId(), true),
-                offered, requested, null, null, Instant.now());
+                offered, requested, adjustment, null, Instant.now());
         ReflectionTestUtils.setField(proposal, "status", TradeProposalStatus.ACCEPTED);
         proposalIds.add(proposal.getId());
         return proposalRepository.save(proposal);
