@@ -9,12 +9,14 @@ import com.pitcc.dto.CreateReviewRequest;
 import com.pitcc.dto.CreateAdRequest;
 import com.pitcc.dto.HideCardRequest;
 import com.pitcc.dto.LoginRequest;
+import com.pitcc.dto.ModerateProfileRequest;
 import com.pitcc.dto.PlaceOrderRequest;
 import com.pitcc.dto.UpdateAdRequest;
 import com.pitcc.dto.UpdateCartItemRequest;
 import com.pitcc.dto.UpdateCartSelectionRequest;
 import com.pitcc.dto.UpdateProfileRequest;
 import com.pitcc.dto.UpdateUserRoleRequest;
+import com.pitcc.dto.UpdateUserStatusRequest;
 import com.pitcc.integration.catalog.ExternalApiException;
 import com.pitcc.model.DeliveryAddress;
 import com.pitcc.security.SecurityConfig;
@@ -53,7 +55,8 @@ public class GlobalExceptionHandler {
                     case LoginRequest _ -> "Dados de login inválidos.";
                     case UpdateUserRoleRequest _ -> "Perfil inválido.";
                     case UpdateProfileRequest _ -> "Dados do perfil inválidos.";
-                    case HideCardRequest _ -> "Motivo inválido.";
+                    case HideCardRequest _, UpdateUserStatusRequest _ -> "Motivo inválido.";
+                    case ModerateProfileRequest _ -> "Revise os campos e o motivo da moderação.";
                     case CreateAdRequest _, UpdateAdRequest _ -> "Revise os dados do anúncio.";
                     case AddCartItemRequest _, UpdateCartItemRequest _, UpdateCartSelectionRequest _ ->
                             "Revise os dados do carrinho.";
@@ -77,8 +80,12 @@ public class GlobalExceptionHandler {
         return forbidden(SecurityConfig.ACCESS_DENIED);
     }
 
-    @ExceptionHandler(OwnRoleChangeException.class)
-    public ResponseEntity<ApiErrorResponse> handleOwnRoleChange(OwnRoleChangeException exception) {
+    @ExceptionHandler({
+        OwnRoleChangeException.class,
+        OwnStatusChangeException.class,
+        AccountSuspendedException.class
+    })
+    public ResponseEntity<ApiErrorResponse> handleForbiddenAction(RuntimeException exception) {
         return forbidden(exception.getMessage());
     }
 

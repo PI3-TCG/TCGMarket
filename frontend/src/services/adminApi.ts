@@ -7,24 +7,74 @@ import type {
   HideCardRequest,
 } from '@/types/AdminCatalog'
 import type {
-  UpdateUserRoleRequest,
-  UserResponse,
-  UserRole,
-} from '@/types/User'
+  AdminAction,
+  AdminUser,
+  AdminUserPage,
+  AdminUserSearch,
+  ModeratedProfileField,
+  UserStatus,
+} from '@/types/AdminUser'
+import type { UpdateUserRoleRequest, UserRole } from '@/types/User'
 
 export const ADMIN_CATALOG_PAGE_SIZE = 20
+export const ADMIN_USERS_PAGE_SIZE = 20
 
-export async function listUsers() {
-  const response = await api.get<UserResponse[]>('/api/admin/users')
+function userPath(id: string) {
+  return `/api/admin/users/${encodeURIComponent(id)}`
+}
+
+export async function searchUsers(search: AdminUserSearch) {
+  const response = await api.get<AdminUserPage>('/api/admin/users', {
+    params: {
+      q: search.q || undefined,
+      role: search.role,
+      status: search.status,
+      page: search.page - 1,
+      size: ADMIN_USERS_PAGE_SIZE,
+    },
+  })
   return response.data
 }
 
 export async function changeUserRole(id: string, role: UserRole) {
   const request: UpdateUserRoleRequest = { role }
-  const response = await api.patch<UserResponse>(
-    `/api/admin/users/${encodeURIComponent(id)}/role`,
-    request,
+  const response = await api.patch<AdminUser>(`${userPath(id)}/role`, request)
+  return response.data
+}
+
+export async function changeUserStatus(
+  id: string,
+  status: UserStatus,
+  reason: string,
+) {
+  const response = await api.patch<AdminUser>(`${userPath(id)}/status`, {
+    status,
+    reason,
+  })
+  return response.data
+}
+
+export async function moderateUserProfile(
+  id: string,
+  fields: ModeratedProfileField[],
+  reason: string,
+) {
+  const response = await api.post<AdminUser>(
+    `${userPath(id)}/profile/moderation`,
+    { fields, reason },
   )
+  return response.data
+}
+
+export async function fetchUserActions(id: string) {
+  const response = await api.get<AdminAction[]>(`${userPath(id)}/actions`)
+  return response.data
+}
+
+export async function fetchRecentAdminActions(limit = 6) {
+  const response = await api.get<AdminAction[]>('/api/admin/events', {
+    params: { limit },
+  })
   return response.data
 }
 

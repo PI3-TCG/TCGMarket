@@ -9,10 +9,12 @@ import static org.mockito.Mockito.when;
 
 import com.pitcc.dto.LoginRequest;
 import com.pitcc.dto.LoginResponse;
+import com.pitcc.exception.AccountSuspendedException;
 import com.pitcc.exception.InvalidAuthenticationException;
 import com.pitcc.exception.InvalidCredentialsException;
 import com.pitcc.model.User;
 import com.pitcc.model.UserRole;
+import com.pitcc.model.UserStatus;
 import com.pitcc.repository.UserRepository;
 import com.pitcc.security.AuthenticatedUser;
 import com.pitcc.security.JwtProperties;
@@ -113,6 +115,17 @@ class AuthServiceTest {
     when(userRepository.findById("abc123")).thenReturn(Optional.empty());
 
     assertThrows(InvalidAuthenticationException.class, () -> authService.currentUser());
+  }
+
+  @Test
+  void shouldRejectLoginOfSuspendedAccount() {
+    User user = user("abc123", "joao@email.com", passwordEncoder.encode(PASSWORD));
+    user.setStatus(UserStatus.SUSPENDED);
+    when(userRepository.findByEmail("joao@email.com")).thenReturn(Optional.of(user));
+
+    assertThrows(
+        AccountSuspendedException.class,
+        () -> authService.login(new LoginRequest("joao@email.com", PASSWORD)));
   }
 
   private User user(String id, String email, String passwordHash) {

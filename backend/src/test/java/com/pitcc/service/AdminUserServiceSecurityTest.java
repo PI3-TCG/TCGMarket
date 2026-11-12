@@ -2,10 +2,11 @@ package com.pitcc.service;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 
+import com.pitcc.model.ModeratedProfileField;
 import com.pitcc.model.UserRole;
+import com.pitcc.model.UserStatus;
+import com.pitcc.repository.AdminActionRepository;
 import com.pitcc.repository.UserRepository;
 import com.pitcc.security.AuthenticatedUser;
 import java.util.List;
@@ -14,7 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -36,6 +37,10 @@ class AdminUserServiceSecurityTest {
 
   @MockitoBean private UserRepository userRepository;
 
+  @MockitoBean private AdminActionRepository adminActionRepository;
+
+  @MockitoBean private MongoTemplate mongoTemplate;
+
   @AfterEach
   void clearSecurityContext() {
     SecurityContextHolder.clearContext();
@@ -45,24 +50,35 @@ class AdminUserServiceSecurityTest {
   void shouldBlockUserEvenIfTheServiceIsCalledDirectly() {
     authenticateAs(UserRole.USER);
 
-    assertThrows(AccessDeniedException.class, () -> adminUserService.listUsers());
+    assertThrows(AccessDeniedException.class, this::search);
     assertThrows(
         AccessDeniedException.class,
         () -> adminUserService.changeRole("user1", "user1", UserRole.ADMIN));
+    assertThrows(
+        AccessDeniedException.class,
+        () -> adminUserService.changeStatus(
+            "user1", "user2", UserStatus.SUSPENDED, "Motivo qualquer aqui"));
+    assertThrows(
+        AccessDeniedException.class,
+        () -> adminUserService.moderateProfile(
+            "user1", "user2", List.of(ModeratedProfileField.BIO), "Motivo qualquer aqui"));
+    assertThrows(AccessDeniedException.class, () -> adminUserService.recentActions(6));
   }
 
   @Test
   void shouldBlockAnonymousCalls() {
-    assertThrows(
-        AuthenticationCredentialsNotFoundException.class, () -> adminUserService.listUsers());
+    assertThrows(AuthenticationCredentialsNotFoundException.class, this::search);
   }
 
   @Test
   void shouldAllowAdmin() {
     authenticateAs(UserRole.ADMIN);
-    when(userRepository.findAll(any(Sort.class))).thenReturn(List.of());
 
-    assertDoesNotThrow(() -> adminUserService.listUsers());
+    assertDoesNotThrow(this::search);
+  }
+
+  private void search() {
+    adminUserService.searchUsers(null, null, null, null, null);
   }
 
   private void authenticateAs(UserRole role) {

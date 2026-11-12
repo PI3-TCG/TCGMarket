@@ -54,6 +54,7 @@ public class ProfileService {
   public PublicProfileResponse publicProfile(String username) {
     return userRepository
         .findByUsername(username.trim().toLowerCase(Locale.ROOT))
+        .filter(user -> !user.isSuspended())
         .map(UserResponses::toPublicProfileResponse)
         .orElseThrow(UserNotFoundException::new);
   }

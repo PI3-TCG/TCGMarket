@@ -39,11 +39,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     filterChain.doFilter(request, response);
   }
 
-  // O perfil vale o que está no banco agora, não o que foi gravado no token na hora do login.
+  // Perfil e situação valem o que está no banco agora, não o que foi gravado no token no login.
   private Optional<AuthenticatedUser> currentState(AuthenticatedUser fromToken) {
     return userRepository
         .findById(fromToken.id())
-        .filter(user -> user.getRole() != null)
+        .filter(user -> user.getRole() != null && !user.isSuspended())
         .map(user -> new AuthenticatedUser(user.getId(), user.getRole()));
   }
 

@@ -37,7 +37,14 @@ public class User {
 
   private List<String> links;
 
+  // Nulo em contas anteriores à moderação, que contam como ativas.
+  private UserStatus status;
+
   public User() {}
+
+  public boolean isSuspended() {
+    return status == UserStatus.SUSPENDED;
+  }
 
   public String getId() {
     return id;
@@ -133,5 +140,13 @@ public class User {
 
   public void setLinks(List<String> links) {
     this.links = links;
+  }
+
+  public UserStatus getStatus() {
+    return status == null ? UserStatus.ACTIVE : status;
+  }
+
+  public void setStatus(UserStatus status) {
+    this.status = status;
   }
 }
