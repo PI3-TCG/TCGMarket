@@ -21,12 +21,25 @@ public record TransactionHistoryResponse(
         Counterparty counterparty,
         List<Item> items,
         int totalQuantity,
-        BigDecimal totalAmount
+        BigDecimal totalAmount,
+        FinancialAdjustment financialAdjustment,
+        String tradeProposalId
 ) {
 
     public enum Type {
         PURCHASE,
-        SALE
+        SALE,
+        TRADE
+    }
+
+    /** Sentido em relação a quem consulta: entregue ou recebido. */
+    public enum Direction {
+        SENT,
+        RECEIVED
+    }
+
+    /** Complemento combinado na troca, sem os IDs dos participantes. */
+    public record FinancialAdjustment(BigDecimal amount, String currency, Direction direction) {
     }
 
     // Só transações concluídas são registradas; novos estados entram aqui.
@@ -47,7 +60,8 @@ public record TransactionHistoryResponse(
             CardCondition condition,
             CardLanguage language,
             int quantity,
-            BigDecimal unitPrice
+            BigDecimal unitPrice,
+            Direction direction
     ) {
     }
 }

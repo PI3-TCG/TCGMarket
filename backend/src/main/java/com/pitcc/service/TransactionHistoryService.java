@@ -4,6 +4,7 @@ import com.pitcc.dto.TransactionHistoryResponse;
 import com.pitcc.exception.InvalidAuthenticationException;
 import com.pitcc.exception.TransactionNotFoundException;
 import com.pitcc.model.CardSnapshot;
+import com.pitcc.model.FinancialAdjustment;
 import com.pitcc.model.Transaction;
 import com.pitcc.model.TransactionItem;
 import com.pitcc.model.TransactionType;
@@ -22,7 +23,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * Histórico de compras e vendas do usuário autenticado. Lê apenas o que foi
+ * Histórico de compras, vendas e trocas do usuário autenticado. Lê apenas o que foi
  * copiado para a transação na conclusão, nunca o anúncio ou o pedido atuais.
  */
 @Service
@@ -61,13 +62,16 @@ public class TransactionHistoryService {
 
         Pageable pageable = PageRequest.of(page, size);
         Page<Transaction> transactions = type == null
-                ? transactionRepository.findByTypeAndBuyerIdOrTypeAndSellerIdOrderByCompletedAtDesc(
-                        TransactionType.SALE, userId, TransactionType.SALE, userId, pageable)
+                ? transactionRepository.findByBuyerIdOrSellerIdOrderByCompletedAtDesc(
+                        userId, userId, pageable)
                 : switch (type) {
                     case PURCHASE -> transactionRepository
                             .findByTypeAndBuyerIdOrderByCompletedAtDesc(TransactionType.SALE, userId, pageable);
                     case SALE -> transactionRepository
                             .findByTypeAndSellerIdOrderByCompletedAtDesc(TransactionType.SALE, userId, pageable);
+                    case TRADE -> transactionRepository
+                            .findByTypeAndBuyerIdOrTypeAndSellerIdOrderByCompletedAtDesc(
+                                    TransactionType.TRADE, userId, TransactionType.TRADE, userId, pageable);
                 };
 
         Set<String> counterpartyIds = transactions.stream()
@@ -88,7 +92,6 @@ public class TransactionHistoryService {
 
         // Transação de terceiros responde como inexistente para não revelar que existe.
         Transaction transaction = transactionRepository.findById(transactionId)
-                .filter(found -> found.getType() == TransactionType.SALE)
                 .filter(found -> isParticipant(found, userId))
                 .orElseThrow(TransactionNotFoundException::new);
 
@@ -115,12 +118,15 @@ public class TransactionHistoryService {
             String userId,
             User counterparty
     ) {
-        TransactionHistoryResponse.Type type = userId.equals(transaction.getBuyerId())
-                ? TransactionHistoryResponse.Type.PURCHASE
-                : TransactionHistoryResponse.Type.SALE;
+        boolean trade = transaction.getType() == TransactionType.TRADE;
+        TransactionHistoryResponse.Type type = trade
+                ? TransactionHistoryResponse.Type.TRADE
+                : userId.equals(transaction.getBuyerId())
+                        ? TransactionHistoryResponse.Type.PURCHASE
+                        : TransactionHistoryResponse.Type.SALE;
 
         var items = transaction.getItems().stream()
-                .map(TransactionHistoryService::toItem)
+                .map(item -> toItem(item, userId))
                 .toList();
 
         return new TransactionHistoryResponse(
@@ -136,11 +142,33 @@ public class TransactionHistoryService {
                         ),
                 items,
                 items.stream().mapToInt(TransactionHistoryResponse.Item::quantity).sum(),
-                transaction.getTotalAmount()
+                transaction.getTotalAmount(),
+                toFinancialAdjustment(transaction.getFinancialAdjustment(), userId),
+                trade ? transaction.getSourceId() : null
         );
     }
 
-    private static TransactionHistoryResponse.Item toItem(TransactionItem item) {
+    private static TransactionHistoryResponse.FinancialAdjustment toFinancialAdjustment(
+            FinancialAdjustment adjustment,
+            String userId
+    ) {
+        if (adjustment == null) {
+            return null;
+        }
+        return new TransactionHistoryResponse.FinancialAdjustment(
+                adjustment.getAmount(),
+                adjustment.getCurrency(),
+                direction(userId.equals(adjustment.getPayerId()))
+        );
+    }
+
+    private static TransactionHistoryResponse.Direction direction(boolean sentByUser) {
+        return sentByUser
+                ? TransactionHistoryResponse.Direction.SENT
+                : TransactionHistoryResponse.Direction.RECEIVED;
+    }
+
+    private static TransactionHistoryResponse.Item toItem(TransactionItem item, String userId) {
         CardSnapshot card = item.getCard();
 
         return new TransactionHistoryResponse.Item(
@@ -153,7 +181,8 @@ public class TransactionHistoryService {
                 card.getCondition(),
                 card.getLanguage(),
                 item.getQuantity(),
-                item.getUnitPrice()
+                item.getUnitPrice(),
+                direction(userId.equals(item.getFromUserId()))
         );
     }
 

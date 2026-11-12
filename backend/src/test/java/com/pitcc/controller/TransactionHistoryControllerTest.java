@@ -75,9 +75,12 @@ class TransactionHistoryControllerTest {
         List.of(
             new TransactionHistoryResponse.Item(
                 "card-1", "Dark Magician", CardGame.YUGIOH, "Starter", "006", null,
-                CardCondition.NEAR_MINT, CardLanguage.PORTUGUESE, 2, new BigDecimal("10.00"))),
+                CardCondition.NEAR_MINT, CardLanguage.PORTUGUESE, 2, new BigDecimal("10.00"),
+                TransactionHistoryResponse.Direction.RECEIVED)),
         2,
-        new BigDecimal("20.00"));
+        new BigDecimal("20.00"),
+        null,
+        null);
   }
 
   @Test
@@ -112,7 +115,7 @@ class TransactionHistoryControllerTest {
         .perform(
             get("/api/users/me/transactions")
                 .header(HttpHeaders.AUTHORIZATION, token)
-                .param("type", "TRADE"))
+                .param("type", "GIFT"))
         .andExpect(status().isBadRequest());
   }
 
