@@ -16,6 +16,7 @@ import {
   historyStatusMeta,
   historyTypeMeta,
 } from '@/components/history/historyFormat'
+import { TransactionReviewSection } from '@/components/history/TransactionReviewSection'
 import { Icon } from '@/components/ui/Icon'
 import { useRemoteData } from '@/hooks/useRemoteData'
 import { getMyTransaction } from '@/services/transactionHistory'
@@ -161,6 +162,11 @@ function TransactionSummary({ entry }: { entry: TransactionHistoryEntry }) {
             items={entry.items}
           />
         )}
+
+        <TransactionReviewSection
+          transactionId={entry.id}
+          counterpartyName={counterpartyName(entry)}
+        />
       </div>
 
       <aside

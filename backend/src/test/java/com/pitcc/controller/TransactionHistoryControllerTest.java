@@ -20,6 +20,7 @@ import com.pitcc.repository.UserRepository;
 import com.pitcc.security.ApiErrorWriter;
 import com.pitcc.security.JwtService;
 import com.pitcc.security.SecurityConfig;
+import com.pitcc.service.ReviewService;
 import com.pitcc.service.TransactionHistoryService;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -51,6 +52,8 @@ class TransactionHistoryControllerTest {
   @Autowired private JwtService jwtService;
 
   @MockitoBean private TransactionHistoryService transactionHistoryService;
+
+  @MockitoBean private ReviewService reviewService;
 
   @MockitoBean private UserRepository userRepository;
 
