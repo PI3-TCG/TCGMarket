@@ -5,6 +5,7 @@ import com.pitcc.exception.InvalidAuthenticationException;
 import com.pitcc.exception.TransactionNotFoundException;
 import com.pitcc.model.Order;
 import com.pitcc.model.Transaction;
+import com.pitcc.model.TransactionType;
 import com.pitcc.model.User;
 import com.pitcc.repository.TransactionRepository;
 import com.pitcc.repository.UserRepository;
@@ -47,8 +48,8 @@ class TransactionHistoryServiceTest {
     @Test
     void buyerSeesSaleAsPurchaseWithSellerAsCounterparty() {
         Transaction transaction = transaction("tx-1");
-        when(transactionRepository.findByBuyerIdOrSellerIdOrderByCompletedAtDesc(
-                eq(BUYER), eq(BUYER), any()))
+        when(transactionRepository.findByTypeAndBuyerIdOrTypeAndSellerIdOrderByCompletedAtDesc(
+                eq(TransactionType.SALE), eq(BUYER), eq(TransactionType.SALE), eq(BUYER), any()))
                 .thenReturn(new PageImpl<>(List.of(transaction), PageRequest.of(0, 10), 1));
         when(userRepository.findAllById(any())).thenReturn(List.of(user(SELLER, "vendedor")));
 
@@ -66,7 +67,7 @@ class TransactionHistoryServiceTest {
 
     @Test
     void sellerSeesSameTransactionAsSale() {
-        when(transactionRepository.findBySellerIdOrderByCompletedAtDesc(eq(SELLER), any()))
+        when(transactionRepository.findByTypeAndSellerIdOrderByCompletedAtDesc(eq(TransactionType.SALE), eq(SELLER), any()))
                 .thenReturn(new PageImpl<>(List.of(transaction("tx-1"))));
         when(userRepository.findAllById(any())).thenReturn(List.of(user(BUYER, "comprador")));
 
@@ -81,13 +82,13 @@ class TransactionHistoryServiceTest {
 
     @Test
     void purchaseFilterOnlyQueriesTransactionsWhereUserIsBuyer() {
-        when(transactionRepository.findByBuyerIdOrderByCompletedAtDesc(eq(BUYER), any()))
+        when(transactionRepository.findByTypeAndBuyerIdOrderByCompletedAtDesc(eq(TransactionType.SALE), eq(BUYER), any()))
                 .thenReturn(Page.empty());
 
         service.findOwnTransactions(BUYER, TransactionHistoryResponse.Type.PURCHASE, 0, 10);
 
-        verify(transactionRepository).findByBuyerIdOrderByCompletedAtDesc(eq(BUYER), any());
-        verify(transactionRepository, never()).findBySellerIdOrderByCompletedAtDesc(anyString(), any());
+        verify(transactionRepository).findByTypeAndBuyerIdOrderByCompletedAtDesc(eq(TransactionType.SALE), eq(BUYER), any());
+        verify(transactionRepository, never()).findByTypeAndSellerIdOrderByCompletedAtDesc(any(), anyString(), any());
     }
 
     @Test

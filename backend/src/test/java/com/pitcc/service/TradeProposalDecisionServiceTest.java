@@ -42,6 +42,9 @@ class TradeProposalDecisionServiceTest {
     private TradeAvailabilityService availabilityService;
 
     @Mock
+    private TradeCompletionService completionService;
+
+    @Mock
     private TradeProposal proposal;
 
     private TradeProposalDecisionService service;
@@ -56,7 +59,8 @@ class TradeProposalDecisionServiceTest {
                 repository,
                 policy,
                 mongoTemplate,
-                availabilityService
+                availabilityService,
+                completionService
         );
     }
 
@@ -108,11 +112,14 @@ class TradeProposalDecisionServiceTest {
         )).thenReturn("ACCEPTED");
 
         mockSuccessfulUpdate(TradeProposalStatus.ACCEPTED);
+        when(completionService.completeQuietly(PROPOSAL_ID))
+                .thenReturn(TradeProposalStatus.COMPLETED);
 
         TradeProposalStatus result =
                 service.accept(PROPOSAL_ID, RECIPIENT_ID);
 
-        assertEquals(TradeProposalStatus.ACCEPTED, result);
+        assertEquals(TradeProposalStatus.COMPLETED, result);
+        verify(completionService).completeQuietly(PROPOSAL_ID);
 
         verify(availabilityService).validate(any(
                 TradeAvailabilityService.TradeContext.class
@@ -308,4 +315,19 @@ class TradeProposalDecisionServiceTest {
         verifyNoInteractions(mongoTemplate);
     }
 
+
+    @Test
+    void shouldResumeCompletionWhenRecipientAcceptsAgain() {
+        when(repository.findById(PROPOSAL_ID)).thenReturn(Optional.of(proposal));
+        when(proposal.getStatus()).thenReturn(TradeProposalStatus.ACCEPTED);
+        when(proposal.getRecipientId()).thenReturn(RECIPIENT_ID);
+        when(completionService.completeQuietly(PROPOSAL_ID))
+                .thenReturn(TradeProposalStatus.COMPLETED);
+
+        assertEquals(
+                TradeProposalStatus.COMPLETED,
+                service.accept(PROPOSAL_ID, RECIPIENT_ID)
+        );
+        verifyNoInteractions(policy, availabilityService, mongoTemplate);
+    }
 }

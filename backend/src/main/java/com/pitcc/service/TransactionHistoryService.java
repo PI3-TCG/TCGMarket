@@ -6,6 +6,7 @@ import com.pitcc.exception.TransactionNotFoundException;
 import com.pitcc.model.CardSnapshot;
 import com.pitcc.model.Transaction;
 import com.pitcc.model.TransactionItem;
+import com.pitcc.model.TransactionType;
 import com.pitcc.model.User;
 import com.pitcc.repository.TransactionRepository;
 import com.pitcc.repository.UserRepository;
@@ -60,13 +61,13 @@ public class TransactionHistoryService {
 
         Pageable pageable = PageRequest.of(page, size);
         Page<Transaction> transactions = type == null
-                ? transactionRepository.findByBuyerIdOrSellerIdOrderByCompletedAtDesc(
-                        userId, userId, pageable)
+                ? transactionRepository.findByTypeAndBuyerIdOrTypeAndSellerIdOrderByCompletedAtDesc(
+                        TransactionType.SALE, userId, TransactionType.SALE, userId, pageable)
                 : switch (type) {
                     case PURCHASE -> transactionRepository
-                            .findByBuyerIdOrderByCompletedAtDesc(userId, pageable);
+                            .findByTypeAndBuyerIdOrderByCompletedAtDesc(TransactionType.SALE, userId, pageable);
                     case SALE -> transactionRepository
-                            .findBySellerIdOrderByCompletedAtDesc(userId, pageable);
+                            .findByTypeAndSellerIdOrderByCompletedAtDesc(TransactionType.SALE, userId, pageable);
                 };
 
         Set<String> counterpartyIds = transactions.stream()
@@ -87,6 +88,7 @@ public class TransactionHistoryService {
 
         // Transação de terceiros responde como inexistente para não revelar que existe.
         Transaction transaction = transactionRepository.findById(transactionId)
+                .filter(found -> found.getType() == TransactionType.SALE)
                 .filter(found -> isParticipant(found, userId))
                 .orElseThrow(TransactionNotFoundException::new);
 
