@@ -37,6 +37,14 @@ public class User {
 
   private List<String> links;
 
+  private boolean collectionPublic;
+  private String avatarUrl;
+
+  public boolean isCollectionPublic() { return collectionPublic; }
+  public void setCollectionPublic(boolean value) { collectionPublic = value; }
+  public String getAvatarUrl() { return avatarUrl; }
+  public void setAvatarUrl(String value) { avatarUrl = value; }
+
   public User() {}
 
   public String getId() {

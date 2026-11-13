@@ -1,14 +1,16 @@
+import { ProfileSettingsProvider } from '@/components/profile/ProfileSettingsContext'
+import { ProfilePhotoEditor } from '@/components/profile/ProfilePhotoEditor'
+import { FeaturedCollection } from '@/components/profile/FeaturedCollection'
 import {
   AboutCard,
-  FeaturedCollectionCard,
-  GamesCard,
   PencilIcon,
-  ProfileBreadcrumb,
   ProfileHero,
   ProfileShell,
   ProfileSkeleton,
   ProfileStatus,
 } from '@/components/profile/ProfileView'
+import { ProfileDashboard } from '@/components/profile/ProfileDashboard'
+import { ProfilePrivacy } from '@/components/profile/ProfilePrivacy'
 import { toViewData } from '@/components/profile/profileFormat'
 import { Alert } from '@/components/ui/Alert'
 import { useRemoteData } from '@/hooks/useRemoteData'
@@ -29,9 +31,7 @@ export function ProfilePage() {
   }
 
   return (
-    <ProfileShell>
-      <ProfileBreadcrumb items={[{ label: 'Meu perfil' }]} />
-
+    <ProfileShell showBanner={false}>
       {saved ? (
         <Alert variant="success" onDismiss={dismissSaved}>
           Perfil atualizado com sucesso.
@@ -43,37 +43,40 @@ export function ProfilePage() {
         <ProfileStatus kind="error" onRetry={retry} />
       ) : null}
       {state.status === 'ready' ? (
-        <>
+        <ProfileSettingsProvider
+          key={state.data.username}
+          username={state.data.username}
+        >
           <ProfileHero
+            avatar={<ProfilePhotoEditor name={state.data.name} />}
             profile={toViewData(state.data)}
-            action={<EditProfileLink label="Editar perfil" />}
+            action={
+              <div className="flex flex-wrap gap-3">
+                <EditProfileLink label="Editar perfil" />
+                <Link
+                  to="/jogadores/$username"
+                  params={{ username: state.data.username }}
+                  className="inline-flex h-10 items-center rounded-control border border-primary-900 bg-white px-4 text-sm font-semibold text-primary-900 hover:bg-primary-100"
+                >
+                  Ver perfil público
+                </Link>
+              </div>
+            }
           />
-          <div className="grid gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-            <div className="space-y-5">
-              <GamesCard
+          <ProfileDashboard
+            about={
+              <AboutCard
                 profile={toViewData(state.data)}
-                title="TCGs que coleciono"
-                editAction={<EditProfileLink label="Editar" compact />}
+                email={state.data.email}
+                emptyBioAction={
+                  <EditProfileLink label="Escrever bio" compact />
+                }
               />
-              <FeaturedCollectionCard />
-            </div>
-            <AboutCard
-              profile={toViewData(state.data)}
-              email={state.data.email}
-              emptyBioAction={<EditProfileLink label="Escrever bio" compact />}
-            />
-          </div>
-          <p className="text-sm text-neutral-500">
-            Seu perfil público:{' '}
-            <Link
-              to="/jogadores/$username"
-              params={{ username: state.data.username }}
-              className="font-semibold text-primary-900 underline-offset-2 hover:underline"
-            >
-              /jogadores/{state.data.username}
-            </Link>
-          </p>
-        </>
+            }
+            privacy={<ProfilePrivacy username={state.data.username} />}
+            collection={<FeaturedCollection />}
+          />
+        </ProfileSettingsProvider>
       ) : null}
     </ProfileShell>
   )

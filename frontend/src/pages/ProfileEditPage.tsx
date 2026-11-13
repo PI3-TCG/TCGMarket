@@ -1,6 +1,4 @@
 import {
-  Avatar,
-  ProfileBreadcrumb,
   ProfileShell,
   ProfileSkeleton,
   ProfileStatus,
@@ -10,6 +8,9 @@ import {
   PROFILE_GAMES,
 } from '@/components/profile/profileFormat'
 import { Alert } from '@/components/ui/Alert'
+import { ProfilePrivacy } from '@/components/profile/ProfilePrivacy'
+import { ProfileSettingsProvider } from '@/components/profile/ProfileSettingsContext'
+import { ProfilePhotoEditor } from '@/components/profile/ProfilePhotoEditor'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
@@ -59,18 +60,19 @@ export function ProfileEditPage() {
   const { state, retry } = useRemoteData(`me:${user?.id}`, getOwnProfile)
 
   return (
-    <ProfileShell>
-      <ProfileBreadcrumb
-        items={[
-          { label: 'Meu perfil', to: '/perfil' },
-          { label: 'Editar perfil' },
-        ]}
-      />
+    <ProfileShell title="Editar perfil">
       {state.status === 'loading' ? <ProfileSkeleton /> : null}
       {state.status === 'notFound' || state.status === 'error' ? (
         <ProfileStatus kind="error" onRetry={retry} />
       ) : null}
-      {state.status === 'ready' ? <ProfileForm profile={state.data} /> : null}
+      {state.status === 'ready' ? (
+        <ProfileSettingsProvider
+          key={state.data.username}
+          username={state.data.username}
+        >
+          <ProfileForm profile={state.data} />
+        </ProfileSettingsProvider>
+      ) : null}
     </ProfileShell>
   )
 }
@@ -156,43 +158,36 @@ function ProfileForm({ profile }: { profile: ProfileResponse }) {
 
   return (
     <Card className="mx-auto max-w-3xl p-5 sm:p-7">
-      <h1 className="font-display text-2xl font-bold text-primary-900">
+      <h2 className="font-display text-2xl font-bold text-primary-900">
         Editar perfil
-      </h1>
+      </h2>
       <p className="mt-1 text-sm text-neutral-700">
         Essas informações aparecem no seu perfil público. Seu e-mail nunca é
         exibido para outros jogadores.
       </p>
 
+      <section
+        aria-label="Foto do perfil"
+        className="mt-5 flex flex-wrap items-center gap-5 rounded-xl border border-neutral-200 bg-neutral-50 p-5"
+      >
+        <ProfilePhotoEditor name={profile.name} showRemove />
+        <div>
+          <h3 className="font-semibold text-primary-900">Foto do perfil</h3>
+          <p className="mt-1 text-sm text-neutral-700">
+            Use o botão de câmera para enviar uma imagem JPEG, PNG ou WebP de
+            até 2 MB.
+          </p>
+        </div>
+      </section>
+      <div className="mt-5">
+        <ProfilePrivacy username={profile.username} />
+      </div>
       <form className="mt-6 space-y-6" onSubmit={handleSubmit} noValidate>
         {feedback ? (
           <Alert variant="error" onDismiss={() => setFeedback(null)}>
             {feedback}
           </Alert>
         ) : null}
-
-        <section aria-labelledby="photo-title">
-          <h2
-            id="photo-title"
-            className="mb-2 text-sm font-medium text-neutral-900"
-          >
-            Foto do perfil
-          </h2>
-          <div className="flex flex-wrap items-center gap-4">
-            <Avatar name={form.name || profile.name} size="md" />
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <Button variant="outline" disabled>
-                  Trocar foto
-                </Button>
-                <Badge variant="neutral">Em breve</Badge>
-              </div>
-              <p className="text-xs text-neutral-500">
-                JPEG, PNG ou WebP até 2 MB. Sem foto, exibimos suas iniciais.
-              </p>
-            </div>
-          </div>
-        </section>
 
         <div className="grid gap-5 sm:grid-cols-2">
           <Input

@@ -108,7 +108,21 @@ function HistoryContent({ search }: { search: TransactionHistorySearch }) {
             </button>
           )
         })}
+        <button
+          type="button"
+          role="tab"
+          aria-selected={false}
+          disabled
+          title="Histórico de trocas em breve"
+          className={`${idleTab} cursor-not-allowed opacity-50`}
+        >
+          Trocas · Em breve
+        </button>
       </div>
+      <p className="text-sm text-neutral-500">
+        O histórico de trocas estará disponível em breve. Acompanhe suas
+        propostas em Minhas propostas.
+      </p>
 
       <section
         aria-label="Transações"
