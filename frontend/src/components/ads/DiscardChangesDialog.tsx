@@ -4,6 +4,9 @@ import { cn } from '@/components/ui/cn'
 import { Icon } from '@/components/ui/Icon'
 import {
   ModalHeaderOrnaments,
+  ModalGoldDivider,
+  modalSecondaryButton as secondaryButton,
+  modalDangerButton as dangerButton,
   modalCloseButton,
   modalFrame,
   modalHeader,
@@ -17,13 +20,6 @@ type Props = {
   onContinue: () => void
   onConfirm: () => void
 }
-
-// Os botões seguem a paleta dos modais de coleção e anúncios, sem
-// sobrescrever os estilos globais do componente Button.
-const secondaryButton =
-  'inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[#C7C3E4] bg-[linear-gradient(180deg,#FFFFFF_0%,#EAE8F6_100%)] px-5 py-3 text-sm font-semibold text-[#21183D] shadow-[inset_0_1px_0_rgba(255,255,255,0.75)] transition hover:brightness-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1254BD]'
-const dangerButton =
-  'inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[#EA4554] bg-[linear-gradient(180deg,#EF263B_0%,#BD091D_100%)] px-5 py-3 text-sm font-bold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.30),0_5px_12px_rgba(166,14,38,0.19)] transition hover:brightness-105 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#A60818]'
 
 export function DiscardChangesDialog({
   title,
@@ -134,13 +130,7 @@ export function DiscardChangesDialog({
           </button>
         </div>
 
-        {/* Divisória dourada entre cabeçalho e corpo, como nos demais modais. */}
-        <div
-          aria-hidden="true"
-          className="relative z-10 h-[2px] bg-[linear-gradient(90deg,#C78600_0%,#FCD84C_30%,#FFF0A8_50%,#FCD84C_70%,#C78600_100%)] shadow-[0_0_8px_rgba(252,210,3,0.25)]"
-        >
-          <span className="absolute left-1/2 top-1/2 size-[16px] -translate-x-1/2 -translate-y-1/2 rotate-45 rounded-[2px] border-2 border-[#F6C846] bg-[linear-gradient(135deg,#FFF9E0,#FFE36D)] shadow-[0_0_0_2px_#691074,0_0_10px_rgba(252,210,3,0.35)]" />
-        </div>
+        <ModalGoldDivider />
 
         <div className="bg-[radial-gradient(ellipse_at_top_left,rgba(238,229,254,0.8),transparent_75%),linear-gradient(135deg,#FDFBFF,#F5F3FD)] px-5 pb-5 pt-7 sm:px-6">
           <div className="flex items-start gap-3 rounded-xl border border-[#E9CCD1] bg-[linear-gradient(135deg,#FFF9FA,#FFF1F3)] p-4 shadow-[0_2px_8px_rgba(115,30,59,0.04)]">

@@ -20,7 +20,6 @@ public class User {
   private String passwordHash;
 
   private UserRole role;
-
   private UserStatus status = UserStatus.ACTIVE;
 
   private Instant registrationDate;

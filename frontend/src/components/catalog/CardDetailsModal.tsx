@@ -21,6 +21,7 @@ import { cn } from '@/components/ui/cn'
 import { Icon } from '@/components/ui/Icon'
 import {
   ModalHeaderOrnaments,
+  ModalGoldDivider,
   modalBody,
   modalCloseButton,
   modalFooter,
@@ -198,15 +199,7 @@ export function CardDetailsModal({
           </div>
         </header>
 
-        {/* Linha de ouro na fronteira exata entre o cabeçalho e o conteúdo. */}
-        <div
-          aria-hidden="true"
-          className="relative z-10 h-[2px] shrink-0 bg-[linear-gradient(90deg,#C78600,#FCD84C_33%,#FFF0A8_50%,#FCD84C_67%,#C78600)]"
-        >
-          <span className="absolute left-1/2 top-1/2 flex size-[18px] -translate-x-1/2 -translate-y-1/2 rotate-45 items-center justify-center rounded-[2px] border-2 border-[#F6C846] bg-[linear-gradient(135deg,#FFF9E0,#FFE36D)] shadow-[0_0_0_2px_#691074,0_0_10px_rgba(252,210,3,0.35)]">
-            <span className="size-[6px] border border-[#E6A900] bg-white/80" />
-          </span>
-        </div>
+        <ModalGoldDivider />
 
         <div
           className={cn(
