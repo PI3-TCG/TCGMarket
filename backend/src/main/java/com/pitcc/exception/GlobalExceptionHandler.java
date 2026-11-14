@@ -5,15 +5,18 @@ import com.pitcc.dto.ApiErrorResponse.FieldErrorResponse;
 import com.pitcc.dto.AddCartItemRequest;
 import com.pitcc.dto.AddressRequest;
 import com.pitcc.dto.CheckoutValidationResponse;
+import com.pitcc.dto.CreateReviewRequest;
 import com.pitcc.dto.CreateAdRequest;
 import com.pitcc.dto.HideCardRequest;
 import com.pitcc.dto.LoginRequest;
+import com.pitcc.dto.ModerateProfileRequest;
 import com.pitcc.dto.PlaceOrderRequest;
 import com.pitcc.dto.UpdateAdRequest;
 import com.pitcc.dto.UpdateCartItemRequest;
 import com.pitcc.dto.UpdateCartSelectionRequest;
 import com.pitcc.dto.UpdateProfileRequest;
 import com.pitcc.dto.UpdateUserRoleRequest;
+import com.pitcc.dto.UpdateUserStatusRequest;
 import com.pitcc.integration.catalog.ExternalApiException;
 import com.pitcc.model.DeliveryAddress;
 import com.pitcc.security.SecurityConfig;
@@ -52,12 +55,14 @@ public class GlobalExceptionHandler {
                     case LoginRequest _ -> "Dados de login inválidos.";
                     case UpdateUserRoleRequest _ -> "Perfil inválido.";
                     case UpdateProfileRequest _ -> "Dados do perfil inválidos.";
-                    case HideCardRequest _ -> "Motivo inválido.";
+                    case HideCardRequest _, UpdateUserStatusRequest _ -> "Motivo inválido.";
+                    case ModerateProfileRequest _ -> "Revise os campos e o motivo da moderação.";
                     case CreateAdRequest _, UpdateAdRequest _ -> "Revise os dados do anúncio.";
                     case AddCartItemRequest _, UpdateCartItemRequest _, UpdateCartSelectionRequest _ ->
                             "Revise os dados do carrinho.";
                     case AddressRequest _ -> INVALID_ADDRESS;
                     case PlaceOrderRequest _ -> "Selecione um endereço de entrega.";
+                    case CreateReviewRequest _ -> "Revise os dados da avaliação.";
                     case null, default -> "Dados de cadastro inválidos.";
                 };
         return ResponseEntity.badRequest().body(error(HttpStatus.BAD_REQUEST, message, fields));
@@ -75,8 +80,12 @@ public class GlobalExceptionHandler {
         return forbidden(SecurityConfig.ACCESS_DENIED);
     }
 
-    @ExceptionHandler(OwnRoleChangeException.class)
-    public ResponseEntity<ApiErrorResponse> handleOwnRoleChange(OwnRoleChangeException exception) {
+    @ExceptionHandler({
+        OwnRoleChangeException.class,
+        OwnStatusChangeException.class,
+        AccountSuspendedException.class
+    })
+    public ResponseEntity<ApiErrorResponse> handleForbiddenAction(RuntimeException exception) {
         return forbidden(exception.getMessage());
     }
 
@@ -229,6 +238,12 @@ public class GlobalExceptionHandler {
     ) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(error(HttpStatus.NOT_FOUND, exception.getMessage(), List.of()));
+    }
+
+    @ExceptionHandler(ReviewConflictException.class)
+    public ResponseEntity<ApiErrorResponse> handleReviewConflict(ReviewConflictException exception) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(error(HttpStatus.CONFLICT, exception.getMessage(), List.of()));
     }
 
     @ExceptionHandler(CartItemNotFoundException.class)

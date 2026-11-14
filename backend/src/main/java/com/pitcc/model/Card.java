@@ -1,6 +1,7 @@
 package com.pitcc.model;
 
 import com.pitcc.util.TextNormalizer;
+import java.util.Map;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -36,6 +37,8 @@ public abstract class Card {
     private String externalId;
     private String conceptualId;
     private CardSource source;
+    // Chave: código do idioma, como "pt".
+    private Map<String, CardLocalization> localizations;
 
     protected Card(){
     }
@@ -139,6 +142,14 @@ public abstract class Card {
 
     public CardSource getSource() {
         return source;
+    }
+
+    public Map<String, CardLocalization> getLocalizations() {
+        return localizations;
+    }
+
+    public void setLocalizations(Map<String, CardLocalization> localizations) {
+        this.localizations = localizations;
     }
 
 

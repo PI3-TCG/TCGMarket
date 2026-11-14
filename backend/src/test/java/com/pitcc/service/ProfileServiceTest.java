@@ -18,6 +18,7 @@ import com.pitcc.exception.UsernameAlreadyTakenException;
 import com.pitcc.model.CardGame;
 import com.pitcc.model.User;
 import com.pitcc.model.UserRole;
+import com.pitcc.model.UserStatus;
 import com.pitcc.repository.UserRepository;
 import java.time.Instant;
 import java.util.List;
@@ -110,6 +111,14 @@ class ProfileServiceTest {
     assertThrows(
         UsernameAlreadyTakenException.class,
         () -> profileService.updateOwnProfile("u1", request("lucas.tcg")));
+  }
+
+  @Test
+  void shouldHideThePublicProfileOfSuspendedAccount() {
+    user.setStatus(UserStatus.SUSPENDED);
+    when(userRepository.findByUsername("lucas.martins")).thenReturn(Optional.of(user));
+
+    assertThrows(UserNotFoundException.class, () -> profileService.publicProfile("lucas.martins"));
   }
 
   @Test

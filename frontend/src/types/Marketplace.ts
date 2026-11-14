@@ -10,6 +10,8 @@ export interface MarketplaceAd {
   cardNumber: string | null
   rarity: string | null
   imageUrl: string | null
+  /** A imagem é de outro idioma (ex.: anúncio em português com scan em inglês). */
+  illustrativeImage: boolean
   condition: CardCondition
   language: CardLanguage
   remainingQuantity: number

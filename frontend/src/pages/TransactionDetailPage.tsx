@@ -10,17 +10,20 @@ import {
   languageLabels,
 } from '@/components/ads/adFormat'
 import {
+  adjustmentLabel,
   counterpartyName,
   formatHistoryDate,
   historyStatusMeta,
   historyTypeMeta,
 } from '@/components/history/historyFormat'
+import { TransactionReviewSection } from '@/components/history/TransactionReviewSection'
 import { Icon } from '@/components/ui/Icon'
 import { useRemoteData } from '@/hooks/useRemoteData'
 import { getMyTransaction } from '@/services/transactionHistory'
 import { useSession } from '@/session'
 import type {
   TransactionHistoryEntry,
+  TransactionHistoryItem,
   TransactionHistorySearch,
 } from '@/types/TransactionHistory'
 
@@ -138,67 +141,33 @@ function TransactionSummary({ entry }: { entry: TransactionHistoryEntry }) {
 
   return (
     <div className="mt-4 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
-      <section
-        aria-labelledby="transaction-items"
-        className="rounded-xl border border-neutral-200 bg-white p-4"
-      >
-        <h2
-          id="transaction-items"
-          className="mb-4 font-display text-xl font-bold text-primary-900"
-        >
-          {entry.type === 'PURCHASE' ? 'Cartas compradas' : 'Cartas vendidas'}
-        </h2>
+      <div className="space-y-6">
+        {entry.type === 'TRADE' ? (
+          <>
+            <ItemSection
+              id="transaction-items-sent"
+              title="Cartas entregues"
+              items={entry.items.filter((item) => item.direction === 'SENT')}
+            />
+            <ItemSection
+              id="transaction-items-received"
+              title="Cartas recebidas"
+              items={entry.items.filter((item) => item.direction === 'RECEIVED')}
+            />
+          </>
+        ) : (
+          <ItemSection
+            id="transaction-items"
+            title={entry.type === 'PURCHASE' ? 'Cartas compradas' : 'Cartas vendidas'}
+            items={entry.items}
+          />
+        )}
 
-        <ul className="divide-y divide-neutral-200">
-          {entry.items.map((item, index) => (
-            <li
-              key={`${item.cardId}-${index}`}
-              className="flex gap-4 py-3 first:pt-0 last:pb-0"
-            >
-              {item.imageUrl ? (
-                <img
-                  src={item.imageUrl}
-                  alt={`Carta ${item.name}`}
-                  className="h-28 w-20 shrink-0 rounded-lg object-cover"
-                />
-              ) : (
-                <div
-                  role="img"
-                  aria-label={`Imagem indisponível de ${item.name}`}
-                  className="h-28 w-20 shrink-0 rounded-lg bg-primary-100"
-                />
-              )}
-
-              <div className="min-w-0 flex-1">
-                <p className="font-semibold text-neutral-900">{item.name}</p>
-                <p className="text-sm text-neutral-700">
-                  {[gameLabels[item.game] ?? item.game, item.edition, item.cardNumber]
-                    .filter(Boolean)
-                    .join(' · ')}
-                </p>
-                <p className="text-sm text-neutral-700">
-                  {conditionLabels[item.condition]} ·{' '}
-                  {languageLabels[item.language]}
-                </p>
-              </div>
-
-              <div className="shrink-0 text-right text-sm">
-                <p className="text-neutral-700">{copies(item.quantity)}</p>
-                {item.unitPrice !== null && (
-                  <>
-                    <p className="text-neutral-700">
-                      {formatCurrency(item.unitPrice)} cada
-                    </p>
-                    <p className="font-semibold text-neutral-900">
-                      {formatCurrency(item.unitPrice * item.quantity)}
-                    </p>
-                  </>
-                )}
-              </div>
-            </li>
-          ))}
-        </ul>
-      </section>
+        <TransactionReviewSection
+          transactionId={entry.id}
+          counterpartyName={counterpartyName(entry)}
+        />
+      </div>
 
       <aside
         aria-label="Resumo da transação"
@@ -251,16 +220,109 @@ function TransactionSummary({ entry }: { entry: TransactionHistoryEntry }) {
             <dt className="text-neutral-500">Identificador</dt>
             <dd className="break-all font-mono text-xs">{entry.id}</dd>
           </div>
+          {entry.tradeProposalId && (
+            <div>
+              <dt className="text-neutral-500">Proposta de troca</dt>
+              <dd className="break-all font-mono text-xs">{entry.tradeProposalId}</dd>
+            </div>
+          )}
         </dl>
 
-        <div className="flex items-center justify-between border-t border-neutral-200 pt-4">
-          <span className="text-sm text-neutral-700">Total</span>
-          <span className="font-display text-2xl font-bold text-primary-900">
-            {formatCurrency(entry.totalAmount)}
-          </span>
-        </div>
+        {entry.type === 'TRADE' ? (
+          <div className="border-t border-neutral-200 pt-4">
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-sm text-neutral-700">Complemento financeiro</span>
+              <span className="text-right font-display text-lg font-bold text-primary-900">
+                {adjustmentLabel(entry)}
+              </span>
+            </div>
+            {entry.financialAdjustment && (
+              <p className="mt-1 text-xs text-neutral-500">
+                Valor apenas registrado na negociação; nenhum pagamento foi processado.
+              </p>
+            )}
+          </div>
+        ) : (
+          <div className="flex items-center justify-between border-t border-neutral-200 pt-4">
+            <span className="text-sm text-neutral-700">Total</span>
+            <span className="font-display text-2xl font-bold text-primary-900">
+              {formatCurrency(entry.totalAmount ?? 0)}
+            </span>
+          </div>
+        )}
       </aside>
     </div>
+  )
+}
+
+function ItemSection({
+  id,
+  title,
+  items,
+}: {
+  id: string
+  title: string
+  items: TransactionHistoryItem[]
+}) {
+  return (
+    <section
+      aria-labelledby={id}
+      className="rounded-xl border border-neutral-200 bg-white p-4"
+    >
+      <h2 id={id} className="mb-4 font-display text-xl font-bold text-primary-900">
+        {title}
+      </h2>
+
+      <ul className="divide-y divide-neutral-200">
+        {items.map((item, index) => (
+          <li
+            key={`${item.cardId}-${index}`}
+            className="flex gap-4 py-3 first:pt-0 last:pb-0"
+          >
+            {item.imageUrl ? (
+              <img
+                src={item.imageUrl}
+                alt={`Carta ${item.name}`}
+                className="h-28 w-20 shrink-0 rounded-lg object-cover"
+              />
+            ) : (
+              <div
+                role="img"
+                aria-label={`Imagem indisponível de ${item.name}`}
+                className="h-28 w-20 shrink-0 rounded-lg bg-primary-100"
+              />
+            )}
+
+            <div className="min-w-0 flex-1">
+              <p className="font-semibold text-neutral-900">{item.name}</p>
+              <p className="text-sm text-neutral-700">
+                {[gameLabels[item.game] ?? item.game, item.edition, item.cardNumber]
+                  .filter(Boolean)
+                  .join(' · ')}
+              </p>
+              <p className="text-sm text-neutral-700">
+                {conditionLabels[item.condition]} ·{' '}
+                {languageLabels[item.language]}
+              </p>
+            </div>
+
+            <div className="shrink-0 text-right text-sm">
+              <p className="text-neutral-700">{copies(item.quantity)}</p>
+              {item.unitPrice !== null && (
+                <>
+                  <p className="text-neutral-700">
+                    {formatCurrency(item.unitPrice)} cada
+                  </p>
+                  <p className="font-semibold text-neutral-900">
+                    {formatCurrency(item.unitPrice * item.quantity)}
+                  </p>
+                </>
+              )}
+            </div>
+          </li>
+        ))}
+      </ul>
+    </section>
   )
 }
 

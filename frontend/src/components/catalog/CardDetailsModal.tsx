@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
-import { fetchCatalogCard } from '@/services/catalogApi'
+import { fetchCatalogCard, localizedName } from '@/services/catalogApi'
+import { ImageLanguageToggle } from '@/components/catalog/ImageLanguageToggle'
 import { useRemoteData } from '@/hooks/useRemoteData'
 import {
   GAME_INFO,
@@ -59,6 +60,9 @@ export function CardDetailsModal({
   const loadCard = useCallback(() => fetchCatalogCard(cardId), [cardId])
   const { state, retry } = useRemoteData(cardId, loadCard)
   const card = state.status === 'ready' ? state.data : null
+  const [showPt, setShowPt] = useState(false)
+  const ptImage = card?.localizations?.pt?.imageUrl ?? null
+  const imageUrl = showPt && ptImage ? ptImage : (card?.imageUrl ?? null)
   const isCollection = context === 'collection'
   const canPerformAction = isCollection
     ? Boolean(onCreateListing)
@@ -210,17 +214,22 @@ export function CardDetailsModal({
               <div className="grid gap-3.5 sm:grid-cols-[228px_minmax(0,1fr)]">
                 {/* Somente a imagem principal: sem miniaturas ou outras impressões. */}
                 <aside className="rounded-2xl border border-[#d8c4df] bg-gradient-to-b from-[#ebe0fa] via-[#f3ecfd] to-[#e9e1f6] p-3 shadow-sm">
+                  {ptImage && (
+                    <div className="mb-2.5">
+                      <ImageLanguageToggle showPt={showPt} onChange={setShowPt} />
+                    </div>
+                  )}
                   <div className="flex min-h-[230px] items-center justify-center rounded-xl bg-white/60 p-2 sm:min-h-[255px]">
-                    {card.imageUrl ? (
+                    {imageUrl ? (
                       <a
-                        href={card.imageUrl}
+                        href={imageUrl}
                         target="_blank"
                         rel="noreferrer noopener"
                         aria-label={`Ver imagem completa de ${card.name}`}
                         className="block rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-900"
                       >
                         <img
-                          src={card.imageUrl}
+                          src={imageUrl}
                           alt={imageAlt(card)}
                           className="mx-auto max-h-[275px] w-auto max-w-full object-contain drop-shadow-[0_10px_13px_rgba(49,17,72,0.22)]"
                         />
@@ -232,9 +241,9 @@ export function CardDetailsModal({
                       </div>
                     )}
                   </div>
-                  {card.imageUrl && (
+                  {imageUrl && (
                     <a
-                      href={card.imageUrl}
+                      href={imageUrl}
                       target="_blank"
                       rel="noreferrer noopener"
                       className="mt-2.5 flex items-center justify-center gap-1.5 rounded-lg border border-primary-300/60 bg-white/75 py-2 text-xs font-semibold text-primary-900 transition hover:bg-white focus-visible:outline-2 focus-visible:outline-primary-900"
@@ -255,6 +264,14 @@ export function CardDetailsModal({
                   <h3 className="mt-3 font-display text-xl font-bold leading-tight text-primary-900 sm:text-2xl">
                     {card.name}
                   </h3>
+                  {localizedName(card.name, card.localizations) && (
+                    <p lang="pt-BR" className="mt-1 text-sm text-neutral-700">
+                      Em português:{' '}
+                      <span className="font-semibold">
+                        {localizedName(card.name, card.localizations)}
+                      </span>
+                    </p>
+                  )}
                   <p className="mt-1 text-xs text-neutral-600">
                     {setLine(card)}
                   </p>

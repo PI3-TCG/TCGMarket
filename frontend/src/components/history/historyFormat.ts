@@ -1,3 +1,4 @@
+import { formatCurrency } from '@/components/ads/adFormat'
 import type { IconName } from '@/components/ui/Icon'
 import type {
   TransactionHistoryEntry,
@@ -19,6 +20,11 @@ export const historyTypeMeta: Record<
     label: 'Venda',
     counterpartyRole: 'Comprador',
     className: 'bg-primary-100 text-primary-900',
+  },
+  TRADE: {
+    label: 'Troca',
+    counterpartyRole: 'Parceiro de troca',
+    className: 'bg-secondary-100 text-secondary-700',
   },
 }
 
@@ -47,11 +53,19 @@ export function counterpartyName(entry: TransactionHistoryEntry) {
   return entry.counterparty?.name ?? 'Usuário indisponível'
 }
 
+export function adjustmentLabel(entry: TransactionHistoryEntry) {
+  const adjustment = entry.financialAdjustment
+  if (!adjustment) {
+    return 'Sem complemento'
+  }
+  return `${adjustment.direction === 'SENT' ? 'Você pagou' : 'Você recebeu'} ${formatCurrency(adjustment.amount)}`
+}
+
 export function parseHistorySearch(
   search: Record<string, unknown>,
 ): TransactionHistorySearch {
   const type =
-    search.type === 'PURCHASE' || search.type === 'SALE'
+    search.type === 'PURCHASE' || search.type === 'SALE' || search.type === 'TRADE'
       ? search.type
       : undefined
   const page = Number(search.page)

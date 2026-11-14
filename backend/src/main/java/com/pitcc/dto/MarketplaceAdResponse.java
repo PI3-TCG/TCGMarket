@@ -15,6 +15,8 @@ public record MarketplaceAdResponse(
         String cardNumber,
         String rarity,
         String imageUrl,
+        // true quando a imagem não é do idioma anunciado (ex.: anúncio em PT com scan em inglês).
+        boolean illustrativeImage,
         CardCondition condition,
         CardLanguage language,
         int remainingQuantity,

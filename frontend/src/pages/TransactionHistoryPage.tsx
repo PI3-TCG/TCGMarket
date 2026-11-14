@@ -3,6 +3,7 @@ import { useEffect, useState, type ReactNode } from 'react'
 import { Link, useNavigate, useSearch } from '@tanstack/react-router'
 import { PageBanner } from '@/components/layout/PageBanner'
 import {
+  adjustmentLabel,
   counterpartyName,
   formatHistoryDate,
   historyStatusMeta,
@@ -26,7 +27,14 @@ const tabs: { type?: TransactionHistoryType; label: string }[] = [
   { label: 'Todas' },
   { type: 'PURCHASE', label: 'Compras' },
   { type: 'SALE', label: 'Vendas' },
+  { type: 'TRADE', label: 'Trocas' },
 ]
+
+const emptyTitles: Record<TransactionHistoryType, string> = {
+  PURCHASE: 'Nenhuma compra encontrada.',
+  SALE: 'Nenhuma venda encontrada.',
+  TRADE: 'Nenhuma troca encontrada.',
+}
 
 type HistoryResult =
   | { key: string; status: 'error' }
@@ -42,7 +50,7 @@ export function TransactionHistoryPage() {
         <PageBanner
           image={pageBanners.profile}
           title="Histórico de transações"
-          subtitle="Consulte suas compras e vendas realizadas no Marketplace."
+          subtitle="Consulte suas compras, vendas e trocas realizadas no Marketplace."
         />
 
         {user && <HistoryContent key={user.id} search={search} />}
@@ -150,11 +158,7 @@ function HistoryContent({ search }: { search: TransactionHistorySearch }) {
           search.type ? (
             <EmptyState
               icon="search"
-              title={
-                search.type === 'PURCHASE'
-                  ? 'Nenhuma compra encontrada.'
-                  : 'Nenhuma venda encontrada.'
-              }
+              title={emptyTitles[search.type]}
               description="Veja todas as transações para conferir o restante do histórico."
             >
               <button
@@ -169,7 +173,7 @@ function HistoryContent({ search }: { search: TransactionHistorySearch }) {
             <EmptyState
               icon="cart"
               title="Você ainda não tem transações."
-              description="Suas compras e vendas concluídas aparecerão aqui."
+              description="Suas compras, vendas e trocas concluídas aparecerão aqui."
             >
               <Link
                 to="/marketplace"
@@ -248,6 +252,11 @@ function TransactionRow({
         <ul className="space-y-1">
           {preview.map((item, index) => (
             <li key={`${item.cardId}-${index}`} className="truncate text-sm">
+              {entry.type === 'TRADE' && (
+                <span className="text-neutral-500">
+                  {item.direction === 'SENT' ? 'Entregou' : 'Recebeu'}{' '}
+                </span>
+              )}
               <span className="font-semibold text-neutral-900">
                 {item.quantity}×
               </span>{' '}
@@ -272,9 +281,15 @@ function TransactionRow({
           <Icon name={status.icon} size={16} />
           {status.label}
         </span>
-        <span className="font-display text-lg font-bold text-primary-900">
-          {formatCurrency(entry.totalAmount)}
-        </span>
+        {entry.type === 'TRADE' ? (
+          <span className="text-sm font-semibold text-primary-900">
+            {adjustmentLabel(entry)}
+          </span>
+        ) : (
+          <span className="font-display text-lg font-bold text-primary-900">
+            {formatCurrency(entry.totalAmount ?? 0)}
+          </span>
+        )}
         <Link
           to="/perfil/historico/$transactionId"
           params={{ transactionId: entry.id }}

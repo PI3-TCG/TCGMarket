@@ -66,6 +66,9 @@ public class Ad {
     // Exemplares separados para pedidos com pagamento pendente.
     private List<AdPurchaseHold> purchaseHolds = new ArrayList<>();
 
+    // Trocas já baixadas da quantidade restante; evita baixar duas vezes ao repetir a conclusão.
+    private List<String> appliedTrades = new ArrayList<>();
+
     protected Ad() {
     }
 

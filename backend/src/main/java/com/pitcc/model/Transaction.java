@@ -3,6 +3,7 @@ package com.pitcc.model;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.CompoundIndex;
@@ -53,6 +54,9 @@ public class Transaction {
     @Field(targetType = FieldType.DECIMAL128)
     private BigDecimal totalAmount;
 
+    // Complemento combinado na troca; apenas registro, sem pagamento executado.
+    private FinancialAdjustment financialAdjustment;
+
     private Instant completedAt;
 
     protected Transaction() {
@@ -90,6 +94,48 @@ public class Transaction {
         return transaction;
     }
 
+    /**
+     * Troca aceita: o dono do anúncio ocupa o lugar de vendedor e o proponente
+     * o de comprador; os itens guardam a direção de cada carta.
+     */
+    public static Transaction fromAcceptedTrade(TradeProposal proposal, Instant now) {
+        if (proposal == null || proposal.getId() == null) {
+            throw new IllegalArgumentException("A transação precisa de uma proposta salva.");
+        }
+        if (proposal.getStatus() != TradeProposalStatus.ACCEPTED
+                && proposal.getStatus() != TradeProposalStatus.COMPLETED) {
+            throw new IllegalArgumentException("Só propostas aceitas geram transação.");
+        }
+
+        Transaction transaction = new Transaction();
+        transaction.type = TransactionType.TRADE;
+        transaction.sourceId = proposal.getId();
+        transaction.sellerId = proposal.getRecipientId();
+        transaction.buyerId = proposal.getProposerId();
+        transaction.items = Stream.concat(
+                proposal.getOfferedItems().stream().map(item -> new TransactionItem(
+                        null,
+                        proposal.getProposerId(),
+                        proposal.getRecipientId(),
+                        item.getCard(),
+                        item.getQuantity(),
+                        null
+                )),
+                proposal.getRequestedItems().stream().map(item -> new TransactionItem(
+                        item.getSourceAdId(),
+                        proposal.getRecipientId(),
+                        proposal.getProposerId(),
+                        item.getCard(),
+                        item.getQuantity(),
+                        null
+                ))
+        ).toList();
+        transaction.financialAdjustment = proposal.getFinancialAdjustment();
+        transaction.completedAt = now;
+
+        return transaction;
+    }
+
     public String getId() {
         return id;
     }
@@ -116,6 +162,10 @@ public class Transaction {
 
     public BigDecimal getTotalAmount() {
         return totalAmount;
+    }
+
+    public FinancialAdjustment getFinancialAdjustment() {
+        return financialAdjustment;
     }
 
     public Instant getCompletedAt() {

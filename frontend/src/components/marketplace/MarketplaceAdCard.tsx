@@ -41,7 +41,15 @@ export function MarketplaceAdCard({ ad }: Props) {
 
   return (
     <article className="flex min-w-0 flex-col overflow-hidden rounded-xl border border-primary-100 bg-white shadow-sm transition-shadow hover:shadow-md">
-      <div className="flex aspect-[4/5] items-center justify-center bg-neutral-100 p-3">
+      <div className="relative flex aspect-[4/5] items-center justify-center bg-neutral-100 p-3">
+        <span className="absolute top-2 left-2 rounded-full bg-primary-900 px-2 py-0.5 text-xs font-semibold text-white shadow-sm">
+          {languageLabels[ad.language] ?? ad.language}
+        </span>
+        {hasImage && ad.illustrativeImage && (
+          <span className="absolute inset-x-2 bottom-2 rounded-md bg-white/90 px-2 py-1 text-center text-[11px] text-neutral-700 shadow-sm">
+            Imagem ilustrativa (versão em inglês)
+          </span>
+        )}
         {hasImage ? (
           <img
             src={ad.imageUrl ?? undefined}

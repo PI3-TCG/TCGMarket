@@ -1,9 +1,13 @@
+import { AdminActionList } from '@/components/admin/AdminActionList'
 import { GAME_LABEL } from '@/components/admin/adminFormat'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
-import { useRemoteData } from '@/hooks/useRemoteData'
-import { fetchAdminCatalogSummary } from '@/services/adminApi'
-import type { CardGame } from '@/types/AdminCatalog'
+import { useRemoteData, type RemoteData } from '@/hooks/useRemoteData'
+import {
+  fetchAdminCatalogSummary,
+  fetchRecentAdminActions,
+} from '@/services/adminApi'
+import type { AdminCatalogSummary, CardGame } from '@/types/AdminCatalog'
 import { Link } from '@tanstack/react-router'
 
 const GAME_BAR: Record<CardGame, string> = {
@@ -24,6 +28,70 @@ export function AdminOverviewPage() {
     fetchAdminCatalogSummary,
   )
 
+  return (
+    <div className="space-y-4">
+      <CatalogSummary state={state} retry={retry} />
+      <RecentActions />
+    </div>
+  )
+}
+
+function RecentActions() {
+  const { state, retry } = useRemoteData(
+    'admin-recent-actions',
+    fetchRecentAdminActions,
+  )
+
+  return (
+    <Card>
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-200 px-5 py-4">
+        <h2 className="text-lg font-semibold text-neutral-900">
+          Últimas ações administrativas
+        </h2>
+        <Link
+          to="/admin/usuarios"
+          className="text-sm font-semibold text-primary-900 hover:text-primary-800"
+        >
+          Ver usuários
+        </Link>
+      </div>
+      <div className="px-5">
+        {state.status === 'loading' ? (
+          <p role="status" className="py-6 text-sm text-neutral-500">
+            Carregando ações...
+          </p>
+        ) : state.status !== 'ready' ? (
+          <div role="alert" className="space-y-3 py-6 text-sm">
+            <p className="text-neutral-700">
+              As últimas ações estão indisponíveis no momento.
+            </p>
+            <Button variant="outline" onClick={retry}>
+              Tentar novamente
+            </Button>
+          </div>
+        ) : state.data.length === 0 ? (
+          <p className="py-6 text-sm text-neutral-500">
+            Nenhuma ação administrativa registrada ainda.
+          </p>
+        ) : (
+          <AdminActionList
+            label="Últimas ações administrativas"
+            actions={state.data}
+            showTarget
+          />
+        )}
+      </div>
+    </Card>
+  )
+}
+
+function CatalogSummary({
+  state,
+  retry,
+}: {
+  state: RemoteData<AdminCatalogSummary>
+  retry: () => void
+}) {
   return (
     <Card>
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-200 px-5 py-4">

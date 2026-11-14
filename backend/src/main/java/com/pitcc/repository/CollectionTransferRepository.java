@@ -5,6 +5,7 @@ import com.pitcc.model.CardCondition;
 import com.pitcc.model.CardLanguage;
 import com.pitcc.model.CollectionItem;
 
+import org.bson.Document;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -56,6 +57,34 @@ public class CollectionTransferRepository {
                 .inc("committedQuantity", -quantity)
                 .inc("adReservations.$.quantity", -quantity)
                 .set("adReservations.$.updatedAt", now)
+                .push(MARKS, mark);
+
+        return mongoTemplate.updateFirst(query, update, CollectionItem.class).getModifiedCount() == 1;
+    }
+
+    /**
+     * Tira exemplares livres (fora de anúncios) do item do dono.
+     * Só aplica se a quantidade não comprometida for suficiente.
+     */
+    public boolean debitFree(
+            String collectionItemId,
+            String ownerId,
+            int quantity,
+            String mark
+    ) {
+        Query query = Query.query(Criteria.where("_id").is(collectionItemId)
+                .and("userId").is(ownerId)
+                .and(MARKS).ne(mark)
+                .andOperator(Criteria.expr(() -> new Document("$gte", List.of(
+                        new Document("$subtract", List.of(
+                                "$quantity",
+                                new Document("$ifNull", List.of("$committedQuantity", 0))
+                        )),
+                        quantity
+                )))));
+
+        Update update = new Update()
+                .inc("quantity", -quantity)
                 .push(MARKS, mark);
 
         return mongoTemplate.updateFirst(query, update, CollectionItem.class).getModifiedCount() == 1;

@@ -12,6 +12,7 @@ import com.pitcc.model.AdStatus;
 import com.pitcc.model.Card;
 import com.pitcc.model.CardCondition;
 import com.pitcc.model.CardLanguage;
+import com.pitcc.model.CardLocalization;
 import com.pitcc.model.CollectionItem;
 import com.pitcc.model.User;
 import com.pitcc.model.YugiohCard;
@@ -24,6 +25,7 @@ import com.pitcc.repository.UserRepository;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -56,7 +58,7 @@ class MarketplaceServiceTest {
             marketplaceSearchRepository);
   }
 
-  private void stubAvailableAd() {
+  private Card stubAvailableAd() {
     CollectionItem item =
         new CollectionItem("seller-1", "card-1", 5, CardCondition.NEAR_MINT, CardLanguage.PORTUGUESE);
     ReflectionTestUtils.setField(item, "id", "item-1");
@@ -78,6 +80,31 @@ class MarketplaceServiceTest {
     when(collectionItemRepository.findById("item-1")).thenReturn(Optional.of(item));
     when(cardRepository.findById("card-1")).thenReturn(Optional.of(card));
     when(userRepository.findById("seller-1")).thenReturn(Optional.of(seller));
+    return card;
+  }
+
+  @Test
+  void shouldShowThePortugueseImageForAPortugueseAd() {
+    Card card = stubAvailableAd();
+    ReflectionTestUtils.setField(card, "imageUrl", "https://img.example/en.png");
+    card.setLocalizations(Map.of("pt", new CardLocalization("Mago Negro", "https://img.example/pt.png")));
+
+    MarketplaceAdResponse response = service.getAvailableAd("ad-1", null);
+
+    assertEquals("https://img.example/pt.png", response.imageUrl());
+    assertFalse(response.illustrativeImage());
+  }
+
+  @Test
+  void shouldFlagTheEnglishImageAsIllustrativeWhenThereIsNoPortugueseScan() {
+    Card card = stubAvailableAd();
+    ReflectionTestUtils.setField(card, "imageUrl", "https://img.example/en.png");
+    card.setLocalizations(Map.of("pt", new CardLocalization("Mago Negro", null)));
+
+    MarketplaceAdResponse response = service.getAvailableAd("ad-1", null);
+
+    assertEquals("https://img.example/en.png", response.imageUrl());
+    assertTrue(response.illustrativeImage());
   }
 
   @Test
