@@ -2,7 +2,13 @@ import mark from '@/assets/mark-3cartas-branco.svg'
 import { useCart } from '@/cart'
 import { hasRole, useSession } from '@/session'
 import { useNavigate } from '@tanstack/react-router'
-import { type FormEvent, useState } from 'react'
+import {
+  type FormEvent,
+  type KeyboardEvent,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 
 type Props = { onSoon: (feature: string) => void }
 
@@ -12,6 +18,9 @@ export function SiteHeader({ onSoon: soon }: Props) {
   const { state: cartState } = useCart()
   const [query, setQuery] = useState('')
   const [menuOpen, setMenuOpen] = useState(false)
+  const menuButtonRef = useRef<HTMLButtonElement>(null)
+  const menuRef = useRef<HTMLDivElement>(null)
+  const focusFirstItemRef = useRef(false)
   const firstName = user?.name.split(' ')[0]
 
   // Enquanto o carrinho carrega, o badge fica oculto em vez de mostrar um número inventado.
@@ -35,7 +44,58 @@ export function SiteHeader({ onSoon: soon }: Props) {
     event.preventDefault()
     if (query.trim()) soon('A busca')
   }
+  useEffect(() => {
+    if (!menuOpen || !focusFirstItemRef.current) return
 
+    focusFirstItemRef.current = false
+
+    menuRef.current
+      ?.querySelector<HTMLButtonElement>('button:not(:disabled)')
+      ?.focus()
+  }, [menuOpen])
+
+  function handleMenuKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+    if (!menuOpen) return
+
+    if (event.key === 'Escape') {
+      event.preventDefault()
+      setMenuOpen(false)
+      menuButtonRef.current?.focus()
+      return
+    }
+
+    if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) {
+      return
+    }
+
+    const items = Array.from(
+      menuRef.current?.querySelectorAll<HTMLButtonElement>(
+        'button:not(:disabled)',
+      ) ?? [],
+    )
+
+    if (items.length === 0) return
+
+    event.preventDefault()
+
+    const currentIndex = items.indexOf(
+      document.activeElement as HTMLButtonElement,
+    )
+
+    let nextIndex = currentIndex
+
+    if (event.key === 'Home') {
+      nextIndex = 0
+    } else if (event.key === 'End') {
+      nextIndex = items.length - 1
+    } else if (event.key === 'ArrowDown') {
+      nextIndex = (currentIndex + 1) % items.length
+    } else {
+      nextIndex = currentIndex <= 0 ? items.length - 1 : currentIndex - 1
+    }
+
+    items[nextIndex]?.focus()
+  }
   return (
     <header className="sticky top-0 z-20 bg-gradient-to-r from-[#47104f] via-primary-900 to-[#310b43] text-white shadow-md">
       <div className="relative mx-auto flex min-h-16 w-full max-w-[1600px] items-center gap-3 px-4 py-2 sm:gap-5 sm:px-6 lg:px-8">
@@ -105,9 +165,19 @@ export function SiteHeader({ onSoon: soon }: Props) {
               <button
                 type="button"
                 onClick={() => setMenuOpen((open) => !open)}
-                className="flex items-center gap-2 rounded-full py-1 pr-1 pl-1 transition hover:bg-white/10"
+                ref={menuButtonRef}
+                onKeyDown={(event) => {
+                  if (event.key === 'ArrowDown') {
+                    event.preventDefault()
+                    focusFirstItemRef.current = true
+                    setMenuOpen(true)
+                  }
+                }}
+                className="flex items-center gap-2 rounded-full py-1 pr-1 pl-1 transition hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500"
                 aria-expanded={menuOpen}
-                aria-label="Abrir menu do perfil"
+                aria-label={
+                  menuOpen ? 'Fechar menu do perfil' : 'Abrir menu do perfil'
+                }
               >
                 <span className="flex size-9 items-center justify-center rounded-full bg-white text-sm font-bold text-primary-900">
                   {firstName?.[0] ?? 'U'}
@@ -118,7 +188,11 @@ export function SiteHeader({ onSoon: soon }: Props) {
                 <ChevronDownIcon />
               </button>
               {menuOpen && (
-                <div className="absolute right-0 mt-2 w-56 rounded-xl border border-neutral-200 bg-white p-3 text-neutral-900 shadow-xl">
+                <div
+                  ref={menuRef}
+                  onKeyDown={handleMenuKeyDown}
+                  className="absolute right-0 mt-2 w-56 rounded-xl border border-neutral-200 bg-white p-3 text-neutral-900 shadow-xl"
+                >
                   <p className="px-2 text-sm font-semibold">{user.name}</p>
                   <p className="truncate px-2 pb-2 text-xs text-neutral-500">
                     {user.email}
@@ -157,7 +231,10 @@ export function SiteHeader({ onSoon: soon }: Props) {
                     type="button"
                     onClick={() => {
                       setMenuOpen(false)
-                      navigate({ to: '/perfil/propostas', search: { direction: 'RECEIVED' } })
+                      navigate({
+                        to: '/perfil/propostas',
+                        search: { direction: 'RECEIVED' },
+                      })
                     }}
                     className="w-full rounded-lg px-2 py-2 text-left text-sm font-medium hover:bg-primary-100"
                   >

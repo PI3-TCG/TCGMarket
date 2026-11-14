@@ -1,9 +1,15 @@
+import { useRef, useState, type FormEvent } from 'react'
 import { Alert } from '@/components/ui/Alert'
-import { Button } from '@/components/ui/Button'
 import { Checkbox } from '@/components/ui/Checkbox'
+import { Icon } from '@/components/ui/Icon'
 import { Input } from '@/components/ui/Input'
 import { Modal } from '@/components/ui/Modal'
 import { Select } from '@/components/ui/Select'
+import {
+  modalDangerButton,
+  modalPrimaryButton,
+  modalSecondaryButton,
+} from '@/components/ui/modalTheme'
 import {
   addressFailure,
   createAddress,
@@ -11,7 +17,6 @@ import {
   type AddressFieldErrors,
 } from '@/services/addresses'
 import type { Address, AddressField } from '@/types/Address'
-import { useRef, useState, type FormEvent } from 'react'
 import {
   LIMITS,
   STATES,
@@ -36,6 +41,11 @@ type AddressFormModalProps = {
 }
 
 const STATE_OPTIONS = STATES.map((state) => ({ value: state, label: state }))
+const sectionStyle =
+  'rounded-[18px] border border-[#DCCAE7] bg-[linear-gradient(180deg,#FFFFFF_0%,#FBF7FD_100%)] p-4 shadow-[0_4px_15px_rgba(60,17,87,0.065)] sm:p-5'
+const sectionTitle =
+  'mb-4 flex items-center gap-2 border-b border-[#E9DDED] pb-3 font-display text-sm font-bold uppercase tracking-[0.035em] text-[#672677]'
+const modalAction = 'inline-flex min-h-11 items-center justify-center gap-2'
 
 export function AddressFormModal({
   address,
@@ -56,7 +66,10 @@ export function AddressFormModal({
   const [confirmingDiscard, setConfirmingDiscard] = useState(false)
   const formRef = useRef<HTMLFormElement>(null)
 
-  function change<K extends keyof AddressDraft>(key: K, value: AddressDraft[K]) {
+  function change<K extends keyof AddressDraft>(
+    key: K,
+    value: AddressDraft[K],
+  ) {
     const next = { ...draft, [key]: value }
     setDraft(next)
     setConfirmingDiscard(false)
@@ -95,7 +108,6 @@ export function AddressFormModal({
     }
 
     setSaving(true)
-
     try {
       const input = toInput(draft)
       const saved = address
@@ -104,7 +116,6 @@ export function AddressFormModal({
       onSaved(saved)
     } catch (cause) {
       const result = addressFailure(cause)
-
       if (result.kind === 'invalid') {
         setErrors(result.fields)
         focusFirstError()
@@ -114,7 +125,9 @@ export function AddressFormModal({
         )
         onUnknownResult()
       } else {
-        setFailure(result.message ?? 'Tente novamente. Seus dados foram mantidos.')
+        setFailure(
+          result.message ?? 'Tente novamente. Seus dados foram mantidos.',
+        )
       }
       setSaving(false)
     }
@@ -129,199 +142,253 @@ export function AddressFormModal({
   return (
     <Modal
       presentation="refined"
+      headerIcon="map-pin"
       open
       title={title}
-      subtitle="Cadastre ou atualize os dados de entrega."
+      subtitle={
+        editing
+          ? 'Atualize as informações do seu endereço de entrega.'
+          : 'Cadastre um novo endereço para suas entregas.'
+      }
       onClose={requestClose}
+      closeDisabled={saving}
       size="lg"
-      className="mx-auto max-w-xl"
+      className="mx-auto max-w-[780px]"
     >
-      <p className="text-sm text-neutral-700">
-        Preencha os dados de entrega.{' '}
-        <span className="text-neutral-500">* Campos obrigatórios</span>
-      </p>
+      <div className="space-y-4 text-[#4A4256]">
+        <div className="flex items-start gap-3 rounded-xl border border-[#D4E6FC] bg-[linear-gradient(115deg,#F1F7FF_0%,#EAF2FF_100%)] px-4 py-3 text-sm text-[#174D8E]">
+          <Icon name="info" size={20} className="mt-0.5" />
+          <p>
+            Preencha os dados de entrega.{' '}
+            <span className="font-semibold">* Campos obrigatórios.</span>
+          </p>
+        </div>
 
-      <form ref={formRef} noValidate onSubmit={submit} className="mt-4">
-        <fieldset disabled={saving} className="grid gap-4 sm:grid-cols-6">
-          <legend className="sr-only">{title}</legend>
+        <form ref={formRef} noValidate onSubmit={submit} className="space-y-4">
+          <fieldset disabled={saving} className="space-y-4">
+            <legend className="sr-only">{title}</legend>
 
-          <Input
-            className="sm:col-span-6"
-            label="Nome do destinatário *"
-            placeholder="Nome completo"
-            autoComplete="name"
-            maxLength={LIMITS.recipientName}
-            aria-required
-            value={draft.recipientName}
-            error={fieldError('recipientName')}
-            onChange={(event) => change('recipientName', event.target.value)}
-          />
-
-          <Input
-            className="sm:col-span-4"
-            label="Identificação (opcional)"
-            placeholder="Ex.: Casa, Trabalho"
-            maxLength={LIMITS.label}
-            value={draft.label}
-            error={fieldError('label')}
-            onChange={(event) => change('label', event.target.value)}
-          />
-
-          <Input
-            className="sm:col-span-2"
-            label="CEP *"
-            placeholder="00000-000"
-            inputMode="numeric"
-            autoComplete="postal-code"
-            aria-required
-            value={draft.zipCode}
-            error={fieldError('zipCode')}
-            onChange={(event) => change('zipCode', maskZipCode(event.target.value))}
-          />
-
-          <Input
-            className="sm:col-span-4"
-            label="Rua / Avenida *"
-            placeholder="Nome da rua"
-            autoComplete="address-line1"
-            maxLength={LIMITS.street}
-            aria-required
-            value={draft.street}
-            error={fieldError('street')}
-            onChange={(event) => change('street', event.target.value)}
-          />
-
-          <div className="space-y-2 sm:col-span-2">
-            <Input
-              label={draft.withoutNumber ? 'Número' : 'Número *'}
-              placeholder="Ex.: 120"
-              maxLength={LIMITS.number}
-              aria-required={!draft.withoutNumber}
-              disabled={draft.withoutNumber}
-              value={draft.withoutNumber ? '' : draft.number}
-              error={draft.withoutNumber ? undefined : fieldError('number')}
-              onChange={(event) => change('number', event.target.value)}
-            />
-            <Checkbox
-              label="Sem número"
-              checked={draft.withoutNumber}
-              onChange={(event) => change('withoutNumber', event.target.checked)}
-            />
-          </div>
-
-          <Input
-            className="sm:col-span-6"
-            label="Complemento (opcional)"
-            placeholder="Apartamento, bloco, sala"
-            autoComplete="address-line2"
-            maxLength={LIMITS.complement}
-            value={draft.complement}
-            error={fieldError('complement')}
-            onChange={(event) => change('complement', event.target.value)}
-          />
-
-          <Input
-            className="sm:col-span-2"
-            label="Bairro *"
-            placeholder="Bairro"
-            maxLength={LIMITS.district}
-            aria-required
-            value={draft.district}
-            error={fieldError('district')}
-            onChange={(event) => change('district', event.target.value)}
-          />
-
-          <Input
-            className="sm:col-span-2"
-            label="Cidade *"
-            placeholder="Cidade"
-            autoComplete="address-level2"
-            maxLength={LIMITS.city}
-            aria-required
-            value={draft.city}
-            error={fieldError('city')}
-            onChange={(event) => change('city', event.target.value)}
-          />
-
-          <Select
-            className="sm:col-span-2"
-            label="UF *"
-            placeholder="UF"
-            options={STATE_OPTIONS}
-            value={draft.state}
-            error={fieldError('state')}
-            disabled={saving}
-            onValueChange={(value) => change('state', value)}
-          />
-
-          <div className="sm:col-span-6">
-            <Checkbox
-              label="Definir como endereço principal"
-              checked={draft.primary || firstAddress}
-              disabled={firstAddress}
-              onChange={(event) => change('primary', event.target.checked)}
-            />
-            {firstAddress ? (
-              <p className="mt-1 text-xs text-neutral-500">
-                Seu primeiro endereço será o principal.
-              </p>
-            ) : null}
-          </div>
-        </fieldset>
-
-        {failure ? (
-          <Alert variant="error" title="Não foi possível salvar o endereço." className="mt-5">
-            {failure}
-          </Alert>
-        ) : null}
-
-        {confirmingDiscard ? (
-          <div className="mt-5">
-            <Alert variant="warning" title="Descartar as alterações?">
-              Os dados preenchidos neste endereço serão perdidos.
-            </Alert>
-            <div className="mt-3 flex flex-wrap justify-end gap-3">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setConfirmingDiscard(false)}
-              >
-                Continuar editando
-              </Button>
-              <Button type="button" variant="danger" onClick={onClose}>
-                Descartar
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <div className="mt-6 flex flex-wrap justify-between gap-3 border-t border-neutral-200 pt-5">
-            <Button
-              type="button"
-              variant="outline"
-              className="min-w-32"
-              disabled={saving}
-              onClick={requestClose}
+            <section
+              aria-labelledby="address-recipient-title"
+              className={sectionStyle}
             >
-              Cancelar
-            </Button>
-            <Button
-              type="submit"
-              className="min-w-40"
-              disabled={saving}
-              icon={
-                saving ? (
+              <h3 id="address-recipient-title" className={sectionTitle}>
+                <Icon name="user" size={20} /> Dados do destinatário
+              </h3>
+              <div className="grid gap-4 sm:grid-cols-6">
+                <Input
+                  className="sm:col-span-6"
+                  label="Nome do destinatário *"
+                  placeholder="Nome completo"
+                  autoComplete="name"
+                  maxLength={LIMITS.recipientName}
+                  aria-required
+                  value={draft.recipientName}
+                  error={fieldError('recipientName')}
+                  onChange={(event) =>
+                    change('recipientName', event.target.value)
+                  }
+                />
+                <Input
+                  className="sm:col-span-4"
+                  label="Identificação (opcional)"
+                  placeholder="Ex.: Casa, Trabalho"
+                  maxLength={LIMITS.label}
+                  value={draft.label}
+                  error={fieldError('label')}
+                  onChange={(event) => change('label', event.target.value)}
+                />
+                <Input
+                  className="sm:col-span-2"
+                  label="CEP *"
+                  placeholder="00000-000"
+                  inputMode="numeric"
+                  autoComplete="postal-code"
+                  aria-required
+                  value={draft.zipCode}
+                  error={fieldError('zipCode')}
+                  onChange={(event) =>
+                    change('zipCode', maskZipCode(event.target.value))
+                  }
+                />
+              </div>
+            </section>
+
+            <section
+              aria-labelledby="address-location-title"
+              className={sectionStyle}
+            >
+              <h3 id="address-location-title" className={sectionTitle}>
+                <Icon name="map-pin" size={20} /> Localização e complemento
+              </h3>
+              <div className="grid gap-4 sm:grid-cols-6">
+                <Input
+                  className="sm:col-span-4"
+                  label="Rua / Avenida *"
+                  placeholder="Nome da rua"
+                  autoComplete="address-line1"
+                  maxLength={LIMITS.street}
+                  aria-required
+                  value={draft.street}
+                  error={fieldError('street')}
+                  onChange={(event) => change('street', event.target.value)}
+                />
+                <div className="space-y-2 sm:col-span-2">
+                  <Input
+                    label={draft.withoutNumber ? 'Número' : 'Número *'}
+                    placeholder="Ex.: 120"
+                    maxLength={LIMITS.number}
+                    aria-required={!draft.withoutNumber}
+                    disabled={draft.withoutNumber}
+                    value={draft.withoutNumber ? '' : draft.number}
+                    error={
+                      draft.withoutNumber ? undefined : fieldError('number')
+                    }
+                    onChange={(event) => change('number', event.target.value)}
+                  />
+                  <Checkbox
+                    label="Sem número"
+                    checked={draft.withoutNumber}
+                    onChange={(event) =>
+                      change('withoutNumber', event.target.checked)
+                    }
+                  />
+                </div>
+                <Input
+                  className="sm:col-span-6"
+                  label="Complemento (opcional)"
+                  placeholder="Apartamento, bloco, sala"
+                  autoComplete="address-line2"
+                  maxLength={LIMITS.complement}
+                  value={draft.complement}
+                  error={fieldError('complement')}
+                  onChange={(event) => change('complement', event.target.value)}
+                />
+                <Input
+                  className="sm:col-span-2"
+                  label="Bairro *"
+                  placeholder="Bairro"
+                  maxLength={LIMITS.district}
+                  aria-required
+                  value={draft.district}
+                  error={fieldError('district')}
+                  onChange={(event) => change('district', event.target.value)}
+                />
+                <Input
+                  className="sm:col-span-2"
+                  label="Cidade *"
+                  placeholder="Cidade"
+                  autoComplete="address-level2"
+                  maxLength={LIMITS.city}
+                  aria-required
+                  value={draft.city}
+                  error={fieldError('city')}
+                  onChange={(event) => change('city', event.target.value)}
+                />
+                <Select
+                  className="sm:col-span-2"
+                  label="UF *"
+                  placeholder="UF"
+                  options={STATE_OPTIONS}
+                  value={draft.state}
+                  error={fieldError('state')}
+                  disabled={saving}
+                  onValueChange={(value) => change('state', value)}
+                />
+              </div>
+            </section>
+
+            <section
+              aria-labelledby="address-preferences-title"
+              className={sectionStyle}
+            >
+              <h3 id="address-preferences-title" className={sectionTitle}>
+                <Icon name="check-circle" size={20} /> Preferências de entrega
+              </h3>
+              <div className="rounded-xl border border-[#E6DAED] bg-[#F8F2FC] px-4 py-3">
+                <Checkbox
+                  label="Definir como endereço principal"
+                  checked={draft.primary || firstAddress}
+                  disabled={firstAddress}
+                  onChange={(event) => change('primary', event.target.checked)}
+                />
+                {firstAddress && (
+                  <p className="mt-2 text-xs text-[#655471]">
+                    Seu primeiro endereço será o principal.
+                  </p>
+                )}
+              </div>
+            </section>
+          </fieldset>
+
+          {failure && (
+            <Alert
+              variant="error"
+              title="Não foi possível salvar o endereço."
+              className="mt-4"
+            >
+              {failure}
+            </Alert>
+          )}
+
+          {confirmingDiscard ? (
+            <section
+              aria-label="Confirmar descarte"
+              className="rounded-[18px] border border-[#F2CB8B] bg-[#FFFAED] p-4 shadow-sm"
+            >
+              <Alert variant="warning" title="Descartar as alterações?">
+                Os dados preenchidos neste endereço serão perdidos.
+              </Alert>
+              <div className="mt-4 flex flex-wrap justify-end gap-3">
+                <button
+                  type="button"
+                  className={`${modalSecondaryButton} ${modalAction}`}
+                  onClick={() => setConfirmingDiscard(false)}
+                >
+                  Continuar editando
+                </button>
+                <button
+                  type="button"
+                  className={`${modalDangerButton} ${modalAction}`}
+                  onClick={onClose}
+                >
+                  <Icon name="trash" size={16} /> Descartar
+                </button>
+              </div>
+            </section>
+          ) : (
+            <div className="flex flex-wrap items-center justify-end gap-3 border-t border-[#DFD3E8] pt-5">
+              <button
+                type="button"
+                className={`${modalSecondaryButton} ${modalAction}`}
+                disabled={saving}
+                onClick={requestClose}
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                className={`${modalPrimaryButton} ${modalAction}`}
+                disabled={saving}
+              >
+                {saving ? (
                   <span
-                    aria-hidden
+                    aria-hidden="true"
                     className="size-4 rounded-full border-2 border-white/40 border-t-white motion-safe:animate-spin"
                   />
-                ) : undefined
-              }
-            >
-              {saving ? 'Salvando...' : editing ? 'Salvar alterações' : 'Salvar endereço'}
-            </Button>
-          </div>
-        )}
-      </form>
+                ) : (
+                  <Icon name="check" size={16} />
+                )}
+                {saving
+                  ? 'Salvando...'
+                  : editing
+                    ? 'Salvar alterações'
+                    : 'Salvar endereço'}
+              </button>
+            </div>
+          )}
+        </form>
+      </div>
     </Modal>
   )
 }

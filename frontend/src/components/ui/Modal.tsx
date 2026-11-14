@@ -1,8 +1,19 @@
 import { useEffect, useId, useRef, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
+
 import { Button, type ButtonVariant } from './Button'
 import { cn } from './cn'
 import { Icon, type IconName } from './Icon'
+import {
+  ModalGoldDivider,
+  ModalHeaderOrnaments,
+  modalBody,
+  modalCloseButton,
+  modalFooter,
+  modalFrame,
+  modalHeader,
+  modalHeadingIcon,
+} from './modalTheme'
 
 export type ModalAction = {
   label: string
@@ -21,10 +32,8 @@ type ModalProps = {
   primaryAction?: ModalAction
   className?: string
   size?: 'sm' | 'md' | 'lg'
-  /** O estilo antigo permanece por padrão para não alterar os outros fluxos. */
   presentation?: 'classic' | 'refined'
   subtitle?: string
-  /** Ícone contextual do cabeçalho refinado (quando não informado, usa gema). */
   headerIcon?: IconName
   footer?: ReactNode
   closeDisabled?: boolean
@@ -52,79 +61,135 @@ export function Modal({
 }: ModalProps) {
   const titleId = useId()
   const subtitleId = useId()
+
   const dialogRef = useRef<HTMLDivElement>(null)
   const headingRef = useRef<HTMLHeadingElement>(null)
   const onCloseRef = useRef(onClose)
+  const closeDisabledRef = useRef(closeDisabled)
 
   useEffect(() => {
     onCloseRef.current = onClose
-  }, [onClose])
+    closeDisabledRef.current = closeDisabled
+  }, [onClose, closeDisabled])
 
   useEffect(() => {
     if (!open || embedded) return
 
-    const previouslyFocused = document.activeElement as HTMLElement | null
+    const previouslyFocused =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null
+
     const dialog = dialogRef.current
+
     const first = dialog?.querySelector<HTMLElement>(FOCUSABLE)
-    if (presentation === 'refined') headingRef.current?.focus()
-    else (first ?? dialog)?.focus()
+
+    if (presentation === 'refined') {
+      headingRef.current?.focus()
+    } else {
+      ;(first ?? dialog)?.focus()
+    }
 
     function onKey(event: KeyboardEvent) {
       if (event.key === 'Escape') {
+        if (closeDisabledRef.current || !onCloseRef.current) {
+          return
+        }
+
         event.preventDefault()
-        onCloseRef.current?.()
+        onCloseRef.current()
         return
       }
+
       if (event.key !== 'Tab' || !dialog) return
-      const nodes = [...dialog.querySelectorAll<HTMLElement>(FOCUSABLE)]
+
+      const nodes = Array.from(
+        dialog.querySelectorAll<HTMLElement>(FOCUSABLE),
+      ).filter(
+        (element) =>
+          element.getClientRects().length > 0 &&
+          !element.closest('[inert]') &&
+          !element.matches(':disabled'),
+      )
+
       if (nodes.length === 0) {
         event.preventDefault()
         dialog.focus()
         return
       }
+
       const firstNode = nodes[0]
       const lastNode = nodes[nodes.length - 1]
-      if (event.shiftKey && (document.activeElement === firstNode || document.activeElement === dialog || document.activeElement === headingRef.current)) {
+      const active = document.activeElement
+
+      if (
+        !dialog.contains(active) ||
+        active === dialog ||
+        active === headingRef.current
+      ) {
+        event.preventDefault()
+        ;(event.shiftKey ? lastNode : firstNode).focus()
+        return
+      }
+
+      if (event.shiftKey && active === firstNode) {
         event.preventDefault()
         lastNode.focus()
-      } else if (!event.shiftKey && document.activeElement === lastNode) {
+      } else if (!event.shiftKey && active === lastNode) {
         event.preventDefault()
         firstNode.focus()
       }
     }
 
     document.addEventListener('keydown', onKey)
+
     const previousOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
+
     return () => {
       document.removeEventListener('keydown', onKey)
       document.body.style.overflow = previousOverflow
-      if (previouslyFocused?.isConnected) previouslyFocused.focus()
+
+      if (previouslyFocused?.isConnected) {
+        previouslyFocused.focus()
+      }
     }
   }, [open, embedded, presentation])
 
-  // Nos fluxos por etapas, anunciar o novo título sem criar outro diálogo.
+  // Anuncia a mudança de etapa dentro do mesmo diálogo.
   useEffect(() => {
-    if (open && presentation === 'refined' && !embedded) headingRef.current?.focus()
+    if (open && presentation === 'refined' && !embedded) {
+      headingRef.current?.focus()
+    }
   }, [title, open, presentation, embedded])
 
   if (!open) return null
 
   const isRefined = presentation === 'refined'
-  const actions = footer ?? (secondaryAction || primaryAction ? (
-    <>
-      {secondaryAction ? (
-        <Button variant={secondaryAction.variant ?? 'ghost'} onClick={secondaryAction.onClick ?? onClose}>
-          {secondaryAction.label}
-        </Button>
-      ) : null}
-      {primaryAction ? (
-        <Button variant={primaryAction.variant ?? 'primary'} onClick={primaryAction.onClick}>
-          {primaryAction.label}
-        </Button>
-      ) : null}
-    </>
-  ) : null)
+
+  const actions =
+    footer ??
+    (secondaryAction || primaryAction ? (
+      <>
+        {secondaryAction && (
+          <Button
+            variant={secondaryAction.variant ?? 'ghost'}
+            onClick={secondaryAction.onClick ?? onClose}
+          >
+            {secondaryAction.label}
+          </Button>
+        )}
+
+        {primaryAction && (
+          <Button
+            variant={primaryAction.variant ?? 'primary'}
+            onClick={primaryAction.onClick}
+          >
+            {primaryAction.label}
+          </Button>
+        )}
+      </>
+    ) : null)
 
   const panel = (
     <div
@@ -136,87 +201,147 @@ export function Modal({
       aria-describedby={subtitle ? subtitleId : undefined}
       className={cn(
         isRefined
-          ? 'flex max-h-[90dvh] w-full flex-col overflow-hidden rounded-[20px] border-2 bg-white shadow-[0_20px_55px_rgba(68,16,79,0.18)] focus:outline-none'
+          ? cn(
+              'flex max-h-[90dvh] w-full flex-col overflow-hidden rounded-[22px] bg-white focus:outline-none',
+              modalFrame,
+            )
           : 'w-full rounded-surface border bg-white p-6 shadow-lg',
-        preview === 'hover'
-          ? (isRefined ? 'border-[#FCD203]' : 'border-2 border-primary-900')
-          : (isRefined ? 'border-[rgba(252,210,3,0.68)]' : 'border-neutral-200'),
+        !isRefined &&
+          (preview === 'hover'
+            ? 'border-2 border-primary-900'
+            : 'border-neutral-200'),
         className,
       )}
     >
-      <div className={cn(
-        'flex shrink-0 items-start justify-between gap-4',
-        isRefined ? 'relative isolate overflow-hidden border-b border-[#FCD203]/65 bg-[linear-gradient(115deg,#4C195F_0%,#74317F_58%,#8C5897_100%)] px-5 py-5 text-white sm:px-6' : '',
-      )}>
-        {isRefined ? (
-          <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
-            <div className="absolute -top-16 right-10 size-44 rounded-full bg-white/10 blur-3xl" />
-            <div className="absolute right-16 top-1/2 -translate-y-1/2 text-[#FCD203]/25">
-              <Icon name="sparkle" size={32} />
-            </div>
-            <div className="absolute right-36 top-4 text-[#FCD203]/20">
-              <Icon name="sparkle" size={20} />
-            </div>
-            {/* Dois detalhes adicionais, sem interferir no texto nem no botão de fechar. */}
-            <div className="absolute right-28 bottom-3 hidden text-[#FCD203]/30 sm:block">
-              <Icon name="gem" size={16} />
-            </div>
-            <div className="absolute right-52 top-3 hidden text-[#FCD203]/20 md:block">
-              <Icon name="sparkle" size={16} />
-            </div>
-          </div>
-        ) : null}
-        <div className="relative z-10 flex min-w-0 items-start gap-3">
-          {isRefined ? (
-            <span
-              aria-hidden="true"
-              className="grid size-10 shrink-0 place-items-center rounded-xl border border-[#FCD203]/40 bg-white/10 text-[#FCD203] shadow-sm"
-            >
+      {/* Cabeçalho */}
+      <header
+        className={cn(
+          'relative flex shrink-0 items-center justify-between gap-3',
+          isRefined ? cn('px-4 py-4 text-white sm:px-6', modalHeader) : '',
+        )}
+      >
+        {isRefined && <ModalHeaderOrnaments />}
+
+        <div
+          className={cn(
+            'relative z-10 min-w-0',
+            isRefined
+              ? 'grid flex-1 grid-cols-[40px_minmax(0,1fr)] items-center gap-3'
+              : 'flex items-start',
+          )}
+        >
+          {isRefined && (
+            <span aria-hidden="true" className={modalHeadingIcon}>
               <Icon name={headerIcon} size={24} />
             </span>
-          ) : null}
-          <div className="min-w-0">
+          )}
+
+          <div className={cn('min-w-0', isRefined && 'sm:text-center')}>
             <h2
               ref={headingRef}
               tabIndex={-1}
               id={titleId}
-              className={cn('font-display text-2xl leading-tight font-bold focus:outline-none', isRefined ? 'text-white' : 'text-neutral-900')}
+              className={cn(
+                'font-display leading-tight font-bold focus:outline-none',
+                isRefined
+                  ? 'text-lg text-white sm:text-xl'
+                  : 'text-2xl text-neutral-900',
+              )}
             >
               {title}
             </h2>
-            {subtitle ? <p id={subtitleId} className={cn('mt-1 text-sm', isRefined ? 'text-white/90' : 'text-neutral-700')}>{subtitle}</p> : null}
+
+            {subtitle && (
+              <p
+                id={subtitleId}
+                className={cn(
+                  'mt-1 text-xs leading-relaxed sm:text-sm',
+                  isRefined ? 'text-white/90' : 'text-neutral-700',
+                )}
+              >
+                {subtitle}
+              </p>
+            )}
           </div>
         </div>
-        {onClose ? (
+
+        {onClose && (
           <button
             type="button"
-            aria-label="Fechar"
+            aria-label="Fechar modal"
             disabled={closeDisabled}
             onClick={onClose}
-            className={cn('relative z-10 grid size-8 shrink-0 cursor-pointer place-items-center rounded-control focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary-500 disabled:cursor-not-allowed disabled:opacity-40', isRefined ? 'text-white hover:bg-white/20' : 'text-neutral-700 hover:bg-primary-100 hover:text-primary-900')}
+            className={cn(
+              'relative z-10 grid size-9 shrink-0 place-items-center rounded-lg transition-colors disabled:cursor-not-allowed disabled:opacity-40',
+              isRefined
+                ? modalCloseButton
+                : 'text-neutral-700 hover:bg-primary-100 hover:text-primary-900 focus-visible:outline-2 focus-visible:outline-secondary-500',
+            )}
           >
             <Icon name="close" size={20} />
           </button>
-        ) : null}
-      </div>
-      <div className={cn(isRefined ? 'min-h-0 flex-1 overflow-y-auto overscroll-contain bg-[linear-gradient(155deg,#FBF8FD_0%,#FFFFFF_66%)] p-4 text-sm text-neutral-700 sm:p-6' : 'mt-4 space-y-2 text-base text-neutral-700')}>
+        )}
+      </header>
+
+      {/* Linha dourada e losango central */}
+      {isRefined && <ModalGoldDivider />}
+
+      {/* Conteúdo */}
+      <div
+        className={cn(
+          isRefined
+            ? cn(
+                'min-h-0 flex-1 overflow-y-auto overscroll-contain p-4 text-sm text-neutral-700 sm:p-6',
+                modalBody,
+              )
+            : 'mt-4 space-y-2 text-base text-neutral-700',
+        )}
+      >
         {children}
       </div>
-      {actions ? (
-        <div className={cn('flex shrink-0 flex-wrap justify-end gap-3', isRefined ? 'border-t border-[#FCD203]/45 bg-[#FCFAFE] px-4 py-4 sm:px-6' : 'mt-6')}>
+
+      {/* Rodapé */}
+      {actions && (
+        <footer
+          className={cn(
+            'flex shrink-0 flex-wrap justify-end gap-3',
+            isRefined ? cn('px-4 py-3 sm:px-6', modalFooter) : 'mt-6',
+          )}
+        >
           {actions}
-        </div>
-      ) : null}
+        </footer>
+      )}
     </div>
   )
 
   if (embedded) return panel
 
+  function requestBackdropClose() {
+    if (!closeDisabled && onClose) {
+      onClose()
+    }
+  }
+
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
-      <div className="absolute inset-0 bg-neutral-900/55 backdrop-blur-[2px]" onMouseDown={onClose} />
       <div
-        className={cn('relative z-10 w-full', size === 'lg' ? (isRefined ? 'max-w-5xl' : 'max-w-3xl') : size === 'sm' ? 'max-w-[440px]' : (isRefined ? 'max-w-2xl' : 'max-w-md'))}
+        className="absolute inset-0 bg-neutral-900/55 backdrop-blur-[2px]"
+        onMouseDown={requestBackdropClose}
+      />
+
+      <div
+        className={cn(
+          'relative z-10 w-full',
+          size === 'lg'
+            ? isRefined
+              ? 'max-w-5xl'
+              : 'max-w-3xl'
+            : size === 'sm'
+              ? 'max-w-[440px]'
+              : isRefined
+                ? 'max-w-2xl'
+                : 'max-w-md',
+        )}
         onMouseDown={(event) => event.stopPropagation()}
       >
         {panel}

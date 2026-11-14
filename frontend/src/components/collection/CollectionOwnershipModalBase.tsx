@@ -1,24 +1,23 @@
 import { useEffect, useId, useRef, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
-
 import { Alert } from '@/components/ui/Alert'
-import { Badge } from '@/components/ui/Badge'
 import { cn } from '@/components/ui/cn'
 import { Icon } from '@/components/ui/Icon'
 import {
   ModalHeaderOrnaments,
   modalBody,
   modalCloseButton,
+  modalDangerButton,
   modalFooter,
   modalFrame,
   modalHeader,
   modalHeadingIcon,
+  modalPrimaryButton,
+  modalSecondaryButton,
 } from '@/components/ui/modalTheme'
 import type { CardCondition, CardLanguage } from '@/types/Collection'
 
 const MAX_QUANTITY = 2147483647
-
-// Os dois contratos (CatalogCard e CollectionCard) possuem estes campos.
 export type CollectionModalCard = {
   name: string
   imageUrl: string | null
@@ -28,8 +27,9 @@ export type CollectionModalCard = {
   game: string
 }
 
+type ModalMode = 'add' | 'edit' | 'remove'
 type ModalBaseProps = {
-  mode: 'add' | 'edit' | 'remove'
+  mode: ModalMode
   card: CollectionModalCard
   title: string
   subtitle: string
@@ -43,7 +43,15 @@ type ModalBaseProps = {
   onClose: () => void
   onSubmit: () => void
   children: ReactNode
+  summaryAside?: ReactNode
 }
+
+const SUCCESS_TITLES: Record<ModalMode, string> = {
+  add: 'Carta adicionada!',
+  edit: 'Alterações salvas!',
+  remove: 'Carta removida!',
+}
+const PRIMARY_ICONS = { add: 'layers', edit: 'edit', remove: 'trash' } as const
 
 const GAME_LABELS: Record<string, string> = {
   POKEMON: 'Pokémon',
@@ -51,19 +59,6 @@ const GAME_LABELS: Record<string, string> = {
   MAGIC_THE_GATHERING: 'Magic',
 }
 
-const SUCCESS_TITLES: Record<ModalBaseProps['mode'], string> = {
-  add: 'Carta adicionada!',
-  edit: 'Alterações salvas!',
-  remove: 'Carta removida!',
-}
-
-const PRIMARY_ICONS = {
-  add: 'plus',
-  edit: 'check',
-  remove: 'trash',
-} as const
-
-/** Estrutura visual compartilhada pelos modais de adicionar, editar e remover. */
 export function CollectionOwnershipModalBase({
   mode,
   card,
@@ -79,6 +74,7 @@ export function CollectionOwnershipModalBase({
   onClose,
   onSubmit,
   children,
+  summaryAside,
 }: ModalBaseProps) {
   const titleId = useId()
   const descriptionId = useId()
@@ -92,13 +88,11 @@ export function CollectionOwnershipModalBase({
       document.activeElement instanceof HTMLElement
         ? document.activeElement
         : null
-
     document.body.style.overflow = 'hidden'
     closeButtonRef.current?.focus()
-
     return () => {
       document.body.style.overflow = previousOverflow
-      previousFocus?.focus()
+      if (previousFocus?.isConnected) previousFocus.focus()
     }
   }, [])
 
@@ -111,36 +105,44 @@ export function CollectionOwnershipModalBase({
         }
         return
       }
-
-      // Evita que o Tab mova o foco para a página sob o modal.
       if (event.key !== 'Tab' || !dialogRef.current) return
-
-      const focusable = dialogRef.current.querySelectorAll<HTMLElement>(
-        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      const dialog = dialogRef.current
+      const focusable = Array.from(
+        dialog.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        ),
+      ).filter(
+        (el) =>
+          el.getClientRects().length > 0 &&
+          !el.closest('[inert]') &&
+          !el.matches(':disabled'),
       )
-      if (focusable.length === 0) return
-
+      if (focusable.length === 0) {
+        event.preventDefault()
+        dialog.focus()
+        return
+      }
       const first = focusable[0]
       const last = focusable[focusable.length - 1]
       const active = document.activeElement
-      const isInside = dialogRef.current.contains(active)
-
-      if (!isInside || (event.shiftKey && active === first)) {
+      if (!dialog.contains(active) || active === dialog) {
         event.preventDefault()
         ;(event.shiftKey ? last : first).focus()
+      } else if (event.shiftKey && active === first) {
+        event.preventDefault()
+        last.focus()
       } else if (!event.shiftKey && active === last) {
         event.preventDefault()
         first.focus()
       }
     }
-
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [isSaving, onClose])
 
   return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[#170b24]/70 p-3 backdrop-blur-[3px] sm:p-5"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[#15091F]/75 p-3 backdrop-blur-[4px] sm:p-5"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget && !isSaving) onClose()
       }}
@@ -151,162 +153,176 @@ export function CollectionOwnershipModalBase({
         aria-modal="true"
         aria-labelledby={titleId}
         aria-describedby={descriptionId}
-        className={cn('flex max-h-[90dvh] w-full max-w-[790px] flex-col overflow-hidden rounded-[22px] bg-white sm:rounded-[24px]', modalFrame)}
+        tabIndex={-1}
+        className={cn(
+          'flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-[21px] outline-none',
+          mode === 'edit'
+            ? 'max-w-[670px]'
+            : mode === 'remove'
+              ? 'max-w-[590px]'
+              : 'max-w-[575px]',
+          modalFrame,
+        )}
       >
-        <header className={cn('flex shrink-0 items-start justify-between gap-3 px-5 py-4 sm:px-6 sm:py-5', modalHeader)}>
+        <header
+          className={cn(
+            'relative shrink-0 px-4 pb-6 pt-4 sm:px-6 sm:pb-7',
+            modalHeader,
+          )}
+        >
           <ModalHeaderOrnaments />
-          <div className="flex min-w-0 items-start gap-3">
-            <div className={modalHeadingIcon}>
-              {mode === 'add' ? (
-                <Icon name="plus" size={24} />
-              ) : mode === 'remove' ? (
-                <Icon name="trash" size={24} className="text-error-200" />
-              ) : (
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="size-6"
-                  aria-hidden="true"
-                >
-                  <path d="m15 5 4 4M4 20l4.5-1 11-11a2.8 2.8 0 0 0-4-4l-11 11L4 20Z" />
-                </svg>
-              )}
+
+          <div className="relative grid grid-cols-[40px_minmax(0,1fr)_40px] items-center gap-2">
+            <div aria-hidden="true" className={modalHeadingIcon}>
+              <Icon
+                name={
+                  mode === 'remove'
+                    ? 'trash'
+                    : mode === 'edit'
+                      ? 'edit'
+                      : 'layers'
+                }
+                size={20}
+              />
             </div>
-            <div className="min-w-0">
+            <div className="min-w-0 text-center">
               <h2
                 id={titleId}
-                className="font-display text-lg font-bold leading-tight text-white sm:text-[22px]"
+                className="font-display text-base font-bold leading-tight text-white sm:text-[19px]"
               >
                 {title}
               </h2>
               <p
                 id={descriptionId}
-                className="mt-1 text-xs leading-relaxed text-white/90 sm:text-sm"
+                className="mt-0.5 text-[11px] leading-snug text-white/90 sm:text-xs"
               >
                 {subtitle}
               </p>
             </div>
-          </div>
-          <button
-            ref={closeButtonRef}
-            type="button"
-            onClick={onClose}
-            disabled={isSaving}
-            aria-label="Fechar modal"
-            className={cn('shrink-0 rounded-lg p-1.5 transition-colors disabled:opacity-50', modalCloseButton)}
-          >
-            <Icon name="close" size={20} />
-          </button>
-        </header>
-
-        <div className={cn('grid min-h-0 flex-1 gap-5 overflow-y-auto overscroll-contain p-4 sm:grid-cols-[235px_minmax(0,1fr)] sm:gap-6 sm:p-6', modalBody)}>
-          <aside className="min-w-0 rounded-xl border border-[#d8c4df] bg-white p-3 shadow-sm">
-            <div className="overflow-hidden rounded-lg bg-neutral-50 p-2">
-              {card.imageUrl ? (
-                <img
-                  src={card.imageUrl}
-                  alt={`Carta ${card.name}`}
-                  className="mx-auto aspect-[3/4] w-full max-w-[215px] object-contain drop-shadow-sm"
-                />
-              ) : (
-                <div className="flex aspect-[3/4] items-center justify-center gap-2 text-sm text-neutral-500">
-                  <Icon name="grid" size={24} />
-                  Imagem indisponível
-                </div>
+            <button
+              ref={closeButtonRef}
+              type="button"
+              disabled={isSaving}
+              onClick={onClose}
+              aria-label="Fechar modal"
+              className={cn(
+                'justify-self-end rounded-lg p-2 disabled:opacity-50',
+                modalCloseButton,
               )}
+            >
+              <Icon name="close" size={20} />
+            </button>
+          </div>
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 bottom-0 z-20"
+          >
+            {/* Linha dourada refinada */}
+            <div
+              className="mx-4 h-[2px] sm:mx-6"
+              style={{
+                background:
+                  'linear-gradient(90deg, rgba(215,154,0,0) 0%, #B87C00 10%, #E7B81E 24%, #FFF1A6 50%, #E7B81E 76%, #B87C00 90%, rgba(215,154,0,0) 100%)',
+                boxShadow:
+                  '0 0 8px rgba(252, 210, 3, 0.22), 0 1px 0 rgba(255,255,255,0.10)',
+              }}
+            />
+
+            {/* Losango central */}
+            <div className="absolute left-1/2 top-1/2 flex size-[16px] -translate-x-1/2 -translate-y-1/2 rotate-45 items-center justify-center rounded-[2px] border border-[#F6CD3A] bg-[linear-gradient(180deg,#FFF8D7_0%,#F0C839_100%)] shadow-[0_0_0_2px_#7A117C,0_0_8px_rgba(252,210,3,0.35)]">
+              <div className="size-[5px] border border-[#F6CD3A] bg-white/75" />
             </div>
-
-            {card.imageUrl && (
-              <a
-                href={card.imageUrl}
-                target="_blank"
-                rel="noreferrer noopener"
-                className="mt-2 flex items-center justify-center gap-1 text-xs font-medium text-primary-900 underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-secondary-500"
-              >
-                <Icon name="search" size={16} />
-                Ver imagem completa
-              </a>
-            )}
-
-            <h3 className="mt-3 font-display text-base font-bold text-primary-900">
-              {card.name}
-            </h3>
-            <p className="mt-1 text-xs leading-relaxed text-neutral-500">
-              {card.edition || 'Coleção não informada'}
-              {card.cardNumber ? ` · Nº ${card.cardNumber}` : ''}
-            </p>
-            <Badge variant="primary" className="mt-2">
-              {card.officialRarity || 'Raridade não informada'}
-            </Badge>
-
-            <dl className="mt-3 grid grid-cols-2 gap-3 rounded-lg bg-primary-100/55 p-3 text-xs">
-              <div className="min-w-0">
-                <dt className="mb-1 flex items-center gap-1 font-semibold text-primary-900">
-                  <Icon name="grid" size={16} /> TCG
-                </dt>
-                <dd className="break-words text-neutral-700">
-                  {GAME_LABELS[card.game] ?? card.game}
-                </dd>
-              </div>
-              <div className="min-w-0">
-                <dt className="mb-1 flex items-center gap-1 font-semibold text-primary-900">
-                  <Icon name="grid" size={16} /> Coleção
-                </dt>
-                <dd className="break-words text-neutral-700">
-                  {card.edition || '—'}
-                </dd>
-              </div>
-              <div className="min-w-0">
-                <dt className="mb-1 font-semibold text-primary-900">Número</dt>
-                <dd className="text-neutral-700">{card.cardNumber || '—'}</dd>
-              </div>
-              <div className="min-w-0">
-                <dt className="mb-1 font-semibold text-primary-900">
-                  Raridade
-                </dt>
-                <dd className="break-words text-neutral-700">
-                  {card.officialRarity || '—'}
-                </dd>
-              </div>
-            </dl>
-          </aside>
+          </div>
+        </header>
+        {/* Divisória decorativa entre cabeçalho e conteúdo */}
+        <div
+          aria-hidden="true"
+          className="relative z-10 h-[2px] shrink-0 bg-[linear-gradient(90deg,#C78600_0%,#FCD84C_30%,#FFF0A8_50%,#FCD84C_70%,#C78600_100%)] shadow-[0_0_8px_rgba(252,210,3,0.25)]"
+        >
+          <div className="absolute left-1/2 top-1/2 flex size-[16px] -translate-x-1/2 -translate-y-1/2 rotate-45 items-center justify-center border-2 border-[#FCD84C] bg-[#FFF6C8] shadow-[0_0_0_2px_#7A117C,0_0_8px_rgba(252,210,3,0.35)]">
+            <span className="size-[5px] bg-[#FCD84C]" />
+          </div>
+        </div>
+        <div
+          className={cn(
+            'relative flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-contain rounded-t-[20px] p-4 sm:p-5',
+            modalBody,
+          )}
+        >
+          {mode === 'add' && (
+            <CollectionCardSummary card={card} variant="add" />
+          )}
+          {mode === 'edit' && (
+            <CollectionCardSummary
+              card={card}
+              variant="edit"
+              summaryAside={summaryAside}
+            />
+          )}
 
           <form
             id={collectionFormId}
             noValidate
-            className="flex min-w-0 flex-col"
+            className={cn(
+              'min-w-0',
+              mode === 'remove' ? '' : 'mt-4 border-t border-[#DAD6E9] pt-4',
+            )}
             onSubmit={(event) => {
               event.preventDefault()
               onSubmit()
             }}
           >
-            <h3 className="mb-4 border-b border-neutral-200 pb-3 font-display text-base font-bold text-primary-900">
-              Informações da sua coleção
-            </h3>
-
+            {mode === 'remove' && !isComplete && (
+              <div className="mb-4 flex flex-col items-center gap-2 text-center">
+                <div
+                  aria-hidden="true"
+                  className="flex size-16 items-center justify-center rounded-[20px] bg-[#FCE4E7] text-[#D41127]"
+                >
+                  <Icon name="trash" size={32} />
+                </div>
+                <h3 className="font-display text-xl font-bold text-[#1B1439]">
+                  Remover item da coleção?
+                </h3>
+                <p className="max-w-[440px] text-sm leading-relaxed text-[#2D264C]">
+                  Este item será removido da sua coleção, mas continuará
+                  disponível no catálogo.
+                </p>
+                <p className="text-xs font-semibold text-[#6B557C]">
+                  {card.name}
+                </p>
+              </div>
+            )}
             {children}
-
-            <div className="mt-5 space-y-3" aria-live="polite">
-              {error && <Alert variant="error">{error}</Alert>}
+            <div className="space-y-3" aria-live="polite">
+              {error && (
+                <div className="mt-4">
+                  <Alert variant="error">{error}</Alert>
+                </div>
+              )}
               {successMessage && (
-                <Alert variant="success" title={SUCCESS_TITLES[mode]}>
-                  {successMessage}
-                </Alert>
+                <div className="mt-4">
+                  <Alert variant="success" title={SUCCESS_TITLES[mode]}>
+                    {successMessage}
+                  </Alert>
+                </div>
               )}
             </div>
           </form>
         </div>
-        <footer className={cn('shrink-0 px-6 py-3.5', modalFooter)}>
-          <div className="flex flex-wrap items-center justify-end gap-2">
+
+        <footer
+          className={cn(
+            'shrink-0 px-6 py-3.5',
+            modalFooter,
+            modalBody,
+          )}
+        >
+          <div className="flex flex-wrap items-center justify-end gap-3 border-t border-[#DAD6E9] pt-4">
             <button
               type="button"
               onClick={onClose}
               disabled={isSaving}
-              className="rounded-lg border border-primary-900 px-4 py-2.5 text-sm font-semibold text-primary-900 transition-colors hover:bg-primary-100 focus-visible:outline-2 focus-visible:outline-secondary-500 disabled:opacity-50"
+              className={modalSecondaryButton}
             >
               {isComplete ? 'Fechar' : 'Cancelar'}
             </button>
@@ -314,22 +330,24 @@ export function CollectionOwnershipModalBase({
               <button
                 type="button"
                 onClick={onClose}
-                className="flex items-center justify-center gap-2 rounded-lg bg-primary-900 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary-800 focus-visible:outline-2 focus-visible:outline-secondary-500"
+                className={cn(
+                  'inline-flex items-center justify-center gap-2',
+                  modalPrimaryButton,
+                )}
               >
-                <Icon name="check" size={16} /> Concluir
+                <Icon name="check" size={20} /> Concluir
               </button>
             ) : (
               <button
                 type="submit"
                 form={collectionFormId}
                 disabled={isSaving || disablePrimary}
-                className={`flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition-colors focus-visible:outline-2 focus-visible:outline-secondary-500 disabled:cursor-not-allowed disabled:opacity-60 ${
-                  mode === 'remove'
-                    ? 'bg-error-700 hover:bg-error-600'
-                    : 'bg-primary-900 hover:bg-primary-800'
-                }`}
+                className={cn(
+                  'inline-flex items-center justify-center gap-2',
+                  mode === 'remove' ? modalDangerButton : modalPrimaryButton,
+                )}
               >
-                <Icon name={PRIMARY_ICONS[mode]} size={16} />
+                <Icon name={PRIMARY_ICONS[mode]} size={20} />{' '}
                 {isSaving ? busyLabel : primaryLabel}
               </button>
             )}
@@ -341,16 +359,71 @@ export function CollectionOwnershipModalBase({
   )
 }
 
+function CollectionCardSummary({
+  card,
+  variant,
+  summaryAside,
+}: {
+  card: CollectionModalCard
+  variant: 'add' | 'edit'
+  summaryAside?: ReactNode
+}) {
+  return (
+    <div
+      className={cn(
+        'flex min-w-0 items-center gap-3',
+        variant === 'edit' ? 'pb-1' : 'border-b border-[#DAD6E9] pb-4',
+      )}
+    >
+      <div className="w-[76px] shrink-0 sm:w-[88px]">
+        {card.imageUrl ? (
+          <img
+            src={card.imageUrl}
+            alt={`Carta ${card.name}`}
+            className="aspect-[3/4] w-full rounded-md object-contain shadow-[0_3px_11px_rgba(33,12,55,0.30)] ring-1 ring-[#C9AC74]"
+          />
+        ) : (
+          <div className="flex aspect-[3/4] items-center justify-center rounded-md bg-[#EAE6F4] text-[#4D366F]">
+            <Icon name="cards" size={32} />
+            <span className="sr-only">Imagem indisponível</span>
+          </div>
+        )}
+      </div>
+      <div className="min-w-0 flex-1">
+        <h3 className="font-display text-lg font-bold leading-tight text-[#20143E] sm:text-xl">
+          {card.name}
+        </h3>
+        <p className="mt-1 text-sm text-[#514475]">
+          {card.edition || 'Coleção não informada'}
+          {card.cardNumber ? ` · #${card.cardNumber}` : ''}
+        </p>
+        <span className="mt-2 inline-block rounded-full bg-[#E8C9FA] px-3 py-1 text-xs font-bold text-[#5F1498]">
+          {card.officialRarity || 'Raridade não informada'}
+        </span>
+        {variant === 'add' && (
+          <span className="sr-only">{GAME_LABELS[card.game] ?? card.game}</span>
+        )}
+      </div>
+      {variant === 'edit' && summaryAside ? (
+        <div className="min-w-[105px] max-w-[145px] shrink-0 border-l border-[#DAD6E9] pl-3 text-center sm:min-w-[135px] sm:pl-4">
+          {summaryAside}
+        </div>
+      ) : null}
+    </div>
+  )
+}
+
 type FieldsProps = {
   quantity: string
   condition: CardCondition
   language: CardLanguage
   disabled: boolean
+  quantityError?: string
+  layout?: 'default' | 'edit'
   onQuantityChange: (value: string) => void
   onConditionChange: (value: CardCondition) => void
   onLanguageChange: (value: CardLanguage) => void
 }
-
 const CONDITIONS: { value: CardCondition; label: string }[] = [
   { value: 'NEAR_MINT', label: 'Near Mint (NM)' },
   { value: 'LIGHTLY_PLAYED', label: 'Lightly Played (LP)' },
@@ -359,121 +432,119 @@ const CONDITIONS: { value: CardCondition; label: string }[] = [
   { value: 'DAMAGED', label: 'Damaged (DMG)' },
 ]
 
-/** Formulário compartilhado: só os valores e callbacks mudam entre adicionar e editar. */
 export function CollectionOwnershipFields({
   quantity,
   condition,
   language,
   disabled,
+  quantityError,
+  layout = 'default',
   onQuantityChange,
   onConditionChange,
   onLanguageChange,
 }: FieldsProps) {
   const uniqueId = useId()
   const quantityId = `${uniqueId}-quantity`
+  const quantityErrorId = `${quantityId}-error`
   const conditionId = `${uniqueId}-condition`
   const languageId = `${uniqueId}-language`
   const currentQuantity = /^\d+$/.test(quantity) ? Number(quantity) : 0
-
   const inputClasses =
-    'h-10 w-full min-w-0 rounded-lg border border-neutral-300 bg-white px-3 text-sm text-neutral-900 outline-none transition focus:border-primary-700 focus:ring-2 focus:ring-primary-100 disabled:bg-neutral-50 disabled:text-neutral-500'
+    'h-9 w-full min-w-0 rounded-lg border border-[#C8C5E2] bg-white/40 px-3 text-sm text-[#21183D] outline-none transition focus-visible:border-[#1254BD] focus-visible:ring-2 focus-visible:ring-[#A3BAFF] disabled:opacity-60'
+  const labelClass = 'mb-1.5 block text-xs font-bold text-[#21183D]'
 
   return (
-    <div className="space-y-4">
-      <div className="grid gap-4 min-[440px]:grid-cols-2 sm:grid-cols-2">
-        <div className="min-w-0">
-          <label
-            htmlFor={quantityId}
-            className="mb-1.5 block text-xs font-semibold text-primary-900"
-          >
-            Quantidade <span className="text-error-700">*</span>
-          </label>
-          <div className="flex h-10 overflow-hidden rounded-lg border border-neutral-300 bg-white focus-within:border-primary-700 focus-within:ring-2 focus-within:ring-primary-100">
-            <button
-              type="button"
-              aria-label="Diminuir quantidade"
-              disabled={disabled || currentQuantity <= 1}
-              onClick={() =>
-                onQuantityChange(String(Math.max(1, currentQuantity - 1)))
-              }
-              className="flex w-9 shrink-0 items-center justify-center border-r border-neutral-200 text-primary-900 hover:bg-primary-100 disabled:opacity-40"
-            >
-              <Icon name="minus" size={16} />
-            </button>
-            <input
-              id={quantityId}
-              inputMode="numeric"
-              type="text"
-              pattern="[0-9]*"
-              autoComplete="off"
-              value={quantity}
-              disabled={disabled}
-              aria-label="Quantidade de exemplares"
-              onChange={(event) => onQuantityChange(event.target.value)}
-              className="min-w-0 flex-1 bg-transparent px-1 text-center text-sm font-semibold text-neutral-900 outline-none disabled:text-neutral-500"
-            />
-            <button
-              type="button"
-              aria-label="Aumentar quantidade"
-              disabled={disabled || currentQuantity >= MAX_QUANTITY}
-              onClick={() =>
-                onQuantityChange(
-                  String(
-                    Math.min(MAX_QUANTITY, Math.max(0, currentQuantity) + 1),
-                  ),
-                )
-              }
-              className="flex w-9 shrink-0 items-center justify-center border-l border-neutral-200 text-primary-900 hover:bg-primary-100 disabled:opacity-40"
-            >
-              <Icon name="plus" size={16} />
-            </button>
-          </div>
-        </div>
-
-        <div className="min-w-0">
-          <label
-            htmlFor={conditionId}
-            className="mb-1.5 block text-xs font-semibold text-primary-900"
-          >
-            Condição <span className="text-error-700">*</span>
-          </label>
-          <select
-            id={conditionId}
-            value={condition}
-            disabled={disabled}
-            onChange={(event) =>
-              onConditionChange(event.target.value as CardCondition)
+    <div
+      className={cn(
+        'grid gap-x-4 gap-y-3',
+        layout === 'edit' ? 'sm:grid-cols-3' : 'sm:grid-cols-2',
+      )}
+    >
+      <div className="min-w-0">
+        <label htmlFor={quantityId} className={labelClass}>
+          Quantidade <span className="text-[#BD0923]">*</span>
+        </label>
+        <div className="flex h-9 overflow-hidden rounded-lg border border-[#C8C5E2] bg-white/50 focus-within:border-[#1254BD] focus-within:ring-2 focus-within:ring-[#A3BAFF]">
+          <button
+            type="button"
+            aria-label="Diminuir quantidade"
+            disabled={disabled || currentQuantity <= 1}
+            onClick={() =>
+              onQuantityChange(String(Math.max(1, currentQuantity - 1)))
             }
-            className={inputClasses}
+            className="flex w-10 shrink-0 items-center justify-center border-r border-[#C8C5E2] bg-[#EEECF9] text-[#074CE1] hover:bg-[#DCE4FF] disabled:opacity-40"
           >
-            {CONDITIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+            <Icon name="minus" size={20} />
+          </button>
+          <input
+            id={quantityId}
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            autoComplete="off"
+            value={quantity}
+            disabled={disabled}
+            required
+            aria-invalid={Boolean(quantityError)}
+            aria-describedby={quantityError ? quantityErrorId : undefined}
+            onChange={(event) => onQuantityChange(event.target.value)}
+            className="min-w-0 flex-1 bg-transparent px-1 text-center text-sm font-semibold text-[#21183D] outline-none"
+          />
+          <button
+            type="button"
+            aria-label="Aumentar quantidade"
+            disabled={disabled || currentQuantity >= MAX_QUANTITY}
+            onClick={() =>
+              onQuantityChange(
+                String(
+                  Math.min(MAX_QUANTITY, Math.max(0, currentQuantity) + 1),
+                ),
+              )
+            }
+            className="flex w-10 shrink-0 items-center justify-center border-l border-[#C8C5E2] bg-[#EEECF9] text-[#074CE1] hover:bg-[#DCE4FF] disabled:opacity-40"
+          >
+            <Icon name="plus" size={20} />
+          </button>
         </div>
+        {quantityError && (
+          <p
+            id={quantityErrorId}
+            className="mt-2 text-sm font-medium text-error-700"
+          >
+            {quantityError}
+          </p>
+        )}
       </div>
-
-      <div className="flex items-start gap-2 rounded-lg border border-primary-100 bg-primary-100/50 px-3 py-3 text-xs leading-relaxed text-primary-900">
-        <Icon name="info" size={16} className="mt-0.5" />
-        <span>
-          A condição representa o estado de conservação da carta. Escolha o
-          valor correspondente ao exemplar que você possui.
-        </span>
-      </div>
-
-      <div>
-        <label
-          htmlFor={languageId}
-          className="mb-1.5 block text-xs font-semibold text-primary-900"
+      <div className="min-w-0">
+        <label htmlFor={conditionId} className={labelClass}>
+          Condição <span className="text-[#BD0923]">*</span>
+        </label>
+        <select
+          id={conditionId}
+          value={condition}
+          disabled={disabled}
+          required
+          onChange={(event) =>
+            onConditionChange(event.target.value as CardCondition)
+          }
+          className={inputClasses}
         >
-          Idioma <span className="text-error-700">*</span>
+          {CONDITIONS.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div className={cn('min-w-0', layout !== 'edit' && 'sm:col-span-2')}>
+        <label htmlFor={languageId} className={labelClass}>
+          Idioma <span className="text-[#BD0923]">*</span>
         </label>
         <select
           id={languageId}
           value={language}
           disabled={disabled}
+          required
           onChange={(event) =>
             onLanguageChange(event.target.value as CardLanguage)
           }
@@ -484,6 +555,17 @@ export function CollectionOwnershipFields({
           <option value="JAPANESE">Japonês (JP)</option>
         </select>
       </div>
+      {layout !== 'edit' && (
+        <div className="sm:col-span-2">
+          <div className="flex items-start gap-2 rounded-lg border border-[#BFD2FD] bg-[#E8F0FF] px-3 py-3 text-xs leading-relaxed text-[#103D98]">
+            <Icon name="info" size={20} />
+            <span>
+              A carta será adicionada à sua coleção com a quantidade, condição e
+              idioma informados.
+            </span>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

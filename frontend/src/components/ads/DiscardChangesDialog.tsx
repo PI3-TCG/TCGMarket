@@ -1,12 +1,13 @@
 import { useEffect, useId, useRef } from 'react'
 import { createPortal } from 'react-dom'
-import { Button } from '@/components/ui/Button'
 import { cn } from '@/components/ui/cn'
 import { Icon } from '@/components/ui/Icon'
 import {
   ModalHeaderOrnaments,
+  ModalGoldDivider,
+  modalSecondaryButton as secondaryButton,
+  modalDangerButton as dangerButton,
   modalCloseButton,
-  modalFooter,
   modalFrame,
   modalHeader,
   modalHeadingIcon,
@@ -43,9 +44,7 @@ export function DiscardChangesDialog({
         : null
     const previousOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
-    dialogRef.current
-      ?.querySelector<HTMLElement>('[data-autofocus]')
-      ?.focus()
+    dialogRef.current?.querySelector<HTMLElement>('[data-autofocus]')?.focus()
 
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === 'Escape') {
@@ -62,10 +61,10 @@ export function DiscardChangesDialog({
       const last = focusable[focusable.length - 1]
       if (event.shiftKey && document.activeElement === first) {
         event.preventDefault()
-        last.focus()
+        last?.focus()
       } else if (!event.shiftKey && document.activeElement === last) {
         event.preventDefault()
-        first.focus()
+        first?.focus()
       }
     }
 
@@ -73,13 +72,13 @@ export function DiscardChangesDialog({
     return () => {
       document.removeEventListener('keydown', handleKeyDown)
       document.body.style.overflow = previousOverflow
-      previousFocus?.focus()
+      if (previousFocus?.isConnected) previousFocus.focus()
     }
   }, [])
 
   return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[#170b24]/60 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[#170B24]/65 p-4 backdrop-blur-[3px]"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) onContinue()
       }}
@@ -90,43 +89,83 @@ export function DiscardChangesDialog({
         aria-modal="true"
         aria-labelledby={titleId}
         aria-describedby={descriptionId}
-        className={cn('w-full max-w-md overflow-hidden rounded-[21px] bg-white', modalFrame)}
+        className={cn(
+          'w-full max-w-[470px] overflow-hidden rounded-[21px] bg-[#FBF9FE]',
+          modalFrame,
+        )}
       >
-        <div className={cn('flex items-start justify-between gap-4 px-5 py-[18px]', modalHeader)}>
+        <div
+          className={cn(
+            'flex items-start justify-between gap-4 px-5 py-5 sm:px-6',
+            modalHeader,
+          )}
+        >
           <ModalHeaderOrnaments />
-          <div className="flex items-start gap-3">
-            <span className={modalHeadingIcon}>
+          <div className="relative z-10 flex min-w-0 items-start gap-3">
+            <span aria-hidden="true" className={modalHeadingIcon}>
               <Icon name="alert" size={24} />
             </span>
-            <div>
+            <div className="min-w-0">
               <h2
                 id={titleId}
-                className="font-display text-xl font-bold text-white"
+                className="font-display text-xl font-bold leading-tight text-white"
               >
                 {title}
               </h2>
-              <p id={descriptionId} className="mt-1 text-sm text-white/90">
-                {description}
+              <p className="mt-1 text-sm leading-relaxed text-white/85">
+                Confirme como deseja continuar.
               </p>
             </div>
           </div>
           <button
             type="button"
-            aria-label="Fechar"
+            aria-label="Fechar e continuar preenchendo"
             onClick={onContinue}
-            className={cn('grid size-8 shrink-0 cursor-pointer place-items-center rounded-control', modalCloseButton)}
+            className={cn(
+              'relative z-10 grid size-9 shrink-0 cursor-pointer place-items-center rounded-lg',
+              modalCloseButton,
+            )}
           >
             <Icon name="close" size={20} />
           </button>
         </div>
 
-        <div className={cn('flex flex-wrap justify-end gap-2 px-5 py-[15px]', modalFooter)}>
-          <Button data-autofocus variant="primary" onClick={onContinue}>
+        <ModalGoldDivider />
+
+        <div className="bg-[radial-gradient(ellipse_at_top_left,rgba(238,229,254,0.8),transparent_75%),linear-gradient(135deg,#FDFBFF,#F5F3FD)] px-5 pb-5 pt-7 sm:px-6">
+          <div className="flex items-start gap-3 rounded-xl border border-[#E9CCD1] bg-[linear-gradient(135deg,#FFF9FA,#FFF1F3)] p-4 shadow-[0_2px_8px_rgba(115,30,59,0.04)]">
+            <span
+              aria-hidden="true"
+              className="grid size-9 shrink-0 place-items-center rounded-lg border border-[#F3CBD1] bg-white text-[#B91C36]"
+            >
+              <Icon name="alert" size={20} />
+            </span>
+            <div className="min-w-0">
+              <p className="text-sm font-bold text-[#651D36]">
+                Alterações não salvas
+              </p>
+              <p
+                id={descriptionId}
+                className="mt-1 text-sm leading-relaxed text-[#594557]"
+              >
+                {description}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col-reverse gap-3 border-t border-[#DED5EB] bg-[linear-gradient(180deg,#FDFBFF,#F7F4FC)] px-5 py-4 sm:flex-row sm:justify-end sm:px-6">
+          <button
+            data-autofocus
+            type="button"
+            onClick={onContinue}
+            className={secondaryButton}
+          >
             Continuar preenchendo
-          </Button>
-          <Button variant="outline" onClick={onConfirm}>
+          </button>
+          <button type="button" onClick={onConfirm} className={dangerButton}>
             {confirmLabel}
-          </Button>
+          </button>
         </div>
       </div>
     </div>,

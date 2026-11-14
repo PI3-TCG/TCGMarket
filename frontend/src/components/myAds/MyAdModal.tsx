@@ -22,6 +22,7 @@ import { Button } from '@/components/ui/Button'
 import { cn } from '@/components/ui/cn'
 import { Icon, type IconName } from '@/components/ui/Icon'
 import {
+  ModalGoldDivider,
   ModalHeaderOrnaments,
   modalBody,
   modalCloseButton,
@@ -29,40 +30,59 @@ import {
   modalFrame,
   modalHeader,
   modalHeadingIcon,
+  modalPrimaryButton,
+  modalDangerButton,
+  modalSecondaryButton,
 } from '@/components/ui/modalTheme'
 import { cancelMyAd, getMyAd, updateMyAd } from '@/services/ads'
 import type { AdStatus, OwnAd } from '@/types/Ad'
 import { AdStatusBadge } from './AdStatusBadge'
-
 export type MyAdModalView = 'details' | 'edit' | 'cancel'
-
 type Props = {
   ad: OwnAd
   initialView: MyAdModalView
   onClose: () => void
-  /** Avisa a listagem que o anúncio mudou no servidor. */
   onChanged: (ad: OwnAd | null) => void
 }
-
 type View =
-  | { kind: 'details' }
-  | { kind: 'edit'; saveFailed: boolean }
-  | { kind: 'discard' }
-  | { kind: 'cancel'; failure: 'none' | 'failed' | 'uncertain' }
-
+  | {
+      kind: 'details'
+    }
+  | {
+      kind: 'edit'
+      saveFailed: boolean
+    }
+  | {
+      kind: 'discard'
+    }
+  | {
+      kind: 'cancel'
+      failure: 'none' | 'failed' | 'uncertain'
+    }
 type Notice =
-  | { kind: 'saved' }
-  | { kind: 'cancelled'; released: number }
-  | { kind: 'statusChanged'; during: 'edit' | 'cancel'; status: AdStatus }
-  | { kind: 'notFound' }
+  | {
+      kind: 'saved'
+    }
+  | {
+      kind: 'cancelled'
+      released: number
+    }
+  | {
+      kind: 'statusChanged'
+      during: 'edit' | 'cancel'
+      status: AdStatus
+    }
+  | {
+      kind: 'notFound'
+    }
   | null
-
-type Draft = { sale: boolean; trade: boolean; price: string }
-
+type Draft = {
+  sale: boolean
+  trade: boolean
+  price: string
+}
 type Busy = 'saving' | 'cancelling' | 'refreshing' | null
-
 const AD_STATUSES: AdStatus[] = ['ACTIVE', 'PENDING', 'SOLD_OUT', 'CANCELLED']
-
 function draftFrom(ad: OwnAd): Draft {
   return {
     sale: ad.saleEnabled,
@@ -70,8 +90,12 @@ function draftFrom(ad: OwnAd): Draft {
     price: ad.unitPrice !== null ? formatPriceInput(ad.unitPrice) : '',
   }
 }
-
-export function MyAdModal({ ad: initialAd, initialView, onClose, onChanged }: Props) {
+export function MyAdModal({
+  ad: initialAd,
+  initialView,
+  onClose,
+  onChanged,
+}: Props) {
   const [ad, setAd] = useState(initialAd)
   const [view, setView] = useState<View>(() =>
     initialAd.status !== 'ACTIVE' || initialView === 'details'
@@ -88,13 +112,11 @@ export function MyAdModal({ ad: initialAd, initialView, onClose, onChanged }: Pr
   }>({})
   const [busy, setBusy] = useState<Busy>(null)
   const [notice, setNotice] = useState<Notice>(null)
-
   const titleId = useId()
   const priceId = useId()
   const dialogRef = useRef<HTMLDivElement>(null)
   const saleRef = useRef<HTMLInputElement>(null)
   const priceRef = useRef<HTMLInputElement>(null)
-
   const active = ad.status === 'ACTIVE'
   const parsedPrice = parsePrice(draft.price)
   const modalityError =
@@ -112,12 +134,10 @@ export function MyAdModal({ ad: initialAd, initialView, onClose, onChanged }: Pr
   const shownPriceError = attempted
     ? (priceError ?? serverErrors.unitPrice)
     : undefined
-
   const dirty =
     draft.sale !== ad.saleEnabled ||
     draft.trade !== ad.tradeEnabled ||
     (draft.sale && parsedPrice !== ad.unitPrice)
-
   function requestClose() {
     if (busy) return
     if (view.kind === 'edit' && dirty) {
@@ -130,18 +150,15 @@ export function MyAdModal({ ad: initialAd, initialView, onClose, onChanged }: Pr
     }
     onClose()
   }
-
   const requestCloseRef = useRef(requestClose)
   useEffect(() => {
     requestCloseRef.current = requestClose
   })
-
   useDialogBehavior(
     dialogRef,
     requestCloseRef,
     view.kind === 'cancel' ? `cancel-${view.failure}` : view.kind,
   )
-
   function startEdit() {
     setDraft(draftFrom(ad))
     setAttempted(false)
@@ -149,15 +166,16 @@ export function MyAdModal({ ad: initialAd, initialView, onClose, onChanged }: Pr
     setNotice(null)
     setView({ kind: 'edit', saveFailed: false })
   }
-
   function backToDetails() {
     setDraft(draftFrom(ad))
     setAttempted(false)
     setServerErrors({})
     setView({ kind: 'details' })
   }
-
-  async function syncAfterConflict(during: 'edit' | 'cancel', fallback: AdStatus) {
+  async function syncAfterConflict(
+    during: 'edit' | 'cancel',
+    fallback: AdStatus,
+  ) {
     let status = fallback
     try {
       const current = await getMyAd(ad.id)
@@ -172,17 +190,14 @@ export function MyAdModal({ ad: initialAd, initialView, onClose, onChanged }: Pr
     setNotice({ kind: 'statusChanged', during, status })
     setView({ kind: 'details' })
   }
-
   function markNotFound() {
     setNotice({ kind: 'notFound' })
     setView({ kind: 'details' })
     onChanged(null)
   }
-
   async function save() {
     setAttempted(true)
     setServerErrors({})
-
     if (modalityError) {
       saleRef.current?.focus()
       return
@@ -191,7 +206,6 @@ export function MyAdModal({ ad: initialAd, initialView, onClose, onChanged }: Pr
       priceRef.current?.focus()
       return
     }
-
     setBusy('saving')
     try {
       const updated = await updateMyAd(ad.id, {
@@ -209,16 +223,18 @@ export function MyAdModal({ ad: initialAd, initialView, onClose, onChanged }: Pr
       const status = axios.isAxiosError(error)
         ? error.response?.status
         : undefined
-
       if (status === 409) {
         await syncAfterConflict('edit', conflictStatus(error) ?? ad.status)
       } else if (status === 404) {
         markNotFound()
       } else if (
         status === 400 &&
-        axios.isAxiosError<{ fields?: { field: string; message: string }[] }>(
-          error,
-        )
+        axios.isAxiosError<{
+          fields?: {
+            field: string
+            message: string
+          }[]
+        }>(error)
       ) {
         const fields = error.response?.data?.fields ?? []
         setServerErrors({
@@ -234,7 +250,6 @@ export function MyAdModal({ ad: initialAd, initialView, onClose, onChanged }: Pr
       setBusy(null)
     }
   }
-
   async function confirmCancel() {
     setBusy('cancelling')
     try {
@@ -248,7 +263,6 @@ export function MyAdModal({ ad: initialAd, initialView, onClose, onChanged }: Pr
       onChanged(cancelled)
     } catch (error) {
       const response = axios.isAxiosError(error) ? error.response : undefined
-
       if (!response) {
         setView({ kind: 'cancel', failure: 'uncertain' })
       } else if (response.status === 409) {
@@ -262,7 +276,6 @@ export function MyAdModal({ ad: initialAd, initialView, onClose, onChanged }: Pr
       setBusy(null)
     }
   }
-
   async function refreshAfterUncertainCancel() {
     setBusy('refreshing')
     try {
@@ -293,7 +306,6 @@ export function MyAdModal({ ad: initialAd, initialView, onClose, onChanged }: Pr
       setBusy(null)
     }
   }
-
   const title =
     view.kind === 'edit'
       ? 'Editar anúncio'
@@ -302,10 +314,6 @@ export function MyAdModal({ ad: initialAd, initialView, onClose, onChanged }: Pr
         : view.kind === 'cancel'
           ? 'Cancelar anúncio?'
           : 'Detalhes do anúncio'
-
-  const titleIcon: IconName =
-    view.kind === 'cancel' ? 'close-circle' : view.kind === 'discard' ? 'alert' : 'cart'
-
   return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-[#170b24]/60 p-4"
@@ -319,54 +327,100 @@ export function MyAdModal({ ad: initialAd, initialView, onClose, onChanged }: Pr
         aria-modal="true"
         aria-labelledby={titleId}
         aria-busy={busy ? true : undefined}
-        className={cn('flex max-h-[calc(100vh-2rem)] w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-white', modalFrame)}
+        className={cn(
+          'flex max-h-[90dvh] w-full max-w-[790px] flex-col overflow-hidden rounded-[22px] bg-white sm:rounded-[24px]',
+          modalFrame,
+        )}
       >
-        <header className={cn('flex items-start justify-between gap-3 px-5 pt-5 pb-4 sm:px-6', modalHeader)}>
+        <header
+          className={cn('relative shrink-0 px-5 py-5 sm:px-6', modalHeader)}
+        >
           <ModalHeaderOrnaments />
-          <div className="flex min-w-0 flex-wrap items-center gap-3">
-            <span className={modalHeadingIcon}>
-              <Icon name={titleIcon} size={24} />
+
+          <div className="relative z-10 grid grid-cols-[40px_minmax(0,1fr)_36px] items-center gap-3">
+            {/* Ícone contextual */}
+
+            <span aria-hidden="true" className={modalHeadingIcon}>
+              <Icon
+                name={
+                  view.kind === 'edit'
+                    ? 'edit'
+                    : view.kind === 'cancel'
+                      ? 'close-circle'
+                      : view.kind === 'discard'
+                        ? 'alert'
+                        : 'megaphone'
+                }
+                size={24}
+              />
             </span>
-            <h2
-              id={titleId}
-              tabIndex={-1}
-              className="font-display text-xl font-bold text-white outline-none sm:text-2xl"
+
+            {/* Título */}
+
+            <div className="min-w-0 text-center">
+              <h2
+                id={titleId}
+                tabIndex={-1}
+                className="font-display text-lg font-bold leading-tight text-white outline-none sm:text-xl"
+              >
+                {title}
+              </h2>
+
+              <p className="mt-1 text-xs leading-relaxed text-white/90 sm:text-sm">
+                {view.kind === 'edit'
+                  ? 'Atualize as informações do seu anúncio.'
+                  : view.kind === 'cancel'
+                    ? 'Confira os detalhes antes de confirmar.'
+                    : view.kind === 'discard'
+                      ? 'Você possui alterações não salvas.'
+                      : 'Confira as informações do seu anúncio.'}
+              </p>
+            </div>
+
+            {/* Fechar */}
+
+            <button
+              type="button"
+              aria-label="Fechar modal"
+              disabled={busy !== null}
+              onClick={requestClose}
+              className={cn(
+                'grid size-9 place-items-center rounded-lg transition-colors disabled:cursor-not-allowed disabled:opacity-40',
+                modalCloseButton,
+              )}
             >
-              {title}
-            </h2>
-            {view.kind !== 'cancel' && view.kind !== 'discard' && (
-              <AdStatusBadge status={ad.status} />
-            )}
+              <Icon name="close" size={20} />
+            </button>
           </div>
-          <button
-            type="button"
-            aria-label="Fechar"
-            disabled={busy !== null}
-            onClick={requestClose}
-            className={cn('grid size-9 shrink-0 cursor-pointer place-items-center rounded-control disabled:cursor-not-allowed disabled:opacity-40', modalCloseButton)}
-          >
-            <Icon name="close" size={20} />
-          </button>
         </header>
 
-        <div className={cn('min-h-0 flex-1 overflow-y-auto px-5 py-5 sm:px-6', modalBody)}>
+        <ModalGoldDivider />
+
+        <div
+          className={cn(
+            'min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-5 sm:px-6 sm:py-6',
+            modalBody,
+          )}
+        >
           {view.kind === 'discard' ? (
             <div className="space-y-2 text-neutral-700">
               <p className="font-semibold text-neutral-900">
                 As alterações não salvas serão perdidas.
               </p>
+
               <p className="text-sm">O anúncio continuará como está.</p>
             </div>
           ) : view.kind === 'cancel' ? (
             <CancelContent ad={ad} failure={view.failure} />
           ) : (
-            <div className="grid gap-5 sm:grid-cols-[180px_minmax(0,1fr)]">
+            <div className="grid gap-5 rounded-[18px] border border-[#DBC7E4] bg-[linear-gradient(180deg,#FFFFFF_0%,#FBF7FD_100%)] p-4 shadow-[0_3px_12px_rgba(60,17,87,0.07)] sm:grid-cols-[160px_minmax(0,1fr)] sm:p-5">
               <CardImage ad={ad} />
 
               <div className="min-w-0">
                 <h3 className="font-display text-2xl font-bold break-words text-primary-900">
                   {ad.card.name}
                 </h3>
+
                 <p className="mt-1 text-sm text-primary-700">
                   {gameLabels[ad.card.game] ?? ad.card.game} • {ad.card.edition}
                   {ad.card.cardNumber ? ` • ${ad.card.cardNumber}` : ''}
@@ -374,8 +428,13 @@ export function MyAdModal({ ad: initialAd, initialView, onClose, onChanged }: Pr
                 </p>
 
                 <dl className="mt-4 divide-y divide-neutral-100 text-sm">
-                  <InfoRow label="Condição" value={conditionLabels[ad.condition]} />
+                  <InfoRow
+                    label="Condição"
+                    value={conditionLabels[ad.condition]}
+                  />
+
                   <InfoRow label="Idioma" value={languageLabels[ad.language]} />
+
                   {ad.status === 'CANCELLED' && ad.releasedQuantity !== null ? (
                     <InfoRow
                       label="Liberados no cancelamento"
@@ -410,13 +469,16 @@ export function MyAdModal({ ad: initialAd, initialView, onClose, onChanged }: Pr
           {view.kind !== 'discard' && view.kind !== 'cancel' && (
             <div className="mt-5 space-y-3">
               <NoticeArea notice={notice} />
+
               {view.kind === 'edit' && view.saveFailed && (
                 <Feedback tone="error" icon="close-circle" role="alert">
                   <strong>Não foi possível salvar.</strong> Tente novamente.
                   Seus dados foram mantidos.
                 </Feedback>
               )}
+
               {view.kind === 'details' && <StatusSummary ad={ad} />}
+
               {view.kind === 'edit' && (
                 <Feedback tone="primary" icon="info">
                   {copies(ad.remainingQuantity)} •{' '}
@@ -433,7 +495,12 @@ export function MyAdModal({ ad: initialAd, initialView, onClose, onChanged }: Pr
           )}
         </div>
 
-        <footer className={cn('flex flex-wrap items-center justify-end gap-2 px-5 py-4 sm:px-6', modalFooter)}>
+        <footer
+          className={cn(
+            'flex shrink-0 flex-wrap items-center justify-end gap-2 px-4 py-3 sm:px-6',
+            modalFooter,
+          )}
+        >
           {view.kind === 'details' &&
             (active && notice?.kind !== 'notFound' ? (
               <>
@@ -445,16 +512,31 @@ export function MyAdModal({ ad: initialAd, initialView, onClose, onChanged }: Pr
                   <Icon name="close-circle" size={16} />
                   Cancelar anúncio
                 </Button>
-                <Button variant="outline" onClick={onClose}>
+
+                <Button
+                  variant="outline"
+                  className={modalSecondaryButton}
+                  onClick={onClose}
+                >
                   Fechar
                 </Button>
-                <Button onClick={startEdit} data-autofocus>
+
+                <Button
+                  className={modalPrimaryButton}
+                  onClick={startEdit}
+                  data-autofocus
+                >
                   <Icon name="settings" size={16} />
                   Editar
                 </Button>
               </>
             ) : (
-              <Button variant="outline" onClick={onClose} data-autofocus>
+              <Button
+                variant="outline"
+                className={modalSecondaryButton}
+                onClick={onClose}
+                data-autofocus
+              >
                 Fechar
               </Button>
             ))}
@@ -462,6 +544,7 @@ export function MyAdModal({ ad: initialAd, initialView, onClose, onChanged }: Pr
           {view.kind === 'edit' && (
             <>
               <Button
+                className={modalSecondaryButton}
                 variant="outline"
                 disabled={busy !== null}
                 onClick={() =>
@@ -470,11 +553,18 @@ export function MyAdModal({ ad: initialAd, initialView, onClose, onChanged }: Pr
               >
                 Cancelar edição
               </Button>
+
               <Button
+                className={modalPrimaryButton}
                 onClick={() => void save()}
                 disabled={busy !== null || (!dirty && !view.saveFailed)}
               >
-                {busy === 'saving' ? <Spinner /> : <Icon name="check" size={16} />}
+                {busy === 'saving' ? (
+                  <Spinner />
+                ) : (
+                  <Icon name="check" size={16} />
+                )}
+
                 {busy === 'saving'
                   ? 'Salvando...'
                   : view.saveFailed
@@ -486,10 +576,16 @@ export function MyAdModal({ ad: initialAd, initialView, onClose, onChanged }: Pr
 
           {view.kind === 'discard' && (
             <>
-              <Button variant="outline" onClick={backToDetails}>
+              <Button
+                variant="outline"
+                className={modalSecondaryButton}
+                onClick={backToDetails}
+              >
                 Descartar alterações
               </Button>
+
               <Button
+                className={modalPrimaryButton}
                 onClick={() => setView({ kind: 'edit', saveFailed: false })}
                 data-autofocus
               >
@@ -501,6 +597,7 @@ export function MyAdModal({ ad: initialAd, initialView, onClose, onChanged }: Pr
           {view.kind === 'cancel' && (
             <>
               <Button
+                className={modalSecondaryButton}
                 variant="outline"
                 disabled={busy !== null}
                 onClick={() => setView({ kind: 'details' })}
@@ -508,21 +605,26 @@ export function MyAdModal({ ad: initialAd, initialView, onClose, onChanged }: Pr
               >
                 Voltar
               </Button>
+
               {view.failure === 'uncertain' ? (
                 <Button
+                  className={modalPrimaryButton}
                   disabled={busy !== null}
                   onClick={() => void refreshAfterUncertainCancel()}
                 >
                   {busy === 'refreshing' && <Spinner />}
+
                   {busy === 'refreshing' ? 'Atualizando...' : 'Atualizar'}
                 </Button>
               ) : (
                 <Button
+                  className={modalDangerButton}
                   variant="danger"
                   disabled={busy !== null}
                   onClick={() => void confirmCancel()}
                 >
                   {busy === 'cancelling' && <Spinner />}
+
                   {busy === 'cancelling'
                     ? 'Cancelando...'
                     : view.failure === 'failed'
@@ -538,9 +640,15 @@ export function MyAdModal({ ad: initialAd, initialView, onClose, onChanged }: Pr
     document.body,
   )
 }
-
 function conflictStatus(error: unknown): AdStatus | null {
-  if (!axios.isAxiosError<{ fields?: { field: string; message: string }[] }>(error)) {
+  if (
+    !axios.isAxiosError<{
+      fields?: {
+        field: string
+        message: string
+      }[]
+    }>(error)
+  ) {
     return null
   }
   const value = error.response?.data?.fields?.find(
@@ -548,12 +656,6 @@ function conflictStatus(error: unknown): AdStatus | null {
   )?.message
   return AD_STATUSES.find((status) => status === value) ?? null
 }
-
-/**
- * Foco preso no modal, Escape tratado pelo próprio modal e foco devolvido ao
- * disparador ao fechar. A cada troca de estado, o foco vai para o botão
- * marcado com data-autofocus ou, sem ele, para o título.
- */
 function useDialogBehavior(
   dialogRef: RefObject<HTMLDivElement | null>,
   requestCloseRef: RefObject<() => void>,
@@ -566,18 +668,16 @@ function useDialogBehavior(
         : null
     const previousOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
-
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === 'Escape') {
         event.preventDefault()
         requestCloseRef.current()
         return
       }
-
       if (event.key !== 'Tab' || !dialogRef.current) return
       const focusable = [
         ...dialogRef.current.querySelectorAll<HTMLElement>(
-          'button:not([disabled]), input:not([disabled]), [href]',
+          'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [href]',
         ),
       ]
       if (focusable.length === 0) {
@@ -594,15 +694,13 @@ function useDialogBehavior(
         first.focus()
       }
     }
-
     document.addEventListener('keydown', handleKeyDown)
     return () => {
       document.removeEventListener('keydown', handleKeyDown)
       document.body.style.overflow = previousOverflow
-      previousFocus?.focus()
+      if (previousFocus?.isConnected) previousFocus.focus()
     }
   }, [dialogRef, requestCloseRef])
-
   useEffect(() => {
     const dialog = dialogRef.current
     if (!dialog) return
@@ -612,16 +710,12 @@ function useDialogBehavior(
     target?.focus()
   }, [dialogRef, stateKey])
 }
-
 function CardImage({ ad, small = false }: { ad: OwnAd; small?: boolean }) {
   const [failed, setFailed] = useState(false)
   const hasImage = Boolean(ad.card.imageUrl) && !failed
-
   return (
     <div
-      className={`flex items-center justify-center overflow-hidden rounded-xl bg-primary-100 ${
-        small ? 'h-32 w-24' : 'mx-auto h-64 w-44 sm:mx-0 sm:w-full'
-      }`}
+      className={`flex items-center justify-center overflow-hidden rounded-xl bg-primary-100 ${small ? 'h-32 w-24' : 'mx-auto h-64 w-44 sm:mx-0 sm:w-full'}`}
     >
       {hasImage ? (
         <img
@@ -636,20 +730,20 @@ function CardImage({ ad, small = false }: { ad: OwnAd; small?: boolean }) {
     </div>
   )
 }
-
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-3 py-2">
       <dt className="text-neutral-700">{label}</dt>
+
       <dd className="font-semibold text-neutral-900">{value}</dd>
     </div>
   )
 }
-
 function ModalityView({ ad }: { ad: OwnAd }) {
   return (
     <div className="mt-4">
       <p className="text-sm font-semibold text-neutral-900">Modalidade</p>
+
       <div className="mt-2 grid grid-cols-2 gap-2">
         {ad.saleEnabled && (
           <span className="flex items-center justify-center gap-2 rounded-lg bg-primary-100 px-3 py-2 text-sm font-semibold text-primary-900">
@@ -657,6 +751,7 @@ function ModalityView({ ad }: { ad: OwnAd }) {
             Venda
           </span>
         )}
+
         {ad.tradeEnabled && (
           <span className="flex items-center justify-center gap-2 rounded-lg bg-secondary-100 px-3 py-2 text-sm font-semibold text-secondary-700">
             <Icon name="share" size={16} />
@@ -664,9 +759,11 @@ function ModalityView({ ad }: { ad: OwnAd }) {
           </span>
         )}
       </div>
+
       {ad.saleEnabled && ad.unitPrice !== null ? (
         <>
           <p className="mt-4 text-sm text-neutral-700">Preço por unidade</p>
+
           <p className="font-display text-2xl font-bold text-primary-900">
             {formatCurrency(ad.unitPrice)}
           </p>
@@ -679,7 +776,6 @@ function ModalityView({ ad }: { ad: OwnAd }) {
     </div>
   )
 }
-
 function EditFields({
   draft,
   onDraft,
@@ -700,16 +796,15 @@ function EditFields({
   priceError?: string
 }) {
   const modalityErrorId = `${priceId}-modality-error`
-
   return (
     <div className="mt-4 space-y-4">
-      <fieldset
-        aria-describedby={modalityError ? modalityErrorId : undefined}
-      >
+      <fieldset aria-describedby={modalityError ? modalityErrorId : undefined}>
         <legend className="text-sm font-semibold text-neutral-900">
           Modalidade
         </legend>
+
         <p className="text-xs text-neutral-700">Selecione uma ou as duas.</p>
+
         <div className="mt-2 grid grid-cols-2 gap-2">
           <ModalityToggle
             inputRef={saleRef}
@@ -721,6 +816,7 @@ function EditFields({
             invalid={Boolean(modalityError)}
             onChange={(sale) => onDraft((current) => ({ ...current, sale }))}
           />
+
           <ModalityToggle
             label="Troca"
             icon="share"
@@ -731,6 +827,7 @@ function EditFields({
             onChange={(trade) => onDraft((current) => ({ ...current, trade }))}
           />
         </div>
+
         {modalityError && (
           <FieldError id={modalityErrorId}>{modalityError}</FieldError>
         )}
@@ -742,14 +839,14 @@ function EditFields({
             htmlFor={priceId}
             className="text-sm font-semibold text-neutral-900"
           >
-            Preço por unidade (R$) <span className="text-error-700">*</span>
+            Preço por unidade (R$) <span className="text-error-700"></span>
           </label>
+
           <div
-            className={`mt-1.5 flex h-11 items-center gap-2 rounded-control border bg-white px-3 focus-within:ring-2 focus-within:ring-secondary-500 ${
-              priceError ? 'border-error-700' : 'border-neutral-300'
-            }`}
+            className={`mt-1.5 flex h-11 items-center gap-2 rounded-control border bg-white px-3 focus-within:ring-2 focus-within:ring-secondary-500 ${priceError ? 'border-error-700' : 'border-neutral-300'}`}
           >
             <span className="text-sm text-neutral-500">R$</span>
+
             <input
               ref={priceRef}
               id={priceId}
@@ -776,6 +873,7 @@ function EditFields({
               className="min-w-0 flex-1 bg-transparent text-sm text-neutral-900 outline-none disabled:cursor-not-allowed"
             />
           </div>
+
           {priceError ? (
             <FieldError id={`${priceId}-hint`}>{priceError}</FieldError>
           ) : (
@@ -788,7 +886,6 @@ function EditFields({
     </div>
   )
 }
-
 function ModalityToggle({
   inputRef,
   label,
@@ -812,7 +909,6 @@ function ModalityToggle({
     tone === 'sale'
       ? 'border-primary-900 bg-primary-100 text-primary-900'
       : 'border-secondary-500 bg-secondary-100 text-secondary-700'
-
   return (
     <label
       className={`flex cursor-pointer items-center gap-2 rounded-lg border-2 px-3 py-2 text-sm font-semibold transition-colors focus-within:ring-2 focus-within:ring-secondary-500 has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-60 ${
@@ -832,12 +928,13 @@ function ModalityToggle({
         onChange={(event) => onChange(event.target.checked)}
         className={`size-4 ${tone === 'sale' ? 'accent-primary-900' : 'accent-secondary-500'}`}
       />
+
       <Icon name={icon} size={16} />
+
       {label}
     </label>
   )
 }
-
 function CancelContent({
   ad,
   failure,
@@ -849,28 +946,35 @@ function CancelContent({
     <div className="space-y-4">
       <div className="flex gap-4">
         <CardImage ad={ad} small />
+
         <div className="min-w-0 space-y-1">
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="font-display text-xl font-bold break-words text-primary-900">
               {ad.card.name}
             </h3>
+
             <AdStatusBadge status={ad.status} />
           </div>
+
           <p className="text-sm text-primary-700">
             {gameLabels[ad.card.game] ?? ad.card.game} • {ad.card.edition}
           </p>
+
           <div className="flex flex-wrap gap-1.5">
             <span className="rounded-full bg-success-50 px-2 py-0.5 text-xs text-success-700">
               {conditionLabels[ad.condition]}
             </span>
+
             <span className="rounded-full bg-primary-100 px-2 py-0.5 text-xs text-primary-900">
               {languageLabels[ad.language]}
             </span>
           </div>
+
           <p className="text-sm text-primary-700">
             {copies(ad.remainingQuantity)} •{' '}
             {modalityLabel(ad.saleEnabled, ad.tradeEnabled)}
           </p>
+
           {ad.saleEnabled && ad.unitPrice !== null && (
             <p className="font-display text-lg font-bold text-primary-900">
               {formatCurrency(ad.unitPrice)}{' '}
@@ -892,21 +996,25 @@ function CancelContent({
       ) : (
         <Feedback tone="warning" icon="alert">
           <span className="block">O anúncio sairá do marketplace.</span>
+
           <span className="block">
             {ad.remainingQuantity === 1
               ? 'O exemplar restante será liberado para novos anúncios.'
               : `Os ${ad.remainingQuantity} exemplares restantes serão liberados para novos anúncios.`}
           </span>
+
           <span className="block">O histórico será mantido.</span>
         </Feedback>
       )}
     </div>
   )
 }
-
 const statusChangedText: Record<
   Exclude<AdStatus, 'ACTIVE'>,
-  { edit: string; cancel: string }
+  {
+    edit: string
+    cancel: string
+  }
 > = {
   PENDING: {
     edit: 'Agora está aguardando pagamento. As alterações não foram salvas.',
@@ -921,10 +1029,8 @@ const statusChangedText: Record<
     cancel: 'O anúncio já foi cancelado.',
   },
 }
-
 function NoticeArea({ notice }: { notice: Notice }) {
   if (!notice) return null
-
   if (notice.kind === 'saved') {
     return (
       <Feedback tone="success" icon="check-circle" role="status">
@@ -932,21 +1038,21 @@ function NoticeArea({ notice }: { notice: Notice }) {
       </Feedback>
     )
   }
-
   if (notice.kind === 'cancelled') {
     return (
       <Feedback tone="success" icon="check-circle" role="status">
         <strong className="block">Anúncio cancelado.</strong>
+
         <span className="block">
           {notice.released === 1
             ? '1 exemplar liberado para novos anúncios.'
             : `${notice.released} exemplares liberados para novos anúncios.`}
         </span>
+
         <span className="block">Histórico preservado.</span>
       </Feedback>
     )
   }
-
   if (notice.kind === 'notFound') {
     return (
       <Feedback tone="error" icon="close-circle" role="alert">
@@ -955,21 +1061,20 @@ function NoticeArea({ notice }: { notice: Notice }) {
       </Feedback>
     )
   }
-
   const text =
     notice.status === 'ACTIVE'
       ? null
       : statusChangedText[notice.status][notice.during]
-
   return (
     <Feedback tone="warning" icon="alert" role="alert">
       <strong className="block">O status do anúncio mudou.</strong>
+
       {text && <span className="block">{text}</span>}
+
       <span className="block">Edição e cancelamento indisponíveis.</span>
     </Feedback>
   )
 }
-
 function StatusSummary({ ad }: { ad: OwnAd }) {
   if (ad.status === 'ACTIVE') {
     return (
@@ -979,21 +1084,18 @@ function StatusSummary({ ad }: { ad: OwnAd }) {
       </Feedback>
     )
   }
-
   const text =
     ad.status === 'PENDING'
       ? 'Aguardando pagamento. Este anúncio não pode ser editado ou cancelado.'
       : ad.status === 'SOLD_OUT'
         ? 'Anúncio finalizado. Histórico preservado.'
         : 'Anúncio cancelado. Histórico preservado.'
-
   return (
     <Feedback tone="neutral" icon="info">
       {text}
     </Feedback>
   )
 }
-
 const feedbackTones = {
   primary: 'bg-primary-100 text-primary-900',
   success: 'bg-success-50 text-success-700',
@@ -1001,7 +1103,6 @@ const feedbackTones = {
   error: 'border border-error-200 bg-error-50 text-error-700',
   neutral: 'bg-neutral-100 text-neutral-700',
 }
-
 function Feedback({
   tone,
   icon,
@@ -1019,20 +1120,23 @@ function Feedback({
       className={`flex items-start gap-3 rounded-xl px-4 py-3 text-sm ${feedbackTones[tone]}`}
     >
       <Icon name={icon} size={20} className="mt-0.5" />
+
       <div className="min-w-0">{children}</div>
     </div>
   )
 }
-
 function FieldError({ id, children }: { id?: string; children: ReactNode }) {
   return (
-    <p id={id} className="mt-1.5 flex items-center gap-1 text-sm text-error-700">
+    <p
+      id={id}
+      className="mt-1.5 flex items-center gap-1 text-sm text-error-700"
+    >
       <Icon name="close-circle" size={16} />
+
       {children}
     </p>
   )
 }
-
 function Spinner() {
   return (
     <span
