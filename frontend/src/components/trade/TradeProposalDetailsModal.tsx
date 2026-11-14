@@ -1,11 +1,19 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import axios from 'axios'
 import { Alert } from '@/components/ui/Alert'
-import { Button } from '@/components/ui/Button'
 import { Icon } from '@/components/ui/Icon'
+import { cn } from '@/components/ui/cn'
 import { Modal } from '@/components/ui/Modal'
+import {
+  modalDangerButton,
+  modalPrimaryButton,
+  modalSecondaryButton,
+} from '@/components/ui/modalTheme'
 import { getTradeProposalDetails } from '@/services/tradeProposalRead'
-import type { TradeProposalCardItem, TradeProposalView } from '@/types/TradeProposalView'
+import type {
+  TradeProposalCardItem,
+  TradeProposalView,
+} from '@/types/TradeProposalView'
 import {
   conditionName,
   gameName,
@@ -28,7 +36,46 @@ type Result =
   | { kind: 'error' }
   | { kind: 'ready'; data: TradeProposalView }
 
-const surface = 'rounded-xl border border-neutral-200 bg-white p-4 shadow-sm'
+const surface =
+  'rounded-[18px] border border-[#DBC7E4] bg-[linear-gradient(180deg,#FFFFFF_0%,#FBF7FD_100%)] p-4 shadow-[0_3px_12px_rgba(60,17,87,0.07),inset_0_1px_0_rgba(255,255,255,0.8)] sm:p-5'
+
+type TradeActionButtonProps = {
+  tone?: 'primary' | 'danger' | 'secondary'
+  children: ReactNode
+  disabled?: boolean
+  onClick: () => void
+  className?: string
+}
+
+function TradeActionButton({
+  tone = 'secondary',
+  children,
+  disabled,
+  onClick,
+  className,
+}: TradeActionButtonProps) {
+  const style =
+    tone === 'primary'
+      ? modalPrimaryButton
+      : tone === 'danger'
+        ? modalDangerButton
+        : modalSecondaryButton
+
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={onClick}
+      className={cn(
+        'inline-flex min-h-11 items-center justify-center gap-2 whitespace-normal text-center',
+        style,
+        className,
+      )}
+    >
+      {children}
+    </button>
+  )
+}
 
 const decisionContent: Record<
   TradeProposalAction,
@@ -44,7 +91,8 @@ const decisionContent: Record<
     message:
       'Você concorda com os termos desta proposta. A disponibilidade das cartas será verificada novamente e, em seguida, as cartas serão transferidas entre as coleções.',
     confirmLabel: 'Confirmar aceite',
-    successMessage: 'Troca concluída! As cartas já foram transferidas entre as coleções.',
+    successMessage:
+      'Troca concluída! As cartas já foram transferidas entre as coleções.',
   },
   reject: {
     title: 'Confirmar recusa',
@@ -62,8 +110,6 @@ const decisionContent: Record<
   },
 }
 
-
-
 export function TradeProposalDetailsModal({
   id,
   onClose,
@@ -77,26 +123,19 @@ export function TradeProposalDetailsModal({
   const [settled, setSettled] = useState<
     ({ key: string } & Exclude<Result, { kind: 'loading' }>) | null
   >(null)
-
-  const [confirming, setConfirming] =
-    useState<TradeProposalAction | null>(null)
-
+  const [confirming, setConfirming] = useState<TradeProposalAction | null>(null)
   const [processing, setProcessing] = useState(false)
   const [feedback, setFeedback] = useState<{
     kind: 'success' | 'error'
     message: string
   } | null>(null)
-
   const [requiresRefresh, setRequiresRefresh] = useState(false)
 
   const key = `${id}:${attempt}`
-
-  const current: Result =
-    settled?.key === key ? settled : { kind: 'loading' }
+  const current: Result = settled?.key === key ? settled : { kind: 'loading' }
 
   useEffect(() => {
     const abort = new AbortController()
-
     getTradeProposalDetails(id, abort.signal)
       .then((data) => {
         if (!abort.signal.aborted) {
@@ -106,17 +145,14 @@ export function TradeProposalDetailsModal({
       })
       .catch((error: unknown) => {
         if (abort.signal.aborted) return
-
         setSettled({
           key,
           kind:
-            axios.isAxiosError(error) &&
-            error.response?.status === 404
+            axios.isAxiosError(error) && error.response?.status === 404
               ? 'notFound'
               : 'error',
         })
       })
-
     return () => abort.abort()
   }, [id, attempt, key])
 
@@ -128,35 +164,24 @@ export function TradeProposalDetailsModal({
   }
 
   async function confirmDecision() {
-    if (!confirming || processing || current.kind !== 'ready') {
-      return
-    }
-
+    if (!confirming || processing || current.kind !== 'ready') return
     const action = confirming
     setProcessing(true)
     setFeedback(null)
-
     try {
       const { status } = await decideTradeProposal(id, action)
-
       setFeedback({
         kind: 'success',
-        message: action === 'accept' && status === 'ACCEPTED'
-          ? 'Proposta aceita. A transferência das cartas está sendo concluída e pode levar alguns minutos.'
-          : decisionContent[action].successMessage,
+        message:
+          action === 'accept' && status === 'ACCEPTED'
+            ? 'Proposta aceita. A transferência das cartas está sendo concluída e pode levar alguns minutos.'
+            : decisionContent[action].successMessage,
       })
-
       refreshDetails()
     } catch (error: unknown) {
       const failure = tradeDecisionFailure(error)
-
-      setFeedback({
-        kind: 'error',
-        message: failure.message,
-      })
-
-      // O estado pode ter mudado, inclusive se houve timeout.
-      // Nunca repetir automaticamente uma decisão.
+      setFeedback({ kind: 'error', message: failure.message })
+      // Não repetir a decisão automaticamente: o estado pode ter mudado.
       refreshDetails()
     } finally {
       setProcessing(false)
@@ -164,32 +189,29 @@ export function TradeProposalDetailsModal({
   }
 
   const data = current.kind === 'ready' ? current.data : null
-
   const canDecide =
-    data?.status === 'PENDING' &&
-    !processing &&
-    !requiresRefresh
-
-  const availableActions: TradeProposalAction[] =
-    !canDecide
-      ? []
-      : data.direction === 'RECEIVED'
-        ? ['accept', 'reject']
-        : ['cancel']
-
-  const confirmation =
-    confirming ? decisionContent[confirming] : null
+    data?.status === 'PENDING' && !processing && !requiresRefresh
+  const availableActions: TradeProposalAction[] = !canDecide
+    ? []
+    : data.direction === 'RECEIVED'
+      ? ['accept', 'reject']
+      : ['cancel']
+  const confirmation = confirming ? decisionContent[confirming] : null
 
   return (
     <Modal
       open
       presentation="refined"
-      size="lg"
-      title={
+      headerIcon={
         confirmation
-          ? confirmation.title
-          : 'Detalhes da proposta'
+          ? confirming === 'accept'
+            ? 'check-circle'
+            : 'alert'
+          : 'arrows-right-left'
       }
+      size="lg"
+      className="max-w-[920px]"
+      title={confirmation ? confirmation.title : 'Detalhes da proposta'}
       subtitle={
         confirmation
           ? 'Confira sua decisão antes de continuar.'
@@ -200,54 +222,49 @@ export function TradeProposalDetailsModal({
       footer={
         confirmation ? (
           <>
-            <Button
-              variant="outline"
+            <TradeActionButton
               disabled={processing}
               onClick={() => setConfirming(null)}
             >
               Voltar aos detalhes
-            </Button>
-
-            <Button
-              variant={
-                confirming === 'accept' ? 'primary' : 'danger'
-              }
+            </TradeActionButton>
+            <TradeActionButton
+              tone={confirming === 'accept' ? 'primary' : 'danger'}
               disabled={processing}
               onClick={confirmDecision}
             >
-              {processing
-                ? 'Processando...'
-                : confirmation.confirmLabel}
-            </Button>
+              <Icon
+                name={confirming === 'accept' ? 'check' : 'alert'}
+                size={16}
+              />
+              {processing ? 'Processando...' : confirmation.confirmLabel}
+            </TradeActionButton>
           </>
         ) : (
           <>
-            <Button
-              variant="outline"
-              disabled={processing}
-              onClick={onClose}
-            >
+            <TradeActionButton disabled={processing} onClick={onClose}>
               Fechar detalhes
-            </Button>
-
+            </TradeActionButton>
             {availableActions.map((action) => (
-              <Button
+              <TradeActionButton
                 key={action}
-                variant={
-                  action === 'accept' ? 'primary' : 'danger'
-                }
+                tone={action === 'accept' ? 'primary' : 'danger'}
                 disabled={processing}
                 onClick={() => {
                   setFeedback(null)
                   setConfirming(action)
                 }}
               >
+                <Icon
+                  name={action === 'accept' ? 'check' : 'close-circle'}
+                  size={16}
+                />
                 {action === 'accept'
                   ? 'Aceitar'
                   : action === 'reject'
                     ? 'Recusar'
                     : 'Cancelar'}
-              </Button>
+              </TradeActionButton>
             ))}
           </>
         )
@@ -260,9 +277,7 @@ export function TradeProposalDetailsModal({
       >
         {feedback && (
           <Alert
-            variant={
-              feedback.kind === 'success' ? 'success' : 'error'
-            }
+            variant={feedback.kind === 'success' ? 'success' : 'error'}
             title={
               feedback.kind === 'success'
                 ? 'Operação concluída'
@@ -272,18 +287,12 @@ export function TradeProposalDetailsModal({
             {feedback.message}
           </Alert>
         )}
-
         {current.kind === 'loading' && <DetailsSkeleton />}
-
         {current.kind === 'notFound' && (
-          <Alert
-            variant="warning"
-            title="Proposta não encontrada"
-          >
+          <Alert variant="warning" title="Proposta não encontrada">
             Esta proposta não está disponível para sua conta.
           </Alert>
         )}
-
         {current.kind === 'error' && (
           <div className="space-y-4">
             <Alert
@@ -292,124 +301,216 @@ export function TradeProposalDetailsModal({
             >
               Verifique sua conexão antes de realizar outra ação.
             </Alert>
-
-            <Button
-              variant="outline"
-              onClick={() => setAttempt((value) => value + 1)}
-            >
+            <TradeActionButton onClick={() => setAttempt((value) => value + 1)}>
               Tentar novamente
-            </Button>
+            </TradeActionButton>
           </div>
         )}
-
         {data && confirmation && (
           <section className="space-y-4">
-            <div className={surface}>
-              <p className="text-sm text-neutral-700">
-                {confirmation.message}
-              </p>
+            <div
+              className={
+                confirming === 'accept'
+                  ? 'flex items-start gap-3 rounded-[16px] border border-[#C7DAF9] bg-[linear-gradient(135deg,#F0F7FF_0%,#E7F0FF_100%)] p-4 text-[#164C89]'
+                  : 'flex items-start gap-3 rounded-[16px] border border-[#F2C7CC] bg-[linear-gradient(135deg,#FFF7F7_0%,#FFF0F2_100%)] p-4 text-[#8A2030]'
+              }
+            >
+              <Icon
+                name={confirming === 'accept' ? 'info' : 'alert'}
+                size={24}
+              />
+              <div className="min-w-0">
+                <p className="text-sm font-bold">{confirmation.title}</p>
+                <p className="mt-1 text-sm leading-relaxed">
+                  {confirmation.message}
+                </p>
+              </div>
             </div>
-
             <ProposalDetails data={data} />
-
             {processing && (
-              <p role="status" className="text-sm font-semibold">
+              <p role="status" className="text-sm font-semibold text-[#660366]">
                 Processando sua decisão. Não feche esta janela.
               </p>
             )}
           </section>
         )}
-
-        {data && !confirmation && (
-          <ProposalDetails data={data} />
-        )}
+        {data && !confirmation && <ProposalDetails data={data} />}
       </div>
     </Modal>
   )
 }
 
-
 function ProposalDetails({ data }: { data: TradeProposalView }) {
   const { receive, deliver } = proposalPerspective(data)
   const status = statusPresentation[data.status]
   const ownRole = data.direction === 'RECEIVED' ? 'destinatário' : 'proponente'
-  const payer = data.financialAdjustment?.payer === 'PROPOSER' ? data.proposer : data.recipient
+  const payer =
+    data.financialAdjustment?.payer === 'PROPOSER'
+      ? data.proposer
+      : data.recipient
 
   return (
-    <div className="space-y-5">
-      <section className={`${surface} space-y-3`} aria-label="Identificação e status da proposta">
+    <div className="space-y-4 sm:space-y-5 text-[#484B5A]">
+      <section
+        className={`${surface} space-y-4`}
+        aria-label="Identificação e status da proposta"
+      >
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500">Proposta de troca</p>
-            <p className="mt-1 break-all font-mono text-xs text-neutral-700 sm:text-sm">{data.id}</p>
+            <p className="font-display text-sm font-bold uppercase tracking-[0.08em] text-[#7A2E8F]">
+              Proposta de troca
+            </p>
+            <p className="mt-1 break-all font-mono text-xs text-[#676276]">
+              {data.id}
+            </p>
           </div>
-          <span className={`inline-flex shrink-0 items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold ${status.className}`}>
-            <span aria-hidden="true">●</span>{status.label}
+          <span
+            className={`inline-flex shrink-0 items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] ${status.className}`}
+          >
+            <span aria-hidden="true">●</span>
+            {status.label}
           </span>
         </div>
-        <div className="grid gap-x-6 gap-y-3 border-t border-neutral-200 pt-3 sm:grid-cols-2">
-          <DetailValue label="Proponente" value={participantName(data.proposer)} username={data.proposer.username} />
-          <DetailValue label="Destinatário" value={participantName(data.recipient)} username={data.recipient.username} />
-          <DetailValue label="Enviada em" value={proposalDate(data.createdAt)} />
-          <DetailValue label="Atualizada em" value={proposalDate(data.updatedAt)} />
+        <div className="grid gap-x-6 gap-y-4 border-t border-[#E8DAED] pt-4 sm:grid-cols-2">
+          <DetailValue
+            label="Proponente"
+            value={participantName(data.proposer)}
+            username={data.proposer.username}
+          />
+          <DetailValue
+            label="Destinatário"
+            value={participantName(data.recipient)}
+            username={data.recipient.username}
+          />
+          <DetailValue
+            label="Enviada em"
+            value={proposalDate(data.createdAt)}
+          />
+          <DetailValue
+            label="Atualizada em"
+            value={proposalDate(data.updatedAt)}
+          />
         </div>
-        <p className="text-xs text-neutral-500">Você está visualizando esta proposta como {ownRole}.</p>
+        <p className="rounded-lg bg-[#F4ECF8] px-3 py-2 text-xs font-medium text-[#702D80]">
+          Você está visualizando esta proposta como {ownRole}.
+        </p>
       </section>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <ProposalItemsPanel title="Você recebe" tone="receive" items={receive} />
-        <ProposalItemsPanel title="Você entrega" tone="deliver" items={deliver} />
+        <ProposalItemsPanel
+          title="Você recebe"
+          tone="receive"
+          items={receive}
+        />
+        <ProposalItemsPanel
+          title="Você entrega"
+          tone="deliver"
+          items={deliver}
+        />
       </div>
 
       {data.financialAdjustment && (
         <section className={surface} aria-label="Complemento financeiro">
-          <h3 className="font-display text-lg font-bold text-primary-900">Complemento financeiro</h3>
-          <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-            <p className="text-sm text-neutral-700">Pagador: <span className="font-semibold text-neutral-900">{participantName(payer)}</span></p>
-            <p className="font-display text-xl font-bold text-primary-900">
-              {proposalMoney(data.financialAdjustment.amount, data.financialAdjustment.currency)}
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h3 className="font-display text-[17px] font-bold text-[#702D80]">
+                Complemento financeiro
+              </h3>
+              <p className="mt-2 text-sm text-[#484B5A]">
+                Pagador:{' '}
+                <span className="font-semibold text-[#302B40]">
+                  {participantName(payer)}
+                </span>
+              </p>
+            </div>
+            <p className="rounded-xl border border-[#E0CEE8] bg-[#F5EBF9] px-4 py-2 font-display text-xl font-bold text-[#660366]">
+              {proposalMoney(
+                data.financialAdjustment.amount,
+                data.financialAdjustment.currency,
+              )}
             </p>
           </div>
-          <p className="mt-2 text-xs text-neutral-500">Valor registrado na proposta. Nenhum pagamento é processado nesta etapa.</p>
+          <p className="mt-3 text-xs text-[#676276]">
+            Valor registrado na proposta. Nenhum pagamento é processado nesta
+            etapa.
+          </p>
         </section>
       )}
 
       <section className={surface} aria-label="Datas e histórico de status">
-        <h3 className="font-display text-lg font-bold text-primary-900">Histórico da proposta</h3>
+        <div className="flex items-center gap-2">
+          <Icon name="clock" size={20} className="text-[#7A2E8F]" />
+          <h3 className="font-display text-[17px] font-bold text-[#702D80]">
+            Histórico da proposta
+          </h3>
+        </div>
         {data.events.length > 0 ? (
-          <ol className="mt-3 space-y-3 border-l-2 border-primary-100 pl-4">
+          <ol className="mt-4 space-y-4 border-l-2 border-[#D3AFE1] pl-4">
             {data.events.map((event, index) => (
-              <li key={`${event.eventType}-${event.occurredAt}-${index}`} className="relative">
-                <span aria-hidden="true" className="absolute -left-[22px] top-1 size-2.5 rounded-full bg-primary-700" />
-                <p className="text-sm font-semibold text-neutral-900">
-                  {event.eventType === 'CREATED' ? 'Proposta enviada' : statusPresentation[event.toStatus].label}
+              <li
+                key={`${event.eventType}-${event.occurredAt}-${index}`}
+                className="relative"
+              >
+                <span
+                  aria-hidden="true"
+                  className="absolute -left-[22px] top-1 size-2.5 rounded-full border-2 border-white bg-[#A65CB4] shadow-[0_0_0_1px_#BD8FCE]"
+                />
+                <p className="text-sm font-semibold text-[#302B40]">
+                  {event.eventType === 'CREATED'
+                    ? 'Proposta enviada'
+                    : statusPresentation[event.toStatus].label}
                 </p>
-                <p className="mt-0.5 text-xs text-neutral-500">
-                  {proposalDate(event.occurredAt)} · {event.actor === 'PROPOSER' ? 'Proponente' : event.actor === 'RECIPIENT' ? 'Destinatário' : 'Sistema'}
+                <p className="mt-0.5 text-xs text-[#676276]">
+                  {proposalDate(event.occurredAt)} ·{' '}
+                  {event.actor === 'PROPOSER'
+                    ? 'Proponente'
+                    : event.actor === 'RECIPIENT'
+                      ? 'Destinatário'
+                      : 'Sistema'}
                 </p>
               </li>
             ))}
           </ol>
         ) : (
-          <p className="mt-2 text-sm text-neutral-500">Nenhum evento registrado.</p>
+          <p className="mt-3 text-sm text-[#676276]">
+            Nenhum evento registrado.
+          </p>
         )}
-        <div className="mt-4 grid gap-2 border-t border-neutral-200 pt-3 text-xs text-neutral-700 sm:grid-cols-2">
+        <div className="mt-4 grid gap-2 border-t border-[#E8DAED] pt-3 text-xs text-[#484B5A] sm:grid-cols-2">
           {data.acceptedAt && <p>Aceita em: {proposalDate(data.acceptedAt)}</p>}
-          {data.rejectedAt && <p>Recusada em: {proposalDate(data.rejectedAt)}</p>}
-          {data.cancelledAt && <p>Cancelada em: {proposalDate(data.cancelledAt)}</p>}
-          {data.completedAt && <p>Concluída em: {proposalDate(data.completedAt)}</p>}
+          {data.rejectedAt && (
+            <p>Recusada em: {proposalDate(data.rejectedAt)}</p>
+          )}
+          {data.cancelledAt && (
+            <p>Cancelada em: {proposalDate(data.cancelledAt)}</p>
+          )}
+          {data.completedAt && (
+            <p>Concluída em: {proposalDate(data.completedAt)}</p>
+          )}
         </div>
       </section>
     </div>
   )
 }
 
-function DetailValue({ label, value, username }: { label: string; value: string; username?: string | null }) {
+function DetailValue({
+  label,
+  value,
+  username,
+}: {
+  label: string
+  value: string
+  username?: string | null
+}) {
   return (
     <div className="min-w-0">
-      <p className="text-xs font-semibold text-neutral-500">{label}</p>
-      <p className="mt-0.5 break-words text-sm font-semibold text-neutral-900">{value}</p>
-      {username && !value.includes(`@${username}`) && <p className="text-xs text-neutral-500">@{username}</p>}
+      <p className="text-xs font-semibold text-[#72547E]">{label}</p>
+      <p className="mt-0.5 break-words text-sm font-bold text-[#302B40]">
+        {value}
+      </p>
+      {username && !value.includes(`@${username}`) && (
+        <p className="text-xs text-[#676276]">@{username}</p>
+      )}
     </div>
   )
 }
@@ -417,35 +518,91 @@ function DetailValue({ label, value, username }: { label: string; value: string;
 function SnapshotArt({ item }: { item: TradeProposalCardItem }) {
   const [failed, setFailed] = useState(false)
   if (item.imageUrl && !failed) {
-    return <img src={item.imageUrl} alt="" loading="lazy" onError={() => setFailed(true)} className="h-24 w-[70px] shrink-0 rounded-control object-contain" />
+    return (
+      <img
+        src={item.imageUrl}
+        alt=""
+        loading="lazy"
+        onError={() => setFailed(true)}
+        className="h-24 w-[70px] shrink-0 rounded-[9px] border border-[#E3D5E9] bg-[#F9F5FC] object-contain shadow-[0_3px_10px_rgba(35,9,48,0.13)]"
+      />
+    )
   }
   return (
-    <span aria-label={`Imagem indisponível de ${item.name}`} role="img" className="flex h-24 w-[70px] shrink-0 items-center justify-center rounded-control bg-neutral-100 text-neutral-500">
+    <span
+      aria-label={`Imagem indisponível de ${item.name}`}
+      role="img"
+      className="flex h-24 w-[70px] shrink-0 items-center justify-center rounded-[9px] border border-[#E3D5E9] bg-[#F6F0F9] text-[#72547E]"
+    >
       <Icon name="gem" size={24} />
     </span>
   )
 }
 
-function ProposalItemsPanel({ title, tone, items }: { title: string; tone: 'receive' | 'deliver'; items: TradeProposalCardItem[] }) {
+function ProposalItemsPanel({
+  title,
+  tone,
+  items,
+}: {
+  title: string
+  tone: 'receive' | 'deliver'
+  items: TradeProposalCardItem[]
+}) {
   const count = items.reduce((sum, item) => sum + item.quantity, 0)
   return (
-    <section className={surface} aria-label={title}>
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-        <h3 className="font-display text-lg font-bold text-primary-900">{title}</h3>
-        <span className={`rounded-full px-3 py-1 text-xs font-semibold ${tone === 'receive' ? 'bg-secondary-100 text-secondary-700' : 'bg-primary-100 text-primary-900'}`}>
+    <section className={`${surface} min-w-0`} aria-label={title}>
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-2 border-b border-[#E9DCEC] pb-3">
+        <div className="flex items-center gap-2">
+          <span
+            aria-hidden="true"
+            className={
+              tone === 'receive'
+                ? 'flex size-8 items-center justify-center rounded-lg border border-[#BFD8FA] bg-[#E7F2FF] text-[#1465B7]'
+                : 'flex size-8 items-center justify-center rounded-lg border border-[#E0C8E8] bg-[#F2E7F8] text-[#702D80]'
+            }
+          >
+            <Icon
+              name={tone === 'receive' ? 'check-circle' : 'arrows-right-left'}
+              size={20}
+            />
+          </span>
+          <h3 className="font-display text-[17px] font-bold text-[#702D80]">
+            {title}
+          </h3>
+        </div>
+        <span
+          className={`rounded-full px-3 py-1 text-xs font-semibold ${tone === 'receive' ? 'bg-secondary-100 text-secondary-700' : 'bg-primary-100 text-[#660366]'}`}
+        >
           {count} {count === 1 ? 'exemplar' : 'exemplares'}
         </span>
       </div>
       <ul className="space-y-3">
         {items.map((item, index) => (
-          <li key={`${item.cardId}-${index}`} className="flex gap-3 rounded-lg border border-neutral-200 bg-neutral-50 p-3">
+          <li
+            key={`${item.cardId}-${index}`}
+            className="flex min-w-0 gap-3 rounded-[13px] border border-[#E6D8EC] bg-[linear-gradient(145deg,#FFFFFF_0%,#F8F3FB_100%)] p-3 shadow-[0_2px_9px_rgba(70,25,88,0.04)]"
+          >
             <SnapshotArt item={item} />
             <div className="min-w-0 flex-1">
-              <p className="break-words text-sm font-bold text-neutral-900">{item.name}</p>
-              <p className="mt-0.5 text-xs text-neutral-700">{gameName(item.game)}{item.edition ? ` · ${item.edition}` : ''}</p>
-              <p className="mt-1 text-xs text-neutral-700">{conditionName(item.condition)} · {languageName(item.language)}</p>
-              {item.cardNumber && <p className="mt-1 text-xs text-neutral-500">Nº {item.cardNumber}</p>}
-              <p className="mt-2 text-sm font-bold text-primary-900">{item.quantity} {item.quantity === 1 ? 'exemplar' : 'exemplares'}</p>
+              <p className="font-display break-words text-[15px] font-bold text-[#660366]">
+                {item.name}
+              </p>
+              <p className="mt-0.5 text-xs text-[#484B5A]">
+                {gameName(item.game)}
+                {item.edition ? ` · ${item.edition}` : ''}
+              </p>
+              <p className="mt-1 text-xs text-[#484B5A]">
+                {conditionName(item.condition)} · {languageName(item.language)}
+              </p>
+              {item.cardNumber && (
+                <p className="mt-1 text-xs text-[#676276]">
+                  Nº {item.cardNumber}
+                </p>
+              )}
+              <p className="mt-2 inline-flex rounded-full bg-[#EFE0F5] px-2.5 py-1 text-xs font-bold text-[#702D80]">
+                {item.quantity}{' '}
+                {item.quantity === 1 ? 'exemplar' : 'exemplares'}
+              </p>
             </div>
           </li>
         ))}
@@ -459,12 +616,12 @@ function DetailsSkeleton() {
     <div role="status" className="space-y-4">
       <span className="sr-only">Carregando detalhes da proposta...</span>
       <div aria-hidden="true" className="space-y-4 motion-safe:animate-pulse">
-        <div className="h-32 rounded-xl bg-neutral-200" />
+        <div className="h-32 rounded-[18px] bg-[#EDE3F2]" />
         <div className="grid gap-4 sm:grid-cols-2">
-          <div className="h-60 rounded-xl bg-neutral-200" />
-          <div className="h-60 rounded-xl bg-neutral-200" />
+          <div className="h-60 rounded-[18px] bg-[#EDE3F2]" />
+          <div className="h-60 rounded-[18px] bg-[#EDE3F2]" />
         </div>
-        <div className="h-28 rounded-xl bg-neutral-200" />
+        <div className="h-28 rounded-[18px] bg-[#EDE3F2]" />
       </div>
     </div>
   )
