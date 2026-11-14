@@ -1,3 +1,4 @@
+import { PageBanner } from '@/components/layout/PageBanner'
 import { pageBanners } from '@/config/pageBanners'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
@@ -15,9 +16,24 @@ import {
   type ProfileViewData,
 } from './profileFormat'
 
-export function ProfileShell({ children }: { children: ReactNode }) {
+export function ProfileShell({
+  children,
+  title = 'Meu perfil',
+  showBanner = true,
+}: {
+  children: ReactNode
+  title?: string
+  showBanner?: boolean
+}) {
   return (
-    <main className="mx-auto w-full max-w-6xl space-y-5 px-4 py-6 sm:px-6">
+    <main className="mx-auto w-full max-w-[1400px] space-y-5 px-4 pt-4 pb-12 sm:px-6 xl:px-[38px]">
+      {showBanner && (
+        <PageBanner
+          image={pageBanners.profile}
+          title={title}
+          subtitle="Seu espaço de colecionador no TCG Market."
+        />
+      )}
       {children}
     </main>
   )
@@ -60,19 +76,29 @@ export function ProfileBreadcrumb({
 export function Avatar({
   name,
   size = 'lg',
+  image,
 }: {
   name: string
   size?: 'md' | 'lg'
+  image?: string | null
 }) {
   return (
     <span
       aria-hidden="true"
       className={cn(
-        'font-display flex shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary-300 to-primary-700 font-bold text-white ring-4 ring-white shadow-md',
+        'font-display flex shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary-300 to-primary-700 font-bold text-white ring-2 ring-[#FCD203]/70 shadow-md',
         size === 'lg' ? 'size-24 text-3xl sm:size-28' : 'size-20 text-2xl',
       )}
     >
-      {initials(name)}
+      {image ? (
+        <img
+          src={image}
+          alt=""
+          className="h-full w-full rounded-full object-cover"
+        />
+      ) : (
+        initials(name)
+      )}
     </span>
   )
 }
@@ -80,7 +106,11 @@ export function Avatar({
 export function ProfileHero({
   profile,
   action,
+  avatarUrl,
+  avatar,
 }: {
+  avatar?: ReactNode
+  avatarUrl?: string | null
   profile: ProfileViewData
   action?: ReactNode
 }) {
@@ -90,22 +120,23 @@ export function ProfileHero({
   )
 
   return (
-    <Card className="relative overflow-hidden border-2 border-[#FCD203]/70 bg-[#130b30]">
+    <header className="relative isolate min-h-[200px] overflow-hidden rounded-xl border-2 border-[#FCD203]/70 bg-[#130b30] shadow-sm">
       <img
         src={pageBanners.profile}
         alt=""
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 h-full w-full object-cover"
+        className="pointer-events-none absolute inset-0 -z-10 h-full w-full object-cover"
       />
       <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#130b30]/90 via-[#280f41]/70 to-[#280f41]/10"
-      />
-      <div className="relative flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:p-7">
-        <Avatar name={profile.name} />
+        className={cn(
+          'relative grid min-h-[196px] grid-cols-[auto_minmax(0,1fr)] items-center gap-x-5 gap-y-4 p-6 sm:px-8',
+          Boolean(action) && 'lg:grid-cols-[auto_minmax(0,1fr)_auto]',
+        )}
+      >
+        {avatar ?? <Avatar name={profile.name} image={avatarUrl} />}
         <div className="min-w-0 flex-1 space-y-2">
           <div className="flex flex-wrap items-center gap-2">
-            <h1 className="font-display text-2xl font-bold break-words text-white drop-shadow-sm sm:text-3xl">
+            <h1 className="font-display text-2xl font-bold break-words text-white sm:text-4xl">
               {profile.name}
             </h1>
             {profile.administrator ? (
@@ -145,9 +176,11 @@ export function ProfileHero({
             </ul>
           ) : null}
         </div>
-        {action ? <div className="sm:self-start">{action}</div> : null}
+        {action ? (
+          <div className="col-span-2 min-w-0 lg:col-span-1">{action}</div>
+        ) : null}
       </div>
-    </Card>
+    </header>
   )
 }
 
@@ -190,31 +223,6 @@ export function GamesCard({
           )
         })}
       </ul>
-    </Card>
-  )
-}
-
-export function FeaturedCollectionCard() {
-  return (
-    <Card className="p-5">
-      <h2 className="text-base font-semibold text-neutral-900">
-        Minha coleção em destaque
-      </h2>
-      <div className="mt-4 flex flex-col items-center gap-2 rounded-surface border border-dashed border-primary-300 bg-primary-100/40 px-4 py-8 text-center">
-        <div className="flex gap-2" aria-hidden="true">
-          {[0, 1, 2, 3].map((item) => (
-            <span
-              key={item}
-              className="h-12 w-9 rounded-md bg-gradient-to-b from-primary-300 to-primary-100"
-            />
-          ))}
-        </div>
-        <p className="text-sm font-semibold text-primary-900">Em breve</p>
-        <p className="text-sm text-neutral-700">
-          As cartas em destaque aparecem aqui quando a Minha Coleção estiver
-          disponível.
-        </p>
-      </div>
     </Card>
   )
 }

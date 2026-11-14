@@ -37,8 +37,13 @@ public class User {
 
   private List<String> links;
 
-  // Nulo em contas anteriores à moderação, que contam como ativas.
-  private UserStatus status;
+  private boolean collectionPublic;
+  private String avatarUrl;
+
+  public boolean isCollectionPublic() { return collectionPublic; }
+  public void setCollectionPublic(boolean value) { collectionPublic = value; }
+  public String getAvatarUrl() { return avatarUrl; }
+  public void setAvatarUrl(String value) { avatarUrl = value; }
 
   public User() {}
 

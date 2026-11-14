@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { Link } from '@tanstack/react-router'
 import { Badge } from '@/components/ui/Badge'
 import { Card } from '@/components/ui/Card'
@@ -6,10 +6,11 @@ import type { CatalogCard as CatalogCardData } from '@/types/Catalog'
 
 type CatalogCardProps = {
   card: CatalogCardData
+  footer?: ReactNode
   onSelect?: (card: CatalogCardData) => void
 }
 
-export function CatalogCard({ card, onSelect }: CatalogCardProps) {
+export function CatalogCard({ card, onSelect, footer }: CatalogCardProps) {
   const [imageFailed, setImageFailed] = useState(false)
   const cardContent = (
     <>
@@ -58,6 +59,11 @@ export function CatalogCard({ card, onSelect }: CatalogCardProps) {
             {card.officialRarity}
           </Badge>
         </div>
+        {footer && (
+          <div className="border-t border-neutral-100 pt-2 text-xs text-neutral-700">
+            {footer}
+          </div>
+        )}
       </div>
     </>
   )

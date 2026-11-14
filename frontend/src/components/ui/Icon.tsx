@@ -2,6 +2,19 @@ import { cn } from './cn'
 
 export type IconName =
   | 'home'
+  | 'layers'
+  | 'cards'
+  | 'tag'
+  | 'megaphone'
+  | 'handshake'
+  | 'storefront'
+  | 'arrows-right-left'
+  | 'receipt'
+  | 'shield-check'
+  | 'message-square'
+  | 'lock'
+  | 'clock'
+  | 'camera'
   | 'search'
   | 'user'
   | 'heart'
@@ -67,6 +80,95 @@ export function Icon({
 
 function paths(name: IconName, filled: boolean) {
   switch (name) {
+    case 'layers':
+      return (
+        <>
+          <path d="m12 3 9 5-9 5-9-5 9-5Z" />
+          <path d="m3 12 9 5 9-5M3 16l9 5 9-5" />
+        </>
+      )
+    case 'cards':
+      return (
+        <>
+          <rect x="7" y="3" width="13" height="17" rx="2" />
+          <path d="M4 6 2 7l4 14 3-1M11 7h5M11 11h5" />
+        </>
+      )
+    case 'tag':
+      return (
+        <>
+          <path d="M3 3h8l10 10-8 8L3 11V3Z" />
+          <circle cx="7.5" cy="7.5" r="1" />
+        </>
+      )
+    case 'megaphone':
+      return (
+        <>
+          <path d="m4 9 16-5v16L4 15V9ZM4 9H2v6h2M7 16l2 5h4l-2-4M20 9l2-1M20 15l2 1" />
+        </>
+      )
+    case 'handshake':
+      return (
+        <>
+          <path d="m2 9 4-5 5 2 2-1 4 1 5 4-4 7-3 3-3-1-3 1-5-5-2-6Z" />
+          <path d="m11 6-4 5 2 2 4-3 5 5M8 15l4 4M11 13l5 5" />
+        </>
+      )
+    case 'storefront':
+      return (
+        <>
+          <path d="M4 10v11h16V10M3 3h18l1 7a3 3 0 0 1-5 2 3 3 0 0 1-5 0 3 3 0 0 1-5 0 3 3 0 0 1-5-2l1-7Z" />
+          <path d="M9 21v-6h6v6" />
+        </>
+      )
+    case 'arrows-right-left':
+      return (
+        <>
+          <path d="M3 7h17m-4-4 4 4-4 4M21 17H4m4-4-4 4 4 4" />
+        </>
+      )
+    case 'receipt':
+      return (
+        <>
+          <path d="m5 3 2 1 2-1 3 1 3-1 2 1 2-1v18l-2-1-2 1-3-1-3 1-2-1-2 1V3Z" />
+          <path d="M9 8h6M9 12h6M9 16h3" />
+        </>
+      )
+    case 'shield-check':
+      return (
+        <>
+          <path d="m12 2 8 3v6c0 5-4 8-8 11-4-3-8-6-8-11V5l8-3Z" />
+          <path d="m8 12 3 3 5-6" />
+        </>
+      )
+    case 'message-square':
+      return (
+        <>
+          <path d="M21 15a3 3 0 0 1-3 3H8l-5 4V5a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v10Z" />
+          <path d="M7 7h10M7 11h7" />
+        </>
+      )
+    case 'lock':
+      return (
+        <>
+          <rect x="4" y="10" width="16" height="11" rx="2" />
+          <path d="M8 10V6a4 4 0 0 1 8 0v4M12 14v3" />
+        </>
+      )
+    case 'clock':
+      return (
+        <>
+          <circle cx="12" cy="12" r="9" />
+          <path d="M12 7v5l3 2" />
+        </>
+      )
+    case 'camera':
+      return (
+        <>
+          <path d="M3 6h4l2-3h6l2 3h4v15H3V6Z" />
+          <circle cx="12" cy="13" r="4" />
+        </>
+      )
     case 'home':
       return (
         <path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1z" />
