@@ -324,7 +324,7 @@ function SelectableItem({
   const available = item.availability.availableQuantity
 
   return (
-    <article className="flex h-full flex-col rounded-xl border border-neutral-200 bg-white p-3 shadow-sm">
+    <article className="flex h-full min-w-0 flex-col rounded-xl border border-neutral-200 bg-white p-3 shadow-sm">
       <div className="flex h-44 items-center justify-center overflow-hidden rounded-lg bg-primary-100/60">
         {hasImage ? (
           <img
@@ -342,10 +342,10 @@ function SelectableItem({
         )}
       </div>
 
-      <h3 className="mt-2 font-display text-sm font-bold text-neutral-900">
+      <h3 className="mt-2 wrap-anywhere font-display text-sm font-bold text-neutral-900">
         {card.name}
       </h3>
-      <p className="text-xs text-primary-700">
+      <p className="wrap-anywhere text-xs text-primary-700">
         {gameLabels[card.game] ?? card.game}
         {card.edition ? ` • ${card.edition}` : ''}
       </p>

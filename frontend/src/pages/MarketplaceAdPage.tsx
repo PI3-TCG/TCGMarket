@@ -95,18 +95,18 @@ function AdDetails({ ad }: { ad: MarketplaceAd }) {
   ]
 
   return (
-    <div className="grid items-start gap-5 md:grid-cols-2">
+    <div className="grid grid-cols-1 items-start gap-5 md:grid-cols-2">
       <AdImage ad={ad} />
 
       <section aria-labelledby="ad-card-name" className={panelClass}>
         <h2
           id="ad-card-name"
-          className="font-display text-3xl leading-tight font-bold break-words text-primary-900"
+          className="font-display text-3xl leading-tight font-bold wrap-anywhere text-primary-900"
         >
           {ad.cardName}
         </h2>
 
-        <p className="mt-1 text-sm text-neutral-700">
+        <p className="mt-1 wrap-anywhere text-sm text-neutral-700">
           <Link
             to="/cartas/$id"
             params={{ id: ad.cardId }}
@@ -122,10 +122,10 @@ function AdDetails({ ad }: { ad: MarketplaceAd }) {
           {rows.map((row) => (
             <div
               key={row.label}
-              className="grid grid-cols-[120px_minmax(0,1fr)] items-center gap-4 py-2.5"
+              className="grid grid-cols-[minmax(0,2fr)_minmax(0,3fr)] items-center gap-3 sm:grid-cols-[120px_minmax(0,1fr)] py-2.5"
             >
               <dt className="text-neutral-700">{row.label}</dt>
-              <dd className="min-w-0 break-words text-neutral-900">
+              <dd className="min-w-0 wrap-anywhere text-neutral-900">
                 {row.value}
               </dd>
             </div>
@@ -153,7 +153,7 @@ function AdDetails({ ad }: { ad: MarketplaceAd }) {
             <h3 className="text-sm font-semibold text-primary-900">
               Descrição do anúncio
             </h3>
-            <p className="mt-1 text-sm leading-relaxed whitespace-pre-wrap break-words text-neutral-700">
+            <p className="mt-1 text-sm leading-relaxed whitespace-pre-wrap wrap-anywhere text-neutral-700">
               {ad.description}
             </p>
           </div>
@@ -579,7 +579,7 @@ function AdSkeleton() {
     <div
       aria-busy="true"
       aria-live="polite"
-      className="grid items-start gap-5 md:grid-cols-2"
+      className="grid grid-cols-1 items-start gap-5 md:grid-cols-2"
     >
       <span className="sr-only">Carregando anúncio...</span>
       <div className={`${panelClass} flex justify-center`}>

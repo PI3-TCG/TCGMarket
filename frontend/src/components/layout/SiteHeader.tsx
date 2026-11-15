@@ -83,7 +83,7 @@ export function SiteHeader({ onSoon: soon }: Props) {
       document.activeElement as HTMLButtonElement,
     )
 
-    let nextIndex = currentIndex
+    let nextIndex: number
 
     if (event.key === 'Home') {
       nextIndex = 0

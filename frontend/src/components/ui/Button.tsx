@@ -1,4 +1,4 @@
-import { type ButtonHTMLAttributes, type ReactNode } from 'react'
+import { type ComponentPropsWithRef, type ReactNode } from 'react'
 import { cn } from './cn'
 import { focusRing } from './styles'
 
@@ -7,7 +7,7 @@ export type ButtonVariant =
 
 export type ButtonPreview = 'hover' | 'focus' | 'disabled'
 
-type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
+type ButtonProps = ComponentPropsWithRef<'button'> & {
   variant?: ButtonVariant
   preview?: ButtonPreview
   icon?: ReactNode

@@ -90,7 +90,7 @@ export function DiscardChangesDialog({
         aria-labelledby={titleId}
         aria-describedby={descriptionId}
         className={cn(
-          'w-full max-w-[470px] overflow-hidden rounded-[21px] bg-[#FBF9FE]',
+          'max-h-[calc(100dvh_-_2rem)] w-full max-w-[470px] overflow-y-auto overscroll-contain rounded-[21px] bg-[#FBF9FE]',
           modalFrame,
         )}
       >

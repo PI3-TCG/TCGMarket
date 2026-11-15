@@ -73,7 +73,7 @@ export function MarketplaceAdCard({ ad }: Props) {
         </p>
 
         <h2
-          className="line-clamp-2 min-h-10 text-sm font-bold text-neutral-900"
+          className="line-clamp-2 min-h-10 wrap-anywhere text-sm font-bold text-neutral-900"
           title={ad.cardName}
         >
           {ad.cardName}
@@ -135,7 +135,7 @@ export function MarketplaceAdCard({ ad }: Props) {
         <div className="mt-auto pt-3">
           {ad.saleEnabled ? (
             ad.unitPrice !== null ? (
-              <p className="font-display text-lg font-bold text-primary-900">
+              <p className="wrap-anywhere font-display text-lg font-bold text-primary-900">
                 {formatCurrency(ad.unitPrice)}
                 <span className="ml-1 font-sans text-xs font-normal text-neutral-700">
                   / un.
@@ -155,7 +155,7 @@ export function MarketplaceAdCard({ ad }: Props) {
           to="/marketplace/anuncios/$id"
           params={{ id: ad.id }}
           aria-label={`Ver detalhes do anúncio de ${ad.cardName}`}
-          className="mt-1 w-full rounded-control bg-primary-900 px-3 py-2.5 text-center text-sm font-semibold text-white transition-colors hover:bg-primary-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-900"
+          className="mt-1 flex min-h-11 w-full items-center justify-center rounded-control bg-primary-900 px-3 py-2.5 text-center text-sm font-semibold text-white transition-colors hover:bg-primary-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-900"
         >
           Ver detalhes
         </Link>

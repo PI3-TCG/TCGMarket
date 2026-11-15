@@ -196,10 +196,8 @@ function AdForm({
         }
       } else if (status === 404) {
         onItemRemoved()
-      } else if (status === 400 && axios.isAxiosError<{ message?: string }>(error)) {
-        setServerError(
-          error.response?.data?.message ?? 'Revise os dados do anúncio.',
-        )
+      } else if (status === 400) {
+        setServerError('Revise os dados do anúncio.')
       } else {
         setPublishFailed(true)
       }
@@ -213,7 +211,7 @@ function AdForm({
   }
 
   return (
-    <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:gap-6">
+    <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:gap-6">
       <SelectedCardPanel
         item={item}
         availability={availability}
@@ -729,7 +727,7 @@ function FormSkeleton() {
       </p>
       <div
         aria-hidden="true"
-        className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:gap-6"
+        className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:gap-6"
       >
         <div className="h-[560px] rounded-xl border border-neutral-200 bg-primary-100/50 motion-safe:animate-pulse" />
         <div className="h-[560px] rounded-xl border border-neutral-200 bg-primary-100/50 motion-safe:animate-pulse" />

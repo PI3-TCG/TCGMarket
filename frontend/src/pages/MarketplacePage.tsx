@@ -1,3 +1,4 @@
+import { FeedbackState } from '@/components/ui/FeedbackState'
 import { pageBanners } from '@/config/pageBanners'
 import { useCallback, useState } from 'react'
 import { conditionLabels, languageLabels } from '@/components/ads/adFormat'
@@ -6,6 +7,7 @@ import { Button } from '@/components/ui/Button'
 import { Icon } from '@/components/ui/Icon'
 import { PageBanner } from '@/components/layout/PageBanner'
 import { MarketplaceAdCard } from '@/components/marketplace/MarketplaceAdCard'
+import { ResponsiveFilters } from '@/components/ui/ResponsiveFilters'
 import { MarketplaceFilters } from '@/components/marketplace/MarketplaceFilters'
 import { emptyMarketplaceFilters } from '@/components/marketplace/marketplaceFilterDefaults'
 import { useRemoteData } from '@/hooks/useRemoteData'
@@ -25,7 +27,7 @@ type Query = {
 }
 
 const gridClass =
-  'grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5'
+  'grid gap-3 grid-cols-[repeat(auto-fill,minmax(min(100%,max(10.5rem,calc((100%-3rem)/5))),1fr))]'
   
 const sortOptions: {
   value: MarketplaceSort
@@ -68,7 +70,9 @@ export function MarketplacePage({ sort = 'recent' }: Props) {
         />
 
         <div className="grid items-start gap-6 lg:grid-cols-[240px_minmax(0,1fr)]">
-          <MarketplaceFilters onApply={applyFilters} />
+          <ResponsiveFilters>
+            <MarketplaceFilters onApply={applyFilters} />
+          </ResponsiveFilters>
 
           <MarketplaceResults
             key={`${sort}:${filterVersion}`}
@@ -205,7 +209,7 @@ function MarketplaceResults({
             {appliedFilters.map((label) => (
               <li
                 key={label}
-                className="max-w-full break-words rounded-lg bg-primary-100 px-3 py-2 text-xs font-semibold text-primary-900"
+                className="max-w-full wrap-anywhere rounded-lg bg-primary-100 px-3 py-2 text-xs font-semibold text-primary-900"
               >
                 {label}
               </li>
@@ -239,28 +243,15 @@ function MarketplaceResults({
           ))}
         </div>
       ) : !data ? (
-        <div
+        <FeedbackState
           role="alert"
-          className="rounded-xl bg-neutral-50 px-6 py-12 text-center"
+          icon="alert"
+          title="Não foi possível carregar os anúncios"
+          description="Verifique sua conexão e tente novamente."
+          className="rounded-xl bg-neutral-50"
         >
-          <Icon
-            name="alert"
-            size={32}
-            className="mx-auto text-error-700"
-          />
-
-          <h3 className="mt-4 font-display text-xl font-bold text-primary-900">
-            Não foi possível carregar os anúncios
-          </h3>
-
-          <p className="mt-2 text-sm text-neutral-700">
-            Verifique sua conexão e tente novamente.
-          </p>
-
-          <Button className="mt-5" onClick={retry}>
-            Tentar novamente
-          </Button>
-        </div>
+          <Button onClick={retry}>Tentar novamente</Button>
+        </FeedbackState>
       ) : data.content.length === 0 ? (
         <div
           role="status"

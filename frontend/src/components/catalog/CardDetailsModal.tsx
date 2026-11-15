@@ -59,7 +59,7 @@ export function CardDetailsModal({
   const closeCallback = useRef(onClose)
   const [showPt, setShowPt] = useState(false)
   const [showTechnicalDetails, setShowTechnicalDetails] = useState(false)
-  const [imageFailed, setImageFailed] = useState(false)
+  const [failedImageUrl, setFailedImageUrl] = useState<string | null>(null)
 
   useEffect(() => {
     closeCallback.current = onClose
@@ -74,10 +74,6 @@ export function CardDetailsModal({
   const canPerformAction = isCollection
     ? Boolean(onCreateListing)
     : Boolean(onAdd || onAddToCollection)
-
-  useEffect(() => {
-    setImageFailed(false)
-  }, [imageUrl])
 
   useEffect(() => {
     const previousFocus =
@@ -262,7 +258,7 @@ export function CardDetailsModal({
                       </div>
                     )}
                     <div className="flex min-h-[260px] items-center justify-center rounded-xl bg-white/50 p-2 sm:min-h-[305px]">
-                      {imageUrl && !imageFailed ? (
+                      {imageUrl && imageUrl !== failedImageUrl ? (
                         <a
                           href={imageUrl}
                           target="_blank"
@@ -273,7 +269,7 @@ export function CardDetailsModal({
                           <img
                             src={imageUrl}
                             alt={imageAlt(card)}
-                            onError={() => setImageFailed(true)}
+                            onError={() => setFailedImageUrl(imageUrl)}
                             className="mx-auto max-h-[325px] w-auto max-w-full rounded-lg object-contain drop-shadow-[0_10px_16px_rgba(45,15,68,0.26)]"
                           />
                         </a>
@@ -454,7 +450,7 @@ export function CardDetailsModal({
           >
             Fechar
           </button>
-          {card && imageUrl && !imageFailed && (
+          {card && imageUrl && imageUrl !== failedImageUrl && (
             <a
               href={imageUrl}
               target="_blank"

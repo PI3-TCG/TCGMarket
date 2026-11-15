@@ -226,7 +226,7 @@ function CartContent({ cart }: { cart: Cart }) {
       {cart.items.length === 0 ? (
         <EmptyCart />
       ) : (
-        <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)]">
+        <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)]">
           <section aria-labelledby="cart-title" className="min-w-0 space-y-3">
             <h2
               id="cart-title"
@@ -356,7 +356,7 @@ function CartSkeleton() {
     <div
       aria-busy="true"
       aria-live="polite"
-      className="grid items-start gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)]"
+      className="grid grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)]"
     >
       <span className="sr-only">Carregando carrinho...</span>
       <div className="space-y-3">

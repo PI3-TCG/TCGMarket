@@ -32,7 +32,7 @@ export function SelectedCardPanel({
       aria-labelledby="selected-card-title"
       className="flex min-w-0 flex-col rounded-xl border border-neutral-200 bg-white p-4 shadow-sm sm:p-5"
     >
-      <header className="mb-4 flex items-center justify-between gap-3">
+      <header className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <h2
           id="selected-card-title"
           className="flex items-center gap-2 font-display text-lg font-bold text-primary-900 sm:text-xl"
@@ -40,7 +40,7 @@ export function SelectedCardPanel({
           <Icon name="grid" size={24} />
           Carta selecionada
         </h2>
-        <span className="shrink-0 rounded-full bg-primary-100 px-3 py-1 text-xs font-semibold text-primary-900">
+        <span className="max-w-full wrap-anywhere rounded-full bg-primary-100 px-3 py-1 text-xs font-semibold text-primary-900">
           Da sua coleção
         </span>
       </header>
@@ -61,7 +61,7 @@ export function SelectedCardPanel({
         )}
       </div>
 
-      <div className="mt-3 text-center">
+      <div className="mt-3 wrap-anywhere text-center">
         <h3 className="font-display text-lg font-bold text-primary-900">
           {card.name}
         </h3>

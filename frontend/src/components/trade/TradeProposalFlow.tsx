@@ -1,3 +1,4 @@
+import { Link } from '@tanstack/react-router'
 import { useRef, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { Alert } from '@/components/ui/Alert'
@@ -98,7 +99,7 @@ function ReviewCardItem({
       <div className="flex min-w-0 items-start gap-3">
         <TradeCardArt src={imageUrl} name={name} compact />
         <div className="min-w-0 flex-1">
-          <p className="break-words text-sm font-bold text-[#261638]">{name}</p>
+          <p className="wrap-anywhere text-sm font-bold text-[#261638]">{name}</p>
           <p className="mt-1 text-xs text-[#62586D]">
             {game}
             {edition ? ` · ${edition}` : ''}
@@ -293,7 +294,7 @@ export function TradeProposalFlow({
   }
 
   async function submit() {
-    if (!canReview || sending.current || busy) return
+    if (!canReview || sending.current || busy || sendError?.kind === 'unknown') return
     sending.current = true
     setBusy(true)
     setSendError(null)
@@ -307,7 +308,7 @@ export function TradeProposalFlow({
         setSendError({
           kind: 'unknown',
           message:
-            'Não foi possível confirmar se a proposta foi registrada. Você pode tentar novamente com a mesma chave de envio, sem duplicar a proposta.',
+            'Não foi possível confirmar se a proposta foi registrada. Confira suas propostas enviadas antes de iniciar outra troca.',
         })
       } else {
         setSendError({ kind: 'rejected', message: failure.message })
@@ -389,20 +390,16 @@ export function TradeProposalFlow({
             variant="outline"
             className={modalSecondaryButton}
             onClick={() => setStep('review')}
-            disabled={busy}
+            disabled={busy || sendError?.kind === 'unknown'}
           >
             Voltar
           </Button>
           <Button
             className={modalPrimaryButton}
             onClick={submit}
-            disabled={busy || !canReview}
+            disabled={busy || !canReview || sendError?.kind === 'unknown'}
           >
-            {busy
-              ? 'Enviando...'
-              : sendError?.kind === 'unknown'
-                ? 'Tentar novamente com a mesma chave'
-                : 'Confirmar e enviar'}
+            {busy ? 'Enviando...' : 'Confirmar e enviar'}
           </Button>
         </>
       ) : null}
@@ -462,10 +459,10 @@ export function TradeProposalFlow({
       closeDisabled={busy}
       footer={footer}
     >
-      <div className="space-y-5">
+      <div className="min-w-0 space-y-5 wrap-anywhere">
         {step === 'compose' ? (
           <>
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <section className={surface} aria-labelledby="trade-offer-title">
                 <div className="mb-3 flex items-center justify-between gap-2">
                   <h3 id="trade-offer-title" className={heading}>
@@ -560,7 +557,7 @@ export function TradeProposalFlow({
                 </h3>
                 <div className="flex gap-3 rounded-[14px] border border-[#CBAFD8] bg-[linear-gradient(135deg,#FCF8FE,#F2EAF8)] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]">
                   <TradeCardArt src={ad.imageUrl} name={ad.cardName} />
-                  <div className="min-w-0">
+                  <div className="min-w-0 wrap-anywhere">
                     <p className="font-semibold text-[#261638]">
                       {ad.cardName}
                     </p>
@@ -676,7 +673,7 @@ export function TradeProposalFlow({
 
         {step === 'review' || step === 'confirm' ? (
           <>
-            <div className="grid items-start gap-4 md:grid-cols-2">
+            <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2">
               <section className={surface}>
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <h3 className={heading}>Você oferece</h3>
@@ -761,6 +758,15 @@ export function TradeProposalFlow({
                 }
               >
                 {sendError.message}{' '}
+                {sendError.kind === 'unknown' ? (
+                  <Link
+                    to="/perfil/propostas"
+                    search={{ direction: 'SENT' }}
+                    className="font-semibold underline"
+                  >
+                    Ver minhas propostas
+                  </Link>
+                ) : null}
                 {sendError.kind === 'rejected'
                   ? 'Seu rascunho foi mantido.'
                   : ''}
