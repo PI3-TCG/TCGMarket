@@ -1,3 +1,4 @@
+import { ProfileReputation } from '@/components/profile/ProfileReputation'
 import { ProfileSettingsProvider } from '@/components/profile/ProfileSettingsContext'
 import { ProfilePhotoEditor } from '@/components/profile/ProfilePhotoEditor'
 import { FeaturedCollection } from '@/components/profile/FeaturedCollection'
@@ -74,6 +75,12 @@ export function ProfilePage() {
               />
             }
             privacy={<ProfilePrivacy username={state.data.username} />}
+            reputation={
+              <ProfileReputation
+                key={state.data.username}
+                username={state.data.username}
+              />
+            }
             collection={<FeaturedCollection />}
           />
         </ProfileSettingsProvider>

@@ -25,8 +25,14 @@ public record CheckoutOrdersResponse(
             List<OrderItemResponse> items,
             BigDecimal totalAmount,
             DeliveryAddress deliveryAddress,
-            Instant createdAt
+            Instant createdAt,
+            String transactionId
     ) {
+        public OrderResponse(String id, String sellerId, String sellerUsername,
+                OrderStatus status, List<OrderItemResponse> items, BigDecimal totalAmount,
+                DeliveryAddress deliveryAddress, Instant createdAt) {
+            this(id, sellerId, sellerUsername, status, items, totalAmount, deliveryAddress, createdAt, null);
+        }
     }
 
     public record OrderItemResponse(

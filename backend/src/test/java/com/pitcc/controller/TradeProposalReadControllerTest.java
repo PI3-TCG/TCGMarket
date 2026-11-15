@@ -67,7 +67,7 @@ class TradeProposalReadControllerTest {
                 null, null, null, null,
                 new TradeProposalViewResponse.Participant("alice", "aline", "Aline"),
                 new TradeProposalViewResponse.Participant("bob", "caelus", "Caelus"),
-                List.of(), List.of(), null, List.of());
+                List.of(), List.of(), null, List.of(), null);
     }
 
     @Test

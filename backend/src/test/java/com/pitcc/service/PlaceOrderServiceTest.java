@@ -14,6 +14,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import com.pitcc.repository.TransactionRepository;
 import com.pitcc.dto.CheckoutOrdersResponse;
 import com.pitcc.dto.CheckoutOrdersResponse.OrderResponse;
 import com.pitcc.dto.CheckoutValidationResponse;
@@ -32,6 +33,8 @@ import com.pitcc.model.CollectionItem;
 import com.pitcc.model.DeliveryAddress;
 import com.pitcc.model.Order;
 import com.pitcc.model.OrderStatus;
+import com.pitcc.model.Transaction;
+import com.pitcc.model.TransactionType;
 import com.pitcc.model.User;
 import com.pitcc.model.UserAddress;
 import com.pitcc.model.YugiohCard;
@@ -79,6 +82,8 @@ class PlaceOrderServiceTest {
   @Mock private PaymentService paymentService;
 
   private PlaceOrderService service;
+  @Mock private TransactionRepository transactionRepository;
+
   private Cart cart;
   private final Map<String, Ad> ads = new HashMap<>();
   private final List<Order> savedOrders = new ArrayList<>();
@@ -88,7 +93,7 @@ class PlaceOrderServiceTest {
     service =
         new PlaceOrderService(
             validationService, checkoutRepository, orderRepository, cartRepository, adRepository,
-            cardRepository, addressRepository, userRepository, holdRepository, paymentService);
+            cardRepository, addressRepository, userRepository, holdRepository, paymentService, transactionRepository);
     cart = new Cart(BUYER, Instant.now());
 
     Card card =
@@ -212,6 +217,36 @@ class PlaceOrderServiceTest {
     CheckoutOrdersResponse response = service.getCheckout(BUYER, "checkout-1");
 
     assertEquals("checkout-1", response.checkoutId());
+  }
+
+  @Test
+  void exposesTheReviewTransactionOnlyForTheCompletedOrder() {
+    Checkout checkout = new Checkout(BUYER, KEY, Instant.now());
+    ReflectionTestUtils.setField(checkout, "id", "checkout-1");
+    Order completed = org.mockito.Mockito.mock(Order.class);
+    Order pending = org.mockito.Mockito.mock(Order.class);
+    Transaction transaction = org.mockito.Mockito.mock(Transaction.class);
+
+    when(completed.getId()).thenReturn("order-1");
+    when(completed.getSellerId()).thenReturn("seller-1");
+    when(completed.getStatus()).thenReturn(OrderStatus.COMPLETED);
+    when(completed.getTotalAmount()).thenReturn(BigDecimal.ONE);
+    when(pending.getSellerId()).thenReturn("seller-2");
+    when(pending.getStatus()).thenReturn(OrderStatus.PAID);
+    when(pending.getTotalAmount()).thenReturn(BigDecimal.ONE);
+    when(transaction.getId()).thenReturn("transaction-1");
+    when(checkoutRepository.findByIdAndBuyerId("checkout-1", BUYER))
+        .thenReturn(Optional.of(checkout));
+    when(orderRepository.findByCheckoutId("checkout-1")).thenReturn(List.of(completed, pending));
+    when(transactionRepository.findByTypeAndSourceId(TransactionType.SALE, "order-1"))
+        .thenReturn(Optional.of(transaction));
+
+    var response = service.getCheckout(BUYER, "checkout-1");
+
+    assertEquals("transaction-1", response.orders().getFirst().transactionId());
+    org.junit.jupiter.api.Assertions.assertNull(response.orders().getLast().transactionId());
+    verify(transactionRepository).findByTypeAndSourceId(TransactionType.SALE, "order-1");
+    org.mockito.Mockito.verifyNoMoreInteractions(transactionRepository);
   }
 
   @Test

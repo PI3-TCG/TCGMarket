@@ -16,3 +16,22 @@ export type ReviewInput = {
   grade: number
   comment: string | null
 }
+
+export interface ReputationSummary {
+  average: number | null
+  totalReviews: number
+  countsByRating: Record<number, number>
+}
+
+export interface ProfileReputation {
+  summary: ReputationSummary
+  reviews: {
+    id: string
+    author: string
+    rating: number
+    comment: string | null
+    createdAt: string
+    transactionType: 'SALE' | 'TRADE' | null
+  }[]
+  hasNext: boolean
+}

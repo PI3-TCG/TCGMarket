@@ -25,6 +25,7 @@ public record MarketplaceAdResponse(
         BigDecimal unitPrice,
         String sellerUsername,
         String description,
-        boolean ownAd
+        boolean ownAd,
+        ReputationSummary sellerReputation
 ) {
 }

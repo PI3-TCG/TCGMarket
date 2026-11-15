@@ -1,3 +1,6 @@
+import { useCallback } from 'react'
+import { api } from '@/services/api'
+import type { ProfileReputation as ReputationDataResponse } from '@/types/Review'
 import type { ReactNode } from 'react'
 import { Badge, type BadgeVariant } from '@/components/ui/Badge'
 import { Link } from '@tanstack/react-router'
@@ -146,10 +149,12 @@ const statusVariants: Record<string, BadgeVariant> = {
 export function ProfileDashboard({
   about,
   privacy,
+  reputation,
   collection,
 }: {
   about: ReactNode
   privacy: ReactNode
+  reputation?: ReactNode
   collection: ReactNode
 }) {
   const { user } = useSession()
@@ -157,6 +162,21 @@ export function ProfileDashboard({
     `dashboard:${user?.id}`,
     getProfileDashboard,
   )
+  const username = user?.username
+  const getReputation = useCallback(async () => {
+    if (!username) return null
+    const response = await api.get<ReputationDataResponse>(
+      `/api/users/${encodeURIComponent(username)}/reputation`,
+    )
+    return response.data.summary
+  }, [username])
+  const { state: reputationState } = useRemoteData(`reputation-summary:${username}`, getReputation)
+  const summary = reputationState.status === 'ready' ? reputationState.data : null
+  const reputationLabel = summary
+    ? summary.average === null
+      ? 'Ainda sem avaliações'
+      : `${summary.average.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} / 5`
+    : reputationState.status === 'loading' ? 'Carregando…' : 'Indisponível'
   return (
     <div className="space-y-5">
       <section
@@ -181,7 +201,7 @@ export function ProfileDashboard({
                 state.data.completedTransactions,
                 'handshake',
               ],
-              ['Reputação', 'Em breve', 'star'],
+              ['Reputação', reputationLabel, 'star'],
             ].map(([label, value, icon]) => (
               <Card
                 key={label}
@@ -191,7 +211,7 @@ export function ProfileDashboard({
                   <Icon name={icon as IconName} size={20} />
                   <span>{label}</span>
                 </p>
-                <p className="flex items-center justify-center font-display text-2xl font-bold text-primary-900">
+                <p className={`flex items-center justify-center font-bold text-primary-900 ${label === 'Reputação' && summary?.average == null ? 'text-sm' : 'font-display text-2xl'}`}>
                   {typeof value === 'number'
                     ? value.toLocaleString('pt-BR')
                     : value}
@@ -220,13 +240,15 @@ export function ProfileDashboard({
         ))}
         {about}
       </section>
-      <section
-        aria-label="Reputação e avaliações"
-        className="grid items-stretch gap-5 sm:grid-cols-2"
-      >
-        <ReputationCard />
-        <ReviewsCard />
-      </section>
+      {reputation ?? (
+        <section
+          aria-label="Reputação e avaliações"
+          className="grid items-stretch gap-5 sm:grid-cols-2"
+        >
+          <ReputationCard />
+          <ReviewsCard />
+        </section>
+      )}
       {privacy}
       {collection}
       <Card className="p-5">

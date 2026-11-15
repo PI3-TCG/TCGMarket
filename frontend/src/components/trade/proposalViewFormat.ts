@@ -72,6 +72,7 @@ export function parseTradeProposalsSearch(search: Record<string, unknown>): Trad
   return {
     direction: search.direction === 'sent' || search.direction === 'SENT' ? 'SENT' : 'RECEIVED',
     status,
+    proposalId: typeof search.proposalId === 'string' ? search.proposalId : undefined,
     page: Number.isSafeInteger(rawPage) && rawPage > 1 ? rawPage : undefined,
   }
 }

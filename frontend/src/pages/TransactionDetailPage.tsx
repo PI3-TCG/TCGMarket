@@ -164,6 +164,8 @@ function TransactionSummary({ entry }: { entry: TransactionHistoryEntry }) {
         )}
 
         <TransactionReviewSection
+          canReview={entry.type !== 'SALE'}
+          canReceiveReview={entry.type !== 'PURCHASE'}
           transactionId={entry.id}
           counterpartyName={counterpartyName(entry)}
         />

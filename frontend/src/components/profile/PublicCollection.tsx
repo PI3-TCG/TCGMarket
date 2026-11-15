@@ -16,7 +16,7 @@ import { gameLabel } from './profileFormat'
 import type { CardGame } from '@/types/User'
 import { ProfileHero, ProfileStatus, AboutCard, GamesCard } from './ProfileView'
 import type { ProfileViewData } from './profileFormat'
-import { ReputationCard, ReviewsCard } from './ProfileDashboard'
+import { ProfileReputation } from './ProfileReputation'
 
 export function PublicCollector({ profile }: { profile: ProfileViewData }) {
   const load = useCallback(
@@ -43,7 +43,7 @@ export function PublicCollector({ profile }: { profile: ProfileViewData }) {
         <ProfileStatus kind="error" onRetry={retry} />
       ) : (
         <>
-          <div className="grid items-stretch gap-5 lg:grid-cols-3">
+          <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
             <Card className="p-5">
               <h2 className="flex items-center gap-2 text-lg font-semibold text-primary-900">
                 <Icon name="handshake" size={24} />
@@ -53,8 +53,7 @@ export function PublicCollector({ profile }: { profile: ProfileViewData }) {
                 {state.data.completedTransactions.toLocaleString('pt-BR')}
               </p>
             </Card>
-            <ReputationCard />
-            <ReviewsCard />
+            <ProfileReputation key={profile.username} username={profile.username} />
           </div>
           <section id="colecao" className="scroll-mt-6">
             <h2 className="mb-4 font-display text-2xl font-bold text-primary-900">

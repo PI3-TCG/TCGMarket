@@ -1,3 +1,4 @@
+import type { ReputationSummary } from './Review'
 import type { CardGame } from './Catalog'
 import type { CardCondition, CardLanguage } from './Collection'
 
@@ -18,6 +19,7 @@ export interface MarketplaceAd {
   saleEnabled: boolean
   tradeEnabled: boolean
   unitPrice: number | null
+  sellerReputation?: ReputationSummary | null
   sellerUsername: string | null
   description: string | null
   ownAd: boolean

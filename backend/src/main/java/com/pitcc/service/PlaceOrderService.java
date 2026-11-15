@@ -1,6 +1,10 @@
 package com.pitcc.service;
 
 import com.pitcc.dto.CheckoutOrdersResponse;
+import com.pitcc.model.Transaction;
+import com.pitcc.model.OrderStatus;
+import com.pitcc.model.TransactionType;
+import com.pitcc.repository.TransactionRepository;
 import com.pitcc.dto.CheckoutOrdersResponse.OrderItemResponse;
 import com.pitcc.dto.CheckoutOrdersResponse.OrderResponse;
 import com.pitcc.dto.CheckoutValidationResponse;
@@ -62,6 +66,7 @@ public class PlaceOrderService {
     private final UserRepository userRepository;
     private final AdPurchaseHoldRepository holdRepository;
     private final PaymentService paymentService;
+    private final TransactionRepository transactionRepository;
 
     public PlaceOrderService(
             CheckoutValidationService validationService,
@@ -73,7 +78,8 @@ public class PlaceOrderService {
             UserAddressRepository addressRepository,
             UserRepository userRepository,
             AdPurchaseHoldRepository holdRepository,
-            PaymentService paymentService
+            PaymentService paymentService,
+            TransactionRepository transactionRepository
     ) {
         this.validationService = validationService;
         this.checkoutRepository = checkoutRepository;
@@ -85,6 +91,7 @@ public class PlaceOrderService {
         this.userRepository = userRepository;
         this.holdRepository = holdRepository;
         this.paymentService = paymentService;
+        this.transactionRepository = transactionRepository;
     }
 
     public CheckoutOrdersResponse placeOrder(String buyerId, String idempotencyKey, String addressId) {
@@ -240,7 +247,12 @@ public class PlaceOrderService {
         return new CheckoutOrdersResponse(checkout.getId(), responses, total);
     }
 
-    private static OrderResponse toOrderResponse(Order order, String sellerUsername) {
+    private OrderResponse toOrderResponse(Order order, String sellerUsername) {
+        String transactionId = order.getStatus() == OrderStatus.COMPLETED
+                ? transactionRepository.findByTypeAndSourceId(TransactionType.SALE, order.getId())
+                        .map(Transaction::getId).orElse(null)
+                : null;
+
         List<OrderItemResponse> items = order.getItems().stream()
                 .map(item -> new OrderItemResponse(
                         item.getAdId(),
@@ -266,7 +278,8 @@ public class PlaceOrderService {
                 items,
                 order.getTotalAmount(),
                 order.getDeliveryAddress(),
-                order.getCreatedAt()
+                order.getCreatedAt(),
+                transactionId
         );
     }
 }

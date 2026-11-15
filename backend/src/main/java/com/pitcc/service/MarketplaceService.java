@@ -1,6 +1,7 @@
 package com.pitcc.service;
 
 import com.pitcc.dto.MarketplaceAdResponse;
+import com.pitcc.dto.ReputationSummary;
 import com.pitcc.dto.MarketplacePageResponse;
 import com.pitcc.model.Ad;
 import com.pitcc.model.AdStatus;
@@ -38,18 +39,22 @@ public class MarketplaceService {
     private final UserRepository userRepository;
     private final MarketplaceSearchRepository marketplaceSearchRepository;
 
+    private final ReputationService reputation;
+
     public MarketplaceService(
             AdRepository adRepository,
             CollectionItemRepository collectionItemRepository,
             CardRepository cardRepository,
             UserRepository userRepository,
-            MarketplaceSearchRepository marketplaceSearchRepository
+            MarketplaceSearchRepository marketplaceSearchRepository,
+            ReputationService reputation
     ) {
         this.adRepository = adRepository;
         this.collectionItemRepository = collectionItemRepository;
         this.cardRepository = cardRepository;
         this.userRepository = userRepository;
         this.marketplaceSearchRepository = marketplaceSearchRepository;
+        this.reputation = reputation;
     }
 
     public MarketplacePageResponse listAvailableAds(
@@ -145,6 +150,8 @@ public class MarketplaceService {
             sellersById.put(seller.getId(), seller);
         }
 
+        var reputations = reputation.summaries(sellerIds);
+
         // Monta os DTOs usando os dados já carregados.
         List<MarketplaceAdResponse> content = ads.stream()
                 .map(ad -> toResponse(
@@ -152,7 +159,8 @@ public class MarketplaceService {
                         itemsById,
                         cardsById,
                         sellersById,
-                        viewerId
+                        viewerId,
+                        reputations.get(ad.getSellerId())
                 ))
                 .toList();
 
@@ -170,7 +178,8 @@ public class MarketplaceService {
             Map<String, CollectionItem> itemsById,
             Map<String, Card> cardsById,
             Map<String, User> sellersById,
-            String viewerId
+            String viewerId,
+            ReputationSummary sellerReputation
     ) {
         CollectionItem item = itemsById.get(ad.getCollectionItemId());
         User seller = sellersById.get(ad.getSellerId());
@@ -223,7 +232,8 @@ public class MarketplaceService {
                 ad.isSaleEnabled() ? ad.getUnitPrice() : null,
                 seller.getUsername(),
                 ad.getDescription(),
-                viewerId != null && viewerId.equals(ad.getSellerId())
+                viewerId != null && viewerId.equals(ad.getSellerId()),
+                seller.isSuspended() ? null : sellerReputation
         );
     }
 
@@ -267,7 +277,8 @@ public class MarketplaceService {
                 Map.of(item.getId(), item),
                 Map.of(card.getId(), card),
                 Map.of(seller.getId(), seller),
-                viewerId
+                viewerId,
+                reputation.summaries(List.of(seller.getId())).get(seller.getId())
         );
     }
 }

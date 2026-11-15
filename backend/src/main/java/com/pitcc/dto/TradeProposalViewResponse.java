@@ -30,7 +30,8 @@ public record TradeProposalViewResponse(
         List<Item> offeredItems,
         List<Item> requestedItems,
         FinancialAdjustmentView financialAdjustment,
-        List<Event> events
+        List<Event> events,
+        String transactionId
 ) {
     public record Participant(String id, String username, String name) {}
 

@@ -1,3 +1,4 @@
+import { ReputationIndicator } from '@/components/profile/ReputationIndicator'
 import { useState } from 'react'
 import { Link } from '@tanstack/react-router'
 import { Icon } from '@/components/ui/Icon'
@@ -31,13 +32,9 @@ const languageLabels: Record<string, string> = {
 export function MarketplaceAdCard({ ad }: Props) {
   const [failedImageUrl, setFailedImageUrl] = useState<string | null>(null)
 
-  const hasImage = Boolean(
-    ad.imageUrl && ad.imageUrl !== failedImageUrl,
-  )
+  const hasImage = Boolean(ad.imageUrl && ad.imageUrl !== failedImageUrl)
 
-  const cardInfo = [ad.cardNumber, ad.rarity]
-    .filter(Boolean)
-    .join(' · ')
+  const cardInfo = [ad.cardNumber, ad.rarity].filter(Boolean).join(' · ')
 
   return (
     <article className="flex min-w-0 flex-col overflow-hidden rounded-xl border border-primary-100 bg-white shadow-sm transition-shadow hover:shadow-md">
@@ -71,10 +68,7 @@ export function MarketplaceAdCard({ ad }: Props) {
           {gameLabels[ad.game] ?? ad.game}
         </p>
 
-        <p
-          className="truncate text-xs text-neutral-700"
-          title={ad.edition}
-        >
+        <p className="truncate text-xs text-neutral-700" title={ad.edition}>
           {ad.edition}
         </p>
 
@@ -86,10 +80,7 @@ export function MarketplaceAdCard({ ad }: Props) {
         </h2>
 
         {cardInfo && (
-          <p
-            className="truncate text-xs text-neutral-700"
-            title={cardInfo}
-          >
+          <p className="truncate text-xs text-neutral-700" title={cardInfo}>
             {cardInfo}
           </p>
         )}
@@ -123,14 +114,23 @@ export function MarketplaceAdCard({ ad }: Props) {
             : 'unidades disponíveis'}
         </p>
 
-        <p className="flex min-w-0 items-center gap-1 text-xs text-neutral-700">
-          <Icon name="user" size={16} />
-          <span className="truncate">
-            {ad.sellerUsername
-              ? `@${ad.sellerUsername}`
-              : 'Vendedor'}
-          </span>
-        </p>
+        <div className="space-y-1 text-xs text-neutral-700">
+          {ad.sellerUsername ? (
+            <Link
+              to="/jogadores/$username"
+              params={{ username: ad.sellerUsername }}
+              className="flex min-w-0 items-center gap-1 font-semibold underline"
+            >
+              <Icon name="user" size={16} />
+              <span className="truncate">@{ad.sellerUsername}</span>
+            </Link>
+          ) : (
+            <p>Vendedor</p>
+          )}
+          <p>
+            <ReputationIndicator summary={ad.sellerReputation} />
+          </p>
+        </div>
 
         <div className="mt-auto pt-3">
           {ad.saleEnabled ? (
@@ -142,9 +142,7 @@ export function MarketplaceAdCard({ ad }: Props) {
                 </span>
               </p>
             ) : (
-              <p className="text-sm text-neutral-700">
-                Preço indisponível
-              </p>
+              <p className="text-sm text-neutral-700">Preço indisponível</p>
             )
           ) : (
             <p className="text-sm font-semibold text-info-700">
