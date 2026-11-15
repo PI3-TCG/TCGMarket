@@ -196,10 +196,8 @@ function AdForm({
         }
       } else if (status === 404) {
         onItemRemoved()
-      } else if (status === 400 && axios.isAxiosError<{ message?: string }>(error)) {
-        setServerError(
-          error.response?.data?.message ?? 'Revise os dados do anúncio.',
-        )
+      } else if (status === 400) {
+        setServerError('Revise os dados do anúncio.')
       } else {
         setPublishFailed(true)
       }

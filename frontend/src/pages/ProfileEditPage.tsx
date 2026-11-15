@@ -1,3 +1,4 @@
+import { validationFields } from '@/services/feedback'
 import {
   ProfileShell,
   ProfileSkeleton,
@@ -140,8 +141,7 @@ function ProfileForm({ profile }: { profile: ProfileResponse }) {
       setErrors(apiErrors)
       if (!Object.keys(apiErrors).some(isVisibleField)) {
         setFeedback(
-          apiMessage(cause) ??
-            'Não foi possível salvar o perfil. Tente novamente.',
+          'Não foi possível salvar o perfil. Tente novamente.',
         )
       }
       setSaving(false)
@@ -480,10 +480,10 @@ function validate(form: FormState): FieldErrors {
 function fieldErrorsFrom(cause: unknown, linkSlots: number[]): FieldErrors {
   if (!axios.isAxiosError<ApiErrorResponse>(cause)) return {}
   const errors: FieldErrors = {}
-  for (const { field, message } of cause.response?.data?.fields ?? []) {
+  for (const field of validationFields(cause)) {
     const link = /^links\[(\d+)\]$/.exec(field)
     const key = link ? `links[${linkSlots[Number(link[1])] ?? link[1]}]` : field
-    errors[key] ??= message
+    errors[key] ??= 'Revise o valor deste campo.'
   }
   return errors
 }
@@ -501,13 +501,6 @@ function isVisibleField(field: string) {
       'links',
     ].includes(field)
   )
-}
-
-function apiMessage(cause: unknown) {
-  if (axios.isAxiosError<ApiErrorResponse>(cause)) {
-    return cause.response?.data?.message ?? null
-  }
-  return null
 }
 
 function withoutKey(errors: FieldErrors, key: string) {

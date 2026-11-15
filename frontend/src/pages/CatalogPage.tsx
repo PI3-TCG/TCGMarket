@@ -1,3 +1,5 @@
+import { Button } from '@/components/ui/Button'
+import { FeedbackState } from '@/components/ui/FeedbackState'
 import { PageBanner } from '@/components/layout/PageBanner'
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams, useSearch } from '@tanstack/react-router'
@@ -374,6 +376,7 @@ function CatalogView({ game }: { game: string }) {
 
             {!supportedGame ? (
               <EmptyState
+                icon="info"
                 title="Catálogo em breve"
                 message={`O catálogo de ${gameName} ainda não está disponível.`}
               />
@@ -398,24 +401,15 @@ function CatalogView({ game }: { game: string }) {
                 ))}
               </div>
             ) : loadError ? (
-              <div
+              <FeedbackState
                 role="alert"
-                className="rounded-xl border border-red-200 bg-white px-6 py-12 text-center"
+                icon="alert"
+                title="Não foi possível carregar as cartas"
+                description="Verifique sua conexão e tente novamente."
+                className="rounded-xl border border-neutral-200 bg-white"
               >
-                <h3 className="font-display text-lg font-bold text-red-700">
-                  Não foi possível carregar as cartas
-                </h3>
-                <p className="mt-2 text-sm text-neutral-500">
-                  Ocorreu um problema ao buscar o catálogo. Tente novamente.
-                </p>
-                <button
-                  type="button"
-                  onClick={() => setAttempt((value) => value + 1)}
-                  className="mt-5 rounded-lg bg-primary-900 px-5 py-2.5 text-sm font-semibold text-white"
-                >
-                  Tentar novamente
-                </button>
-              </div>
+                <Button onClick={() => setAttempt((value) => value + 1)}>Tentar novamente</Button>
+              </FeedbackState>
             ) : outOfRange ? (
               <EmptyState
                 title="Página não encontrada"
@@ -427,8 +421,8 @@ function CatalogView({ game }: { game: string }) {
               />
             ) : !data?.content.length ? (
               <EmptyState
-                title="Nenhuma carta encontrada"
-                message="Não encontramos cartas correspondentes à sua busca ou aos filtros selecionados."
+                title={hasFilters ? "Nenhuma carta encontrada" : "Catálogo sem cartas"}
+                message={hasFilters ? "Altere a busca ou limpe os filtros para ver mais cartas." : "Ainda não há cartas cadastradas para este jogo."}
                 action={
                   hasFilters
                     ? { label: 'Limpar filtros', onClick: clearFilters }
@@ -562,18 +556,18 @@ function FilterGroup({
 }
 
 function EmptyState({
+  icon = 'search',
   title,
   message,
   action,
 }: {
+  icon?: 'info' | 'search'
   title: string
   message: string
   action?: { label: string; onClick: () => void }
 }) {
   return (
-    <div className="rounded-xl border border-dashed border-[#dcd8ed] bg-white px-6 py-16 text-center">
-      <h3 className="font-display text-lg font-bold">{title}</h3>
-      <p className="mt-2 text-sm text-neutral-500">{message}</p>
+    <FeedbackState icon={icon} title={title} description={message} className="rounded-xl border border-dashed border-primary-300/40 bg-white">
       {action && (
         <button
           type="button"
@@ -583,7 +577,7 @@ function EmptyState({
           {action.label}
         </button>
       )}
-    </div>
+    </FeedbackState>
   )
 }
 

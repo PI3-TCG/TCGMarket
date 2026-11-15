@@ -20,20 +20,20 @@ export function addressFailure(cause: unknown): AddressFailure {
   }
 
   const { status, data } = cause.response
-  const fields = data?.fields ?? []
+  const fields = Array.isArray(data?.fields) ? data.fields : []
 
   if (status === 400 && fields.length > 0) {
     return {
       kind: 'invalid',
       fields: Object.fromEntries(
-        fields.map((field) => [field.field, field.message]),
+        fields.map((field) => [field.field, 'Revise o valor deste campo.']),
       ) as AddressFieldErrors,
     }
   }
 
   return {
     kind: 'rejected',
-    message: status < 500 && status !== 400 ? (data?.message ?? null) : null,
+    message: status === 404 ? 'Este endereço não está mais disponível.' : null,
   }
 }
 

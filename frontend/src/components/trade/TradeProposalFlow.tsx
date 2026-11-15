@@ -1,3 +1,4 @@
+import { Link } from '@tanstack/react-router'
 import { useRef, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { Alert } from '@/components/ui/Alert'
@@ -293,7 +294,7 @@ export function TradeProposalFlow({
   }
 
   async function submit() {
-    if (!canReview || sending.current || busy) return
+    if (!canReview || sending.current || busy || sendError?.kind === 'unknown') return
     sending.current = true
     setBusy(true)
     setSendError(null)
@@ -307,7 +308,7 @@ export function TradeProposalFlow({
         setSendError({
           kind: 'unknown',
           message:
-            'Não foi possível confirmar se a proposta foi registrada. Você pode tentar novamente com a mesma chave de envio, sem duplicar a proposta.',
+            'Não foi possível confirmar se a proposta foi registrada. Confira suas propostas enviadas antes de iniciar outra troca.',
         })
       } else {
         setSendError({ kind: 'rejected', message: failure.message })
@@ -389,20 +390,16 @@ export function TradeProposalFlow({
             variant="outline"
             className={modalSecondaryButton}
             onClick={() => setStep('review')}
-            disabled={busy}
+            disabled={busy || sendError?.kind === 'unknown'}
           >
             Voltar
           </Button>
           <Button
             className={modalPrimaryButton}
             onClick={submit}
-            disabled={busy || !canReview}
+            disabled={busy || !canReview || sendError?.kind === 'unknown'}
           >
-            {busy
-              ? 'Enviando...'
-              : sendError?.kind === 'unknown'
-                ? 'Tentar novamente com a mesma chave'
-                : 'Confirmar e enviar'}
+            {busy ? 'Enviando...' : 'Confirmar e enviar'}
           </Button>
         </>
       ) : null}
@@ -761,6 +758,15 @@ export function TradeProposalFlow({
                 }
               >
                 {sendError.message}{' '}
+                {sendError.kind === 'unknown' ? (
+                  <Link
+                    to="/perfil/propostas"
+                    search={{ direction: 'SENT' }}
+                    className="font-semibold underline"
+                  >
+                    Ver minhas propostas
+                  </Link>
+                ) : null}
                 {sendError.kind === 'rejected'
                   ? 'Seu rascunho foi mantido.'
                   : ''}

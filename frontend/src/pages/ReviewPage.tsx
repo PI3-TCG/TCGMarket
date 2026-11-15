@@ -28,7 +28,8 @@ type LoadState =
 type Submit =
   | { status: 'idle' }
   | { status: 'submitting' }
-  | { status: 'failed'; message: string | null }
+  | { status: 'failed'; message: string }
+  | { status: 'unknown' }
 
 function newIdempotencyKey() {
   return typeof crypto.randomUUID === 'function'
@@ -68,6 +69,7 @@ function ReviewContent({ cart, userId }: { cart: Cart; userId: string }) {
   const [state, setState] = useState<LoadState>({ status: 'loading' })
   const [attempt, setAttempt] = useState(0)
   const [submit, setSubmit] = useState<Submit>({ status: 'idle' })
+  const sending = useRef(false)
   const idempotencyKey = useRef<string | null>(null)
 
   useEffect(() => {
@@ -115,7 +117,8 @@ function ReviewContent({ cart, userId }: { cart: Cart; userId: string }) {
   const blocked = items.length === 0 || !address || !validation.valid
 
   async function confirm() {
-    if (!address) return
+    if (!address || sending.current || submit.status === 'unknown') return
+    sending.current = true
     idempotencyKey.current ??= newIdempotencyKey()
     setSubmit({ status: 'submitting' })
     try {
@@ -134,10 +137,15 @@ function ReviewContent({ cart, userId }: { cart: Cart; userId: string }) {
         retryLoad()
       } else if (failure.kind === 'rejected') {
         idempotencyKey.current = null
-        setSubmit({ status: 'failed', message: failure.message })
+        setSubmit({
+          status: 'failed',
+          message: failure.message ?? 'Não foi possível confirmar a compra. Tente novamente.',
+        })
       } else {
-        setSubmit({ status: 'failed', message: null })
+        setSubmit({ status: 'unknown' })
       }
+    } finally {
+      sending.current = false
     }
   }
 
@@ -329,13 +337,19 @@ function ReviewSummary({ items, orderCount, blocked, submit, onConfirm }: Review
 
       <div className="mt-5 space-y-3">
         {submit.status === 'failed' ? (
-          <Alert
-            variant={submit.message ? 'error' : 'warning'}
-            title={submit.message ? undefined : 'Não foi possível confirmar o resultado'}
-          >
-            {submit.message ??
-              'A compra pode ter sido registrada. Tente de novo com a mesma chave — isso não cria outro pedido.'}
+          <Alert variant="error">{submit.message}</Alert>
+        ) : null}
+        {submit.status === 'unknown' ? (
+          <Alert variant="warning" title="Resultado do pagamento não confirmado">
+            A compra pode ter sido registrada. Consulte as compras concluídas no{' '}
+            <Link to="/perfil/historico" search={{ type: 'PURCHASE' }} className={linkClass}>
+              histórico de transações
+            </Link>. Pagamentos pendentes ou recusados podem não aparecer lá.
           </Alert>
+        ) : null}
+
+        {submitting ? (
+          <Alert variant="info">Processando pagamento simulado...</Alert>
         ) : null}
 
         <Alert variant="info" title="Pagamento simulado">
@@ -344,14 +358,12 @@ function ReviewSummary({ items, orderCount, blocked, submit, onConfirm }: Review
 
         <Button
           className="h-12 w-full"
-          disabled={blocked || submitting}
+          disabled={blocked || submitting || submit.status === 'unknown'}
           onClick={onConfirm}
         >
           {submitting
             ? 'Processando pagamento simulado...'
-            : submit.status === 'failed' && !submit.message
-              ? 'Verificar resultado'
-              : 'Simular pagamento'}
+            : 'Simular pagamento'}
         </Button>
 
         <div className="border-t border-neutral-100 pt-3 text-center">
