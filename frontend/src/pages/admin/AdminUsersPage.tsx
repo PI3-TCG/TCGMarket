@@ -359,8 +359,24 @@ export function AdminUsersPage() {
         <AdminUserDetailsModal
           user={updated[details.id] ?? details}
           version={version}
+          isSelf={details.id === current?.id}
           onClose={() => setDetails(null)}
-          onModerate={() => open({ kind: 'moderate', user: details })}
+          onModerate={() =>
+            open({ kind: 'moderate', user: updated[details.id] ?? details })
+          }
+          onChangeRole={(role) => {
+            const selected = updated[details.id] ?? details
+            setDetails(null)
+            open({ kind: 'role', user: selected, role })
+          }}
+          onChangeStatus={(status) => {
+            const selected = updated[details.id] ?? details
+            setDetails(null)
+            open({
+              kind: status === 'SUSPENDED' ? 'suspend' : 'reactivate',
+              user: selected,
+            })
+          }}
         />
       ) : null}
 
@@ -389,8 +405,8 @@ export function AdminUsersPage() {
         ) : null}
         {pending?.kind === 'reactivate' ? (
           <p className="text-sm">
-            <strong>{pending.user.name}</strong> volta a acessar a plataforma,
-            e o perfil público volta a aparecer.
+            <strong>{pending.user.name}</strong> volta a acessar a plataforma, e
+            o perfil público volta a aparecer.
           </p>
         ) : null}
         {pending?.kind === 'moderate' ? (
