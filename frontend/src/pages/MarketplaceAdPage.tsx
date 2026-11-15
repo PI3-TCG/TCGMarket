@@ -13,7 +13,12 @@ import { Button } from '@/components/ui/Button'
 import { Icon } from '@/components/ui/Icon'
 import { useCart } from '@/cart'
 import { useRemoteData } from '@/hooks/useRemoteData'
-import { addCartItem, cartFailure } from '@/services/cart'
+import {
+  addCartItem,
+  cartFailure,
+  updateCartItem,
+  updateCartSelection,
+} from '@/services/cart'
 import { getMarketplaceAd } from '@/services/marketplace'
 import { TradeProposalFlow } from '@/components/trade/TradeProposalFlow'
 import { useSession } from '@/session'
@@ -177,10 +182,7 @@ function AdImage({ ad }: { ad: MarketplaceAd }) {
   const available = Boolean(ad.imageUrl) && !failed
 
   return (
-    <div className={`${panelClass} flex flex-col items-center gap-3`}>
-      <span className="rounded-full bg-primary-900 px-3 py-1 text-sm font-semibold text-white">
-        Carta em {languageLabels[ad.language]}
-      </span>
+    <div className={`${panelClass} flex justify-center`}>
       <div className="aspect-[63/88] w-full max-w-[340px] overflow-hidden rounded-surface">
         {available ? (
           <img
@@ -200,13 +202,6 @@ function AdImage({ ad }: { ad: MarketplaceAd }) {
           </div>
         )}
       </div>
-      {available && ad.illustrativeImage ? (
-        <p className="max-w-[340px] text-center text-xs text-neutral-700">
-          Imagem ilustrativa: mostramos a versão em inglês porque não temos a imagem da
-          carta em {languageLabels[ad.language].toLowerCase()}. O vendedor anunciou a carta
-          em {languageLabels[ad.language].toLowerCase()}.
-        </p>
-      ) : null}
     </div>
   )
 }
@@ -305,6 +300,45 @@ function QuantitySelector({
     }
   }
 
+  async function buyNow() {
+    if (adding || (!valid && inCart === 0)) return
+    setAdding(true)
+    setResult(null)
+    try {
+      if (inCart === 0) apply(await addCartItem(ad.id, parsed))
+      await updateCartSelection(false)
+      const cart = await updateCartItem(ad.id, { selected: true })
+      apply(cart)
+      const selected = cart.items.filter((item) => item.selected)
+      if (selected.length !== 1 || selected[0].adId !== ad.id) {
+        throw new Error('Seleção do carrinho alterada')
+      }
+      await navigate({ to: '/carrinho' })
+    } catch {
+      reload()
+      setResult({
+        kind: 'failed',
+        message:
+          'Confira a seleção no carrinho ou tente Comprar agora novamente.',
+      })
+    } finally {
+      setAdding(false)
+    }
+  }
+
+  const buyNowButton = (
+    <Button
+      variant="secondary"
+      className="h-12 w-full"
+      disabled={
+        adding || (inCart === 0 && (!valid || cartState.status !== 'ready'))
+      }
+      onClick={buyNow}
+    >
+      Comprar agora
+    </Button>
+  )
+
   if (loggedIn && available === 0 && inCart > 0) {
     return (
       <div className="space-y-4">
@@ -314,6 +348,10 @@ function QuantitySelector({
           Todos os exemplares disponíveis já estão no seu carrinho.
         </Alert>
         <CartActions />
+        {buyNowButton}
+        {result?.kind === 'failed' && (
+          <Alert variant="error">{result.message}</Alert>
+        )}
         <PurchaseNotices />
       </div>
     )
@@ -337,7 +375,7 @@ function QuantitySelector({
     <div className="space-y-4">
       {result?.kind === 'added' ? <AddedNotice result={result} /> : null}
       {result?.kind === 'failed' ? (
-        <Alert variant="error" title="Não foi possível adicionar ao carrinho.">
+        <Alert variant="error" title="Não foi possível atualizar o carrinho.">
           {result.message}
         </Alert>
       ) : null}
@@ -430,6 +468,7 @@ function QuantitySelector({
         </Button>
       )}
 
+      {loggedIn && buyNowButton}
       <PurchaseNotices />
     </div>
   )
@@ -443,7 +482,6 @@ function AddedNotice({ result }: { result: { quantity: number } }) {
           ? '1 exemplar adicionado ao carrinho.'
           : `${result.quantity} exemplares adicionados ao carrinho.`}
       </Alert>
-      <CartActions />
     </div>
   )
 }
@@ -513,7 +551,9 @@ function TradeEntry({ ad }: { ad: MarketplaceAd }) {
       setLoginNotice('Entre na sua conta para propor uma troca.')
       navigate({
         to: '/login',
-        search: { redirect: '/marketplace/anuncios/' + encodeURIComponent(ad.id) },
+        search: {
+          redirect: '/marketplace/anuncios/' + encodeURIComponent(ad.id),
+        },
       })
       return
     }

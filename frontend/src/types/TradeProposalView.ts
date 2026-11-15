@@ -1,6 +1,7 @@
 /** Contrato de leitura da issue #84. Independente do DTO de criacao (#83). */
 export type TradeProposalDirection = 'SENT' | 'RECEIVED'
-export type TradeProposalStatus = 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'CANCELLED' | 'COMPLETED'
+export type TradeProposalStatus =
+  'PENDING' | 'ACCEPTED' | 'REJECTED' | 'CANCELLED' | 'COMPLETED'
 export type TradeProposalActor = 'PROPOSER' | 'RECIPIENT'
 
 export type TradeProposalParticipant = {
@@ -40,6 +41,7 @@ export type TradeProposalView = {
   rejectedAt: string | null
   cancelledAt: string | null
   completedAt: string | null
+  transactionId?: string | null
   proposer: TradeProposalParticipant
   recipient: TradeProposalParticipant
   offeredItems: TradeProposalCardItem[]
@@ -69,4 +71,5 @@ export type TradeProposalsSearch = {
   status?: TradeProposalStatus
   /** Pagina na URL: 1-based, diferente da API. */
   page?: number
+  proposalId?: string
 }

@@ -1,7 +1,8 @@
 import type { CardGame } from './Catalog'
 import type { CardCondition, CardLanguage } from './Collection'
 
-export type OrderStatus = 'PENDING_PAYMENT' | 'PAID' | 'COMPLETED' | 'PAYMENT_FAILED'
+export type OrderStatus =
+  'PENDING_PAYMENT' | 'PAID' | 'COMPLETED' | 'PAYMENT_FAILED'
 
 export interface OrderItem {
   adId: string
@@ -32,6 +33,7 @@ export interface DeliveryAddress {
 
 export interface Order {
   id: string
+  transactionId?: string | null
   sellerId: string
   // Nulo se o vendedor ainda não escolheu um nome de usuário.
   sellerUsername: string | null

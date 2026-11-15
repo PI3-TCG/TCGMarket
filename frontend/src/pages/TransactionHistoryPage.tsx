@@ -1,3 +1,4 @@
+import { TransactionReviewButton } from '@/components/history/TransactionReviewButton'
 import { pageBanners } from '@/config/pageBanners'
 import { useEffect, useState, type ReactNode } from 'react'
 import { Link, useNavigate, useSearch } from '@tanstack/react-router'
@@ -116,21 +117,7 @@ function HistoryContent({ search }: { search: TransactionHistorySearch }) {
             </button>
           )
         })}
-        <button
-          type="button"
-          role="tab"
-          aria-selected={false}
-          disabled
-          title="Histórico de trocas em breve"
-          className={`${idleTab} cursor-not-allowed opacity-50`}
-        >
-          Trocas · Em breve
-        </button>
       </div>
-      <p className="text-sm text-neutral-500">
-        O histórico de trocas estará disponível em breve. Acompanhe suas
-        propostas em Minhas propostas.
-      </p>
 
       <section
         aria-label="Transações"
@@ -290,14 +277,27 @@ function TransactionRow({
             {formatCurrency(entry.totalAmount ?? 0)}
           </span>
         )}
-        <Link
-          to="/perfil/historico/$transactionId"
-          params={{ transactionId: entry.id }}
-          search={search}
-          className={outlineButton}
-        >
-          Ver detalhes
-        </Link>
+        <div className="flex flex-col gap-2 md:items-end">
+          {entry.status === 'COMPLETED' && entry.type !== 'SALE' && (
+            <TransactionReviewButton
+              transactionId={entry.id}
+              counterpartyName={counterpartyName(entry)}
+              label={
+                entry.type === 'TRADE'
+                  ? 'Avaliar troca'
+                  : 'Avaliar vendedor'
+              }
+            />
+          )}
+          <Link
+            to="/perfil/historico/$transactionId"
+            params={{ transactionId: entry.id }}
+            search={search}
+            className={outlineButton}
+          >
+            Ver detalhes
+          </Link>
+        </div>
       </div>
     </article>
   )

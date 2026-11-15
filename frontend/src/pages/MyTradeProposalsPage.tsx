@@ -56,7 +56,7 @@ function ProposalsContent({ search }: { search: TradeProposalsSearch }) {
   const navigate = useNavigate()
   const [attempt, setAttempt] = useState(0)
   const [settled, setSettled] = useState<Settled | null>(null)
-  const [detailsId, setDetailsId] = useState<string | null>(null)
+  const detailsId = search.proposalId
   const page = (search.page ?? 1) - 1
   const requestKey = `${search.direction}:${search.status ?? 'ALL'}:${page}:${attempt}`
 
@@ -83,7 +83,6 @@ function ProposalsContent({ search }: { search: TradeProposalsSearch }) {
   const current = settled?.key === requestKey ? settled : null
 
   function updateSearch(next: TradeProposalsSearch) {
-    setDetailsId(null)
     navigate({ to: '/perfil/propostas', search: next })
   }
 
@@ -207,7 +206,7 @@ function ProposalsContent({ search }: { search: TradeProposalsSearch }) {
                 <li key={proposal.id}>
                   <ProposalRow
                     proposal={proposal}
-                    onView={() => setDetailsId(proposal.id)}
+                    onView={() => updateSearch({ ...search, proposalId: proposal.id })}
                   />
                 </li>
               ))}
@@ -223,7 +222,7 @@ function ProposalsContent({ search }: { search: TradeProposalsSearch }) {
       {detailsId && (
         <TradeProposalDetailsModal
           id={detailsId}
-          onClose={() => setDetailsId(null)}
+          onClose={() => updateSearch({ ...search, proposalId: undefined })}
           onDecision={() => setAttempt((value) => value + 1)}
         />
       )}

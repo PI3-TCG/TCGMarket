@@ -7,6 +7,8 @@ import com.pitcc.exception.ReviewConflictException;
 import com.pitcc.exception.TransactionNotFoundException;
 import com.pitcc.model.Review;
 import com.pitcc.model.Transaction;
+import com.pitcc.model.TransactionType;
+import org.springframework.security.access.AccessDeniedException;
 import com.pitcc.repository.ReviewRepository;
 import com.pitcc.repository.TransactionRepository;
 
@@ -40,6 +42,10 @@ public class ReviewService {
             CreateReviewRequest request
     ) {
         Transaction transaction = findOwnTransaction(userId, transactionId);
+
+        if (transaction.getType() == TransactionType.SALE && !userId.equals(transaction.getBuyerId())) {
+            throw new AccessDeniedException("Somente o comprador pode avaliar uma venda.");
+        }
 
         Review review = Review.of(
                 transaction,

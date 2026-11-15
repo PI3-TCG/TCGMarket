@@ -1,3 +1,4 @@
+import { Link } from '@tanstack/react-router'
 import { useEffect, useState, type ReactNode } from 'react'
 import axios from 'axios'
 import { Alert } from '@/components/ui/Alert'
@@ -245,6 +246,23 @@ export function TradeProposalDetailsModal({
             <TradeActionButton disabled={processing} onClick={onClose}>
               Fechar detalhes
             </TradeActionButton>
+
+            {data?.status === 'COMPLETED' && data.transactionId && (
+              <Link
+                to="/perfil/historico/$transactionId"
+                params={{ transactionId: data.transactionId }}
+                search={{ type: 'TRADE' }}
+                onClick={onClose}
+                className={cn(
+                  'inline-flex min-h-11 items-center justify-center gap-2 text-center',
+                  modalPrimaryButton,
+                )}
+              >
+                <Icon name="star" size={16} />
+                Avaliar troca
+              </Link>
+            )}
+
             {availableActions.map((action) => (
               <TradeActionButton
                 key={action}

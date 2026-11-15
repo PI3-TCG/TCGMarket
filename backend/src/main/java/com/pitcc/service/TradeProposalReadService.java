@@ -120,7 +120,8 @@ public class TradeProposalReadService {
                 proposal.getOfferedItems().stream().map(TradeProposalReadService::toItem).toList(),
                 proposal.getRequestedItems().stream().map(TradeProposalReadService::toItem).toList(),
                 toFinancialAdjustment(proposal),
-                proposal.getEvents().stream().map(e -> toEvent(e, proposal)).toList());
+                proposal.getEvents().stream().map(e -> toEvent(e, proposal)).toList(),
+                proposal.getStatus() == TradeProposalStatus.COMPLETED ? proposal.getTransactionId() : null);
     }
 
     private static TradeProposalViewResponse.Participant toParticipant(String id, User user) {

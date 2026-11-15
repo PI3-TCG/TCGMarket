@@ -8,6 +8,8 @@ import com.pitcc.exception.TransactionNotFoundException;
 import com.pitcc.model.Order;
 import com.pitcc.model.Review;
 import com.pitcc.model.Transaction;
+import com.pitcc.model.TransactionType;
+import org.springframework.security.access.AccessDeniedException;
 import com.pitcc.repository.ReviewRepository;
 import com.pitcc.repository.TransactionRepository;
 
@@ -68,17 +70,31 @@ class ReviewServiceTest {
     }
 
     @Test
-    void sellerReviewsBuyerAndBlankCommentIsDropped() {
+    void sellerCannotReviewBuyerInSale() {
         Transaction transaction = transaction();
+        when(transactionRepository.findById(TX)).thenReturn(Optional.of(transaction));
+
+        assertThrows(AccessDeniedException.class,
+                () -> service.create(transaction.getSellerId(), TX, new CreateReviewRequest(5, null)));
+        verify(reviewRepository, never()).save(any());
+    }
+
+    @Test
+    void bothTradeParticipantsCanReviewAndBlankCommentIsDropped() {
+        Transaction transaction = transaction();
+        ReflectionTestUtils.setField(transaction, "type", TransactionType.TRADE);
         when(transactionRepository.findById(TX)).thenReturn(Optional.of(transaction));
         when(reviewRepository.findByTransactionId(TX)).thenReturn(List.of());
 
         service.create(transaction.getSellerId(), TX, new CreateReviewRequest(5, "   "));
 
         ArgumentCaptor<Review> captor = ArgumentCaptor.forClass(Review.class);
-        verify(reviewRepository).save(captor.capture());
-        assertEquals(transaction.getBuyerId(), captor.getValue().getRevieweeId());
-        assertNull(captor.getValue().getComment());
+        service.create(transaction.getBuyerId(), TX, new CreateReviewRequest(4, null));
+
+        verify(reviewRepository, times(2)).save(captor.capture());
+        assertEquals(transaction.getBuyerId(), captor.getAllValues().get(0).getRevieweeId());
+        assertNull(captor.getAllValues().get(0).getComment());
+        assertEquals(transaction.getSellerId(), captor.getAllValues().get(1).getRevieweeId());
     }
 
     @Test

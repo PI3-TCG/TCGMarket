@@ -1,3 +1,4 @@
+import { TradeReviewNotifications } from './TradeReviewNotifications'
 import mark from '@/assets/mark-3cartas-branco.svg'
 import { useCart } from '@/cart'
 import { hasRole, useSession } from '@/session'
@@ -150,15 +151,9 @@ export function SiteHeader({ onSoon: soon }: Props) {
             ) : null}
           </button>
 
-          <button
-            type="button"
-            onClick={() => soon('As notificações')}
-            className="rounded-full p-2 transition hover:bg-white/15 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500"
-            aria-label="Notificações"
-            title="Notificações"
-          >
-            <BellIcon />
-          </button>
+          {sessionReady && user ? (
+            <TradeReviewNotifications key={user.id} />
+          ) : null}
 
           {sessionReady && user ? (
             <div className="relative border-l border-white/25 pl-2 sm:pl-3">
@@ -333,24 +328,6 @@ function CartIcon() {
       <circle cx="9" cy="21" r="1" />
       <circle cx="20" cy="21" r="1" />
       <path d="M1 2h3l2.4 12.1a2 2 0 0 0 2 1.6h10a2 2 0 0 0 2-1.6L22 6H5" />
-    </svg>
-  )
-}
-
-function BellIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      className="size-5 sm:size-6"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M6 16v-5a6 6 0 1 1 12 0v5l1.5 2h-15L6 16Z" />
-      <path d="M10 19a2 2 0 0 0 4 0" />
     </svg>
   )
 }

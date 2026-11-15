@@ -49,7 +49,7 @@ public class SecurityConfig {
                                         .permitAll()
                                         .requestMatchers("/api/users/me/**")
                                         .authenticated()
-                                        .requestMatchers(HttpMethod.GET, "/api/users/*/profile", "/api/users/*/profile/summary", "/api/users/*/profile/collection")
+                                        .requestMatchers(HttpMethod.GET, "/api/users/*/profile", "/api/users/*/reputation")
                                         .permitAll()
                                         .requestMatchers(HttpMethod.OPTIONS, "/**")
                                         .permitAll()

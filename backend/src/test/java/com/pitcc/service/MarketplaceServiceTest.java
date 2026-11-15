@@ -45,6 +45,8 @@ class MarketplaceServiceTest {
   @Mock private UserRepository userRepository;
   @Mock private MarketplaceSearchRepository marketplaceSearchRepository;
 
+  @Mock private ReputationService reputation;
+
   private MarketplaceService service;
 
   @BeforeEach
@@ -55,7 +57,8 @@ class MarketplaceServiceTest {
             collectionItemRepository,
             cardRepository,
             userRepository,
-            marketplaceSearchRepository);
+            marketplaceSearchRepository,
+            reputation);
   }
 
   private Card stubAvailableAd() {

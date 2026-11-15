@@ -29,30 +29,58 @@ const gradeLabels: Record<number, string> = {
 export function TransactionReviewSection({
   transactionId,
   counterpartyName,
+  onSubmittingChange,
+  compact = false,
+  canReview = true,
+  canReceiveReview = true,
+  onReviewed,
 }: {
   transactionId: string
   counterpartyName: string
+  onSubmittingChange?: (submitting: boolean) => void
+  compact?: boolean
+  canReview?: boolean
+  canReceiveReview?: boolean
+  onReviewed?: () => void
 }) {
   const titleId = useId()
   const fetchReviews = useCallback(
     () => getTransactionReviews(transactionId),
     [transactionId],
   )
-  const { state, retry } = useRemoteData(`reviews:${transactionId}`, fetchReviews)
+  const { state, retry } = useRemoteData(
+    `reviews:${transactionId}`,
+    fetchReviews,
+  )
   const [created, setCreated] = useState<TransactionReviews | null>(null)
   const reviews = created ?? (state.status === 'ready' ? state.data : null)
 
   return (
     <section
       aria-labelledby={titleId}
-      className="rounded-xl border border-neutral-200 bg-white p-4"
+      className={
+        compact
+          ? undefined
+          : 'rounded-xl border border-neutral-200 bg-white p-4'
+      }
     >
-      <h2 id={titleId} className="mb-4 font-display text-xl font-bold text-primary-900">
+      <h2
+        id={titleId}
+        className={
+          compact
+            ? 'sr-only'
+            : 'mb-4 font-display text-xl font-bold text-primary-900'
+        }
+      >
         Avaliação da negociação
       </h2>
 
       {state.status === 'loading' && (
-        <div role="status" aria-busy="true" className="h-32 rounded-lg bg-neutral-100 motion-safe:animate-pulse">
+        <div
+          role="status"
+          aria-busy="true"
+          className="h-32 rounded-lg bg-neutral-100 motion-safe:animate-pulse"
+        >
           <span className="sr-only">Carregando avaliações...</span>
         </div>
       )}
@@ -76,27 +104,33 @@ export function TransactionReviewSection({
               title={`Sua avaliação de ${counterpartyName}`}
               review={reviews.given}
             />
-          ) : (
+          ) : canReview ? (
             <ReviewForm
               transactionId={transactionId}
               counterpartyName={counterpartyName}
-              onCreated={setCreated}
+              onCreated={(reviews) => {
+                setCreated(reviews)
+                if (reviews.given) onReviewed?.()
+              }}
               onDuplicate={retry}
+              onSubmittingChange={onSubmittingChange}
             />
-          )}
+          ) : null}
 
-          <div className="border-t border-neutral-200 pt-4">
-            {reviews.received ? (
-              <ReviewCard
-                title={`Avaliação recebida de ${counterpartyName}`}
-                review={reviews.received}
-              />
-            ) : (
-              <p className="text-sm text-neutral-700">
-                {counterpartyName} ainda não avaliou esta negociação.
-              </p>
-            )}
-          </div>
+          {!compact && (canReceiveReview || reviews.received) && (
+            <div className="border-t border-neutral-200 pt-4">
+              {reviews.received ? (
+                <ReviewCard
+                  title={`Avaliação recebida de ${counterpartyName}`}
+                  review={reviews.received}
+                />
+              ) : (
+                <p className="text-sm text-neutral-700">
+                  {counterpartyName} ainda não avaliou esta negociação.
+                </p>
+              )}
+            </div>
+          )}
         </div>
       )}
     </section>
@@ -108,11 +142,13 @@ function ReviewForm({
   counterpartyName,
   onCreated,
   onDuplicate,
+  onSubmittingChange,
 }: {
   transactionId: string
   counterpartyName: string
   onCreated: (reviews: TransactionReviews) => void
   onDuplicate: () => void
+  onSubmittingChange?: (submitting: boolean) => void
 }) {
   const commentId = useId()
   const gradeErrorId = useId()
@@ -128,7 +164,9 @@ function ReviewForm({
       setGradeMissing(true)
       return
     }
+    if (submitting) return
     setSubmitting(true)
+    onSubmittingChange?.(true)
     setError(null)
     try {
       const trimmed = comment.trim()
@@ -151,6 +189,7 @@ function ReviewForm({
       )
     } finally {
       setSubmitting(false)
+      onSubmittingChange?.(false)
     }
   }
 
@@ -205,8 +244,12 @@ function ReviewForm({
       </fieldset>
 
       <div>
-        <label htmlFor={commentId} className="mb-1 block text-sm font-semibold text-neutral-900">
-          Comentário <span className="font-normal text-neutral-500">(opcional)</span>
+        <label
+          htmlFor={commentId}
+          className="mb-1 block text-sm font-semibold text-neutral-900"
+        >
+          Comentário{' '}
+          <span className="font-normal text-neutral-500">(opcional)</span>
         </label>
         <textarea
           id={commentId}
@@ -218,7 +261,10 @@ function ReviewForm({
           className="w-full resize-y rounded-control border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 outline-none placeholder:text-neutral-500 focus:ring-2 focus:ring-secondary-500"
           placeholder="Conte como foi a negociação."
         />
-        <p id={`${commentId}-count`} className="mt-1 text-right text-xs text-neutral-500">
+        <p
+          id={`${commentId}-count`}
+          className="mt-1 text-right text-xs text-neutral-500"
+        >
           {comment.length}/{REVIEW_COMMENT_MAX}
         </p>
       </div>
@@ -232,7 +278,13 @@ function ReviewForm({
   )
 }
 
-function ReviewCard({ title, review }: { title: string; review: TransactionReview }) {
+function ReviewCard({
+  title,
+  review,
+}: {
+  title: string
+  review: TransactionReview
+}) {
   return (
     <div>
       <p className="text-sm font-semibold text-neutral-900">{title}</p>
@@ -248,7 +300,9 @@ function ReviewCard({ title, review }: { title: string; review: TransactionRevie
               name="star"
               size={20}
               filled={value <= review.grade}
-              className={cn(value <= review.grade ? 'text-rare-500' : 'text-neutral-300')}
+              className={cn(
+                value <= review.grade ? 'text-rare-500' : 'text-neutral-300',
+              )}
             />
           ))}
         </span>
@@ -257,7 +311,9 @@ function ReviewCard({ title, review }: { title: string; review: TransactionRevie
         </time>
       </div>
       {review.comment && (
-        <p className="mt-2 whitespace-pre-line text-sm text-neutral-700">{review.comment}</p>
+        <p className="mt-2 whitespace-pre-line text-sm text-neutral-700">
+          {review.comment}
+        </p>
       )}
     </div>
   )
