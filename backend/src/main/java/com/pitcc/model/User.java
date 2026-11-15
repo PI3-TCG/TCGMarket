@@ -22,8 +22,6 @@ public class User {
   private UserRole role;
   private UserStatus status = UserStatus.ACTIVE;
 
-  private UserStatus status = UserStatus.ACTIVE;
-
   private Instant registrationDate;
 
   // Esparso porque contas anteriores ao perfil só recebem username na subida da aplicação.
