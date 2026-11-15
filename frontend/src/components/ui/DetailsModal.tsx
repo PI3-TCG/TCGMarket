@@ -1,13 +1,9 @@
-import {
-  useEffect,
-  useId,
-  useRef,
-  type ReactNode,
-} from 'react'
+import { useEffect, useId, useRef, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { cn } from './cn'
 import { Icon } from './Icon'
 import {
+  ModalGoldDivider,
   ModalHeaderOrnaments,
   modalBody,
   modalCloseButton,
@@ -15,6 +11,7 @@ import {
   modalFrame,
   modalHeader,
   modalHeadingIcon,
+  modalSecondaryButton,
 } from './modalTheme'
 
 type Props = {
@@ -68,7 +65,6 @@ export function DetailsModal({
       }
 
       const dialog = dialogRef.current
-
       if (event.key !== 'Tab' || !dialog) return
 
       const focusable = Array.from(
@@ -94,8 +90,7 @@ export function DetailsModal({
 
       if (!isInside || current === dialog) {
         event.preventDefault()
-        const target = event.shiftKey ? last : first
-        target.focus()
+        ;(event.shiftKey ? last : first).focus()
       } else if (event.shiftKey && current === first) {
         event.preventDefault()
         last.focus()
@@ -110,20 +105,15 @@ export function DetailsModal({
     return () => {
       document.removeEventListener('keydown', handleKeyDown)
       document.body.style.overflow = previousOverflow
-
-      if (previousFocus?.isConnected) {
-        previousFocus.focus()
-      }
+      if (previousFocus?.isConnected) previousFocus.focus()
     }
   }, [])
 
   return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-neutral-900/65 p-2.5 backdrop-blur-[3px] sm:p-5"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[#13091e]/75 p-3 backdrop-blur-[3px] sm:p-5"
       onMouseDown={(event) => {
-        if (event.target === event.currentTarget) {
-          onClose()
-        }
+        if (event.target === event.currentTarget) onCloseRef.current()
       }}
     >
       <section
@@ -132,58 +122,73 @@ export function DetailsModal({
         aria-modal="true"
         aria-labelledby={titleId}
         tabIndex={-1}
-        className={cn('flex max-h-[90dvh] w-full max-w-[880px] flex-col overflow-hidden rounded-[22px] bg-neutral-50', modalFrame)}
+        className={cn(
+          'flex max-h-[90dvh] w-full max-w-[880px] flex-col overflow-hidden rounded-[22px] focus:outline-none',
+          modalFrame,
+        )}
       >
-        <header className={cn('shrink-0 px-4 py-3.5 sm:px-6', modalHeader)}>
+        <header
+          className={cn('shrink-0 px-4 py-4 sm:px-6 sm:py-5', modalHeader)}
+        >
           <ModalHeaderOrnaments />
-
-          <div className="relative flex items-center justify-between gap-3">
+          <div className="relative z-10 flex items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-3">
-              <div className={modalHeadingIcon}>
+              <span aria-hidden="true" className={modalHeadingIcon}>
                 <Icon name="gem" size={24} />
-              </div>
-
+              </span>
               <div className="min-w-0">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/90">
+                <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#F1DDF7]">
                   {eyebrow}
                 </p>
-
                 <h2
                   id={titleId}
-                  className="truncate font-display text-lg font-bold leading-snug sm:text-xl"
+                  className="truncate font-display text-xl font-bold leading-tight text-white sm:text-2xl"
                 >
                   {title}
                 </h2>
               </div>
             </div>
-
             <button
               ref={closeRef}
               type="button"
-              onClick={onClose}
+              onClick={() => onCloseRef.current()}
               aria-label="Fechar detalhes"
-              className={cn('shrink-0 cursor-pointer rounded-lg p-2 transition focus-visible:outline-offset-2', modalCloseButton)}
+              className={cn(
+                'relative z-10 grid size-9 shrink-0 cursor-pointer place-items-center rounded-lg transition',
+                modalCloseButton,
+              )}
             >
               <Icon name="close" size={20} />
             </button>
           </div>
         </header>
 
-        <div className={cn('min-h-0 flex-1 overflow-y-auto overscroll-contain p-3.5 sm:p-5', modalBody)}>
+        <ModalGoldDivider />
+
+        <div
+          className={cn(
+            'min-h-0 flex-1 overflow-y-auto overscroll-contain p-4 text-sm text-[#39324F] sm:p-6',
+            modalBody,
+          )}
+        >
           {children}
         </div>
 
-        <footer className={cn('flex shrink-0 flex-wrap items-center justify-between gap-2 px-4 py-3 sm:px-6', modalFooter)}>
+        <footer
+          className={cn(
+            'flex shrink-0 flex-wrap items-center justify-end gap-3 border-t border-[#DED5EB] px-4 py-4 sm:px-6',
+            modalFooter,
+          )}
+        >
           {footerText && (
-            <p className="hidden text-xs text-primary-800 sm:block">
+            <p className="mr-auto text-xs font-medium text-[#655C7B]">
               {footerText}
             </p>
           )}
-
           <button
             type="button"
-            onClick={onClose}
-            className="ml-auto cursor-pointer rounded-lg border border-primary-300/40 bg-white/90 px-4 py-2.5 text-xs font-semibold text-primary-900 transition hover:bg-primary-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-900"
+            onClick={() => onCloseRef.current()}
+            className={cn('min-w-28', modalSecondaryButton)}
           >
             Fechar
           </button>

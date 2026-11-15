@@ -1,4 +1,4 @@
-import { useId, useRef, useState, type KeyboardEvent } from 'react'
+import { useEffect, useId, useRef, useState, type KeyboardEvent } from 'react'
 import { cn } from './cn'
 import { Icon } from './Icon'
 import { focusRing } from './styles'
@@ -52,6 +52,8 @@ export function Select({
   const generatedId = useId()
   const fieldId = id ?? generatedId
   const listboxId = `${fieldId}-listbox`
+  const labelId = `${fieldId}-label`
+  const errorId = `${fieldId}-error`
   const rootRef = useRef<HTMLDivElement>(null)
   const [open, setOpen] = useState(false)
   const [internal, setInternal] = useState(defaultValue)
@@ -65,6 +67,29 @@ export function Select({
 
   useDismiss(isOpen && !locked, () => setOpen(false), rootRef)
 
+  // Mantém a opção ativa visível durante a navegação por teclado.
+  useEffect(() => {
+    if (!isOpen || locked || cursor < 0) return
+
+    const option = Array.from(
+      rootRef.current?.querySelectorAll<HTMLElement>('[role="option"]') ?? [],
+    )[cursor]
+
+    if (!option) return
+
+    const listbox = option.closest<HTMLElement>('[role="listbox"]')
+    if (!listbox) return
+
+    const optionTop = option.offsetTop - listbox.offsetTop
+    const optionBottom = optionTop + option.offsetHeight
+
+    if (optionTop < listbox.scrollTop) {
+      listbox.scrollTop = optionTop
+    } else if (optionBottom > listbox.scrollTop + listbox.clientHeight) {
+      listbox.scrollTop = optionBottom - listbox.clientHeight
+    }
+  }, [cursor, isOpen, locked])
+
   function commit(next: string) {
     if (value === undefined) setInternal(next)
     onValueChange?.(next)
@@ -75,7 +100,11 @@ export function Select({
     const selectedIndex = options.findIndex(
       (option) => option.value === selectedValue,
     )
-    setCursor(selectedIndex >= 0 ? selectedIndex : firstEnabledIndex(options))
+    setCursor(
+      selectedIndex >= 0 && !options[selectedIndex].disabled
+        ? selectedIndex
+        : firstEnabledIndex(options),
+    )
   }
 
   function openList() {
@@ -85,7 +114,10 @@ export function Select({
 
   function onKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
     if (locked || isDisabled) return
-
+    if (event.key === 'Tab' && open) {
+      setOpen(false)
+      return
+    }
     if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
       event.preventDefault()
       if (!open) {
@@ -106,13 +138,18 @@ export function Select({
       if (option && !option.disabled) commit(option.value)
     }
 
-    if (event.key === 'Escape') setOpen(false)
+    if (event.key === 'Escape' && open) {
+      event.preventDefault()
+      event.stopPropagation()
+      setOpen(false)
+    }
   }
 
   return (
     <div ref={rootRef} className={cn('relative w-full', className)}>
       {label ? (
         <label
+          id={labelId}
           htmlFor={fieldId}
           className="mb-2 block text-sm font-medium text-neutral-900"
         >
@@ -131,9 +168,17 @@ export function Select({
         id={fieldId}
         type="button"
         role="combobox"
+        aria-labelledby={label ? labelId : undefined}
         aria-controls={listboxId}
         aria-expanded={isOpen}
+        aria-haspopup="listbox"
+        aria-activedescendant={
+          isOpen && options[cursor] && !options[cursor].disabled
+            ? `${listboxId}-option-${cursor}`
+            : undefined
+        }
         aria-invalid={isError || undefined}
+        aria-describedby={error ? errorId : undefined}
         disabled={isDisabled}
         onClick={() => {
           if (locked || isDisabled) return
@@ -173,60 +218,66 @@ export function Select({
           id={listboxId}
           role="listbox"
           className={cn(
-            'z-30 mt-1 w-full rounded-control border border-neutral-200 bg-white p-1 shadow-md',
+            'z-30 mt-1 max-h-60 w-full overflow-y-auto rounded-control border border-neutral-200 bg-white p-1 shadow-md',
             preview === 'open' ? 'relative' : 'absolute',
           )}
         >
-          {options.map((option) => {
+          {options.map((option, index) => {
             const isSelected = option.value === selectedValue
+            const isActive = index === cursor
             const isHighlighted = option.value === highlightedValue
+
             return (
-              <li key={option.value} role="presentation">
-                <button
-                  type="button"
-                  role="option"
-                  aria-selected={isSelected}
-                  disabled={option.disabled}
-                  onMouseEnter={() => {
-                    const index = options.findIndex(
-                      (item) => item.value === option.value,
-                    )
+              <li
+                key={option.value}
+                id={`${listboxId}-option-${index}`}
+                role="option"
+                aria-selected={isSelected}
+                aria-disabled={option.disabled || undefined}
+                onMouseEnter={() => {
+                  if (!option.disabled) {
                     setCursor(index)
-                  }}
-                  onClick={() => {
-                    if (!option.disabled) commit(option.value)
-                  }}
-                  className={cn(
-                    'flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm',
-                    'cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary-500',
-                    option.disabled && 'cursor-not-allowed text-neutral-500',
-                    !option.disabled &&
-                      !isSelected &&
-                      !isHighlighted &&
-                      'text-neutral-900 hover:bg-primary-100 hover:text-primary-900',
+                  }
+                }}
+                onClick={() => {
+                  if (!option.disabled && !locked) {
+                    commit(option.value)
+                  }
+                }}
+                className={cn(
+                  'flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm',
+                  option.disabled
+                    ? 'cursor-not-allowed text-neutral-500'
+                    : 'cursor-pointer text-neutral-900',
+                  !option.disabled &&
+                    isActive &&
+                    'bg-primary-100 text-primary-900',
+                  !option.disabled &&
                     isHighlighted &&
-                      !isSelected &&
-                      'bg-primary-100 text-primary-900',
-                    isSelected &&
-                      'bg-secondary-100 font-medium text-secondary-700',
-                  )}
-                >
-                  {option.label}
-                  {isSelected ? <Icon name="check" size={16} /> : null}
-                </button>
+                    !isSelected &&
+                    'bg-primary-100 text-primary-900',
+                  isSelected &&
+                    'bg-secondary-100 font-medium text-secondary-700',
+                )}
+              >
+                <span>{option.label}</span>
+                {isSelected ? <Icon name="check" size={16} /> : null}
               </li>
             )
           })}
         </ul>
       ) : null}
-      {error ? <p className="mt-1 text-sm text-error-700">{error}</p> : null}
+      {error ? (
+        <p id={errorId} className="mt-1 text-sm font-medium text-error-700">
+          {error}
+        </p>
+      ) : null}
     </div>
   )
 }
 
 function firstEnabledIndex(options: SelectOption[]) {
-  const index = options.findIndex((option) => !option.disabled)
-  return index < 0 ? 0 : index
+  return options.findIndex((option) => !option.disabled)
 }
 
 function moveEnabledIndex(

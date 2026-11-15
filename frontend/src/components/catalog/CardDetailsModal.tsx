@@ -21,12 +21,15 @@ import { cn } from '@/components/ui/cn'
 import { Icon } from '@/components/ui/Icon'
 import {
   ModalHeaderOrnaments,
+  ModalGoldDivider,
   modalBody,
   modalCloseButton,
   modalFooter,
   modalFrame,
   modalHeader,
   modalHeadingIcon,
+  modalPrimaryButton,
+  modalSecondaryButton,
 } from '@/components/ui/modalTheme'
 import type { CatalogCard, CatalogCardDetails } from '@/types/Catalog'
 
@@ -34,15 +37,13 @@ type Props = {
   cardId: string
   context?: 'catalog' | 'collection'
   onClose: () => void
-  /** Callback utilizado atualmente pelo CatalogPage. */
   onAdd?: (card: CatalogCard) => void
-  /** Compatibilidade com uma possível chamada criada no protótipo. */
   onAddToCollection?: (card: CatalogCardDetails) => void
-  /** Ainda pode não estar implementado; neste caso o botão fica desabilitado. */
   onCreateListing?: (card: CatalogCardDetails) => void
 }
 
-type ActiveTab = 'details' | 'dashboard'
+const detailButton =
+  'inline-flex min-h-11 items-center justify-center gap-2 text-center transition disabled:cursor-not-allowed disabled:opacity-50'
 
 export function CardDetailsModal({
   cardId,
@@ -53,14 +54,20 @@ export function CardDetailsModal({
   onCreateListing,
 }: Props) {
   const titleId = useId()
-  const [activeTab, setActiveTab] = useState<ActiveTab>('details')
-  const closeRef = useRef<HTMLButtonElement>(null)
   const dialogRef = useRef<HTMLElement>(null)
+  const closeRef = useRef<HTMLButtonElement>(null)
+  const closeCallback = useRef(onClose)
+  const [showPt, setShowPt] = useState(false)
+  const [showTechnicalDetails, setShowTechnicalDetails] = useState(false)
+  const [imageFailed, setImageFailed] = useState(false)
+
+  useEffect(() => {
+    closeCallback.current = onClose
+  }, [onClose])
 
   const loadCard = useCallback(() => fetchCatalogCard(cardId), [cardId])
   const { state, retry } = useRemoteData(cardId, loadCard)
   const card = state.status === 'ready' ? state.data : null
-  const [showPt, setShowPt] = useState(false)
   const ptImage = card?.localizations?.pt?.imageUrl ?? null
   const imageUrl = showPt && ptImage ? ptImage : (card?.imageUrl ?? null)
   const isCollection = context === 'collection'
@@ -69,313 +76,351 @@ export function CardDetailsModal({
     : Boolean(onAdd || onAddToCollection)
 
   useEffect(() => {
-    const previousOverflow = document.body.style.overflow
+    setImageFailed(false)
+  }, [imageUrl])
+
+  useEffect(() => {
     const previousFocus =
       document.activeElement instanceof HTMLElement
         ? document.activeElement
         : null
-
+    const previousOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     closeRef.current?.focus()
 
-    function onKeyDown(event: KeyboardEvent) {
+    function handleKeyDown(event: KeyboardEvent) {
       if (event.key === 'Escape') {
         event.preventDefault()
-        onClose()
+        closeCallback.current()
         return
       }
-
       if (event.key !== 'Tab' || !dialogRef.current) return
-
       const focusable = dialogRef.current.querySelectorAll<HTMLElement>(
-        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
       )
-      if (focusable.length === 0) return
-
+      if (focusable.length === 0) {
+        event.preventDefault()
+        dialogRef.current.focus()
+        return
+      }
       const first = focusable[0]
       const last = focusable[focusable.length - 1]
       const current = document.activeElement
-      const isInside = dialogRef.current.contains(current)
-
-      if (!isInside || (event.shiftKey && current === first)) {
+      if (!dialogRef.current.contains(current)) {
         event.preventDefault()
         ;(event.shiftKey ? last : first).focus()
+      } else if (event.shiftKey && current === first) {
+        event.preventDefault()
+        last.focus()
       } else if (!event.shiftKey && current === last) {
         event.preventDefault()
         first.focus()
       }
     }
 
-    document.addEventListener('keydown', onKeyDown)
+    document.addEventListener('keydown', handleKeyDown)
     return () => {
+      document.removeEventListener('keydown', handleKeyDown)
       document.body.style.overflow = previousOverflow
-      document.removeEventListener('keydown', onKeyDown)
-      previousFocus?.focus()
+      if (previousFocus?.isConnected) previousFocus.focus()
     }
-  }, [onClose])
+  }, [])
 
   function handlePrimaryAction() {
     if (!card) return
-
     if (isCollection) {
       onCreateListing?.(card)
-      return
+    } else if (onAdd) {
+      onAdd(toCatalogCard(card))
+    } else {
+      onAddToCollection?.(card)
     }
-
-    if (onAdd) onAdd(toCatalogCard(card))
-    else onAddToCollection?.(card)
   }
 
   const detailRows = card ? [...commonRows(card), ...gameRows(card)] : []
   const cardAttacks = card ? attacks(card) : []
   const cardRules = card ? rulesText(card) : null
+  const translatedName = card
+    ? localizedName(card.name, card.localizations)
+    : null
 
   return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[#13091e]/75 p-2.5 backdrop-blur-[3px] sm:p-5"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[#16071E]/75 p-3 backdrop-blur-[3px] sm:p-5"
       onMouseDown={(event) => {
-        if (event.target === event.currentTarget) onClose()
+        if (event.target === event.currentTarget) closeCallback.current()
       }}
     >
       <section
         ref={dialogRef}
+        tabIndex={-1}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className={cn('flex max-h-[90dvh] w-full max-w-[880px] flex-col overflow-hidden rounded-[22px] bg-[#f7f3fd]', modalFrame)}
+        className={cn(
+          'flex max-h-[92dvh] w-full max-w-[820px] flex-col overflow-hidden rounded-[23px] bg-[#F9F7FD] focus:outline-none',
+          modalFrame,
+        )}
       >
-        {/* Cabeçalho com a identidade roxa do TCGMarket. */}
-        <header className={cn('shrink-0 px-4 py-3.5 sm:px-6', modalHeader)}>
+        <header
+          className={cn('relative shrink-0 px-5 py-5 sm:px-7', modalHeader)}
+        >
           <ModalHeaderOrnaments />
-          <div className="relative flex items-center justify-between gap-3">
-            <div className="flex min-w-0 items-center gap-3">
-              <div className={modalHeadingIcon}>
-                <Icon name="gem" size={24} />
-              </div>
-              <div className="min-w-0">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-purple-100/80">
-                  {isCollection ? 'Minha coleção' : 'Catálogo'} / Detalhes
-                </p>
-                <h2
-                  id={titleId}
-                  className="truncate font-display text-lg font-bold leading-snug sm:text-xl"
-                >
-                  {card?.name ?? 'Detalhes da carta'}
-                </h2>
-              </div>
+          <div className="relative z-10 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3">
+            <span aria-hidden="true" className={modalHeadingIcon}>
+              <Icon name="gem" size={24} />
+            </span>
+            <div className="min-w-0 text-center">
+              <p className="text-[10px] font-bold uppercase tracking-[0.17em] text-[#F7DBFF]/85">
+                {isCollection ? 'Minha coleção' : 'Catálogo'} / Detalhes
+              </p>
+              <h2
+                id={titleId}
+                className="mt-0.5 truncate font-display text-xl font-bold text-white sm:text-2xl"
+              >
+                {card?.name ?? 'Detalhes da carta'}
+              </h2>
+              <p className="mt-0.5 text-xs text-white/85 sm:text-sm">
+                Informações e características da carta
+              </p>
             </div>
             <button
               ref={closeRef}
               type="button"
               onClick={onClose}
               aria-label="Fechar detalhes"
-              className={cn('rounded-lg p-2 transition focus-visible:outline-offset-2', modalCloseButton)}
+              className={cn(
+                'grid size-9 shrink-0 cursor-pointer place-items-center rounded-lg transition',
+                modalCloseButton,
+              )}
             >
               <Icon name="close" size={20} />
             </button>
           </div>
         </header>
 
-        <div className={cn('min-h-0 flex-1 overflow-y-auto p-3.5 sm:p-5', modalBody)}>
+        <ModalGoldDivider />
+
+        <div
+          className={cn(
+            'min-h-0 flex-1 overflow-y-auto px-4 py-6 text-[#332847] sm:px-7 sm:py-7',
+            modalBody,
+          )}
+        >
           {state.status === 'loading' && (
             <div
               role="status"
-              className="grid gap-4 sm:grid-cols-[225px_minmax(0,1fr)]"
+              className="grid gap-5 sm:grid-cols-[245px_minmax(0,1fr)]"
             >
-              <div className="h-72 animate-pulse rounded-2xl bg-primary-100" />
-              <div className="space-y-3 rounded-2xl bg-white/70 p-5">
-                <div className="h-7 w-2/3 animate-pulse rounded bg-primary-100" />
-                <div className="h-4 w-1/2 animate-pulse rounded bg-primary-100" />
-                <div className="mt-6 h-24 animate-pulse rounded bg-primary-100" />
-                <p className="text-sm text-neutral-600">
-                  Carregando detalhes...
-                </p>
+              <span className="sr-only">Carregando detalhes da carta...</span>
+              <div
+                aria-hidden="true"
+                className="h-80 animate-pulse rounded-2xl bg-[#ECE3F5]"
+              />
+              <div aria-hidden="true" className="space-y-4 pt-5">
+                <div className="h-7 w-3/4 animate-pulse rounded-lg bg-[#ECE3F5]" />
+                <div className="h-4 w-1/2 animate-pulse rounded-lg bg-[#ECE3F5]" />
+                <div className="h-24 animate-pulse rounded-lg bg-[#ECE3F5]" />
               </div>
             </div>
           )}
 
-          {state.status === 'notFound' && (
-            <StatusPanel
-              title="Carta não encontrada"
-              description="Esta carta não está disponível no catálogo."
-              onRetry={retry}
-            />
-          )}
-          {state.status === 'error' && (
-            <StatusPanel
-              title="Não foi possível carregar a carta"
-              description="Confira a conexão e tente novamente."
-              onRetry={retry}
-            />
+          {(state.status === 'notFound' || state.status === 'error') && (
+            <div className="mx-auto max-w-md rounded-2xl border border-[#DFCBEA] bg-white px-6 py-8 text-center shadow-sm">
+              <Icon name="info" size={32} className="mx-auto text-[#750B7B]" />
+              <h3 className="mt-3 font-display text-xl font-bold text-[#61046D]">
+                {state.status === 'notFound'
+                  ? 'Carta não encontrada'
+                  : 'Não foi possível carregar a carta'}
+              </h3>
+              <p className="mt-2 text-sm text-[#645B73]">
+                {state.status === 'notFound'
+                  ? 'Esta carta não está disponível no catálogo.'
+                  : 'Confira sua conexão e tente novamente.'}
+              </p>
+              <button
+                type="button"
+                onClick={retry}
+                className={cn(detailButton, modalSecondaryButton, 'mt-5')}
+              >
+                Tentar novamente
+              </button>
+            </div>
           )}
 
           {card && (
-            <div className="space-y-3.5">
-              <div className="grid gap-3.5 sm:grid-cols-[228px_minmax(0,1fr)]">
-                {/* Somente a imagem principal: sem miniaturas ou outras impressões. */}
-                <aside className="rounded-2xl border border-[#d8c4df] bg-gradient-to-b from-[#ebe0fa] via-[#f3ecfd] to-[#e9e1f6] p-3 shadow-sm">
-                  {ptImage && (
-                    <div className="mb-2.5">
-                      <ImageLanguageToggle showPt={showPt} onChange={setShowPt} />
-                    </div>
-                  )}
-                  <div className="flex min-h-[230px] items-center justify-center rounded-xl bg-white/60 p-2 sm:min-h-[255px]">
-                    {imageUrl ? (
-                      <a
-                        href={imageUrl}
-                        target="_blank"
-                        rel="noreferrer noopener"
-                        aria-label={`Ver imagem completa de ${card.name}`}
-                        className="block rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-900"
-                      >
-                        <img
-                          src={imageUrl}
-                          alt={imageAlt(card)}
-                          className="mx-auto max-h-[275px] w-auto max-w-full object-contain drop-shadow-[0_10px_13px_rgba(49,17,72,0.22)]"
+            <div className="space-y-5">
+              <div className="grid items-center gap-6 sm:grid-cols-[245px_minmax(0,1fr)] sm:gap-8">
+                <aside className="flex min-w-0 flex-col items-center">
+                  <div className="w-full rounded-[20px] border border-[#DCC8E9] bg-[radial-gradient(circle_at_50%_27%,#FFFFFF_0%,#F1EBFB_70%,#EAE1F7_100%)] p-3 shadow-[0_8px_24px_rgba(65,22,89,0.10)]">
+                    {ptImage && (
+                      <div className="mb-3 flex justify-center">
+                        <ImageLanguageToggle
+                          showPt={showPt}
+                          onChange={setShowPt}
                         />
-                      </a>
-                    ) : (
-                      <div className="flex flex-col items-center gap-2 text-sm text-neutral-500">
-                        <Icon name="grid" size={32} />
-                        Imagem indisponível
                       </div>
                     )}
+                    <div className="flex min-h-[260px] items-center justify-center rounded-xl bg-white/50 p-2 sm:min-h-[305px]">
+                      {imageUrl && !imageFailed ? (
+                        <a
+                          href={imageUrl}
+                          target="_blank"
+                          rel="noreferrer noopener"
+                          aria-label={`Ver imagem completa de ${card.name}`}
+                          className="rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1254BD]"
+                        >
+                          <img
+                            src={imageUrl}
+                            alt={imageAlt(card)}
+                            onError={() => setImageFailed(true)}
+                            className="mx-auto max-h-[325px] w-auto max-w-full rounded-lg object-contain drop-shadow-[0_10px_16px_rgba(45,15,68,0.26)]"
+                          />
+                        </a>
+                      ) : (
+                        <div
+                          role="img"
+                          aria-label={`Imagem indisponível: ${card.name}`}
+                          className="flex flex-col items-center gap-2 text-sm text-[#786C87]"
+                        >
+                          <Icon name="gem" size={32} />
+                          Imagem indisponível
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  {imageUrl && (
-                    <a
-                      href={imageUrl}
-                      target="_blank"
-                      rel="noreferrer noopener"
-                      className="mt-2.5 flex items-center justify-center gap-1.5 rounded-lg border border-primary-300/60 bg-white/75 py-2 text-xs font-semibold text-primary-900 transition hover:bg-white focus-visible:outline-2 focus-visible:outline-primary-900"
-                    >
-                      <Icon name="search" size={16} />
-                      Ver imagem
-                    </a>
-                  )}
                 </aside>
 
-                <div className="min-w-0 rounded-2xl border border-[#d8c4df] bg-white/80 p-4 shadow-sm sm:p-5">
-                  <div className="flex flex-wrap items-center gap-2">
+                <div className="min-w-0 space-y-4">
+                  <div className="flex flex-wrap gap-2">
                     <Badge variant="primary">
                       {GAME_INFO[card.cardGame].name}
                     </Badge>
                     {card.rarity && <Badge variant="rare">{card.rarity}</Badge>}
                   </div>
-                  <h3 className="mt-3 font-display text-xl font-bold leading-tight text-primary-900 sm:text-2xl">
-                    {card.name}
-                  </h3>
-                  {localizedName(card.name, card.localizations) && (
-                    <p lang="pt-BR" className="mt-1 text-sm text-neutral-700">
-                      Em português:{' '}
-                      <span className="font-semibold">
-                        {localizedName(card.name, card.localizations)}
-                      </span>
+                  <div>
+                    <h3 className="font-display text-2xl font-bold leading-tight text-[#29123E] sm:text-[30px]">
+                      {card.name}
+                    </h3>
+                    <p className="mt-1 text-sm font-medium text-[#6C538D]">
+                      {setLine(card)}
                     </p>
+                    {translatedName && (
+                      <p lang="pt-BR" className="mt-2 text-sm text-[#63576E]">
+                        Nome em português:{' '}
+                        <span className="font-semibold text-[#352545]">
+                          {translatedName}
+                        </span>
+                      </p>
+                    )}
+                  </div>
+                  {highlightChips(card).length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {highlightChips(card).map((chip) => (
+                        <span
+                          key={chip}
+                          className="rounded-full border border-[#E0C8EC] bg-[#F1E7FA] px-3 py-1 text-xs font-semibold text-[#6D2484]"
+                        >
+                          {chip}
+                        </span>
+                      ))}
+                    </div>
                   )}
-                  <p className="mt-1 text-xs text-neutral-600">
-                    {setLine(card)}
-                  </p>
-                  <div className="mt-3 flex flex-wrap gap-1.5">
-                    {highlightChips(card).map((chip) => (
-                      <span
-                        key={chip}
-                        className="rounded-md bg-primary-100 px-2.5 py-1 text-[11px] font-semibold text-primary-900"
-                      >
-                        {chip}
+                  <div className="h-px bg-[#E5DAEF]" />
+                  <div className="grid gap-3 text-sm sm:grid-cols-2">
+                    <div>
+                      <span className="block text-xs text-[#756A83]">
+                        Coleção
                       </span>
-                    ))}
+                      <span className="mt-1 block font-semibold text-[#322240]">
+                        {card.setName || '—'}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="block text-xs text-[#756A83]">
+                        Número
+                      </span>
+                      <span className="mt-1 block font-semibold text-[#322240]">
+                        {card.cardNumber || '—'}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="block text-xs text-[#756A83]">
+                        Raridade
+                      </span>
+                      <span className="mt-1 block font-semibold text-[#322240]">
+                        {card.rarity || '—'}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="block text-xs text-[#756A83]">
+                        Código do set
+                      </span>
+                      <span className="mt-1 block font-semibold text-[#322240]">
+                        {card.setCode || '—'}
+                      </span>
+                    </div>
                   </div>
-
-                  <div className="mt-4 rounded-xl border border-primary-100 bg-[#f5effc] p-3">
-                    <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.12em] text-primary-800">
-                      Identificação da carta
-                    </p>
-                    <dl className="grid grid-cols-2 gap-x-4 gap-y-2.5 text-xs">
-                      <div className="min-w-0">
-                        <dt className="text-neutral-500">Coleção</dt>
-                        <dd className="mt-0.5 break-words font-semibold text-primary-900">
-                          {card.setName || '—'}
-                        </dd>
-                      </div>
-                      <div>
-                        <dt className="text-neutral-500">Número</dt>
-                        <dd className="mt-0.5 font-semibold text-primary-900">
-                          {card.cardNumber || '—'}
-                        </dd>
-                      </div>
-                      <div>
-                        <dt className="text-neutral-500">Código do set</dt>
-                        <dd className="mt-0.5 font-semibold text-primary-900">
-                          {card.setCode || '—'}
-                        </dd>
-                      </div>
-                      <div>
-                        <dt className="text-neutral-500">Raridade</dt>
-                        <dd className="mt-0.5 break-words font-semibold text-primary-900">
-                          {card.rarity || '—'}
-                        </dd>
-                      </div>
-                    </dl>
-                  </div>
-                  <p className="mt-3 flex items-center gap-2 text-xs text-primary-800">
+                  <p className="flex items-start gap-2 text-xs leading-relaxed text-[#756A83]">
                     <Icon name="info" size={16} />
                     Dados oficiais do catálogo, somente leitura.
                   </p>
                 </div>
               </div>
 
-              {/* Abas mantêm o modal compacto e deixam o dashboard preparado. */}
-              <section className="overflow-hidden rounded-2xl border border-[#d8c4df] bg-white/75 shadow-sm">
-                <div className="flex items-center gap-1 border-b border-primary-100 bg-[#efe7f8] px-3 pt-2">
-                  <TabButton
-                    selected={activeTab === 'details'}
-                    onClick={() => setActiveTab('details')}
-                  >
-                    Informações da carta
-                  </TabButton>
-                  <TabButton
-                    selected={activeTab === 'dashboard'}
-                    onClick={() => setActiveTab('dashboard')}
-                  >
-                    Dashboard{' '}
-                    <span className="ml-1 text-[10px] font-normal opacity-70">
-                      · Em breve
-                    </span>
-                  </TabButton>
-                </div>
-
-                {activeTab === 'details' ? (
-                  <div className="space-y-3 p-3.5 sm:p-4">
-                    <dl className="grid gap-x-5 gap-y-2 sm:grid-cols-2">
-                      {detailRows.map((row) => (
-                        <div
-                          key={row.label}
-                          className="flex min-w-0 justify-between gap-3 border-b border-primary-100 pb-1.5 text-xs"
-                        >
-                          <dt className="shrink-0 text-neutral-600">
-                            {row.label}
-                          </dt>
-                          <dd className="min-w-0 break-words text-right font-semibold text-primary-900">
-                            {row.value}
-                          </dd>
-                        </div>
-                      ))}
-                    </dl>
+              {/* O conteúdo específico de cada jogo fica disponível sem poluir o resumo. */}
+              <div className="overflow-hidden rounded-2xl border border-[#DFD0ED] bg-white/75 shadow-[0_3px_12px_rgba(77,31,99,0.05)]">
+                <button
+                  type="button"
+                  aria-expanded={showTechnicalDetails}
+                  onClick={() => setShowTechnicalDetails((value) => !value)}
+                  className="flex min-h-12 w-full items-center justify-between gap-3 px-4 py-3 text-left text-sm font-semibold text-[#641373] transition hover:bg-[#F6EFFB] focus-visible:outline-2 focus-visible:outline-[#1254BD]"
+                >
+                  <span className="flex items-center gap-2">
+                    <Icon name="info" size={16} /> Informações completas da
+                    carta
+                  </span>
+                  <Icon
+                    name="chevron-down"
+                    size={20}
+                    className={cn(
+                      'shrink-0 transition-transform',
+                      showTechnicalDetails && 'rotate-180',
+                    )}
+                  />
+                </button>
+                {showTechnicalDetails && (
+                  <div className="space-y-4 border-t border-[#E6D9EF] p-4">
+                    {detailRows.length > 0 && (
+                      <dl className="grid gap-x-6 gap-y-3 sm:grid-cols-2">
+                        {detailRows.map((row) => (
+                          <div
+                            key={row.label}
+                            className="flex min-w-0 justify-between gap-3 border-b border-[#EEE5F4] pb-2 text-xs"
+                          >
+                            <dt className="text-[#71677F]">{row.label}</dt>
+                            <dd className="min-w-0 break-words text-right font-semibold text-[#332240]">
+                              {row.value}
+                            </dd>
+                          </div>
+                        ))}
+                      </dl>
+                    )}
                     {cardAttacks.length > 0 && (
-                      <div className="rounded-lg bg-[#f5effc] p-3">
-                        <p className="mb-2 text-xs font-bold text-primary-900">
+                      <div className="rounded-xl border border-[#E3D5EF] bg-[#F8F4FD] p-4">
+                        <h4 className="font-display text-base font-bold text-[#681474]">
                           Ataques
-                        </p>
-                        <div className="space-y-2">
+                        </h4>
+                        <div className="mt-3 space-y-3">
                           {cardAttacks.map((attack, index) => (
                             <div
                               key={`${attack.name}-${index}`}
-                              className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-xs"
+                              className="flex flex-wrap justify-between gap-2 text-xs"
                             >
-                              <span className="font-semibold text-primary-900">
+                              <span className="font-semibold text-[#342343]">
                                 {attack.name}
                               </span>
-                              <span className="text-neutral-600">
+                              <span className="text-[#685C76]">
                                 {attackCost(attack) || 'Sem custo'} ·{' '}
                                 {attack.damage || '—'} dano
                               </span>
@@ -385,122 +430,53 @@ export function CardDetailsModal({
                       </div>
                     )}
                     {cardRules && (
-                      <p className="whitespace-pre-line rounded-lg bg-[#f5effc] p-3 text-xs leading-relaxed text-neutral-700">
+                      <p className="whitespace-pre-line rounded-xl border border-[#E3D5EF] bg-[#F8F4FD] p-4 text-xs leading-relaxed text-[#51445F]">
                         {cardRules}
                       </p>
                     )}
                   </div>
-                ) : (
-                  <div className="px-4 py-5 sm:px-6">
-                    <div className="rounded-xl bg-gradient-to-r from-primary-900 via-[#5c2379] to-[#72389c] p-4 text-white sm:p-5">
-                      <div className="flex items-center gap-2">
-                        <Icon name="sparkle" size={20} />
-                        <h4 className="font-display text-base font-bold">
-                          Dashboard da carta
-                        </h4>
-                      </div>
-                      <p className="mt-2 max-w-xl text-xs leading-relaxed text-purple-100 sm:text-sm">
-                        Estamos preparando indicadores de mercado para esta
-                        carta. Preço médio, histórico de valores e atividade de
-                        anúncios estarão disponíveis futuramente.
-                      </p>
-                      <div className="mt-4 flex flex-wrap gap-2">
-                        {['Preço médio', 'Histórico', 'Anúncios'].map(
-                          (metric) => (
-                            <span
-                              key={metric}
-                              className="rounded-full border border-white/25 bg-white/10 px-3 py-1.5 text-[11px] text-white/90"
-                            >
-                              {metric} · Em breve
-                            </span>
-                          ),
-                        )}
-                      </div>
-                    </div>
-                  </div>
                 )}
-              </section>
+              </div>
             </div>
           )}
         </div>
 
-        <footer className={cn('flex shrink-0 flex-wrap items-center justify-between gap-2 px-4 py-3 sm:px-6', modalFooter)}>
-          <p className="hidden text-xs text-primary-800 sm:block">
-            {isCollection
-              ? 'Visualizando sua coleção'
-              : 'Explorando o catálogo'}
-          </p>
-          <div className="flex w-full justify-end gap-2 sm:w-auto">
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded-lg border border-primary-300/80 bg-white/75 px-4 py-2.5 text-xs font-semibold text-primary-900 transition hover:bg-white focus-visible:outline-2 focus-visible:outline-primary-900"
+        <footer
+          className={cn(
+            'flex shrink-0 flex-wrap items-center justify-end gap-3 px-4 py-4 sm:px-7',
+            modalFooter,
+          )}
+        >
+          <button
+            type="button"
+            onClick={onClose}
+            className={cn(detailButton, modalSecondaryButton)}
+          >
+            Fechar
+          </button>
+          {card && imageUrl && !imageFailed && (
+            <a
+              href={imageUrl}
+              target="_blank"
+              rel="noreferrer noopener"
+              className={cn(detailButton, modalSecondaryButton)}
+              aria-label={`Ver imagem completa de ${card.name}`}
             >
-              Fechar
-            </button>
-            <button
-              type="button"
-              onClick={handlePrimaryAction}
-              disabled={!card || !canPerformAction}
-              className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary-900 px-4 py-2.5 text-xs font-bold text-white transition hover:bg-primary-800 focus-visible:outline-2 focus-visible:outline-primary-900 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              <Icon name={isCollection ? 'cart' : 'plus'} size={16} />
-              {isCollection ? 'Criar anúncio' : 'Adicionar à coleção'}
-            </button>
-          </div>
+              <Icon name="search" size={16} /> Ver imagem
+            </a>
+          )}
+          <button
+            type="button"
+            onClick={handlePrimaryAction}
+            disabled={!card || !canPerformAction}
+            className={cn(detailButton, modalPrimaryButton)}
+          >
+            <Icon name={isCollection ? 'cart' : 'plus'} size={16} />
+            {isCollection ? 'Criar anúncio' : 'Adicionar à coleção'}
+          </button>
         </footer>
       </section>
     </div>,
     document.body,
-  )
-}
-
-type TabButtonProps = {
-  selected: boolean
-  onClick: () => void
-  children: React.ReactNode
-}
-
-function TabButton({ selected, onClick, children }: TabButtonProps) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={selected}
-      className={`whitespace-nowrap border-b-2 px-3 py-2 text-xs font-semibold transition focus-visible:outline-2 focus-visible:outline-primary-900 ${
-        selected
-          ? 'border-primary-900 text-primary-900'
-          : 'border-transparent text-primary-700 hover:text-primary-900'
-      }`}
-    >
-      {children}
-    </button>
-  )
-}
-
-function StatusPanel({
-  title,
-  description,
-  onRetry,
-}: {
-  title: string
-  description: string
-  onRetry: () => void
-}) {
-  return (
-    <div className="rounded-xl border border-[#d8c4df] bg-white/80 p-6 text-center">
-      <Icon name="info" size={32} className="mx-auto text-primary-800" />
-      <h3 className="mt-2 font-display text-lg font-bold text-primary-900">
-        {title}
-      </h3>
-      <p className="mt-1 text-sm text-neutral-600">{description}</p>
-      <button
-        type="button"
-        onClick={onRetry}
-        className="mt-4 rounded-lg bg-primary-900 px-4 py-2 text-xs font-bold text-white hover:bg-primary-800"
-      >
-        Tentar novamente
-      </button>
-    </div>
   )
 }

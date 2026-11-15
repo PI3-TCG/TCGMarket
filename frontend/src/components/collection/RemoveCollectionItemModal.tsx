@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import axios from 'axios'
-
-import { CollectionOwnershipModalBase } from '../collection/CollectionOwnershipModalBase'
+import { CollectionOwnershipModalBase } from './CollectionOwnershipModalBase'
 import { Icon } from '@/components/ui/Icon'
 import { removeMyCollectionItem } from '@/services/collection'
 import type {
@@ -15,7 +14,6 @@ type Props = {
   onClose: () => void
   onRemoved: () => void
 }
-
 const conditionLabels: Record<CardCondition, string> = {
   NEAR_MINT: 'Near Mint (NM)',
   LIGHTLY_PLAYED: 'Lightly Played (LP)',
@@ -23,7 +21,6 @@ const conditionLabels: Record<CardCondition, string> = {
   HEAVILY_PLAYED: 'Heavily Played (HP)',
   DAMAGED: 'Damaged (DMG)',
 }
-
 const languageLabels: Record<CardLanguage, string> = {
   PORTUGUESE: 'Português (PT-BR)',
   ENGLISH: 'Inglês (EN)',
@@ -43,10 +40,8 @@ export function RemoveCollectionItemModal({ item, onClose, onRemoved }: Props) {
 
   async function handleRemove() {
     if (isRemoving || removed) return
-
     setIsRemoving(true)
     setError(null)
-
     try {
       await removeMyCollectionItem(item.id)
       setRemoved(true)
@@ -61,13 +56,32 @@ export function RemoveCollectionItemModal({ item, onClose, onRemoved }: Props) {
                 ? 'Esta carta está em um anúncio ativo. Encerre o anúncio antes de removê-la da coleção.'
                 : 'Não foi possível remover o item. Tente novamente.'),
         )
-      } else {
-        setError('Ocorreu um erro inesperado. Tente novamente.')
-      }
+      } else setError('Ocorreu um erro inesperado. Tente novamente.')
     } finally {
       setIsRemoving(false)
     }
   }
+
+  const summary = [
+    {
+      key: 'quantity',
+      icon: 'layers',
+      label: 'Quantidade',
+      value: String(item.quantity),
+    },
+    {
+      key: 'condition',
+      icon: 'shield-check',
+      label: 'Condição',
+      value: conditionLabels[item.condition],
+    },
+    {
+      key: 'language',
+      icon: 'grid',
+      label: 'Idioma',
+      value: languageLabels[item.language],
+    },
+  ] as const
 
   return (
     <CollectionOwnershipModalBase
@@ -80,41 +94,36 @@ export function RemoveCollectionItemModal({ item, onClose, onRemoved }: Props) {
       isSaving={isRemoving}
       isComplete={removed}
       error={error}
-      successMessage={
-        removed ? 'A carta foi removida da sua coleção.' : null
-      }
+      successMessage={removed ? 'A carta foi removida da sua coleção.' : null}
       onClose={handleClose}
       onSubmit={() => void handleRemove()}
     >
-      <dl className="grid gap-3 rounded-lg border border-neutral-200 p-3 text-sm min-[440px]:grid-cols-3">
-        <div className="min-w-0">
-          <dt className="text-xs font-semibold text-primary-900">Quantidade</dt>
-          <dd className="mt-1 text-neutral-700">
-            {item.quantity} {item.quantity === 1 ? 'exemplar' : 'exemplares'}
-          </dd>
-        </div>
-        <div className="min-w-0">
-          <dt className="text-xs font-semibold text-primary-900">Condição</dt>
-          <dd className="mt-1 break-words text-neutral-700">
-            {conditionLabels[item.condition]}
-          </dd>
-        </div>
-        <div className="min-w-0">
-          <dt className="text-xs font-semibold text-primary-900">Idioma</dt>
-          <dd className="mt-1 break-words text-neutral-700">
-            {languageLabels[item.language]}
-          </dd>
-        </div>
+      <dl className="grid gap-2 sm:grid-cols-3">
+        {summary.map((field) => (
+          <div
+            key={field.key}
+            className="flex min-w-0 items-center gap-2 rounded-xl border border-[#D4CFE9] bg-[linear-gradient(160deg,#F9F8FE,#ECEAF8)] px-3 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]"
+          >
+            <Icon name={field.icon} size={24} className="text-[#6512BA]" />
+            <div className="min-w-0">
+              <dt className="text-[11px] font-medium text-[#40365B]">
+                {field.label}
+              </dt>
+              <dd className="break-words text-xs font-bold text-[#1C1436]">
+                {field.value}
+              </dd>
+            </div>
+          </div>
+        ))}
       </dl>
-
       {!removed && (
-        <div className="mt-4 flex items-start gap-2 rounded-lg border border-error-200 bg-error-50 px-3 py-3 text-xs leading-relaxed text-error-700">
-          <Icon name="info" size={16} className="mt-0.5" />
+        <div className="mt-3 flex items-start gap-2 rounded-lg border border-[#F5CFD4] bg-[#FFF3F4] px-3 py-2.5 text-xs leading-relaxed text-[#9D1425]">
+          <Icon name="info" size={20} />
           <span>
             Todos os {item.quantity}{' '}
             {item.quantity === 1 ? 'exemplar' : 'exemplares'} com esta condição
-            e idioma serão removidos da sua coleção. A carta continua disponível
-            no catálogo. Esta ação não pode ser desfeita.
+            e idioma serão removidos. Esta ação não pode ser desfeita. Se houver
+            anúncio ativo vinculado, a remoção será bloqueada.
           </span>
         </div>
       )}

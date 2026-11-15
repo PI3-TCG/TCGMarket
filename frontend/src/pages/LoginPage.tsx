@@ -61,11 +61,13 @@ export function LoginPage() {
   function updateEmail(value: string) {
     setEmail(value)
     setErrors((current) => ({ ...current, email: undefined }))
+    setFeedback(null)
   }
 
   function updatePassword(value: string) {
     setPassword(value)
     setErrors((current) => ({ ...current, password: undefined }))
+    setFeedback(null)
   }
 
   function validate() {
@@ -88,7 +90,11 @@ export function LoginPage() {
 
     const nextErrors = validate()
     setErrors(nextErrors)
+
     if (Object.keys(nextErrors).length > 0) {
+      const firstInvalidField = nextErrors.email ? 'email' : 'password'
+
+      document.getElementById(firstInvalidField)?.focus()
       return
     }
 
@@ -145,7 +151,7 @@ export function LoginPage() {
             <h1 className="mt-6 text-3xl font-bold tracking-tight">
               Bem-vinda de volta!
             </h1>
-            <p className="mt-2 text-sm text-neutral-500">
+            <p className="mt-2 text-sm text-neutral-700">
               Faça login para continuar sua jornada no mundo dos TCGs.
             </p>
           </div>
@@ -176,7 +182,7 @@ export function LoginPage() {
                 </button>
               </div>
               <div className="relative">
-                <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-neutral-500">
+                <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-neutral-700">
                   <LockIcon />
                 </span>
                 <input
@@ -187,20 +193,25 @@ export function LoginPage() {
                   placeholder="Sua senha"
                   autoComplete="current-password"
                   aria-invalid={errors.password ? true : undefined}
+                  aria-describedby={
+                    errors.password ? 'password-error' : undefined
+                  }
                   onChange={(event) => updatePassword(event.target.value)}
-                  className="w-full rounded-xl border border-neutral-300 bg-white py-3 pr-12 pl-11 text-sm outline-none placeholder:text-neutral-500 focus:border-primary-900 focus:ring-2 focus:ring-secondary-500"
+                  className="w-full rounded-xl border border-neutral-300 bg-white py-3 pr-12 pl-11 text-sm outline-none placeholder:text-neutral-700 focus:border-primary-900 focus:ring-2 focus:ring-secondary-500"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword((current) => !current)}
-                  className="absolute top-1/2 right-3 -translate-y-1/2 text-neutral-500 hover:text-primary-900"
+                  className="absolute top-1/2 right-3 -translate-y-1/2 text-neutral-700 hover:text-primary-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500"
                   aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
                 >
                   {showPassword ? <EyeOffIcon /> : <EyeIcon />}
                 </button>
               </div>
               {errors.password ? (
-                <p className="mt-2 text-sm text-error-700">{errors.password}</p>
+                <p id="password-error" className="mt-2 text-sm text-error-700">
+                  {errors.password}
+                </p>
               ) : null}
             </div>
 
@@ -216,7 +227,7 @@ export function LoginPage() {
             </button>
           </form>
 
-          <div className="my-6 flex items-center gap-4 text-sm text-neutral-500">
+          <div className="my-6 flex items-center gap-4 text-sm text-neutral-700">
             <span className="h-px flex-1 bg-neutral-200" />
             ou
             <span className="h-px flex-1 bg-neutral-200" />
@@ -231,7 +242,7 @@ export function LoginPage() {
             Entrar com o Google
           </button>
 
-          <p className="mt-8 text-center text-sm text-neutral-500">
+          <p className="mt-8 text-center text-sm text-neutral-700">
             Ainda não tem uma conta?{' '}
             <button
               type="button"
@@ -274,7 +285,7 @@ function Field({
         {label}
       </label>
       <div className="relative">
-        <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-neutral-500">
+        <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-neutral-700">
           {icon}
         </span>
         <input
@@ -285,11 +296,16 @@ function Field({
           placeholder={placeholder}
           autoComplete={autoComplete}
           aria-invalid={error ? true : undefined}
+          aria-describedby={error ? `${id}-error` : undefined}
           onChange={(event) => onChange(event.target.value)}
-          className="w-full rounded-xl border border-neutral-300 bg-white py-3 pr-4 pl-11 text-sm outline-none placeholder:text-neutral-500 focus:border-primary-900 focus:ring-2 focus:ring-secondary-500"
+          className="w-full rounded-xl border border-neutral-300 bg-white py-3 pr-4 pl-11 text-sm outline-none placeholder:text-neutral-700 focus:border-primary-900 focus:ring-2 focus:ring-secondary-500"
         />
       </div>
-      {error ? <p className="mt-2 text-sm text-error-700">{error}</p> : null}
+      {error ? (
+        <p id={`${id}-error`} className="mt-2 text-sm text-error-700">
+          {error}
+        </p>
+      ) : null}
     </div>
   )
 }
