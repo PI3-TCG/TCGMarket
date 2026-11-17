@@ -150,7 +150,7 @@ function ReviewContent({ cart, userId }: { cart: Cart; userId: string }) {
   }
 
   return (
-    <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)]">
+    <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)]">
       <section aria-labelledby="review-title" className="min-w-0 space-y-4">
         <h2 id="review-title" className="font-display text-3xl font-bold text-primary-900">
           Revisão do pedido
@@ -219,7 +219,7 @@ function ReviewIssues({ lines }: { lines: string[] }) {
 function AddressPanel({ address }: { address: Address | null }) {
   return (
     <div className={panelClass}>
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex flex-wrap items-start justify-between gap-3 wrap-anywhere">
         <div className="flex items-start gap-3">
           <span className="mt-0.5 text-secondary-700">
             <Icon name="map-pin" size={24} />
@@ -255,7 +255,7 @@ function SellerGroup({ items, sellerUsername, index, count }: SellerGroupProps) 
 
   return (
     <div className={panelClass}>
-      <div className="flex items-baseline justify-between gap-3">
+      <div className="flex flex-wrap items-baseline justify-between gap-3 wrap-anywhere">
         <div>
           <h3 className="font-display text-xl font-bold text-primary-900">
             {sellerUsername ? `Vendedor @${sellerUsername}` : 'Vendedor'}
@@ -330,7 +330,7 @@ function ReviewSummary({ items, orderCount, blocked, submit, onConfirm }: Review
         </div>
       </dl>
 
-      <div className="mt-3 flex items-baseline justify-between gap-4 border-t border-neutral-100 pt-3">
+      <div className="mt-3 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 wrap-anywhere border-t border-neutral-100 pt-3">
         <span className="text-neutral-900">Total</span>
         <span className="font-display text-2xl font-bold text-primary-900">{formatCurrency(total)}</span>
       </div>
@@ -396,11 +396,11 @@ function ReviewSkeleton() {
     <div
       aria-busy="true"
       aria-live="polite"
-      className="grid items-start gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)]"
+      className="grid grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)]"
     >
       <span className="sr-only">Carregando revisão...</span>
       <div className="space-y-4">
-        <span className="block h-9 w-72 animate-pulse rounded bg-neutral-200" />
+        <span className="block h-9 w-72 max-w-full animate-pulse rounded bg-neutral-200" />
         <span className={`${panelClass} block h-28 animate-pulse`} />
         <span className={`${panelClass} block h-40 animate-pulse`} />
       </div>

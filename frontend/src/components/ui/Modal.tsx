@@ -202,10 +202,10 @@ export function Modal({
       className={cn(
         isRefined
           ? cn(
-              'flex max-h-[90dvh] w-full flex-col overflow-hidden rounded-[22px] bg-white focus:outline-none',
+              'flex max-h-[calc(100dvh_-_1.5rem)] w-full flex-col overflow-hidden sm:max-h-[calc(100dvh_-_2rem)] [@media(max-height:420px)]:overflow-y-auto rounded-[22px] bg-white focus:outline-none',
               modalFrame,
             )
-          : 'w-full rounded-surface border bg-white p-6 shadow-lg',
+          : 'max-h-[calc(100dvh_-_1.5rem)] w-full overflow-y-auto overscroll-contain rounded-surface border bg-white p-6 shadow-lg sm:max-h-[calc(100dvh_-_2rem)]',
         !isRefined &&
           (preview === 'hover'
             ? 'border-2 border-primary-900'
@@ -291,7 +291,7 @@ export function Modal({
         className={cn(
           isRefined
             ? cn(
-                'min-h-0 flex-1 overflow-y-auto overscroll-contain p-4 text-sm text-neutral-700 sm:p-6',
+                'min-h-0 flex-1 overflow-y-auto overscroll-contain p-4 [@media(max-height:420px)]:flex-none [@media(max-height:420px)]:overflow-visible text-sm text-neutral-700 sm:p-6',
                 modalBody,
               )
             : 'mt-4 space-y-2 text-base text-neutral-700',

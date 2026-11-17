@@ -216,7 +216,7 @@ function TransactionRow({
   const hidden = entry.items.length - preview.length
 
   return (
-    <article className="grid gap-4 rounded-xl border border-neutral-200 p-4 md:grid-cols-[180px_minmax(0,1fr)_auto] md:items-center">
+    <article className="grid grid-cols-1 gap-4 wrap-anywhere rounded-xl border border-neutral-200 p-4 lg:grid-cols-[180px_minmax(0,1fr)_auto] lg:items-center">
       <div className="space-y-1">
         <span
           className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${type.className}`}
@@ -359,7 +359,7 @@ function HistorySkeleton() {
         {Array.from({ length: 4 }, (_, index) => (
           <div
             key={index}
-            className="grid gap-4 rounded-xl border border-neutral-200 p-4 motion-safe:animate-pulse md:grid-cols-[180px_minmax(0,1fr)_auto]"
+            className="grid grid-cols-1 gap-4 wrap-anywhere rounded-xl border border-neutral-200 p-4 motion-safe:animate-pulse lg:grid-cols-[180px_minmax(0,1fr)_auto]"
           >
             <div className="space-y-2">
               <div className="h-6 w-20 rounded-full bg-primary-100" />

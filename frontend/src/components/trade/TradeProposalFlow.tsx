@@ -99,7 +99,7 @@ function ReviewCardItem({
       <div className="flex min-w-0 items-start gap-3">
         <TradeCardArt src={imageUrl} name={name} compact />
         <div className="min-w-0 flex-1">
-          <p className="break-words text-sm font-bold text-[#261638]">{name}</p>
+          <p className="wrap-anywhere text-sm font-bold text-[#261638]">{name}</p>
           <p className="mt-1 text-xs text-[#62586D]">
             {game}
             {edition ? ` · ${edition}` : ''}
@@ -459,10 +459,10 @@ export function TradeProposalFlow({
       closeDisabled={busy}
       footer={footer}
     >
-      <div className="space-y-5">
+      <div className="min-w-0 space-y-5 wrap-anywhere">
         {step === 'compose' ? (
           <>
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <section className={surface} aria-labelledby="trade-offer-title">
                 <div className="mb-3 flex items-center justify-between gap-2">
                   <h3 id="trade-offer-title" className={heading}>
@@ -557,7 +557,7 @@ export function TradeProposalFlow({
                 </h3>
                 <div className="flex gap-3 rounded-[14px] border border-[#CBAFD8] bg-[linear-gradient(135deg,#FCF8FE,#F2EAF8)] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]">
                   <TradeCardArt src={ad.imageUrl} name={ad.cardName} />
-                  <div className="min-w-0">
+                  <div className="min-w-0 wrap-anywhere">
                     <p className="font-semibold text-[#261638]">
                       {ad.cardName}
                     </p>
@@ -673,7 +673,7 @@ export function TradeProposalFlow({
 
         {step === 'review' || step === 'confirm' ? (
           <>
-            <div className="grid items-start gap-4 md:grid-cols-2">
+            <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2">
               <section className={surface}>
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <h3 className={heading}>Você oferece</h3>

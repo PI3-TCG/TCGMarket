@@ -22,7 +22,7 @@ export function DeliverySummary({ items, blocker }: DeliverySummaryProps) {
   return (
     <aside
       aria-labelledby={`${id}-title`}
-      className="rounded-xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-6 lg:sticky lg:top-24"
+      className="min-w-0 rounded-xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-6 lg:sticky lg:top-24"
     >
       <h2 id={`${id}-title`} className="font-display text-2xl font-bold text-primary-900">
         Resumo da compra
@@ -43,7 +43,7 @@ export function DeliverySummary({ items, blocker }: DeliverySummaryProps) {
                   <span className="h-14 w-10 shrink-0 rounded bg-neutral-100" />
                 )}
                 <div className="min-w-0 flex-1">
-                  <p className="truncate font-display font-bold text-secondary-700">
+                  <p className="wrap-anywhere font-display font-bold text-secondary-700">
                     {itemName(item)}
                   </p>
                   <p className="text-xs text-neutral-700">
@@ -61,7 +61,7 @@ export function DeliverySummary({ items, blocker }: DeliverySummaryProps) {
             {adsCount(items.length)} • {copies(totalCopies)}
           </p>
 
-          <div className="mt-3 flex items-baseline justify-between gap-4 border-t border-neutral-100 pt-3">
+          <div className="mt-3 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 wrap-anywhere border-t border-neutral-100 pt-3">
             <span className="text-neutral-900">Subtotal dos itens</span>
             <span className="font-display text-2xl font-bold text-primary-900">
               {formatCurrency(subtotal)}

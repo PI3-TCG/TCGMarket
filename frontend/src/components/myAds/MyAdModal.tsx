@@ -331,7 +331,7 @@ export function MyAdModal({
         aria-labelledby={titleId}
         aria-busy={busy ? true : undefined}
         className={cn(
-          'flex max-h-[90dvh] w-full max-w-[790px] flex-col overflow-hidden rounded-[22px] bg-white sm:rounded-[24px]',
+          'flex max-h-[calc(100dvh_-_2rem)] w-full max-w-[790px] flex-col wrap-anywhere overflow-hidden [@media(max-height:420px)]:overflow-y-auto rounded-[22px] bg-white sm:rounded-[24px]',
           modalFrame,
         )}
       >
@@ -401,7 +401,7 @@ export function MyAdModal({
 
         <div
           className={cn(
-            'min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-5 sm:px-6 sm:py-6',
+            'min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 [@media(max-height:420px)]:flex-none [@media(max-height:420px)]:overflow-visible py-5 sm:px-6 sm:py-6',
             modalBody,
           )}
         >
@@ -423,11 +423,11 @@ export function MyAdModal({
               ) : null}
             </>
           ) : (
-            <div className="grid gap-5 rounded-[18px] border border-[#DBC7E4] bg-[linear-gradient(180deg,#FFFFFF_0%,#FBF7FD_100%)] p-4 shadow-[0_3px_12px_rgba(60,17,87,0.07)] sm:grid-cols-[160px_minmax(0,1fr)] sm:p-5">
+            <div className="grid grid-cols-1 gap-5 rounded-[18px] border border-[#DBC7E4] bg-[linear-gradient(180deg,#FFFFFF_0%,#FBF7FD_100%)] p-4 shadow-[0_3px_12px_rgba(60,17,87,0.07)] sm:grid-cols-[160px_minmax(0,1fr)] sm:p-5">
               <CardImage ad={ad} />
 
               <div className="min-w-0">
-                <h3 className="font-display text-2xl font-bold break-words text-primary-900">
+                <h3 className="font-display text-2xl font-bold wrap-anywhere text-primary-900">
                   {ad.card.name}
                 </h3>
 
@@ -959,7 +959,7 @@ function CancelContent({
 
         <div className="min-w-0 space-y-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="font-display text-xl font-bold break-words text-primary-900">
+            <h3 className="font-display text-xl font-bold wrap-anywhere text-primary-900">
               {ad.card.name}
             </h3>
 

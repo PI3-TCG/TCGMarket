@@ -7,6 +7,7 @@ import {
   MyAdModal,
   type MyAdModalView,
 } from '@/components/myAds/MyAdModal'
+import { ResponsiveFilters } from '@/components/ui/ResponsiveFilters'
 import { MyAdsFilters } from '@/components/myAds/MyAdsFilters'
 import { emptyOwnAdFilters } from '@/components/myAds/ownAdFilters'
 import { Icon } from '@/components/ui/Icon'
@@ -47,14 +48,16 @@ function MyAdsContent() {
 
   return (
     <div className="mt-6 grid items-start gap-6 lg:grid-cols-[240px_minmax(0,1fr)]">
-      <MyAdsFilters
-        key={formVersion}
-        onApply={(next) => {
-          setFilters(next)
-          setPage(0)
-          setAttempt((current) => current + 1)
-        }}
-      />
+      <ResponsiveFilters>
+        <MyAdsFilters
+          key={formVersion}
+          onApply={(next) => {
+            setFilters(next)
+            setPage(0)
+            setAttempt((current) => current + 1)
+          }}
+        />
+      </ResponsiveFilters>
 
       <MyAdsResults
         key={`${page}-${attempt}`}

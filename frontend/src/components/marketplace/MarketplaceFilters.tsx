@@ -208,7 +208,7 @@ export function MarketplaceFilters({ onApply }: Props) {
           <button
             type="button"
             onClick={clearFilters}
-            className="min-h-10 w-full cursor-pointer rounded-lg text-sm font-semibold text-primary-900 underline underline-offset-4 hover:bg-primary-100/50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500"
+            className="min-h-11 w-full cursor-pointer rounded-lg text-sm font-semibold text-primary-900 underline underline-offset-4 hover:bg-primary-100/50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500"
           >
             Limpar filtros
           </button>

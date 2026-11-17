@@ -123,7 +123,7 @@ export function DetailsModal({
         aria-labelledby={titleId}
         tabIndex={-1}
         className={cn(
-          'flex max-h-[90dvh] w-full max-w-[880px] flex-col overflow-hidden rounded-[22px] focus:outline-none',
+          'flex max-h-[calc(100dvh_-_1.5rem)] w-full max-w-[880px] flex-col overflow-hidden rounded-[22px] focus:outline-none sm:max-h-[calc(100dvh_-_2.5rem)] [@media(max-height:420px)]:overflow-y-auto',
           modalFrame,
         )}
       >
@@ -167,7 +167,7 @@ export function DetailsModal({
 
         <div
           className={cn(
-            'min-h-0 flex-1 overflow-y-auto overscroll-contain p-4 text-sm text-[#39324F] sm:p-6',
+            'min-h-0 flex-1 overflow-y-auto overscroll-contain p-4 [@media(max-height:420px)]:flex-none [@media(max-height:420px)]:overflow-visible text-sm text-[#39324F] sm:p-6',
             modalBody,
           )}
         >
