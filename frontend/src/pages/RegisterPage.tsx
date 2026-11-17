@@ -1,3 +1,4 @@
+import { validationFields } from '@/services/feedback'
 import mark from '@/assets/mark-3cartas-roxo.svg'
 import hero from '@/assets/login-hero.webp'
 import { Alert } from '@/components/ui/Alert'
@@ -11,7 +12,7 @@ import {
   utf8ByteLength,
 } from '@/utils/password'
 import axios from 'axios'
-import { type FormEvent, type ReactNode, useEffect, useState } from 'react'
+import { type FormEvent, type ReactNode, useEffect, useRef, useState } from 'react'
 
 const FUTURE_TERMS = 'Os termos de uso serão implementados no futuro.'
 const FUTURE_PRIVACY = 'A política de privacidade será implementada no futuro.'
@@ -62,6 +63,7 @@ export function RegisterPage() {
   const [errors, setErrors] = useState<Partial<Record<FieldName, string>>>({})
   const [feedback, setFeedback] = useState<string | null>(null)
   const [notice, setNotice] = useState<string | null>(null)
+  const sending = useRef(false)
   const [submitting, setSubmitting] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
@@ -140,6 +142,7 @@ export function RegisterPage() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    if (sending.current) return
     setFeedback(null)
 
     const nextErrors = validate()
@@ -148,6 +151,7 @@ export function RegisterPage() {
       return
     }
 
+    sending.current = true
     setSubmitting(true)
     try {
       await registerUser({
@@ -160,6 +164,7 @@ export function RegisterPage() {
     } catch (error) {
       applyApiError(error, setErrors, setFeedback)
     } finally {
+      sending.current = false
       setSubmitting(false)
     }
   }
@@ -552,18 +557,21 @@ function applyApiError(
   setFeedback: (message: string) => void,
 ) {
   if (axios.isAxiosError<ApiErrorResponse>(error)) {
-    const data = error.response?.data
-    if (data?.fields?.length) {
+    const fields = validationFields(error)
+    if (fields.length) {
       const nextErrors: Partial<Record<FieldName, string>> = {}
-      for (const fieldError of data.fields) {
-        if (isPersistedField(fieldError.field)) {
-          nextErrors[fieldError.field] = fieldError.message
+      for (const field of fields) {
+        if (isPersistedField(field)) {
+          nextErrors[field] =
+            field === 'email' && error.response?.status === 409
+              ? 'Já existe uma conta com este e-mail.'
+              : 'Revise o valor deste campo.'
         }
       }
       setErrors(nextErrors)
     }
     setFeedback(
-      data?.message ?? 'Não foi possível concluir o cadastro. Tente novamente.',
+      'Não foi possível concluir o cadastro. Revise os dados e tente novamente.',
     )
     return
   }

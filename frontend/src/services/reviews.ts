@@ -13,11 +13,11 @@ export function reviewFailure(cause: unknown): ReviewFailure {
   if (!axios.isAxiosError<ApiError>(cause) || !cause.response) {
     return { kind: 'unknown' }
   }
-  const { status, data } = cause.response
+  const { status } = cause.response
   if (status === 409) return { kind: 'duplicate' }
   return {
     kind: 'rejected',
-    message: status < 500 ? (data?.message ?? null) : null,
+    message: status === 403 ? 'Você não tem permissão para avaliar esta transação.' : null,
   }
 }
 

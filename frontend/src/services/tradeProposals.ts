@@ -1,3 +1,4 @@
+import { mutationResultUnknown } from '@/services/feedback'
 import axios from 'axios'
 import { api } from '@/services/api'
 import type { CreateTradeProposalRequest, TradeProposalResponse } from '@/types/TradeProposal'
@@ -12,13 +13,15 @@ export type TradeSubmitFailure =
   | { kind: 'unknown' }
 
 export function tradeSubmitFailure(cause: unknown): TradeSubmitFailure {
-  if (axios.isAxiosError<{ message?: string }>(cause) && cause.response) {
+  if (!mutationResultUnknown(cause) && axios.isAxiosError(cause) && cause.response) {
     const status = cause.response.status
     if (status < 500) {
       return {
         kind: 'rejected',
         status,
-        message: cause.response.data?.message ?? 'Não foi possível enviar esta proposta. Revise os dados e tente novamente.',
+        message: status === 409
+          ? 'A disponibilidade das cartas mudou. Revise os itens da proposta.'
+          : 'Não foi possível enviar esta proposta. Revise os dados e tente novamente.',
       }
     }
   }

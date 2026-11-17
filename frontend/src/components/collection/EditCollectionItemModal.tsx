@@ -1,5 +1,5 @@
+import { responseStatus } from '@/services/feedback'
 import { useState } from 'react'
-import axios from 'axios'
 import {
   CollectionOwnershipFields,
   CollectionOwnershipModalBase,
@@ -56,14 +56,14 @@ export function EditCollectionItemModal({ item, onClose, onSaved }: Props) {
       })
       setSaved(true)
     } catch (err: unknown) {
-      if (axios.isAxiosError<{ message?: string }>(err)) {
-        setError(
-          err.response?.data?.message ||
-            (err.response?.status === 409
-              ? 'Já existe esta carta com a condição e o idioma selecionados. Escolha outra combinação.'
-              : 'Não foi possível atualizar o item. Tente novamente.'),
-        )
-      } else setError('Ocorreu um erro inesperado. Tente novamente.')
+      const status = responseStatus(err)
+      setError(
+        status === 404
+          ? 'Este item não está mais na sua coleção. Atualize a página.'
+          : status === 409
+            ? 'Já existe esta carta com a condição e o idioma selecionados. Escolha outra combinação.'
+            : 'Não foi possível atualizar o item. Tente novamente.',
+      )
     } finally {
       setIsSaving(false)
     }

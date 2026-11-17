@@ -1,6 +1,7 @@
+import { FeedbackState } from '@/components/ui/FeedbackState'
 import { TransactionReviewButton } from '@/components/history/TransactionReviewButton'
 import { pageBanners } from '@/config/pageBanners'
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate, useSearch } from '@tanstack/react-router'
 import { PageBanner } from '@/components/layout/PageBanner'
 import {
@@ -127,7 +128,7 @@ function HistoryContent({ search }: { search: TransactionHistorySearch }) {
         {current === null ? (
           <HistorySkeleton />
         ) : current.status === 'error' ? (
-          <EmptyState
+          <FeedbackState
             role="alert"
             icon="alert"
             title="Não foi possível carregar seu histórico."
@@ -140,10 +141,10 @@ function HistoryContent({ search }: { search: TransactionHistorySearch }) {
             >
               Tentar novamente
             </button>
-          </EmptyState>
+          </FeedbackState>
         ) : current.data.totalElements === 0 ? (
           search.type ? (
-            <EmptyState
+            <FeedbackState
               icon="search"
               title={emptyTitles[search.type]}
               description="Veja todas as transações para conferir o restante do histórico."
@@ -155,9 +156,9 @@ function HistoryContent({ search }: { search: TransactionHistorySearch }) {
               >
                 Ver todas
               </button>
-            </EmptyState>
+            </FeedbackState>
           ) : (
-            <EmptyState
+            <FeedbackState
               icon="cart"
               title="Você ainda não tem transações."
               description="Suas compras, vendas e trocas concluídas aparecerão aqui."
@@ -169,7 +170,7 @@ function HistoryContent({ search }: { search: TransactionHistorySearch }) {
               >
                 Explorar anúncios
               </Link>
-            </EmptyState>
+            </FeedbackState>
           )
         ) : (
           <>
@@ -347,36 +348,6 @@ function Pagination({
         </div>
       )}
     </nav>
-  )
-}
-
-function EmptyState({
-  role = 'status',
-  icon,
-  title,
-  description,
-  children,
-}: {
-  role?: 'status' | 'alert'
-  icon: 'alert' | 'search' | 'cart'
-  title: string
-  description: string
-  children: ReactNode
-}) {
-  return (
-    <div
-      role={role}
-      className="flex min-h-80 flex-col items-center justify-center px-4 py-10 text-center"
-    >
-      <span className="mb-5 rounded-full bg-primary-100 p-5 text-primary-900">
-        <Icon name={icon} size={32} />
-      </span>
-      <h2 className="font-display text-xl font-bold text-primary-900">
-        {title}
-      </h2>
-      <p className="mt-2 max-w-sm text-sm text-neutral-700">{description}</p>
-      <div className="mt-5 flex flex-wrap justify-center gap-3">{children}</div>
-    </div>
   )
 }
 

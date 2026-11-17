@@ -31,19 +31,18 @@ export function tradeDecisionFailure(
 ): TradeDecisionFailure {
   if (axios.isAxiosError<{ message?: string }>(error)) {
     const status = error.response?.status
-    const message = error.response?.data?.message
 
     if (status === 409) {
       return {
         kind: 'conflict',
-        message: message ?? 'A proposta mudou ou as cartas não estão mais disponíveis.',
+        message: 'A proposta mudou ou as cartas não estão mais disponíveis.',
       }
     }
 
     if (status === 403) {
       return {
         kind: 'forbidden',
-        message: message ?? 'Você não tem permissão para realizar esta ação.',
+        message: 'Você não tem permissão para realizar esta ação.',
       }
     }
 
