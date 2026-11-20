@@ -1,30 +1,38 @@
-import { TradeReviewNotifications } from './TradeReviewNotifications'
-import mark from '@/assets/mark-3cartas-branco.svg'
+import frame from '@/assets/moldura-superior.webp'
+import logo from '@/assets/marca-referencia.webp'
 import { useCart } from '@/cart'
+import { Icon, type IconName } from '@/components/ui/Icon'
 import { hasRole, useSession } from '@/session'
 import { useNavigate } from '@tanstack/react-router'
 import {
   type FormEvent,
-  type KeyboardEvent,
+  type KeyboardEvent as ReactKeyboardEvent,
   useEffect,
   useRef,
   useState,
 } from 'react'
+import { TradeReviewNotifications } from './TradeReviewNotifications'
 
 type Props = { onSoon: (feature: string) => void }
+type ProfileItem = { label: string; icon: IconName; onClick: () => void }
 
-export function SiteHeader({ onSoon: soon }: Props) {
+const goldFocus =
+  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FFE18D]'
+const profileRow =
+  'group flex min-h-10 w-full items-center gap-3 px-3 py-2 text-left text-sm font-semibold text-[#FBF6FF] transition-colors hover:bg-[#A84AE5]/20 focus-visible:bg-[#A84AE5]/20 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[#FFE18D]'
+
+export function SiteHeader({ onSoon }: Props) {
   const navigate = useNavigate()
   const { user, sessionReady, logout, setLoginNotice } = useSession()
   const { state: cartState } = useCart()
   const [query, setQuery] = useState('')
   const [menuOpen, setMenuOpen] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
   const menuButtonRef = useRef<HTMLButtonElement>(null)
-  const menuRef = useRef<HTMLDivElement>(null)
-  const focusFirstItemRef = useRef(false)
-  const firstName = user?.name.split(' ')[0]
+  const searchRef = useRef<HTMLInputElement>(null)
+  const focusFirstRef = useRef(false)
 
-  // Enquanto o carrinho carrega, o badge fica oculto em vez de mostrar um número inventado.
+  const firstName = user?.name.trim().split(/\s+/)[0] || 'Colecionador'
   const cartCount =
     cartState.status === 'ready' ? cartState.cart.distinctItemCount : 0
   const cartLabel =
@@ -32,319 +40,373 @@ export function SiteHeader({ onSoon: soon }: Props) {
       ? `Carrinho de compras: ${cartCount} ${cartCount === 1 ? 'anúncio' : 'anúncios'}`
       : 'Carrinho de compras'
 
-  function openCart() {
-    if (user) {
-      navigate({ to: '/carrinho' })
-      return
+  useEffect(() => {
+    const handleShortcut = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault()
+        searchRef.current?.focus()
+      }
     }
-    setLoginNotice('Entre na sua conta para ver seu carrinho.')
-    navigate({ to: '/login', search: { redirect: '/carrinho' } })
-  }
+    window.addEventListener('keydown', handleShortcut)
+    return () => window.removeEventListener('keydown', handleShortcut)
+  }, [])
+
+  useEffect(() => {
+    if (!menuOpen) return
+    if (focusFirstRef.current) {
+      focusFirstRef.current = false
+      dropdownRef.current
+        ?.querySelector<HTMLButtonElement>('[data-account-item]')
+        ?.focus()
+    }
+    const closeOnOutsideClick = (event: PointerEvent) => {
+      if (
+        event.target instanceof Node &&
+        !dropdownRef.current?.contains(event.target)
+      ) {
+        setMenuOpen(false)
+      }
+    }
+    document.addEventListener('pointerdown', closeOnOutsideClick)
+    return () =>
+      document.removeEventListener('pointerdown', closeOnOutsideClick)
+  }, [menuOpen])
 
   function search(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    if (query.trim()) soon('A busca')
+    const q = query.trim()
+    if (q) void navigate({ to: '/busca', search: { q } })
   }
-  useEffect(() => {
-    if (!menuOpen || !focusFirstItemRef.current) return
 
-    focusFirstItemRef.current = false
+  function openCart() {
+    if (user) {
+      void navigate({ to: '/carrinho' })
+    } else {
+      setLoginNotice('Entre na sua conta para ver seu carrinho.')
+      void navigate({ to: '/login', search: { redirect: '/carrinho' } })
+    }
+  }
 
-    menuRef.current
-      ?.querySelector<HTMLButtonElement>('button:not(:disabled)')
-      ?.focus()
-  }, [menuOpen])
+  function selectItem(action: () => void) {
+    setMenuOpen(false)
+    action()
+  }
 
-  function handleMenuKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+  function handleMenuKeyboard(event: ReactKeyboardEvent<HTMLDivElement>) {
     if (!menuOpen) return
-
     if (event.key === 'Escape') {
       event.preventDefault()
       setMenuOpen(false)
       menuButtonRef.current?.focus()
       return
     }
-
-    if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) {
-      return
-    }
-
+    if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return
     const items = Array.from(
-      menuRef.current?.querySelectorAll<HTMLButtonElement>(
-        'button:not(:disabled)',
+      dropdownRef.current?.querySelectorAll<HTMLButtonElement>(
+        '[data-account-item]:not(:disabled)',
       ) ?? [],
     )
-
     if (items.length === 0) return
-
     event.preventDefault()
-
-    const currentIndex = items.indexOf(
-      document.activeElement as HTMLButtonElement,
-    )
-
-    let nextIndex: number
-
-    if (event.key === 'Home') {
-      nextIndex = 0
-    } else if (event.key === 'End') {
-      nextIndex = items.length - 1
-    } else if (event.key === 'ArrowDown') {
-      nextIndex = (currentIndex + 1) % items.length
-    } else {
-      nextIndex = currentIndex <= 0 ? items.length - 1 : currentIndex - 1
-    }
-
-    items[nextIndex]?.focus()
+    const index = items.indexOf(document.activeElement as HTMLButtonElement)
+    const next =
+      event.key === 'Home'
+        ? 0
+        : event.key === 'End'
+          ? items.length - 1
+          : event.key === 'ArrowDown'
+            ? (index + 1) % items.length
+            : index <= 0
+              ? items.length - 1
+              : index - 1
+    items[next]?.focus()
   }
+
+  const profileItems: ProfileItem[] = [
+    {
+      label: 'Meu perfil',
+      icon: 'user',
+      onClick: () => void navigate({ to: '/perfil' }),
+    },
+    {
+      label: 'Catálogo',
+      icon: 'cards',
+      onClick: () =>
+        void navigate({ to: '/catalogo/$game', params: { game: 'pokemon' } }),
+    },
+    {
+      label: 'Minha coleção',
+      icon: 'layers',
+      onClick: () => void navigate({ to: '/minha-colecao' }),
+    },
+    {
+      label: 'Marketplace',
+      icon: 'storefront',
+      onClick: () =>
+        void navigate({ to: '/marketplace', search: { sort: 'recent' } }),
+    },
+    {
+      label: 'Propostas',
+      icon: 'handshake',
+      onClick: () =>
+        void navigate({
+          to: '/perfil/propostas',
+          search: { direction: 'RECEIVED' },
+        }),
+    },
+    {
+      label: 'Meus anúncios',
+      icon: 'tag',
+      onClick: () => void navigate({ to: '/meus-anuncios' }),
+    },
+    {
+      label: 'Histórico de transações',
+      icon: 'receipt',
+      onClick: () => void navigate({ to: '/perfil/historico' }),
+    },
+  ]
+
   return (
-    <header className="sticky top-0 z-20 bg-gradient-to-r from-[#47104f] via-primary-900 to-[#310b43] text-white shadow-md">
-      <div className="relative mx-auto flex min-h-16 w-full max-w-[1600px] items-center gap-3 px-4 py-2 sm:gap-5 sm:px-6 lg:px-8">
-        <button
-          type="button"
-          onClick={() => navigate({ to: '/' })}
-          className="flex shrink-0 items-center gap-2 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500"
-          aria-label="Ir para a página inicial do TCG Market"
-        >
-          <img src={mark} alt="" className="h-9 w-auto sm:h-10" />
-          <span className="font-display hidden whitespace-nowrap text-base tracking-wide sm:inline lg:text-xl">
-            TCG MARKET
-          </span>
-        </button>
-
-        {/* Em telas grandes, centraliza em relação ao header inteiro,
-            sem depender da largura do logo ou dos botões do perfil. */}
-        <form
-          onSubmit={search}
-          role="search"
-          className="mx-auto min-w-0 max-w-[540px] flex-1 lg:absolute lg:left-1/2 lg:w-[38%] lg:-translate-x-1/2"
-        >
-          <label className="relative block">
-            <span className="sr-only">Buscar carta, anúncio ou usuário</span>
-            <SearchIcon />
-            <input
-              type="search"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Buscar carta, anúncio ou usuário..."
-              className="h-10 w-full rounded-xl border border-white/80 bg-white py-2 pr-3 pl-10 text-sm text-neutral-900 shadow-sm outline-none placeholder:text-neutral-500 focus-visible:ring-2 focus-visible:ring-secondary-500 sm:h-11"
-            />
-          </label>
-        </form>
-
-        <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-2">
+    <header
+      className="tcg-header"
+      aria-label="Cabeçalho principal do TCG Market"
+    >
+      <img
+        src={frame}
+        alt=""
+        aria-hidden="true"
+        draggable={false}
+        className="tcg-frame-art"
+      />
+      <div className="tcg-header-inner">
+        <div className="tcg-header-row">
           <button
             type="button"
-            onClick={openCart}
-            className="relative rounded-full p-2 transition hover:bg-white/15 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500"
-            aria-label={cartLabel}
-            title="Carrinho de compras"
+            onClick={() => void navigate({ to: '/' })}
+            aria-label="TCG Market — voltar ao início"
+            className={`relative z-10 min-w-0 justify-self-start rounded-sm transition hover:drop-shadow-[0_0_7px_rgba(255,206,100,0.5)] ${goldFocus}`}
           >
-            <CartIcon />
-            {cartCount > 0 ? (
-              <span
-                aria-hidden="true"
-                className="absolute top-0.5 right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-error-600 px-1 text-[10px] leading-none font-bold text-white"
-              >
-                {cartCount > 99 ? '99+' : cartCount}
-              </span>
-            ) : null}
+            <img src={logo} alt="" decoding="async" className="tcg-brand" />
           </button>
 
-          {sessionReady && user ? (
-            <TradeReviewNotifications key={user.id} />
-          ) : null}
+          <form onSubmit={search} role="search" className="tcg-search">
+            <div className="tcg-search-field flex h-10 items-center gap-2 rounded-full border border-[#FAE6FF]/90 bg-[linear-gradient(180deg,#FAF2FF_0%,#DCC4F0_75%,#CBA8E5_100%)] px-3 text-[#4B176F] shadow-[0_4px_16px_rgba(21,4,39,0.43),inset_0_2px_0_rgba(255,255,255,0.85),inset_0_-2px_7px_rgba(89,24,117,0.2)] transition focus-within:border-[#FFE29D] focus-within:ring-2 focus-within:ring-[#FBAEF6] sm:h-11">
+              <label htmlFor="navbar-search" className="sr-only">
+                Buscar cartas anunciadas e usuários
+              </label>
+              <button
+                type="submit"
+                aria-label="Buscar"
+                className="grid min-h-8 min-w-8 shrink-0 place-items-center rounded-full focus-visible:outline-2"
+              >
+                <Icon name="search" size={20} />
+              </button>
+              <input
+                id="navbar-search"
+                ref={searchRef}
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                maxLength={100}
+                type="search"
+                autoComplete="off"
+                placeholder="Buscar cartas anunciadas e usuários…"
+                className="min-w-0 flex-1 bg-transparent text-xs font-medium text-[#321343] outline-none placeholder:text-[#725B84] sm:text-sm"
+              />
+              <kbd
+                aria-hidden="true"
+                className="hidden shrink-0 rounded-md border border-[#C8A3DF] bg-[#EDDEF8] px-1.5 py-0.5 text-[10px] font-semibold text-[#5B3370] sm:block"
+              >
+                Ctrl K
+              </kbd>
+            </div>
+          </form>
 
-          {sessionReady && user ? (
-            <div className="relative border-l border-white/25 pl-2 sm:pl-3">
-              <button
-                type="button"
-                onClick={() => setMenuOpen((open) => !open)}
-                ref={menuButtonRef}
-                onKeyDown={(event) => {
-                  if (event.key === 'ArrowDown') {
-                    event.preventDefault()
-                    focusFirstItemRef.current = true
-                    setMenuOpen(true)
-                  }
-                }}
-                className="flex items-center gap-2 rounded-full py-1 pr-1 pl-1 transition hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500"
-                aria-expanded={menuOpen}
-                aria-label={
-                  menuOpen ? 'Fechar menu do perfil' : 'Abrir menu do perfil'
-                }
-              >
-                <span className="flex size-9 items-center justify-center rounded-full bg-white text-sm font-bold text-primary-900">
-                  {firstName?.[0] ?? 'U'}
-                </span>
-                <span className="hidden max-w-28 truncate text-sm font-medium lg:inline">
-                  {firstName}
-                </span>
-                <ChevronDownIcon />
-              </button>
-              {menuOpen && (
-                <div
-                  ref={menuRef}
-                  onKeyDown={handleMenuKeyDown}
-                  className="absolute right-0 mt-2 w-56 rounded-xl border border-neutral-200 bg-white p-3 text-neutral-900 shadow-xl"
+          <div className="tcg-actions">
+            <button
+              type="button"
+              onClick={openCart}
+              title="Carrinho de compras"
+              aria-label={cartLabel}
+              className={`relative grid size-9 place-items-center rounded-lg text-white transition hover:bg-[#CB61E4]/20 hover:text-[#FFE396] sm:size-10 ${goldFocus}`}
+            >
+              <Icon name="cart" size={24} />
+              {cartCount > 0 && (
+                <span
+                  aria-hidden="true"
+                  className="absolute -right-0.5 -top-0.5 grid min-h-5 min-w-5 place-items-center rounded-full border border-[#5A266D] bg-[#F6C640] px-1 text-[10px] font-extrabold text-[#2B093F] shadow-[0_2px_7px_rgba(0,0,0,0.3)]"
                 >
-                  <p className="px-2 text-sm font-semibold">{user.name}</p>
-                  <p className="truncate px-2 pb-2 text-xs text-neutral-500">
-                    {user.email}
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMenuOpen(false)
-                      navigate({ to: '/perfil' })
-                    }}
-                    className="w-full rounded-lg px-2 py-2 text-left text-sm font-medium hover:bg-primary-100"
-                  >
-                    Meu perfil
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMenuOpen(false)
-                      navigate({ to: '/minha-colecao' })
-                    }}
-                    className="w-full rounded-lg px-2 py-2 text-left text-sm font-medium hover:bg-primary-100"
-                  >
-                    Minha coleção
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMenuOpen(false)
-                      navigate({ to: '/meus-anuncios' })
-                    }}
-                    className="w-full rounded-lg px-2 py-2 text-left text-sm font-medium hover:bg-primary-100"
-                  >
-                    Meus anúncios
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMenuOpen(false)
-                      navigate({
-                        to: '/perfil/propostas',
-                        search: { direction: 'RECEIVED' },
-                      })
-                    }}
-                    className="w-full rounded-lg px-2 py-2 text-left text-sm font-medium hover:bg-primary-100"
-                  >
-                    Minhas propostas
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMenuOpen(false)
-                      navigate({ to: '/perfil/historico' })
-                    }}
-                    className="w-full rounded-lg px-2 py-2 text-left text-sm font-medium hover:bg-primary-100"
-                  >
-                    Histórico de transações
-                  </button>
-                  {hasRole(user, 'ADMIN') && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setMenuOpen(false)
-                        navigate({ to: '/admin' })
-                      }}
-                      className="w-full rounded-lg px-2 py-2 text-left text-sm font-medium hover:bg-primary-100"
-                    >
-                      Área Administrativa
-                    </button>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMenuOpen(false)
-                      logout()
-                    }}
-                    className="w-full rounded-lg px-2 py-2 text-left text-sm font-medium text-primary-900 hover:bg-primary-100"
-                  >
-                    Sair
-                  </button>
-                </div>
+                  {cartCount > 99 ? '99+' : cartCount}
+                </span>
               )}
-            </div>
-          ) : (
-            <div className="flex items-center gap-2 border-l border-white/25 pl-2 sm:pl-3">
-              <button
-                type="button"
-                onClick={() => navigate({ to: '/cadastro' })}
-                disabled={!sessionReady}
-                className="hidden text-sm font-semibold hover:text-white/80 disabled:opacity-60 lg:inline"
+            </button>
+
+            {sessionReady && user ? (
+              <span className="[&>button]:!grid [&>button]:!size-10 [&>button]:place-items-center [&>button]:text-white [&>button:hover]:!bg-[#CB61E4]/20 [&>button:focus-visible]:!outline-[#FFE18D]">
+                <TradeReviewNotifications key={user.id} />
+              </span>
+            ) : null}
+
+            {sessionReady && user ? (
+              <div
+                ref={dropdownRef}
+                onKeyDown={handleMenuKeyboard}
+                onBlur={(event) => {
+                  if (!event.currentTarget.contains(event.relatedTarget))
+                    setMenuOpen(false)
+                }}
+                className="relative"
               >
-                Criar conta
-              </button>
-              <button
-                type="button"
-                onClick={() => navigate({ to: '/login' })}
-                disabled={!sessionReady}
-                className="rounded-full bg-white px-3 py-2 text-xs font-semibold text-primary-900 transition hover:bg-primary-100 disabled:opacity-60 sm:px-4 sm:text-sm"
-              >
-                {sessionReady ? 'Entrar' : '...'}
-              </button>
-            </div>
-          )}
+                <button
+                  ref={menuButtonRef}
+                  type="button"
+                  aria-haspopup="true"
+                  aria-expanded={menuOpen}
+                  aria-controls="tcg-account-dropdown"
+                  aria-label={
+                    menuOpen ? 'Fechar menu da conta' : 'Abrir menu da conta'
+                  }
+                  onClick={() => {
+                    focusFirstRef.current = false
+                    setMenuOpen((value) => !value)
+                  }}
+                  onKeyDown={(event) => {
+                    if (event.key === 'ArrowDown') {
+                      event.preventDefault()
+                      focusFirstRef.current = true
+                      setMenuOpen(true)
+                    }
+                  }}
+                  className={`grid size-10 place-items-center rounded-full border-[2px] border-[#FFDB72] bg-[radial-gradient(circle_at_35%_25%,#6A2690,#320B4B_80%)] text-white shadow-[inset_0_1px_0_rgba(255,245,207,0.35),0_0_0_1px_rgba(252,160,244,0.4),0_0_12px_rgba(234,83,229,0.22)] transition hover:border-[#FFF1AE] hover:shadow-[0_0_14px_rgba(241,163,73,0.35)] ${goldFocus}`}
+                >
+                  <Icon name="user" size={24} />
+                </button>
+
+                {menuOpen && (
+                  <div
+                    id="tcg-account-dropdown"
+                    style={{
+                      clipPath:
+                        'polygon(13px 0, calc(100% - 13px) 0, 100% 13px, 100% calc(100% - 13px), calc(100% - 13px) 100%, 13px 100%, 0 calc(100% - 13px), 0 13px)',
+                    }}
+                    aria-label="Opções da conta"
+                    className="absolute right-0 top-[calc(100%+14px)] z-[100] w-[min(305px,calc(100vw-20px))] p-[2px] shadow-[0_22px_50px_rgba(25,5,41,0.54),0_0_18px_rgba(199,45,223,0.2)] bg-[linear-gradient(135deg,#FFE79C_0%,#C97C1E_18%,#FFE39A_48%,#EC4DF2_72%,#FFE69C_100%)]"
+                  >
+                    <div
+                      className="overflow-hidden bg-[radial-gradient(ellipse_at_25%_0%,rgba(159,52,201,0.5)_0%,transparent_62%),linear-gradient(145deg,#551271_0%,#340A50_68%,#240633_100%)]"
+                      style={{
+                        clipPath:
+                          'polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px), 0 12px)',
+                      }}
+                    >
+                      <div className="flex items-center gap-3 border-b border-[#EAC375]/30 bg-[linear-gradient(110deg,rgba(255,255,255,0.12),rgba(255,255,255,0))] px-4 py-4">
+                        <span className="grid size-11 shrink-0 place-items-center rounded-full border border-[#F3C958] bg-[#2A093D] text-[#FFE49A]">
+                          <Icon name="user" size={24} />
+                        </span>
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-bold">
+                            Olá, {firstName}
+                          </p>
+                          <p className="truncate text-xs text-[#DFBCEB]">
+                            {user.email}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="py-1.5">
+                        {profileItems.map((item) => (
+                          <button
+                            type="button"
+                            key={item.label}
+                            data-account-item
+                            className={profileRow}
+                            onClick={() => selectItem(item.onClick)}
+                          >
+                            <Icon
+                              name={item.icon}
+                              size={20}
+                              className="text-[#F4C958] transition group-hover:text-[#FFE9AD]"
+                            />
+                            {item.label}
+                          </button>
+                        ))}
+                        {hasRole(user, 'ADMIN') && (
+                          <button
+                            type="button"
+                            data-account-item
+                            className={profileRow}
+                            onClick={() =>
+                              selectItem(() => void navigate({ to: '/admin' }))
+                            }
+                          >
+                            <Icon
+                              name="shield-check"
+                              size={20}
+                              className="text-[#F4C958]"
+                            />{' '}
+                            Área administrativa
+                          </button>
+                        )}
+                      </div>
+                      <div className="border-t border-[#EAC375]/30 py-1.5">
+                        <button
+                          type="button"
+                          data-account-item
+                          className={profileRow}
+                          onClick={() =>
+                            selectItem(() => onSoon('As configurações'))
+                          }
+                        >
+                          <Icon
+                            name="settings"
+                            size={20}
+                            className="text-[#F4C958]"
+                          />{' '}
+                          Configurações
+                        </button>
+                        <button
+                          type="button"
+                          data-account-item
+                          className={`${profileRow} text-[#FFAECA] hover:bg-[#EC4C88]/15`}
+                          onClick={() => selectItem(logout)}
+                        >
+                          <Icon
+                            name="close-circle"
+                            size={20}
+                            className="text-[#FF93B5]"
+                          />{' '}
+                          Sair
+                        </button>
+                      </div>
+                      <div
+                        aria-hidden="true"
+                        className="h-0.5 bg-[linear-gradient(90deg,transparent,#FF5EF6_22%,#FFE397_50%,#FF5EF6_78%,transparent)] shadow-[0_0_9px_#F04DF2]"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => void navigate({ to: '/cadastro' })}
+                  disabled={!sessionReady}
+                  className={`hidden text-xs font-bold text-white hover:text-[#FFE396] disabled:opacity-50 lg:inline ${goldFocus}`}
+                >
+                  Criar conta
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void navigate({ to: '/login' })}
+                  disabled={!sessionReady}
+                  className={`min-h-9 rounded-full border border-[#F4C958] px-3 text-xs font-bold text-[#FFE8AC] transition hover:bg-[#FFDB86]/10 disabled:opacity-50 ${goldFocus}`}
+                >
+                  {sessionReady ? 'Entrar' : '...'}
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </header>
-  )
-}
-
-function SearchIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      className="pointer-events-none absolute top-1/2 left-3 size-5 -translate-y-1/2 text-primary-500"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      aria-hidden="true"
-    >
-      <circle cx="10.8" cy="10.8" r="6.5" />
-      <path d="m16 16 4.5 4.5" />
-    </svg>
-  )
-}
-
-function CartIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      className="size-5 sm:size-6"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <circle cx="9" cy="21" r="1" />
-      <circle cx="20" cy="21" r="1" />
-      <path d="M1 2h3l2.4 12.1a2 2 0 0 0 2 1.6h10a2 2 0 0 0 2-1.6L22 6H5" />
-    </svg>
-  )
-}
-
-function ChevronDownIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      className="hidden size-4 text-white/80 sm:block"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="m6 9 6 6 6-6" />
-    </svg>
   )
 }
