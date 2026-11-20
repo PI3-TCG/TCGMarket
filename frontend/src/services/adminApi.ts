@@ -14,6 +14,12 @@ import type {
   ModeratedProfileField,
   UserStatus,
 } from '@/types/AdminUser'
+import type {
+  AdminDashboardActivity,
+  AdminDashboardOverview,
+  AdminDashboardRecentAd,
+  AdminDashboardRecentUser,
+} from '@/types/AdminDashboard'
 import type { UpdateUserRoleRequest, UserRole } from '@/types/User'
 
 export const ADMIN_CATALOG_PAGE_SIZE = 20
@@ -42,27 +48,13 @@ export async function changeUserRole(id: string, role: UserRole) {
   return response.data
 }
 
-export async function changeUserStatus(
-  id: string,
-  status: UserStatus,
-  reason: string,
-) {
-  const response = await api.patch<AdminUser>(`${userPath(id)}/status`, {
-    status,
-    reason,
-  })
+export async function changeUserStatus(id: string, status: UserStatus, reason: string) {
+  const response = await api.patch<AdminUser>(`${userPath(id)}/status`, { status, reason })
   return response.data
 }
 
-export async function moderateUserProfile(
-  id: string,
-  fields: ModeratedProfileField[],
-  reason: string,
-) {
-  const response = await api.post<AdminUser>(
-    `${userPath(id)}/profile/moderation`,
-    { fields, reason },
-  )
+export async function moderateUserProfile(id: string, fields: ModeratedProfileField[], reason: string) {
+  const response = await api.post<AdminUser>(`${userPath(id)}/profile/moderation`, { fields, reason })
   return response.data
 }
 
@@ -72,9 +64,7 @@ export async function fetchUserActions(id: string) {
 }
 
 export async function fetchRecentAdminActions(limit = 6) {
-  const response = await api.get<AdminAction[]>('/api/admin/events', {
-    params: { limit },
-  })
+  const response = await api.get<AdminAction[]>('/api/admin/events', { params: { limit } })
   return response.data
 }
 
@@ -95,17 +85,14 @@ export async function searchAdminCatalog(search: AdminCatalogSearch) {
 }
 
 export async function fetchAdminCatalogSummary() {
-  const response = await api.get<AdminCatalogSummary>(
-    '/api/admin/catalog/summary',
-  )
+  const response = await api.get<AdminCatalogSummary>('/api/admin/catalog/summary')
   return response.data
 }
 
 export async function hideCatalogCard(id: string, reason: string) {
   const request: HideCardRequest = { reason }
   const response = await api.put<AdminCatalogCard>(
-    `/api/admin/catalog/cards/${encodeURIComponent(id)}/hidden`,
-    request,
+    `/api/admin/catalog/cards/${encodeURIComponent(id)}/hidden`, request,
   )
   return response.data
 }
@@ -114,5 +101,28 @@ export async function unhideCatalogCard(id: string) {
   const response = await api.delete<AdminCatalogCard>(
     `/api/admin/catalog/cards/${encodeURIComponent(id)}/hidden`,
   )
+  return response.data
+}
+
+// Dashboard: cada endpoint é buscado separadamente para não acoplar os estados dos blocos.
+export async function fetchAdminOverview() {
+  const response = await api.get<AdminDashboardOverview>('/api/admin/overview')
+  return response.data
+}
+
+export async function fetchAdminActivity(days: 7 | 30 | 90) {
+  const response = await api.get<AdminDashboardActivity>('/api/admin/activity', {
+    params: { days },
+  })
+  return response.data
+}
+
+export async function fetchAdminRecentUsers() {
+  const response = await api.get<AdminDashboardRecentUser[]>('/api/admin/recent/users')
+  return response.data
+}
+
+export async function fetchAdminRecentAds() {
+  const response = await api.get<AdminDashboardRecentAd[]>('/api/admin/recent/ads')
   return response.data
 }

@@ -25,7 +25,7 @@ const UPCOMING = [
 
 export function AdminLayout() {
   return (
-    <main className="mx-auto w-full max-w-6xl space-y-5 px-4 py-6 sm:px-6">
+    <main className="mx-auto w-full max-w-[1600px] space-y-5 px-4 py-6 sm:px-6 lg:px-7 xl:px-8">
       <ProfileBreadcrumb items={[{ label: 'Área administrativa' }]} />
 
       <PageBanner
@@ -35,10 +35,10 @@ export function AdminLayout() {
         symbol="✦"
       />
 
-      <div className="grid items-start gap-5 lg:grid-cols-[220px_minmax(0,1fr)]">
+      <div className="grid min-w-0 items-start gap-5 lg:grid-cols-[210px_minmax(0,1fr)]">
         <nav
           aria-label="Seções da área administrativa"
-          className="rounded-surface border border-neutral-200 bg-white p-2"
+          className="min-w-0 rounded-surface border border-neutral-200 bg-white p-2"
         >
           <ul className="flex gap-1 overflow-x-auto lg:flex-col">
             {SECTIONS.map((section) => (
