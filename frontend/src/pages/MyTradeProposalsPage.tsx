@@ -118,7 +118,7 @@ function ProposalsContent({ search }: { search: TradeProposalsSearch }) {
             )
           })}
         </div>
-        <label className="flex min-w-56 items-center gap-3 text-sm font-semibold text-neutral-700">
+        <label className="flex w-full min-w-0 items-center gap-3 sm:w-auto sm:min-w-56 text-sm font-semibold text-neutral-700">
           Status
           <select
             value={search.status ?? ''}
@@ -131,7 +131,7 @@ function ProposalsContent({ search }: { search: TradeProposalsSearch }) {
                 status: selected?.value,
               })
             }}
-            className="min-h-10 flex-1 rounded-control border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 focus-visible:outline-2 focus-visible:outline-secondary-500"
+            className="min-h-11 min-w-0 flex-1 rounded-control border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 focus-visible:outline-2 focus-visible:outline-secondary-500"
           >
             <option value="">Todos</option>
             {TRADE_STATUSES.map((status) => (
@@ -252,7 +252,7 @@ function ProposalRow({
           </p>
           <p className="text-sm text-neutral-700">
             {counterpartyRole}:{' '}
-            <span className="font-semibold text-neutral-900">
+            <span className="wrap-anywhere font-semibold text-neutral-900">
               {participantName(counterparty)}
             </span>
           </p>

@@ -1,3 +1,4 @@
+import { mutationResultUnknown, validationFields } from '@/services/feedback'
 import axios from 'axios'
 import {
   useEffect,
@@ -110,6 +111,8 @@ export function MyAdModal({
     modality?: string
     unitPrice?: string
   }>({})
+  const cancellationPending = useRef(false)
+  const [verificationFailed, setVerificationFailed] = useState(false)
   const [busy, setBusy] = useState<Busy>(null)
   const [notice, setNotice] = useState<Notice>(null)
   const titleId = useId()
@@ -227,22 +230,12 @@ export function MyAdModal({
         await syncAfterConflict('edit', conflictStatus(error) ?? ad.status)
       } else if (status === 404) {
         markNotFound()
-      } else if (
-        status === 400 &&
-        axios.isAxiosError<{
-          fields?: {
-            field: string
-            message: string
-          }[]
-        }>(error)
-      ) {
-        const fields = error.response?.data?.fields ?? []
-        setServerErrors({
-          modality: fields.find((field) => field.field === 'modality')?.message,
-          unitPrice: fields.find((field) => field.field === 'unitPrice')
-            ?.message,
-        })
-        setView({ kind: 'edit', saveFailed: fields.length === 0 })
+      } else if (status === 400) {
+        const fields = validationFields(error)
+        const modality = fields.includes('modality') ? 'Revise as modalidades selecionadas.' : undefined
+        const unitPrice = fields.includes('unitPrice') ? 'Revise o preço por unidade.' : undefined
+        setServerErrors({ modality, unitPrice })
+        setView({ kind: 'edit', saveFailed: !modality && !unitPrice })
       } else {
         setView({ kind: 'edit', saveFailed: true })
       }
@@ -251,6 +244,9 @@ export function MyAdModal({
     }
   }
   async function confirmCancel() {
+    if (cancellationPending.current) return
+    cancellationPending.current = true
+    setVerificationFailed(false)
     setBusy('cancelling')
     try {
       const cancelled = await cancelMyAd(ad.id)
@@ -263,7 +259,7 @@ export function MyAdModal({
       onChanged(cancelled)
     } catch (error) {
       const response = axios.isAxiosError(error) ? error.response : undefined
-      if (!response) {
+      if (!response || mutationResultUnknown(error)) {
         setView({ kind: 'cancel', failure: 'uncertain' })
       } else if (response.status === 409) {
         await syncAfterConflict('cancel', conflictStatus(error) ?? ad.status)
@@ -273,10 +269,14 @@ export function MyAdModal({
         setView({ kind: 'cancel', failure: 'failed' })
       }
     } finally {
+      cancellationPending.current = false
       setBusy(null)
     }
   }
   async function refreshAfterUncertainCancel() {
+    if (cancellationPending.current) return
+    cancellationPending.current = true
+    setVerificationFailed(false)
     setBusy('refreshing')
     try {
       const current = await getMyAd(ad.id)
@@ -301,8 +301,11 @@ export function MyAdModal({
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 404) {
         markNotFound()
+      } else {
+        setVerificationFailed(true)
       }
     } finally {
+      cancellationPending.current = false
       setBusy(null)
     }
   }
@@ -328,7 +331,7 @@ export function MyAdModal({
         aria-labelledby={titleId}
         aria-busy={busy ? true : undefined}
         className={cn(
-          'flex max-h-[90dvh] w-full max-w-[790px] flex-col overflow-hidden rounded-[22px] bg-white sm:rounded-[24px]',
+          'flex max-h-[calc(100dvh_-_2rem)] w-full max-w-[790px] flex-col wrap-anywhere overflow-hidden [@media(max-height:420px)]:overflow-y-auto rounded-[22px] bg-white sm:rounded-[24px]',
           modalFrame,
         )}
       >
@@ -398,7 +401,7 @@ export function MyAdModal({
 
         <div
           className={cn(
-            'min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-5 sm:px-6 sm:py-6',
+            'min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 [@media(max-height:420px)]:flex-none [@media(max-height:420px)]:overflow-visible py-5 sm:px-6 sm:py-6',
             modalBody,
           )}
         >
@@ -411,13 +414,20 @@ export function MyAdModal({
               <p className="text-sm">O anúncio continuará como está.</p>
             </div>
           ) : view.kind === 'cancel' ? (
-            <CancelContent ad={ad} failure={view.failure} />
+            <>
+              <CancelContent ad={ad} failure={view.failure} />
+              {view.failure === 'uncertain' && verificationFailed ? (
+                <Feedback tone="error" icon="close-circle" role="alert">
+                  Não foi possível consultar o anúncio. Verifique sua conexão e atualize o status novamente.
+                </Feedback>
+              ) : null}
+            </>
           ) : (
-            <div className="grid gap-5 rounded-[18px] border border-[#DBC7E4] bg-[linear-gradient(180deg,#FFFFFF_0%,#FBF7FD_100%)] p-4 shadow-[0_3px_12px_rgba(60,17,87,0.07)] sm:grid-cols-[160px_minmax(0,1fr)] sm:p-5">
+            <div className="grid grid-cols-1 gap-5 rounded-[18px] border border-[#DBC7E4] bg-[linear-gradient(180deg,#FFFFFF_0%,#FBF7FD_100%)] p-4 shadow-[0_3px_12px_rgba(60,17,87,0.07)] sm:grid-cols-[160px_minmax(0,1fr)] sm:p-5">
               <CardImage ad={ad} />
 
               <div className="min-w-0">
-                <h3 className="font-display text-2xl font-bold break-words text-primary-900">
+                <h3 className="font-display text-2xl font-bold wrap-anywhere text-primary-900">
                   {ad.card.name}
                 </h3>
 
@@ -949,7 +959,7 @@ function CancelContent({
 
         <div className="min-w-0 space-y-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="font-display text-xl font-bold break-words text-primary-900">
+            <h3 className="font-display text-xl font-bold wrap-anywhere text-primary-900">
               {ad.card.name}
             </h3>
 

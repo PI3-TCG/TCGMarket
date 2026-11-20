@@ -45,7 +45,7 @@ export function AddressCard({ address, selected, onSelect, onEdit }: AddressCard
         <span className="hidden size-12 shrink-0 place-items-center rounded-lg bg-secondary-100 text-secondary-700 sm:grid">
           <Icon name={address.label?.toLowerCase() === 'casa' ? 'home' : 'map-pin'} size={24} />
         </span>
-        <span className="min-w-0 text-sm text-neutral-700">
+        <span className="min-w-0 wrap-anywhere text-sm text-neutral-700">
           <span className="flex flex-wrap items-center gap-2">
             <span className="font-display text-lg font-bold text-secondary-700">
               {title}

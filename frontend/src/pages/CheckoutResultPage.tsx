@@ -249,7 +249,7 @@ function CheckoutResult({
       ))}
 
       <div className={`${panelClass} space-y-2`}>
-        <div className="flex items-baseline justify-between gap-4">
+        <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 wrap-anywhere">
           <span className="text-neutral-900">Total da tentativa</span>
           <span className="font-display text-2xl font-bold text-primary-900">
             {formatCurrency(result.total)}

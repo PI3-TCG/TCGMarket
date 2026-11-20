@@ -126,7 +126,7 @@ function DeliveryContent({ cart, userId }: { cart: Cart; userId: string }) {
   }
 
   return (
-    <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)]">
+    <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)]">
       <section aria-labelledby="delivery-title" className="min-w-0 space-y-4">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
@@ -273,9 +273,9 @@ function AddressesSkeleton() {
 
 function DeliverySkeleton() {
   return (
-    <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)]">
+    <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)]">
       <div className="space-y-4">
-        <span className="block h-9 w-72 animate-pulse rounded bg-neutral-200" />
+        <span className="block h-9 w-72 max-w-full animate-pulse rounded bg-neutral-200" />
         <AddressesSkeleton />
       </div>
       <div className={`${panelClass} space-y-3`}>

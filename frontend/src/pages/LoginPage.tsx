@@ -3,9 +3,8 @@ import hero from '@/assets/login-hero.webp'
 import { Alert } from '@/components/ui/Alert'
 import { login as loginRequest } from '@/services/authApi'
 import { useSession } from '@/session'
-import type { ApiErrorResponse } from '@/types/User'
+import { responseStatus } from '@/services/feedback'
 import { useNavigate, useRouter, useSearch } from '@tanstack/react-router'
-import axios from 'axios'
 import {
   type FormEvent,
   type ReactNode,
@@ -31,6 +30,7 @@ export function LoginPage() {
   )
   const [feedback, setFeedback] = useState<string | null>(null)
   const [notice, setNotice] = useState<string | null>(loginNotice)
+  const sending = useRef(false)
   const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
@@ -86,6 +86,7 @@ export function LoginPage() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    if (sending.current) return
     setFeedback(null)
 
     const nextErrors = validate()
@@ -98,6 +99,7 @@ export function LoginPage() {
       return
     }
 
+    sending.current = true
     setSubmitting(true)
     try {
       const session = await loginRequest({
@@ -108,6 +110,7 @@ export function LoginPage() {
     } catch (error) {
       setFeedback(loginErrorMessage(error))
     } finally {
+      sending.current = false
       setSubmitting(false)
     }
   }
@@ -311,11 +314,11 @@ function Field({
 }
 
 function loginErrorMessage(error: unknown) {
-  if (axios.isAxiosError<ApiErrorResponse>(error)) {
-    return (
-      error.response?.data?.message ??
-      'Não foi possível entrar. Tente novamente.'
-    )
+  const status = responseStatus(error)
+  if (status === 401) return 'E-mail, nome de usuário ou senha inválidos.'
+  if (status === 403) return 'O acesso a esta conta está indisponível.'
+  if (status === undefined || status >= 500) {
+    return 'O serviço de login está indisponível. Tente novamente em instantes.'
   }
   return 'Não foi possível entrar. Tente novamente.'
 }

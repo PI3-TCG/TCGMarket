@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router'
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import axios from 'axios'
 import { Alert } from '@/components/ui/Alert'
 import { Icon } from '@/components/ui/Icon'
@@ -125,6 +125,7 @@ export function TradeProposalDetailsModal({
     ({ key: string } & Exclude<Result, { kind: 'loading' }>) | null
   >(null)
   const [confirming, setConfirming] = useState<TradeProposalAction | null>(null)
+  const pendingDecision = useRef(false)
   const [processing, setProcessing] = useState(false)
   const [feedback, setFeedback] = useState<{
     kind: 'success' | 'error'
@@ -165,7 +166,8 @@ export function TradeProposalDetailsModal({
   }
 
   async function confirmDecision() {
-    if (!confirming || processing || current.kind !== 'ready') return
+    if (!confirming || pendingDecision.current || requiresRefresh || current.kind !== 'ready') return
+    pendingDecision.current = true
     const action = confirming
     setProcessing(true)
     setFeedback(null)
@@ -185,6 +187,7 @@ export function TradeProposalDetailsModal({
       // Não repetir a decisão automaticamente: o estado pode ter mudado.
       refreshDetails()
     } finally {
+      pendingDecision.current = false
       setProcessing(false)
     }
   }

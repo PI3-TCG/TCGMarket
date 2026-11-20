@@ -1,3 +1,4 @@
+import { mutationResultUnknown } from '@/services/feedback'
 import axios from 'axios'
 import { api } from '@/services/api'
 import type { Cart, CheckoutValidation, UpdateCartItemRequest } from '@/types/Cart'
@@ -9,11 +10,12 @@ export type CartFailure =
   | { kind: 'unknown' }
 
 export function cartFailure(cause: unknown): CartFailure {
-  if (axios.isAxiosError<{ message?: string }>(cause) && cause.response) {
+  if (mutationResultUnknown(cause)) return { kind: 'unknown' }
+  if (axios.isAxiosError(cause) && cause.response) {
     const status = cause.response.status
     return {
       kind: 'rejected',
-      message: status < 500 ? (cause.response.data?.message ?? null) : null,
+      message: status === 409 ? 'Um anúncio mudou de disponibilidade. Atualize o carrinho.' : null,
     }
   }
   return { kind: 'unknown' }

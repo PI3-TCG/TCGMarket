@@ -1,5 +1,5 @@
+import { responseStatus } from '@/services/feedback'
 import { useState } from 'react'
-import axios from 'axios'
 import { CollectionOwnershipModalBase } from './CollectionOwnershipModalBase'
 import { Icon } from '@/components/ui/Icon'
 import { removeMyCollectionItem } from '@/services/collection'
@@ -46,17 +46,14 @@ export function RemoveCollectionItemModal({ item, onClose, onRemoved }: Props) {
       await removeMyCollectionItem(item.id)
       setRemoved(true)
     } catch (err: unknown) {
-      if (axios.isAxiosError<{ message?: string }>(err)) {
-        const status = err.response?.status
-        setError(
-          err.response?.data?.message ||
-            (status === 404
-              ? 'Este item não está mais na sua coleção. Atualize a página.'
-              : status === 409
-                ? 'Esta carta está em um anúncio ativo. Encerre o anúncio antes de removê-la da coleção.'
-                : 'Não foi possível remover o item. Tente novamente.'),
-        )
-      } else setError('Ocorreu um erro inesperado. Tente novamente.')
+      const status = responseStatus(err)
+      setError(
+        status === 404
+          ? 'Este item não está mais na sua coleção. Atualize a página.'
+          : status === 409
+            ? 'A disponibilidade desta carta mudou. Atualize a coleção e confira os anúncios ativos.'
+            : 'Não foi possível remover o item. Tente novamente.',
+      )
     } finally {
       setIsRemoving(false)
     }

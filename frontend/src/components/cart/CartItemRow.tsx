@@ -31,7 +31,7 @@ type Props = {
 }
 
 const linkClass =
-  'font-display text-lg leading-tight font-bold break-words text-secondary-700 hover:text-primary-900 hover:underline'
+  'font-display max-w-full text-lg leading-tight font-bold wrap-anywhere text-secondary-700 hover:text-primary-900 hover:underline'
 
 export function CartItemRow({
   item,
@@ -74,9 +74,9 @@ export function CartItemRow({
 
         <ItemImage item={item} name={name} />
 
-        <div className="grid min-w-0 flex-1 gap-4 md:grid-cols-[minmax(0,1.4fr)_auto_auto_auto] md:items-start">
-          <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2">
+        <div className="grid min-w-0 flex-1 grid-cols-1 gap-4 wrap-anywhere sm:grid-cols-2 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_auto_minmax(0,1fr)] xl:items-start">
+          <div className="min-w-0 wrap-anywhere sm:col-span-2 xl:col-span-1">
+            <div className="flex min-w-0 flex-wrap items-center gap-2">
               {item.cardName ? (
                 <Link
                   to="/marketplace/anuncios/$id"
@@ -120,8 +120,8 @@ export function CartItemRow({
             onChange={onQuantity}
           />
 
-          <div className="flex flex-row items-center justify-between gap-2 md:flex-col md:items-end">
-            <div className="md:text-right">
+          <div className="flex min-w-0 flex-wrap items-center justify-between gap-2 sm:col-span-2 xl:col-span-1 xl:flex-col xl:items-end">
+            <div className="min-w-0 wrap-anywhere xl:text-right">
               <p className="text-xs text-neutral-700">Subtotal</p>
               <p
                 className={`font-display text-lg font-bold ${

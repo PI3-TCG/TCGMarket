@@ -1,3 +1,4 @@
+import { FeedbackState } from '@/components/ui/FeedbackState'
 import { useEffect, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { PageBanner } from '@/components/layout/PageBanner'
@@ -232,16 +233,11 @@ function CollectionPageData({
           <CollectionState status="error" onRetry={onRetry} />
         ) : result.data.totalElements === 0 ? (
           hasFilters ? (
-            <div role="status" className="px-4 py-12 text-center">
-              <h2 className="text-lg font-semibold text-primary-900">
-                Nenhuma carta encontrada
-              </h2>
-
-              <p className="mt-2 text-sm text-neutral-700">
-                Altere os filtros ou clique em “Limpar filtros” para consultar a
-                coleção completa.
-              </p>
-            </div>
+            <FeedbackState
+              icon="search"
+              title="Nenhuma carta encontrada"
+              description="Altere os filtros ou clique em “Limpar filtros” para consultar a coleção completa."
+            />
           ) : (
             <CollectionState status="empty" />
           )

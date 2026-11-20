@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import axios from 'axios'
 import {
   CollectionOwnershipFields,
   CollectionOwnershipModalBase,
@@ -43,13 +42,8 @@ export function AddToCollectionModal({ card, onClose, onSuccess }: Props) {
         language,
       })
       didSave = true
-    } catch (err: unknown) {
-      if (axios.isAxiosError<{ message?: string }>(err)) {
-        setError(
-          err.response?.data?.message ||
-            'Não foi possível adicionar a carta. Tente novamente.',
-        )
-      } else setError('Ocorreu um erro inesperado. Tente novamente.')
+    } catch {
+      setError('Não foi possível adicionar a carta. Tente novamente.')
     } finally {
       setIsSaving(false)
     }

@@ -293,3 +293,13 @@ Esta auditoria **não equivale a um teste visual ao vivo** de todas as jornadas:
 - `docs/design-system/prototyping/prototype-myAds/Handoff-myAds-V1.md`
 - `frontend/src/router.tsx`, `components/layout/SiteHeader.tsx`, `pages/HomePage.tsx`, `components/profile/ProfileView.tsx`
 - `frontend/src/pages/{CartPage,DeliveryPage,ReviewPage,MarketplaceAdPage,MyCollectionPage,MyAdsPage}.tsx`
+
+## Issue #202 — Consulta após interrupção da resposta
+
+| Operação | Consulta disponível no frontend | Dependência |
+| --- | --- | --- |
+| Compra | O histórico mostra compras concluídas. A tela de resultado consulta o checkout quando seu ID é conhecido. | Consultar o checkout da conta pela chave de idempotência para verificar compras pendentes, concluídas ou recusadas quando o ID se perdeu. |
+| Nova proposta | A aba de propostas enviadas mostra propostas já registradas. | Consultar a proposta da conta por `requestKey` para identificar o resultado do envio específico. |
+| Cancelamento de anúncio ou decisão de troca | O detalhe é consultado pelo ID antes de permitir outra tentativa no mesmo diálogo após uma resposta incerta. | A consulta precisa retornar um estado atualizado. Se falhar, a interface oferece nova consulta. |
+
+A revisão da compra e o diálogo de proposta bloqueiam o reenvio na tela aberta quando a resposta é incerta. A ausência do registro no histórico ou na lista não confirma falha. A recuperação vinculada à tentativa específica, inclusive após recarregar a página ou reabrir o fluxo, depende das consultas acima.

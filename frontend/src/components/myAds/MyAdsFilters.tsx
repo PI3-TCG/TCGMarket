@@ -7,7 +7,7 @@ type MyAdsFiltersProps = {
 }
 
 const fieldClass =
-  'mt-2 h-10 w-full rounded-control border border-neutral-200 bg-white px-3 text-sm text-neutral-900 focus:border-primary-900 focus:outline-none focus:ring-2 focus:ring-secondary-500'
+  'mt-2 min-h-11 w-full rounded-control border border-neutral-200 bg-white px-3 text-sm text-neutral-900 focus:border-primary-900 focus:outline-none focus:ring-2 focus:ring-secondary-500'
 
 export function MyAdsFilters({ onApply }: MyAdsFiltersProps) {
   const [draft, setDraft] = useState<OwnAdFilterValues>(emptyOwnAdFilters)
@@ -98,7 +98,7 @@ export function MyAdsFilters({ onApply }: MyAdsFiltersProps) {
 
         <button
           type="submit"
-          className="min-h-10 w-full cursor-pointer rounded-lg bg-primary-900 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500"
+          className="min-h-11 w-full cursor-pointer rounded-lg bg-primary-900 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500"
         >
           Aplicar filtros
         </button>
@@ -106,7 +106,7 @@ export function MyAdsFilters({ onApply }: MyAdsFiltersProps) {
         <button
           type="button"
           onClick={clearFilters}
-          className="mx-auto block cursor-pointer text-xs text-primary-900 underline focus-visible:outline-2 focus-visible:outline-secondary-500"
+          className="mx-auto block min-h-11 w-full cursor-pointer text-sm text-primary-900 underline focus-visible:outline-2 focus-visible:outline-secondary-500"
         >
           Limpar filtros
         </button>
