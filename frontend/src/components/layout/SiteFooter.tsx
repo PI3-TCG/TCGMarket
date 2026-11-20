@@ -1,153 +1,126 @@
-import mark from '@/assets/mark-3cartas-branco.svg'
+import frame from '@/assets/moldura-rodape.webp'
+import logo from '@/assets/marca-referencia.webp'
+import { useNavigate } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
 
 type Props = { onSoon: (feature: string) => void }
 
-const navigation = [
-  'Meios de Pagamento',
-  'Quem Somos',
-  'Comunidade',
-  'Ajuda',
-] as const
+type Platform = 'youtube' | 'instagram' | 'tiktok' | 'discord' | 'twitch'
 
-export function SiteFooter({ onSoon }: Props) {
-  return (
-    <footer className="relative isolate overflow-hidden border-t border-white/10 bg-gradient-to-r from-[#2c0738] via-[#21062c] to-[#32083e] text-white">
-      {/* Brilho sutil para acompanhar o visual do protótipo. */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_0%_50%,rgba(151,35,176,0.14),transparent_32%),radial-gradient(ellipse_at_100%_50%,rgba(151,35,176,0.14),transparent_32%)]"
-      />
+const socials: { label: string; platform: Platform }[] = [
+  { label: 'YouTube', platform: 'youtube' },
+  { label: 'Instagram', platform: 'instagram' },
+  { label: 'TikTok', platform: 'tiktok' },
+  { label: 'Discord', platform: 'discord' },
+  { label: 'Twitch', platform: 'twitch' },
+]
 
-      <div className="relative mx-auto flex w-full max-w-[1600px] flex-col gap-6 px-5 py-6 sm:px-8 lg:min-h-[110px] lg:flex-row lg:items-center lg:justify-between lg:gap-7 lg:px-12 lg:py-4">
-        {/* Marca */}
-        <div className="flex shrink-0 items-center gap-3 lg:min-w-[285px]">
-          <img src={mark} alt="" className="h-11 w-auto shrink-0 sm:h-12" />
-          <div className="min-w-0">
-            <span className="block whitespace-nowrap font-display text-xl leading-tight tracking-wide sm:text-2xl">
-              <span className="font-semibold text-[#d9a4ff]">TCG</span>Market
-            </span>
-            <p className="mt-0.5 text-[11px] leading-snug text-white/55">
-              Sua coleção, suas trocas, novos mundos.
-            </p>
-          </div>
-        </div>
-
-        {/* Navegação: linha única no desktop, quebra naturalmente em telas menores. */}
-        <nav
-          aria-label="Links institucionais"
-          className="flex min-w-0 flex-1 flex-wrap items-center justify-start gap-x-7 gap-y-3 sm:gap-x-9 lg:justify-evenly lg:gap-x-4"
-        >
-          {navigation.map((label) => (
-            <button
-              key={label}
-              type="button"
-              onClick={() => onSoon(label)}
-              className="whitespace-nowrap rounded-sm text-[13px] font-medium text-white/90 transition hover:text-[#d9a4ff] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#b96cf4]"
-            >
-              {label}
-            </button>
-          ))}
-        </nav>
-
-        {/* Redes sociais */}
-        <div className="flex shrink-0 items-center gap-4 border-t border-white/20 pt-4 sm:gap-5 lg:min-h-12 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-9">
-          <SocialButton label="Discord" onClick={() => onSoon('Discord')}>
-            <DiscordIcon />
-          </SocialButton>
-          <SocialButton label="Instagram" onClick={() => onSoon('Instagram')}>
-            <InstagramIcon />
-          </SocialButton>
-          <SocialButton label="YouTube" onClick={() => onSoon('YouTube')}>
-            <YoutubeIcon />
-          </SocialButton>
-          <SocialButton label="X" onClick={() => onSoon('X')}>
-            <XIcon />
-          </SocialButton>
-        </div>
-      </div>
-
-      <p className="relative px-4 pb-3 text-center text-[10px] text-white/45">
-        © {new Date().getFullYear()} TCG Market. Todos os direitos reservados.
-      </p>
-    </footer>
-  )
-}
-
-function SocialButton({
+function SocialAction({
+  children,
   label,
   onClick,
-  children,
 }: {
+  children: ReactNode
   label: string
   onClick: () => void
-  children: ReactNode
 }) {
   return (
     <button
       type="button"
-      onClick={onClick}
       aria-label={label}
       title={label}
-      className="flex size-8 items-center justify-center rounded-md text-white transition hover:-translate-y-0.5 hover:text-[#d9a4ff] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#b96cf4]"
+      onClick={onClick}
+      className="grid size-8 place-items-center rounded-md border border-transparent text-[#FBF5FF] transition duration-200 hover:-translate-y-0.5 hover:border-[#F3D078]/50 hover:bg-[#CF65EB]/20 hover:text-[#FFE59C] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FFE18D] [&>svg]:size-[21px]"
     >
       {children}
     </button>
   )
 }
 
-function DiscordIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      className="size-7"
-      aria-hidden="true"
-    >
-      <path d="M19.73 5.13a18.6 18.6 0 0 0-4.6-1.43l-.55 1.13a17 17 0 0 0-5.16 0l-.55-1.13a18.7 18.7 0 0 0-4.6 1.43C1.35 9.43.55 13.6.96 17.71a18.8 18.8 0 0 0 5.64 2.85l1.22-2.01a12 12 0 0 1-1.93-.93l.47-.37c3.72 1.74 7.53 1.74 11.2 0l.47.37c-.62.37-1.27.68-1.94.93l1.22 2.01a18.8 18.8 0 0 0 5.65-2.85c.5-4.77-.86-8.9-3.23-12.58ZM8.56 15.29c-1.1 0-1.99-1-1.99-2.22s.87-2.22 1.99-2.22c1.13 0 2 1 1.99 2.22 0 1.22-.87 2.22-1.99 2.22Zm6.88 0c-1.11 0-1.99-1-1.99-2.22s.88-2.22 1.99-2.22c1.12 0 1.99 1 1.99 2.22s-.87 2.22-1.99 2.22Z" />
-    </svg>
-  )
+function SocialIcon({ platform }: { platform: Platform }) {
+  switch (platform) {
+    case 'youtube':
+      return (
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M21.4 7a2.7 2.7 0 0 0-1.9-1.9C17.8 4.6 12 4.6 12 4.6s-5.8 0-7.5.5A2.7 2.7 0 0 0 2.6 7 27 27 0 0 0 2 12a27 27 0 0 0 .6 5 2.7 2.7 0 0 0 1.9 1.9c1.7.5 7.5.5 7.5.5s5.8 0 7.5-.5a2.7 2.7 0 0 0 1.9-1.9 27 27 0 0 0 .6-5 27 27 0 0 0-.6-5ZM10 15.5v-7l6 3.5-6 3.5Z" />
+        </svg>
+      )
+    case 'instagram':
+      return (
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          aria-hidden="true"
+        >
+          <rect x="3" y="3" width="18" height="18" rx="5" />
+          <circle cx="12" cy="12" r="4" />
+          <circle cx="17.5" cy="6.6" r="1" fill="currentColor" stroke="none" />
+        </svg>
+      )
+    case 'tiktok':
+      return (
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M16.5 2h-3.3v13.2a3.2 3.2 0 1 1-3.1-3.2V8.7a6.5 6.5 0 1 0 6.5 6.5V8.5a8.1 8.1 0 0 0 4.5 1.3V6.5A4.8 4.8 0 0 1 16.5 2Z" />
+        </svg>
+      )
+    case 'discord':
+      return (
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M19.7 5.2a19 19 0 0 0-4.6-1.4l-.5 1.1a17 17 0 0 0-5.2 0l-.5-1.1a19 19 0 0 0-4.6 1.4C1.4 9.4.6 13.6 1 17.7a19 19 0 0 0 5.6 2.8l1.2-2a12 12 0 0 1-1.9-.9l.5-.4a12.7 12.7 0 0 0 11.2 0l.5.4c-.6.4-1.2.7-1.9.9l1.2 2a19 19 0 0 0 5.6-2.8c.5-4.8-.8-8.9-3.3-12.5ZM8.6 15.3c-1.1 0-2-1-2-2.2s.9-2.2 2-2.2 2 1 2 2.2-.9 2.2-2 2.2Zm6.8 0c-1.1 0-2-1-2-2.2s.9-2.2 2-2.2 2 1 2 2.2-.9 2.2-2 2.2Z" />
+        </svg>
+      )
+    case 'twitch':
+      return (
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M4 2 2 7v13h5v2h3l2.2-2H16l6-6V2H4Zm16 11-3.5 3.5H11L8 19v-2.5H4V4h16v9ZM16 7h-2v5h2V7Zm-5 0H9v5h2V7Z" />
+        </svg>
+      )
+  }
 }
 
-function InstagramIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      className="size-7"
-      aria-hidden="true"
-    >
-      <rect x="2.5" y="2.5" width="19" height="19" rx="5" />
-      <circle cx="12" cy="12" r="4.2" />
-      <circle cx="17.7" cy="6.6" r="1.15" fill="currentColor" stroke="none" />
-    </svg>
-  )
-}
+export function SiteFooter({ onSoon }: Props) {
+  const navigate = useNavigate()
 
-function YoutubeIcon() {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      className="size-7"
-      aria-hidden="true"
-    >
-      <path d="M22.1 7.2a2.8 2.8 0 0 0-1.96-1.98C18.4 4.75 12 4.75 12 4.75s-6.4 0-8.14.47A2.8 2.8 0 0 0 1.9 7.2 29 29 0 0 0 1.45 12c0 1.6.16 3.2.45 4.8a2.8 2.8 0 0 0 1.96 1.98c1.74.47 8.14.47 8.14.47s6.4 0 8.14-.47a2.8 2.8 0 0 0 1.96-1.98c.3-1.6.45-3.2.45-4.8s-.15-3.2-.45-4.8ZM9.8 15.5v-7l6.08 3.5-6.08 3.5Z" />
-    </svg>
-  )
-}
+    <footer aria-label="Rodapé do TCG Market" className="tcg-footer">
+      <div className="tcg-footer-frame">
+        <img
+          src={frame}
+          alt=""
+          aria-hidden="true"
+          draggable={false}
+          className="tcg-frame-art"
+        />
+        <div className="tcg-footer-row">
+          <button
+            type="button"
+            onClick={() => void navigate({ to: '/' })}
+            aria-label="TCG Market — página inicial"
+            className="min-w-0 justify-self-start rounded-sm transition hover:drop-shadow-[0_0_7px_rgba(255,208,119,0.45)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FFE18D] max-[430px]:justify-self-center"
+          >
+            <img src={logo} alt="" decoding="async" className="tcg-brand" />
+          </button>
 
-function XIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      className="size-7"
-      aria-hidden="true"
-    >
-      <path d="M18.9 2H22l-6.77 7.74L23.2 22h-6.25l-4.9-7.43L5.55 22H2.4l7.24-8.28L1.8 2h6.4l4.43 6.76L18.9 2Zm-1.1 18h1.73L7.28 3.9H5.42L17.8 20Z" />
-    </svg>
+          <p className="tcg-copyright">
+            © {new Date().getFullYear()} TCGMarket. Todos os direitos
+            reservados.
+          </p>
+
+          <div role="group" aria-label="Redes sociais" className="tcg-socials">
+            {socials.map(({ label, platform }) => (
+              <SocialAction
+                key={platform}
+                label={label}
+                onClick={() => onSoon(label)}
+              >
+                <SocialIcon platform={platform} />
+              </SocialAction>
+            ))}
+          </div>
+        </div>
+      </div>
+    </footer>
   )
 }
