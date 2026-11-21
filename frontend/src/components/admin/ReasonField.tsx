@@ -17,11 +17,8 @@ export function ReasonField({
   const id = useId()
   const hintId = `${id}-hint`
   return (
-    <div className="space-y-1 pt-2">
-      <label
-        htmlFor={id}
-        className="block text-sm font-semibold text-neutral-900"
-      >
+    <div className="space-y-1.5 pt-2">
+      <label htmlFor={id} className="block text-sm font-bold text-[#342044]">
         Motivo <span className="text-error-700">*</span>
       </label>
       <textarea
@@ -33,13 +30,13 @@ export function ReasonField({
         aria-invalid={error ? true : undefined}
         aria-describedby={hintId}
         placeholder={placeholder}
-        className="w-full rounded-control border border-neutral-300 px-3 py-2 text-sm text-neutral-900 outline-none placeholder:text-neutral-500 hover:border-primary-900 focus:border-primary-900 focus:ring-2 focus:ring-secondary-500 aria-invalid:border-error-700"
+        className="w-full rounded-lg border border-[#C9ADDA] bg-white px-3 py-2 text-sm text-[#2F1C3A] outline-none placeholder:text-[#85778A] transition-colors hover:border-[#9F64B5] focus:border-[#773C95] focus:ring-2 focus:ring-[#DCB3EC] aria-invalid:border-error-700"
       />
       <div id={hintId} className="flex justify-between gap-3 text-xs">
-        <span className={error ? 'text-error-700' : 'text-neutral-500'}>
+        <span className={error ? 'text-error-700' : 'text-[#796681]'}>
           {error ?? `Entre ${REASON_MIN} e ${REASON_MAX} caracteres.`}
         </span>
-        <span className="text-neutral-500">
+        <span className="shrink-0 text-[#796681]">
           {value.trim().length}/{REASON_MAX}
         </span>
       </div>
