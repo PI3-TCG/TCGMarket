@@ -11,7 +11,7 @@ export function ProfilePhotoEditor({
   name: string
   showRemove?: boolean
 }) {
-  const { state, saving, save } = useProfileSettings()
+  const { state, saving, save, uploadAvatar } = useProfileSettings()
   const id = useId()
   const [reading, setReading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -29,16 +29,8 @@ export function ProfilePhotoEditor({
     }
     setReading(true)
     try {
-      const data = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader()
-        reader.onload = () => resolve(String(reader.result))
-        reader.onerror = reject
-        reader.readAsDataURL(file)
-      })
-      const success = await save({ avatarUrl: data })
+      const success = await uploadAvatar(file)
       if (!success) setError('Não foi possível salvar a foto. Tente novamente.')
-    } catch {
-      setError('Não foi possível ler a foto. Tente novamente.')
     } finally {
       setReading(false)
     }

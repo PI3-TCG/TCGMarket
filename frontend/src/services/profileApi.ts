@@ -54,6 +54,16 @@ export const getProfileSettings = async () =>
   (await api.get<ProfileSettings>('/api/users/me/profile/settings')).data
 export const saveProfileSettings = async (value: ProfileSettings) =>
   (await api.put<ProfileSettings>('/api/users/me/profile/settings', value)).data
+export const createAvatarUpload = async (file: File) =>
+  (
+    await api.post<{ uploadUrl: string; key: string }>(
+      '/api/users/me/profile/avatar/upload-url',
+      { contentType: file.type, contentLength: file.size },
+    )
+  ).data
+export const confirmAvatarUpload = async (key: string) =>
+  (await api.post<ProfileSettings>('/api/users/me/profile/avatar', { key }))
+    .data
 export const getPublicSummary = async (username: string) =>
   (
     await api.get<PublicSummary>(

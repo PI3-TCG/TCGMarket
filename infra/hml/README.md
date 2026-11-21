@@ -204,6 +204,11 @@ JWT_EXPIRATION=24h
 CORS_ALLOWED_ORIGINS=https://<frontend-hml>,http://localhost:5173
 ADMIN_EMAIL=
 POKEMON_TCG_API_KEY=
+R2_ACCOUNT_ID=
+R2_ACCESS_KEY_ID=
+R2_SECRET_ACCESS_KEY=
+R2_BUCKET=
+R2_ENDPOINT=
 ```
 
 - Com o perfil `hml`, a aplicação **não sobe** sem `CORS_ALLOWED_ORIGINS`, para evitar CORS aberto.

@@ -1,6 +1,9 @@
 package com.pitcc.controller;
 
+import com.pitcc.dto.AvatarConfirmRequest;
+import com.pitcc.dto.AvatarUploadRequest;
 import com.pitcc.dto.ProfileSettings;
+import com.pitcc.integration.r2.AvatarStorage;
 import com.pitcc.exception.InvalidAuthenticationException;
 import com.pitcc.security.AuthenticatedUser;
 import com.pitcc.service.ProfileDashboardService;
@@ -29,6 +32,14 @@ public class ProfileDashboardController {
   @PutMapping("/me/profile/settings")
   public ProfileSettings update(@AuthenticationPrincipal AuthenticatedUser user, @Valid @RequestBody ProfileSettings settings) {
     return service.updateSettings(id(user), settings);
+  }
+  @PostMapping("/me/profile/avatar/upload-url")
+  public AvatarStorage.Ticket uploadUrl(@AuthenticationPrincipal AuthenticatedUser user, @Valid @RequestBody AvatarUploadRequest request) {
+    return service.prepareAvatar(id(user), request.contentType(), request.contentLength());
+  }
+  @PostMapping("/me/profile/avatar")
+  public ProfileSettings confirmAvatar(@AuthenticationPrincipal AuthenticatedUser user, @Valid @RequestBody AvatarConfirmRequest request) {
+    return service.confirmAvatar(id(user), request.key());
   }
   @GetMapping("/{username}/profile/summary")
   public ResponseEntity<ProfileDashboardService.PublicSummary> summary(@PathVariable String username) {
