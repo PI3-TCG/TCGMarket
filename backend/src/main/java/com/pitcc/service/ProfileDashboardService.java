@@ -3,6 +3,8 @@ package com.pitcc.service;
 import com.pitcc.dto.*;
 import com.pitcc.exception.InvalidAuthenticationException;
 import com.pitcc.exception.UserNotFoundException;
+import com.pitcc.integration.r2.AvatarStorage;
+import com.pitcc.integration.r2.R2AvatarStorage;
 import com.pitcc.model.*;
 import com.pitcc.repository.UserRepository;
 import java.time.Instant;
@@ -22,11 +24,13 @@ public class ProfileDashboardService {
   private final MongoTemplate mongo;
   private final UserRepository users;
   private final CollectionService collection;
+  private final AvatarStorage avatars;
 
-  public ProfileDashboardService(MongoTemplate mongo, UserRepository users, CollectionService collection) {
+  public ProfileDashboardService(MongoTemplate mongo, UserRepository users, CollectionService collection, AvatarStorage avatars) {
     this.mongo = mongo;
     this.users = users;
     this.collection = collection;
+    this.avatars = avatars;
   }
 
   public record Activity(String id, String kind, String description, Instant occurredAt, String status) {}
@@ -45,16 +49,48 @@ public class ProfileDashboardService {
 
   public ProfileSettings settings(String id) {
     User user = own(id);
-    return new ProfileSettings(user.isCollectionPublic(), user.getAvatarUrl());
+    return new ProfileSettings(user.isCollectionPublic(), display(user.getAvatarUrl()));
+  }
+
+  public AvatarStorage.Ticket prepareAvatar(String id, String contentType, long contentLength) {
+    own(id);
+    return avatars.prepare(id, contentType, contentLength);
+  }
+
+  public ProfileSettings confirmAvatar(String id, String key) {
+    User user = own(id);
+    R2AvatarStorage.requireOwned(id, key);
+    avatars.verify(id, key);
+    mongo.updateFirst(Query.query(Criteria.where("id").is(id)), new Update().set("avatarUrl", key), User.class);
+    String previous = user.getAvatarUrl();
+    if (isObjectKey(previous) && !previous.equals(key)) avatars.delete(previous);
+    return new ProfileSettings(user.isCollectionPublic(), avatars.readUrl(key));
   }
 
   public ProfileSettings updateSettings(String id, ProfileSettings settings) {
-    own(id);
-    validateAvatar(settings.avatarUrl());
+    User user = own(id);
+    String incoming = settings.avatarUrl();
+    String stored = user.getAvatarUrl();
+    // A tela devolve a URL temporária de leitura. Ela não pode substituir a chave gravada.
+    if (incoming != null && !incoming.startsWith("data:")) {
+      mongo.updateFirst(Query.query(Criteria.where("id").is(id)),
+          new Update().set("collectionPublic", settings.collectionPublic()), User.class);
+      return new ProfileSettings(settings.collectionPublic(), display(stored));
+    }
+    validateAvatar(incoming);
+    if (isObjectKey(stored)) avatars.delete(stored);
     // Atualização parcial: não sobrescreve edições simultâneas dos demais dados da conta.
     mongo.updateFirst(Query.query(Criteria.where("id").is(id)), new Update()
-        .set("collectionPublic", settings.collectionPublic()).set("avatarUrl", settings.avatarUrl()), User.class);
-    return settings;
+        .set("collectionPublic", settings.collectionPublic()).set("avatarUrl", incoming), User.class);
+    return new ProfileSettings(settings.collectionPublic(), incoming);
+  }
+
+  private String display(String stored) {
+    return isObjectKey(stored) ? avatars.readUrl(stored) : stored;
+  }
+
+  private static boolean isObjectKey(String value) {
+    return value != null && value.startsWith("avatars/");
   }
 
   private void validateAvatar(String value) {
@@ -83,7 +119,7 @@ public class ProfileDashboardService {
 
   public PublicSummary publicSummary(String username) {
     User user = publicUser(username);
-    return new PublicSummary(user.isCollectionPublic(), user.getAvatarUrl(),
+    return new PublicSummary(user.isCollectionPublic(), display(user.getAvatarUrl()),
         mongo.count(Query.query(participant(user.getId())), Transaction.class));
   }
 

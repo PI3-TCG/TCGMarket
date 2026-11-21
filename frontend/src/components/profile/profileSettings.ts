@@ -10,6 +10,7 @@ export type SettingsContext = {
   save: (
     changes: Partial<Pick<ProfileSettings, 'avatarUrl' | 'collectionPublic'>>,
   ) => Promise<boolean>
+  uploadAvatar: (file: File) => Promise<boolean>
 }
 export const ProfileSettingsContext = createContext<SettingsContext | null>(
   null,

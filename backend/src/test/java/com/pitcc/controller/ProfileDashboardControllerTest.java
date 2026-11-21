@@ -41,6 +41,10 @@ class ProfileDashboardControllerTest {
     mvc.perform(get("/api/users/me/profile/settings")).andExpect(status().isUnauthorized());
     mvc.perform(put("/api/users/me/profile/settings").contentType(MediaType.APPLICATION_JSON).content("{\"collectionPublic\":true}"))
         .andExpect(status().isUnauthorized());
+    mvc.perform(post("/api/users/me/profile/avatar/upload-url").contentType(MediaType.APPLICATION_JSON)
+        .content("{\"contentType\":\"image/png\",\"contentLength\":10}")).andExpect(status().isUnauthorized());
+    mvc.perform(post("/api/users/me/profile/avatar").contentType(MediaType.APPLICATION_JSON)
+        .content("{\"key\":\"avatars/owner/photo.png\"}")).andExpect(status().isUnauthorized());
     verifyNoInteractions(service);
   }
   @Test void publicEndpointsAreAnonymousAndNeverCached() throws Exception {

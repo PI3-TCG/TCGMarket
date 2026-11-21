@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import com.pitcc.dto.*;
+import com.pitcc.integration.r2.AvatarStorage;
 import com.pitcc.model.*;
 import com.pitcc.repository.UserRepository;
 import java.util.*;
@@ -23,6 +24,7 @@ class ProfileDashboardServiceTest {
   @Mock MongoTemplate mongo;
   @Mock UserRepository users;
   @Mock CollectionService collection;
+  @Mock AvatarStorage avatars;
   @InjectMocks ProfileDashboardService service;
 
   User user() {
@@ -65,6 +67,44 @@ class ProfileDashboardServiceTest {
     assertThrows(IllegalArgumentException.class,
         () -> service.updateSettings("owner", new ProfileSettings(false, "data:image/jpeg;base64," + Base64.getEncoder().encodeToString(bytes))));
     verifyNoInteractions(mongo);
+  }
+
+  @Test void echoedAvatarUrlDoesNotReplaceStoredKey() {
+    User user = user();
+    user.setAvatarUrl("avatars/owner/photo.jpg");
+    when(users.findById("owner")).thenReturn(Optional.of(user));
+    when(avatars.readUrl("avatars/owner/photo.jpg")).thenReturn("https://signed.example/photo.jpg");
+    var result = service.updateSettings("owner", new ProfileSettings(true, "https://signed.example/photo.jpg"));
+    assertEquals("https://signed.example/photo.jpg", result.avatarUrl());
+    var update = ArgumentCaptor.forClass(Update.class);
+    verify(mongo).updateFirst(any(), update.capture(), eq(User.class));
+    var fields = (org.bson.Document) update.getValue().getUpdateObject().get("$set");
+    assertEquals(Set.of("collectionPublic"), fields.keySet());
+    verify(avatars, never()).delete(any());
+  }
+
+  @Test void confirmStoresKeyAndRemovesPreviousObject() {
+    User user = user();
+    user.setCollectionPublic(true);
+    user.setAvatarUrl("avatars/owner/old.jpg");
+    when(users.findById("owner")).thenReturn(Optional.of(user));
+    when(avatars.readUrl("avatars/owner/new.jpg")).thenReturn("https://signed.example/new.jpg");
+    var result = service.confirmAvatar("owner", "avatars/owner/new.jpg");
+    assertEquals("https://signed.example/new.jpg", result.avatarUrl());
+    assertTrue(result.collectionPublic());
+    verify(avatars).verify("owner", "avatars/owner/new.jpg");
+    verify(avatars).delete("avatars/owner/old.jpg");
+    var update = ArgumentCaptor.forClass(Update.class);
+    verify(mongo).updateFirst(any(), update.capture(), eq(User.class));
+    var fields = (org.bson.Document) update.getValue().getUpdateObject().get("$set");
+    assertEquals("avatars/owner/new.jpg", fields.getString("avatarUrl"));
+    assertNull(fields.get("collectionPublic"));
+  }
+
+  @Test void confirmRejectsForeignKeyBeforePersisting() {
+    when(users.findById("owner")).thenReturn(Optional.of(user()));
+    assertThrows(IllegalArgumentException.class, () -> service.confirmAvatar("owner", "avatars/other/photo.jpg"));
+    verifyNoInteractions(mongo, avatars);
   }
 
   @Test void dashboardUsesPersistedCountsAndExcludesAbortedAds() {
