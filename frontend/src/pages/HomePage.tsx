@@ -1,5 +1,4 @@
 import { BannerGoldDivider } from '@/components/layout/PageBanner'
-import { tradingCardGrid } from '@/components/ui/tradingCardStyles'
 import { Alert } from '@/components/ui/Alert'
 import { GAMES } from '@/components/layout/siteGames'
 import { useSession } from '@/session'
@@ -9,22 +8,24 @@ import hero from '@/assets/images/image-banner-home.png'
 import pokemonBanner from '@/assets/images/image-nav-pokemon.png'
 import magicBanner from '@/assets/images/image-nav-magic.png'
 import yugiohBanner from '@/assets/images/image-nav-yugioh.png'
-import onePieceBanner from '@/assets/images/image-nav-onePiece.png'
-import digimonBanner from '@/assets/images/image-nav-digimon.png'
 import { Button } from '@/components/ui/Button'
 import { MarketplaceAdCard } from '@/components/marketplace/MarketplaceAdCard'
+import { HomeInformationSections } from '@/components/home/HomeInformationSections'
 import { useRemoteData } from '@/hooks/useRemoteData'
 import { getMarketplaceAds } from '@/services/marketplace'
-
-
 
 const exploreImages: Record<string, string> = {
   poke: pokemonBanner,
   magic: magicBanner,
   yugioh: yugiohBanner,
-  piece: onePieceBanner,
-  digimon: digimonBanner,
 }
+
+// A Homepage apresenta somente os três TCGs disponíveis no catálogo.
+const HOME_GAMES = GAMES.filter((game) => game.slug !== null)
+
+// Limita somente a vitrine da Homepage (a API do marketplace mantém a paginação original).
+const HOME_AD_LIMIT = 8
+const HOME_AD_GRID = 'grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4'
 
 export function HomePage() {
   const navigate = useNavigate()
@@ -121,23 +122,20 @@ export function HomePage() {
         <section>
           <div className="mb-4 flex items-end justify-between">
             <h2 className="text-xl font-bold">Explore por TCG</h2>
-
           </div>
 
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-            {GAMES.map((game) => (
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            {HOME_GAMES.map((game) => (
               <button
                 key={game.name}
 
                 type="button"
 
                 onClick={() =>
-                  game.slug
-                    ? navigate({
-                      to: '/catalogo/$game',
-                      params: { game: game.slug },
-                    })
-                    : soon(`O catálogo de ${game.name}`)
+                  navigate({
+                    to: '/catalogo/$game',
+                    params: { game: game.slug },
+                  })
                 }
 
                 className="group relative h-30 overflow-hidden rounded-lg text-left text-white shadow-sm"
@@ -196,6 +194,8 @@ export function HomePage() {
 
           <HomeAds />
         </section>
+
+        <HomeInformationSections isAuthenticated={Boolean(user)} />
       </main>
     </div>
   )
@@ -309,54 +309,6 @@ function GameMark({ kind }: { kind: (typeof GAMES)[number]['mark'] }) {
           strokeWidth="3"
         />
       ) : null}
-
-      {kind === 'piece' ? (
-        <>
-          <circle
-            cx="32"
-
-            cy="28"
-
-            r="16"
-
-            fill="none"
-
-            stroke="white"
-
-            strokeWidth="3"
-          />
-
-          <path
-            d="M20 24c6-10 18-10 24 0"
-
-            fill="none"
-
-            stroke="white"
-
-            strokeWidth="3"
-          />
-        </>
-      ) : null}
-
-      {kind === 'digimon' ? (
-        <rect
-          x="16"
-
-          y="14"
-
-          width="32"
-
-          height="36"
-
-          rx="8"
-
-          fill="none"
-
-          stroke="white"
-
-          strokeWidth="3"
-        />
-      ) : null}
     </svg>
   )
 }
@@ -374,8 +326,8 @@ function HomeAds() {
       >
         <span className="sr-only">Carregando anúncios...</span>
 
-        <div aria-hidden="true" className={tradingCardGrid}>
-          {Array.from({ length: 4 }, (_, index) => (
+        <div aria-hidden="true" className={HOME_AD_GRID}>
+          {Array.from({ length: HOME_AD_LIMIT }, (_, index) => (
             <div
               key={index}
               className="overflow-hidden rounded-xl border border-neutral-200 bg-white motion-safe:animate-pulse"
@@ -403,18 +355,14 @@ function HomeAds() {
           Não foi possível carregar os anúncios.
         </p>
 
-        <Button
-          variant="outline"
-          className="mt-3"
-          onClick={retry}
-        >
+        <Button variant="outline" className="mt-3" onClick={retry}>
           Tentar novamente
         </Button>
       </div>
     )
   }
 
-  const ads = state.data.content.slice(0, 4)
+  const ads = state.data.content.slice(0, HOME_AD_LIMIT)
 
   if (ads.length === 0) {
     return (
@@ -434,7 +382,7 @@ function HomeAds() {
   }
 
   return (
-    <div className={tradingCardGrid}>
+    <div className={HOME_AD_GRID}>
       {ads.map((ad) => (
         <MarketplaceAdCard key={ad.id} ad={ad} />
       ))}
