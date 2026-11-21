@@ -23,6 +23,7 @@ export type CatalogSort = 'name-asc' | 'name-desc'
 /** Estado da busca na URL do catálogo. {@link page} começa em 1. */
 export interface CatalogSearch {
   q?: string
+  cardNumber?: string
   set?: string
   rarity?: string
   type?: string

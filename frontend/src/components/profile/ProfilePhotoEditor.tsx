@@ -62,7 +62,7 @@ export function ProfilePhotoEditor({
           htmlFor={id}
           aria-label="Alterar foto do perfil"
           title="Alterar foto do perfil"
-          className={`absolute -right-1 -bottom-1 flex size-10 items-center justify-center rounded-full border border-[#FCD203]/70 bg-primary-900 text-white shadow-md peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-secondary-500 ${disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer hover:bg-primary-800'}`}
+          className={`absolute -right-1 -bottom-1 flex size-10 items-center justify-center rounded-full border border-[#FCD203]/70 bg-primary-900 button-vignette text-white shadow-md peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-secondary-500 ${disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer hover:bg-primary-800'}`}
         >
           <Icon name="camera" size={20} />
           <span className="sr-only">Alterar foto do perfil</span>

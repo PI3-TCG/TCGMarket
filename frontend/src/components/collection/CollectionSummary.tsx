@@ -42,7 +42,7 @@ export function CollectionSummary({
             {indicators.map((indicator) => (
                 <div
                     key={indicator.label}
-                    className="flex min-h-20 items-center gap-3 rounded-xl border border-primary-100 bg-white px-4 py-4 shadow-sm"
+                    className="flex min-h-20 items-center gap-3 rounded-xl border border-rare-500/70 bg-white px-4 py-4 shadow-sm"
                 >
                     <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary-100 text-primary-900">
                         <Icon name={indicator.icon} size={24} />
@@ -76,10 +76,10 @@ export function CollectionSummary({
                 </div>
             ))}
 
-            <div className="flex min-h-20 items-center rounded-xl border border-primary-100 bg-white p-3 shadow-sm">
+            <div className="flex min-h-20 items-center rounded-xl border border-rare-500/70 bg-white p-3 shadow-sm">
                 <Link
                     to="/anuncios/novo"
-                    className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-primary-900 px-5 py-3 text-sm font-semibold whitespace-nowrap text-white transition-colors hover:bg-primary-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500"
+                    className="button-vignette inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-primary-900 px-5 py-3 text-sm font-semibold whitespace-nowrap text-white transition-colors hover:bg-primary-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500"
                 >
                     <Icon name="plus" size={20} />
                     Criar anúncio

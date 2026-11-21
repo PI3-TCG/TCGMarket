@@ -12,7 +12,7 @@ export function ProfilePrivacy({ username }: { username: string }) {
   const id = useId()
   const [copyMessage, setCopyMessage] = useState<string | null>(null)
   return (
-    <Card className="p-5">
+    <Card className="border-rare-500/70 p-5">
       <h2 className="flex items-center gap-2 text-lg font-semibold text-primary-900">
         <Icon name="lock" size={24} />
         Privacidade da coleção

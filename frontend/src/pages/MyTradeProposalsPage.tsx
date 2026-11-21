@@ -1,3 +1,4 @@
+import { Pagination as PageNavigation } from '@/components/ui/Pagination'
 import { pageBanners } from '@/config/pageBanners'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useSearch } from '@tanstack/react-router'
@@ -27,7 +28,7 @@ import type {
 
 const PAGE_SIZE = 10
 const panel =
-  'rounded-xl border border-neutral-200 bg-white p-4 shadow-sm sm:p-5'
+  'rounded-xl border border-rare-500 bg-white p-4 shadow-sm sm:p-5'
 
 type Settled =
   | { key: string; kind: 'error' }
@@ -38,12 +39,18 @@ export function MyTradeProposalsPage() {
   const search = useSearch({ from: '/site-layout/perfil/propostas' })
 
   return (
-    <main className="min-h-screen bg-neutral-50 pb-12 text-neutral-900">
+    <main className="min-h-screen pb-12 text-neutral-900">
       <div className="mx-auto w-full max-w-[1400px] px-4 pt-4 sm:px-6 xl:px-[38px]">
         <PageBanner
           image={pageBanners.profile}
           title="Minhas propostas"
-          subtitle="Acompanhe as propostas de troca que você enviou ou recebeu."
+          subtitle={
+            <>
+              Acompanhe as propostas de troca que você
+              <br />
+              enviou ou recebeu.
+            </>
+          }
           symbol="⇄"
         />
         {user && <ProposalsContent key={user.id} search={search} />}
@@ -91,8 +98,8 @@ function ProposalsContent({ search }: { search: TradeProposalsSearch }) {
   }
 
   return (
-    <div className="mt-6 space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+    <div className="mt-10 space-y-4">
+      <div className="filter-panel flex flex-wrap items-center justify-between gap-3">
         <div
           role="tablist"
           aria-label="Propostas por direção"
@@ -109,7 +116,7 @@ function ProposalsContent({ search }: { search: TradeProposalsSearch }) {
                 onClick={() => changeDirection(direction)}
                 className={`min-h-11 rounded-full px-5 py-2 text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500 ${
                   selected
-                    ? 'bg-primary-900 text-white shadow-sm'
+                    ? 'button-vignette bg-primary-900 text-white shadow-sm'
                     : 'border border-neutral-300 bg-white text-primary-900 hover:bg-primary-100'
                 }`}
               >
@@ -131,7 +138,7 @@ function ProposalsContent({ search }: { search: TradeProposalsSearch }) {
                 status: selected?.value,
               })
             }}
-            className="min-h-11 min-w-0 flex-1 rounded-control border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 focus-visible:outline-2 focus-visible:outline-secondary-500"
+            className="filter-field min-h-11 min-w-0 flex-1 rounded-control border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 focus-visible:outline-2 focus-visible:outline-secondary-500"
           >
             <option value="">Todos</option>
             {TRADE_STATUSES.map((status) => (
@@ -419,7 +426,7 @@ function ProposalsEmpty({
           <Link
             to="/marketplace"
             search={{ sort: 'recent' }}
-            className="inline-flex min-h-11 items-center rounded-control bg-primary-900 px-5 py-2 text-sm font-semibold text-white hover:bg-primary-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500"
+            className="inline-flex min-h-11 items-center rounded-control bg-primary-900 button-vignette px-5 py-2 text-sm font-semibold text-white hover:bg-primary-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500"
           >
             Explorar anúncios
           </Link>
@@ -439,35 +446,14 @@ function ProposalPager({
   const first = data.number * data.size + 1
   const last = first + data.content.length - 1
   return (
-    <nav
-      aria-label="Paginação de propostas"
+    <div
       className="mt-5 flex flex-wrap items-center justify-between gap-4 border-t border-neutral-200 pt-4"
     >
       <p className="text-sm text-neutral-700">
         Exibindo {first}–{last} de {data.totalElements}
       </p>
-      {data.totalPages > 1 && (
-        <div className="flex items-center gap-3">
-          <Button
-            variant="outline"
-            disabled={data.first}
-            onClick={() => onPage(data.number - 1)}
-          >
-            Anterior
-          </Button>
-          <span className="text-sm text-neutral-700">
-            Página {data.number + 1} de {data.totalPages}
-          </span>
-          <Button
-            variant="outline"
-            disabled={data.last}
-            onClick={() => onPage(data.number + 1)}
-          >
-            Próxima
-          </Button>
-        </div>
-      )}
-    </nav>
+      <PageNavigation label="Paginação de propostas" page={data.number + 1} totalPages={data.totalPages} onPageChange={(page) => onPage(page - 1)} />
+    </div>
   )
 }
 

@@ -6,7 +6,7 @@ export function RootLayout() {
 
 export function NotFound() {
   return (
-    <main className="flex min-h-svh flex-col items-center justify-center gap-4 px-6 text-center">
+    <main className="page-vignette flex min-h-svh flex-col items-center justify-center gap-4 px-6 text-center">
       <h1 className="font-display text-3xl font-bold text-primary-900">
         Página não encontrada
       </h1>

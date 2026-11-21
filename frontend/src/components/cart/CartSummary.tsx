@@ -48,7 +48,7 @@ export function CartSummary({ items }: { items: CartItem[] }) {
   return (
     <aside
       aria-labelledby={`${hintId}-title`}
-      className="rounded-xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-6 lg:sticky lg:top-24"
+      className="rounded-xl border border-rare-500 bg-white p-5 shadow-sm sm:p-6 lg:sticky lg:top-24"
     >
       <h2
         id={`${hintId}-title`}

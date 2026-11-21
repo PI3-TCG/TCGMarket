@@ -1,7 +1,10 @@
-import { useState, type ReactNode } from 'react'
+import { type ReactNode } from 'react'
 import { Link } from '@tanstack/react-router'
-import { Badge } from '@/components/ui/Badge'
-import { Card } from '@/components/ui/Card'
+import { TradingCardImage } from '@/components/ui/TradingCard'
+import {
+  tradingCardRarity,
+  tradingCardSurface,
+} from '@/components/ui/tradingCardStyles'
 import type { CatalogCard as CatalogCardData } from '@/types/Catalog'
 
 type CatalogCardProps = {
@@ -11,36 +14,25 @@ type CatalogCardProps = {
 }
 
 export function CatalogCard({ card, onSelect, footer }: CatalogCardProps) {
-  const [imageFailed, setImageFailed] = useState(false)
   const cardContent = (
     <>
-      <div className="relative flex aspect-[4/5] items-center justify-center overflow-hidden bg-neutral-50 p-3">
-        {card.imageUrl && !imageFailed ? (
-          <img
-            src={card.imageUrl}
-            alt={`Carta ${card.name}`}
-            loading="lazy"
-            onError={() => setImageFailed(true)}
-            className="h-full w-full object-contain drop-shadow-md transition-transform duration-300 group-hover:scale-[1.04]"
-          />
-        ) : (
-          <div className="flex flex-col items-center gap-2 text-neutral-500">
-            <span aria-hidden="true" className="text-4xl">
-              🃏
-            </span>
-            <span className="text-xs">Imagem indisponível</span>
-          </div>
-        )}
-      </div>
+      <TradingCardImage url={card.imageUrl} name={card.name} />
 
       <div className="flex flex-1 flex-col gap-2 p-3.5">
         <h3 className="font-display line-clamp-1 text-sm font-bold text-neutral-900">
           {card.name}
         </h3>
         {card.namePt && (
-          <p lang="pt-BR" className="-mt-1.5 line-clamp-1 text-xs text-neutral-600">
+          <p
+            lang="pt-BR"
+            className="-mt-1.5 line-clamp-1 text-xs text-neutral-600"
+          >
             {card.namePt}
           </p>
+        )}
+
+        {card.officialRarity && (
+          <span className={tradingCardRarity}>{card.officialRarity}</span>
         )}
 
         <p className="line-clamp-1 text-xs text-neutral-500">
@@ -48,17 +40,6 @@ export function CatalogCard({ card, onSelect, footer }: CatalogCardProps) {
           {card.cardNumber ? ` · Nº ${card.cardNumber}` : ''}
         </p>
 
-        <div className="mt-auto pt-1">
-          <Badge
-            variant={
-              card.officialRarity.toLowerCase().includes('rare')
-                ? 'rare'
-                : 'neutral'
-            }
-          >
-            {card.officialRarity}
-          </Badge>
-        </div>
         {footer && (
           <div className="border-t border-neutral-100 pt-2 text-xs text-neutral-700">
             {footer}
@@ -69,7 +50,7 @@ export function CatalogCard({ card, onSelect, footer }: CatalogCardProps) {
   )
 
   return (
-    <Card interactive className="group h-full">
+    <article className={tradingCardSurface}>
       {onSelect ? (
         <button
           type="button"
@@ -88,6 +69,6 @@ export function CatalogCard({ card, onSelect, footer }: CatalogCardProps) {
           {cardContent}
         </Link>
       )}
-    </Card>
+    </article>
   )
 }

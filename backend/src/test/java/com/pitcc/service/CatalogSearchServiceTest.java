@@ -65,11 +65,12 @@ class CatalogSearchServiceTest {
     verifyNoInteractions(repository);
   }
 
-  @Test void shouldCombineNameSetRarityAndTypeFilters() {
+  @Test void shouldCombineNameSetRarityTypeAndCardNumberFilters() {
     when(mongoTemplate.count(any(Query.class), eq(Card.class))).thenReturn(1L);
     when(mongoTemplate.find(any(Query.class), eq(Card.class))).thenReturn(List.of(pikachu()));
 
-    service.search("pokemon", request(" Pika.chu ", " Base ", "Common", "pokemon", 2, 10, "name-desc"));
+    service.search("pokemon", new CatalogSearchRequest(
+        " Pika.chu ", " Base ", "Common", "pokemon", 2, 10, "name-desc", " 025.A "));
 
     ArgumentCaptor<Query> query = ArgumentCaptor.forClass(Query.class);
     verify(mongoTemplate).find(query.capture(), eq(Card.class));
@@ -78,6 +79,11 @@ class CatalogSearchServiceTest {
     assertEquals("Base", filter.get("edition"));
     assertEquals("Common", filter.get("officialRarity"));
     assertEquals("POKEMON", filter.get("pokemonCardType"));
+    var cardNumber = (java.util.regex.Pattern) filter.get("cardNumber");
+    assertTrue(cardNumber.matcher("025.a").find());
+    assertFalse(cardNumber.matcher("25.A").find());
+    assertFalse(cardNumber.matcher("025-A").find());
+    assertFalse(cardNumber.matcher("025.AA").find());
     var nameOr = (List<?>) ((Document) ((List<?>) filter.get("$and")).get(0)).get("$or");
     var name = (java.util.regex.Pattern) ((Document) nameOr.get(0)).get("name");
     var ptName = (java.util.regex.Pattern) ((Document) nameOr.get(1)).get("localizations.pt.name");

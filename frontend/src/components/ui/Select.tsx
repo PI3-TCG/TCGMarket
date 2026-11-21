@@ -80,7 +80,7 @@ export function Select({
     const listbox = option.closest<HTMLElement>('[role="listbox"]')
     if (!listbox) return
 
-    const optionTop = option.offsetTop - listbox.offsetTop
+    const optionTop = option.getBoundingClientRect().top - listbox.getBoundingClientRect().top + listbox.scrollTop
     const optionBottom = optionTop + option.offsetHeight
 
     if (optionTop < listbox.scrollTop) {
@@ -191,6 +191,7 @@ export function Select({
         onKeyDown={onKeyDown}
         className={cn(
           'inline-flex h-10 w-full items-center justify-between gap-2 rounded-control border bg-white px-3 text-left text-sm transition-colors',
+          variant === 'filter' && 'filter-field button-vignette',
           'cursor-pointer disabled:cursor-not-allowed disabled:border-neutral-200 disabled:bg-neutral-100 disabled:text-neutral-500',
           focusRing,
           triggerChrome({

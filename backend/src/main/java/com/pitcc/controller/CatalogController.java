@@ -29,11 +29,12 @@ public class CatalogController {
       @RequestParam(required = false) String set,
       @RequestParam(required = false) String rarity,
       @RequestParam(required = false) String type,
+      @RequestParam(required = false) String cardNumber,
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer size,
       @RequestParam(required = false) String sort) {
     return catalogSearchService.search(
-        game, new CatalogSearchRequest(q, set, rarity, type, page, size, sort));
+        game, new CatalogSearchRequest(q, set, rarity, type, page, size, sort, cardNumber));
   }
 
   @GetMapping("/{game}/filters")

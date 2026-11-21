@@ -1,3 +1,4 @@
+import { Pagination as PageNavigation } from '@/components/ui/Pagination'
 import { CollectionFilters } from '@/components/collection/CollectionFilters'
 import { emptyCollectionFilters } from '@/components/collection/collectionFilterDefaults'
 import type { CollectionFilterValues } from '@/types/Collection'
@@ -10,7 +11,6 @@ import {
   getPublicCollectionFilterOptions,
 } from '@/services/profileApi'
 import { Card } from '@/components/ui/Card'
-import { Button } from '@/components/ui/Button'
 import { CatalogCard } from '@/components/catalog/CatalogCard'
 import { gameLabel } from './profileFormat'
 import type { CardGame } from '@/types/User'
@@ -33,7 +33,7 @@ export function PublicCollector({ profile }: { profile: ProfileViewData }) {
         profile={profile}
         avatarUrl={state.status === 'ready' ? state.data.avatarUrl : null}
       />
-      <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+      <div className="grid items-start gap-5 pt-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
         <AboutCard profile={profile} />
         <GamesCard profile={profile} title="TCGs que joga" />
       </div>
@@ -44,7 +44,7 @@ export function PublicCollector({ profile }: { profile: ProfileViewData }) {
       ) : (
         <>
           <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
-            <Card className="p-5">
+            <Card className="border-rare-500/70 p-5">
               <h2 className="flex items-center gap-2 text-lg font-semibold text-primary-900">
                 <Icon name="handshake" size={24} />
                 Transações concluídas
@@ -55,7 +55,7 @@ export function PublicCollector({ profile }: { profile: ProfileViewData }) {
             </Card>
             <ProfileReputation key={profile.username} username={profile.username} />
           </div>
-          <section id="colecao" className="scroll-mt-6">
+          <section id="colecao" className="panel-ornaments scroll-mt-6 rounded-xl border border-rare-500 bg-white p-4">
             <h2 className="mb-4 font-display text-2xl font-bold text-primary-900">
               Coleção de @{profile.username}
             </h2>
@@ -184,28 +184,7 @@ function PublicCardsResults({
           : 'registros encontrados'}
       </p>
       {(!data.first || !data.last) && (
-        <nav
-          aria-label="Paginação da coleção pública"
-          className="flex items-center justify-center gap-4"
-        >
-          <Button
-            variant="outline"
-            disabled={data.first}
-            onClick={() => onPageChange(page - 1)}
-          >
-            Anterior
-          </Button>
-          <span aria-live="polite" className="text-sm">
-            Página {data.number + 1}
-          </span>
-          <Button
-            variant="outline"
-            disabled={data.last}
-            onClick={() => onPageChange(page + 1)}
-          >
-            Próxima
-          </Button>
-        </nav>
+        <PageNavigation label="Paginação da coleção pública" page={data.number + 1} totalPages={data.totalPages} onPageChange={(page) => onPageChange(page - 1)} />
       )}
     </div>
   )

@@ -7,7 +7,7 @@ type MyAdsFiltersProps = {
 }
 
 const fieldClass =
-  'mt-2 min-h-11 w-full rounded-control border border-neutral-200 bg-white px-3 text-sm text-neutral-900 focus:border-primary-900 focus:outline-none focus:ring-2 focus:ring-secondary-500'
+  'mt-2 min-h-11 w-full rounded-control border border-neutral-200 bg-white filter-field px-3 text-sm text-neutral-900 focus:border-primary-900 focus:outline-none focus:ring-2 focus:ring-secondary-500'
 
 export function MyAdsFilters({ onApply }: MyAdsFiltersProps) {
   const [draft, setDraft] = useState<OwnAdFilterValues>(emptyOwnAdFilters)
@@ -25,7 +25,7 @@ export function MyAdsFilters({ onApply }: MyAdsFiltersProps) {
   }
 
   return (
-    <aside className="min-w-0 self-start rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
+    <aside className="filter-panel panel-ornaments min-w-0 self-start">
       <h2 className="mb-5 text-sm font-bold text-primary-900">FILTROS</h2>
 
       <form
@@ -98,7 +98,7 @@ export function MyAdsFilters({ onApply }: MyAdsFiltersProps) {
 
         <button
           type="submit"
-          className="min-h-11 w-full cursor-pointer rounded-lg bg-primary-900 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500"
+          className="filter-button min-h-11 w-full cursor-pointer"
         >
           Aplicar filtros
         </button>

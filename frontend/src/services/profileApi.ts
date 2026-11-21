@@ -66,6 +66,7 @@ export interface PublicCollectionPage {
   first: boolean
   last: boolean
   totalElements: number
+  totalPages: number
 }
 export const getPublicCollection = async (
   username: string,

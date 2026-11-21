@@ -1,3 +1,5 @@
+import { BannerGoldDivider } from '@/components/layout/PageBanner'
+import { tradingCardGrid } from '@/components/ui/tradingCardStyles'
 import { CollectionItemCard } from '@/components/collection/CollectionItemCard'
 import { Icon } from '@/components/ui/Icon'
 import { collectionMock } from '@/mocks/collectionMock'
@@ -50,7 +52,7 @@ export function CollectionPreviewPage() {
     })
 
     return (
-        <main className="mx-auto w-full max-w-[1600px] bg-neutral-50 px-4 py-6 sm:px-6 lg:px-8">
+        <main className="mx-auto w-full max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8">
             <div className="space-y-6">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                     <nav aria-label="Navegação estrutural">
@@ -78,16 +80,11 @@ export function CollectionPreviewPage() {
                     </span>
                 </div>
 
-                <header className="relative isolate overflow-hidden rounded-2xl bg-primary-800 shadow-sm">
+                <header className="relative isolate rounded-2xl bg-primary-800 shadow-sm">
                     <img
                         src={collectionBanner}
                         alt=""
-                        className="absolute inset-0 -z-20 h-full w-full object-cover object-right"
-                    />
-
-                    <div
-                        aria-hidden="true"
-                        className="absolute inset-0 -z-10 bg-gradient-to-r from-black/80 via-black/40 to-transparent"
+                        className="absolute inset-0 -z-20 h-full w-full rounded-[inherit] object-cover object-right"
                     />
 
                     <div className="flex min-h-52 items-center px-6 py-8 sm:min-h-64 sm:px-8">
@@ -97,7 +94,7 @@ export function CollectionPreviewPage() {
                                 Seu universo de cartas
                             </span>
 
-                            <h1 className="font-display text-3xl font-bold text-white sm:text-4xl">
+                            <h1 className="banner-text-outline font-display text-3xl font-bold text-white sm:text-4xl">
                                 Minha Coleção
                             </h1>
 
@@ -106,6 +103,7 @@ export function CollectionPreviewPage() {
                             </p>
                         </div>
                     </div>
+                    <BannerGoldDivider />
                 </header>
 
                 <div
@@ -131,7 +129,7 @@ export function CollectionPreviewPage() {
                             aria-pressed={previewStatus === option.value}
                             onClick={() => setPreviewStatus(option.value)}
                             className={`cursor-pointer rounded-lg px-3 py-2 text-xs font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500 ${previewStatus === option.value
-                                ? 'bg-primary-900 text-white'
+                                ? 'bg-primary-900 button-vignette text-white'
                                 : 'bg-primary-100 text-primary-900 hover:bg-primary-300'
                                 }`}
                         >
@@ -159,7 +157,7 @@ export function CollectionPreviewPage() {
 
                     <section
                         aria-labelledby="collection-items-title"
-                        className="min-w-0 rounded-xl border border-neutral-200 bg-white p-4"
+                        className="min-w-0 panel-ornaments rounded-xl border border-rare-500 bg-white p-4"
                     >
                         <h2
                             id="collection-items-title"
@@ -178,7 +176,7 @@ export function CollectionPreviewPage() {
                                 onRetry={() => setPreviewStatus('success')}
                             />
                         ) : filteredItems.length > 0 ? (
-                            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5">
+                            <div className={tradingCardGrid}>
                                 {filteredItems.map((item) => (
                                     <CollectionItemCard key={item.id} item={item} />
                                 ))}

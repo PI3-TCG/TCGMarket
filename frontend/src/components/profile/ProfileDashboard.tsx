@@ -30,7 +30,7 @@ export function ReputationCard({
   loading?: boolean
 }) {
   return (
-    <Card className="h-full p-5" aria-busy={loading}>
+    <Card className="h-full border-rare-500/70 p-5" aria-busy={loading}>
       <h2 className="flex items-center gap-2 text-lg font-semibold text-primary-900">
         <Icon name="shield-check" size={24} />
         Reputação
@@ -62,7 +62,7 @@ export function ReviewsCard({
   loading?: boolean
 }) {
   return (
-    <Card className="h-full p-5" aria-busy={loading}>
+    <Card className="h-full border-rare-500/70 p-5" aria-busy={loading}>
       <h2 className="flex items-center gap-2 text-lg font-semibold text-primary-900">
         <Icon name="message-square" size={24} />
         Avaliações
@@ -178,7 +178,7 @@ export function ProfileDashboard({
       : `${summary.average.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} / 5`
     : reputationState.status === 'loading' ? 'Carregando…' : 'Indisponível'
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 pt-4">
       <section
         aria-label="Resumo da conta"
         aria-busy={state.status === 'loading'}
@@ -205,7 +205,7 @@ export function ProfileDashboard({
             ].map(([label, value, icon]) => (
               <Card
                 key={label}
-                className="grid h-full min-h-[140px] grid-rows-[minmax(3rem,1fr)_3rem] p-4 text-center"
+                className="grid h-full min-h-[140px] grid-rows-[minmax(3rem,1fr)_3rem] border-rare-500/70 p-4 text-center"
               >
                 <p className="flex items-center justify-center gap-2 text-sm text-neutral-700">
                   <Icon name={icon as IconName} size={20} />
@@ -229,7 +229,7 @@ export function ProfileDashboard({
           <Link
             key={item.to}
             to={item.to}
-            className="flex min-h-[160px] flex-col items-center justify-center rounded-xl border border-neutral-200 bg-white p-5 text-center hover:border-primary-900 focus-visible:outline-2 focus-visible:outline-secondary-500"
+            className="flex min-h-[160px] flex-col items-center justify-center rounded-xl border border-rare-500/70 bg-white p-5 text-center hover:border-rare-500 focus-visible:outline-2 focus-visible:outline-secondary-500"
           >
             <Icon name={item.icon} size={24} />
             <h2 className="mt-3 font-semibold text-primary-900">
@@ -251,7 +251,7 @@ export function ProfileDashboard({
       )}
       {privacy}
       {collection}
-      <Card className="p-5">
+      <Card className="border-rare-500/70 p-5">
         <h2 className="flex items-center gap-2 text-lg font-semibold text-primary-900">
           <Icon name="clock" size={24} />
           Atividades recentes

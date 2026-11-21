@@ -1,4 +1,4 @@
-import { PageBanner } from '@/components/layout/PageBanner'
+import { BannerGoldDivider, PageBanner } from '@/components/layout/PageBanner'
 import { pageBanners } from '@/config/pageBanners'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
@@ -114,18 +114,17 @@ export function ProfileHero({
   profile: ProfileViewData
   action?: ReactNode
 }) {
-  const location = formatLocation(profile.city, profile.state)
   const games = PROFILE_GAMES.filter((game) =>
     profile.favoriteGames.includes(game.value),
   )
 
   return (
-    <header className="relative isolate min-h-[200px] overflow-hidden rounded-xl border-2 border-[#FCD203]/70 bg-[#130b30] shadow-sm">
+    <header className="relative isolate min-h-[200px] rounded-xl border-2 border-b-0 border-[#FCD203]/70 bg-[#130b30] shadow-sm">
       <img
         src={pageBanners.profile}
         alt=""
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 -z-10 h-full w-full object-cover"
+        className="pointer-events-none absolute inset-0 -z-10 h-full w-full rounded-[inherit] object-cover"
       />
       <div
         className={cn(
@@ -136,7 +135,7 @@ export function ProfileHero({
         {avatar ?? <Avatar name={profile.name} image={avatarUrl} />}
         <div className="min-w-0 flex-1 space-y-2">
           <div className="flex flex-wrap items-center gap-2">
-            <h1 className="font-display text-2xl font-bold break-words text-white sm:text-4xl">
+            <h1 className="banner-text-outline font-display text-2xl font-bold break-words text-white sm:text-4xl">
               {profile.name}
             </h1>
             {profile.administrator ? (
@@ -149,18 +148,7 @@ export function ProfileHero({
               <CalendarIcon />
               {formatMemberSince(profile.registrationDate)}
             </li>
-            {location ? (
-              <li className="flex items-center gap-1">
-                <PinIcon />
-                {location}
-              </li>
-            ) : null}
           </ul>
-          {profile.bio ? (
-            <p className="line-clamp-2 max-w-2xl text-sm text-white/90">
-              {profile.bio}
-            </p>
-          ) : null}
           {games.length > 0 ? (
             <ul className="flex flex-wrap gap-2" aria-label="TCGs que joga">
               {games.map((game) => (
@@ -180,6 +168,7 @@ export function ProfileHero({
           <div className="col-span-2 min-w-0 lg:col-span-1">{action}</div>
         ) : null}
       </div>
+      <BannerGoldDivider />
     </header>
   )
 }
@@ -196,7 +185,7 @@ export function GamesCard({
   if (!editAction && profile.favoriteGames.length === 0) return null
 
   return (
-    <Card className="p-5">
+    <Card className="border-rare-500/70 p-5">
       <div className="flex items-center justify-between gap-3">
         <h2 className="text-base font-semibold text-neutral-900">{title}</h2>
         {editAction}
@@ -239,7 +228,7 @@ export function AboutCard({
   const location = formatLocation(profile.city, profile.state)
 
   return (
-    <Card className="p-5">
+    <Card className="border-rare-500/70 p-5">
       <h2 className="text-base font-semibold text-neutral-900">Sobre mim</h2>
       {profile.bio ? (
         <p className="mt-3 text-sm break-words whitespace-pre-line text-neutral-700">
@@ -333,7 +322,7 @@ export function ProfileStatus({
       {notFound ? (
         <Link
           to="/"
-          className="mt-2 inline-flex h-10 items-center rounded-control bg-primary-900 px-4 text-sm font-semibold text-white hover:bg-primary-800"
+          className="mt-2 inline-flex h-10 items-center rounded-control bg-primary-900 button-vignette px-4 text-sm font-semibold text-white hover:bg-primary-800"
         >
           Voltar para o início
         </Link>

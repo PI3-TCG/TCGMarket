@@ -1,3 +1,5 @@
+import { Pagination as PageNavigation } from '@/components/ui/Pagination'
+import { tradingCardGrid } from '@/components/ui/tradingCardStyles'
 import { FeedbackState } from '@/components/ui/FeedbackState'
 import { useEffect, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
@@ -39,11 +41,17 @@ export function MyCollectionPage() {
   const { user } = useSession()
 
   return (
-    <main className="min-h-screen bg-[#FAFBFE] pb-12 text-[#171443]">
+    <main className="min-h-screen pb-12 text-[#171443]">
       <div className="mx-auto w-full max-w-[1600px] px-4 pt-4 sm:px-6 xl:px-[38px]">
         <PageBanner
           title="Minha Coleção"
-          subtitle="Organize seu acervo e acompanhe sua jornada como colecionador."
+          subtitle={
+            <>
+              Organize seu acervo e acompanhe sua jornada
+              <br />
+              como colecionador.
+            </>
+          }
         />
 
         {user && <CollectionContent key={user.id} />}
@@ -98,7 +106,7 @@ function CollectionContent() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pt-4">
       <CollectionSummaryData key={summaryAttempt} />
 
       <button
@@ -223,7 +231,7 @@ function CollectionPageData({
     <>
       <section
         aria-label="Itens da coleção"
-        className="rounded-xl border border-neutral-200 bg-white p-4"
+        className="panel-ornaments rounded-xl border border-rare-500 bg-white p-4"
       >
         <AppliedCollectionFilters filters={filters} />
 
@@ -258,7 +266,7 @@ function CollectionPageData({
             </h2>
 
             {result.data.content.length > 0 ? (
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5">
+              <div className={tradingCardGrid}>
                 {result.data.content.map((item) => (
                   <CollectionItemCard
                     key={item.id}
@@ -276,32 +284,8 @@ function CollectionPageData({
               </p>
             )}
 
-            <nav
-              aria-label="Paginação da coleção"
-              className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-neutral-200 pt-4"
-            >
-              <button
-                type="button"
-                disabled={page === 0}
-                onClick={() => onPageChange(Math.max(0, page - 1))}
-                className={pageButtonClass}
-              >
-                Anterior
-              </button>
-
-              <span className="text-sm text-neutral-700">
-                Página {result.data.number + 1} de {result.data.totalPages}
-              </span>
-
-              <button
-                type="button"
-                disabled={result.data.last}
-                onClick={() => onPageChange(page + 1)}
-                className={pageButtonClass}
-              >
-                Próxima
-              </button>
-
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-3 border-t border-neutral-200 pt-4">
+              <PageNavigation label="Paginação da coleção" page={result.data.number + 1} totalPages={result.data.totalPages} onPageChange={(page) => onPageChange(page - 1)} />
               {result.data.content.length === 0 && (
                 <button
                   type="button"
@@ -311,7 +295,7 @@ function CollectionPageData({
                   Primeira página
                 </button>
               )}
-            </nav>
+            </div>
           </>
         )}
       </section>

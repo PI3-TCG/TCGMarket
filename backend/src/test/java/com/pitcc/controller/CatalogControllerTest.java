@@ -46,7 +46,7 @@ class CatalogControllerTest {
   @Test
   void shouldReturnAPageOfCardsFromTheRequestedCatalog() throws Exception {
     CatalogSearchRequest request =
-        new CatalogSearchRequest("charizard", "Base", "Rare Holo", "POKEMON", 1, 10, "name-desc");
+        new CatalogSearchRequest("charizard", "Base", "Rare Holo", "POKEMON", 1, 10, "name-desc", "004");
     when(catalogSearchService.search("pokemon", request))
         .thenReturn(CatalogPageResponse.of(List.of(new CatalogCardResponse(
             "6650a1",
@@ -66,6 +66,7 @@ class CatalogControllerTest {
             .param("set", "Base")
             .param("rarity", "Rare Holo")
             .param("type", "POKEMON")
+            .param("cardNumber", "004")
             .param("page", "1")
             .param("size", "10")
             .param("sort", "name-desc"))

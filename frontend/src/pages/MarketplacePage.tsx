@@ -1,3 +1,5 @@
+import { Pagination as PageNavigation } from '@/components/ui/Pagination'
+import { tradingCardGrid } from '@/components/ui/tradingCardStyles'
 import { FeedbackState } from '@/components/ui/FeedbackState'
 import { pageBanners } from '@/config/pageBanners'
 import { useCallback, useState } from 'react'
@@ -26,9 +28,6 @@ type Query = {
   filters: FilterValues
 }
 
-const gridClass =
-  'grid gap-3 grid-cols-[repeat(auto-fill,minmax(min(100%,max(10.5rem,calc((100%-3rem)/5))),1fr))]'
-  
 const sortOptions: {
   value: MarketplaceSort
   label: string
@@ -61,15 +60,21 @@ export function MarketplacePage({ sort = 'recent' }: Props) {
   }
 
   return (
-    <main className="min-h-screen bg-neutral-50 pb-12 text-neutral-900">
+    <main className="min-h-screen pb-12 text-neutral-900">
       <div className="mx-auto w-full max-w-[1600px] px-4 pt-4 sm:px-6 xl:px-[38px]">
         <PageBanner
           image={pageBanners.marketplace}
           title="Marketplace"
-          subtitle="Encontre cartas para comprar ou trocar e complete sua coleção."
+          subtitle={
+            <>
+              Encontre cartas para comprar ou trocar.
+              <br />
+              Complete sua coleção!
+            </>
+          }
         />
 
-        <div className="grid items-start gap-6 lg:grid-cols-[240px_minmax(0,1fr)]">
+        <div className="grid items-start gap-6 pt-5 lg:grid-cols-[240px_minmax(0,1fr)]">
           <ResponsiveFilters>
             <MarketplaceFilters onApply={applyFilters} />
           </ResponsiveFilters>
@@ -143,7 +148,7 @@ function MarketplaceResults({
   return (
     <section
       aria-label="Anúncios disponíveis"
-      className="min-w-0 rounded-xl border border-neutral-200 bg-white p-4"
+      className="min-w-0 panel-ornaments rounded-xl border border-rare-500 bg-white p-4"
     >
       <div className="mb-4 flex flex-wrap items-center justify-between gap-4 border-b border-primary-300/20 pb-4">
         <div>
@@ -186,7 +191,7 @@ function MarketplaceResults({
               }
               className={`rounded-lg border px-3 py-2 text-xs font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500 ${
                 sort === option.value
-                  ? 'border-transparent bg-gradient-to-r from-primary-900 to-primary-500 text-white'
+                  ? 'border-transparent bg-primary-900 button-vignette text-white'
                   : 'border-primary-300/40 bg-white text-primary-900 hover:bg-primary-100'
               }`}
             >
@@ -223,7 +228,7 @@ function MarketplaceResults({
           role="status"
           aria-label="Carregando anúncios"
           aria-busy="true"
-          className={gridClass}
+          className={tradingCardGrid}
         >
           {Array.from({ length: 10 }, (_, index) => (
             <div
@@ -231,7 +236,7 @@ function MarketplaceResults({
               aria-hidden="true"
               className="overflow-hidden rounded-xl border border-neutral-200 bg-white motion-safe:animate-pulse"
             >
-              <div className="aspect-[4/5] bg-primary-100/70" />
+              <div className="aspect-square bg-primary-100" />
 
               <div className="space-y-3 p-3">
                 <div className="h-4 w-3/4 rounded bg-neutral-200" />
@@ -290,7 +295,7 @@ function MarketplaceResults({
         </div>
       ) : (
         <>
-          <div className={gridClass}>
+          <div className={tradingCardGrid}>
             {data.content.map((ad) => (
               <MarketplaceAdCard key={ad.id} ad={ad} />
             ))}
@@ -305,33 +310,7 @@ function MarketplaceResults({
             </p>
 
             {data.totalPages > 1 && (
-              <nav
-                aria-label="Paginação do marketplace"
-                className="mt-4 flex flex-wrap items-center justify-between gap-3"
-              >
-                <Button
-                  variant="outline"
-                  disabled={data.page <= 1}
-                  onClick={() => changePage(data.page - 1)}
-                >
-                  Anterior
-                </Button>
-
-                <span
-                  className="text-sm text-neutral-700"
-                  aria-live="polite"
-                >
-                  Página {data.page} de {data.totalPages}
-                </span>
-
-                <Button
-                  variant="outline"
-                  disabled={data.page >= data.totalPages}
-                  onClick={() => changePage(data.page + 1)}
-                >
-                  Próxima
-                </Button>
-              </nav>
+              <PageNavigation label="Paginação do marketplace" page={data.page} totalPages={data.totalPages} onPageChange={changePage} className="mt-4" />
             )}
           </div>
         </>
