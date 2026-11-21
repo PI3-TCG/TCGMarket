@@ -1,4 +1,3 @@
-import { Pagination as PageNavigation } from '@/components/ui/Pagination'
 import {
   ADMIN_GAMES,
   GAME_LABEL,
@@ -31,9 +30,10 @@ import { fetchCatalogFilters } from '@/services/catalogApi'
 import { useSession } from '@/session'
 import type { AdminCatalogCard, AdminCatalogSearch } from '@/types/AdminCatalog'
 import type { CatalogFilters } from '@/types/Catalog'
+import { pageItems } from '@/utils/pagination'
 import { useNavigate, useSearch } from '@tanstack/react-router'
 import axios from 'axios'
-import { useCallback, useEffect, useId, useState } from 'react'
+import { useCallback, useEffect, useId, useState, type ReactNode } from 'react'
 
 const REASON_MIN = 10
 const REASON_MAX = 300
