@@ -1,9 +1,8 @@
 import { BannerGoldDivider } from '@/components/layout/PageBanner'
-import { Alert } from '@/components/ui/Alert'
 import { GAMES } from '@/components/layout/siteGames'
 import { useSession } from '@/session'
 import { useNavigate } from '@tanstack/react-router'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback } from 'react'
 import hero from '@/assets/images/image-banner-home.png'
 import pokemonBanner from '@/assets/images/image-nav-pokemon.png'
 import magicBanner from '@/assets/images/image-nav-magic.png'
@@ -21,7 +20,10 @@ const exploreImages: Record<string, string> = {
 }
 
 // A Homepage apresenta somente os três TCGs disponíveis no catálogo.
-const HOME_GAMES = GAMES.filter((game) => game.slug !== null)
+const HOME_GAMES = GAMES.filter(
+  (game): game is Extract<(typeof GAMES)[number], { readonly slug: string }> =>
+    game.slug !== null,
+)
 
 // Limita somente a vitrine da Homepage (a API do marketplace mantém a paginação original).
 const HOME_AD_LIMIT = 8
@@ -30,25 +32,8 @@ const HOME_AD_GRID = 'grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4'
 export function HomePage() {
   const navigate = useNavigate()
   const { user, sessionReady } = useSession()
-  const [notice, setNotice] = useState<string | null>(null)
-  useEffect(() => {
-    if (!notice) return
-    const timeout = window.setTimeout(() => setNotice(null), 6000)
-    return () => window.clearTimeout(timeout)
-  }, [notice])
-  function soon(feature: string) {
-    setNotice(`${feature} será implementado no futuro.`)
-  }
   return (
     <div className="min-h-svh text-neutral-900">
-      {notice ? (
-        <div className="fixed top-24 right-4 left-4 z-30 mx-auto max-w-md sm:left-auto">
-          <Alert variant="info" onDismiss={() => setNotice(null)}>
-            {notice}
-          </Alert>
-        </div>
-      ) : null}
-
       <main className="mx-auto w-full max-w-[1600px] space-y-6 px-4 py-6 sm:space-y-8 sm:px-6 lg:px-8">
         {sessionReady && user ? (
           <p role="status" className="sr-only">
