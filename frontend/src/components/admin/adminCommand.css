@@ -1,0 +1,143 @@
+.admin-console {
+  --ink: #2c163b;
+  --edge: #ad90bd;
+  --lavender: #f4eefb;
+  --gold: #f2c552;
+  max-width: 1600px;
+  margin: .6rem auto 0;
+  color: var(--ink);
+}
+.admin-shell {
+  display: grid;
+  grid-template-columns: 194px minmax(0,1fr);
+  min-height: 74vh;
+  background: linear-gradient(135deg,#f1eafa,#fcfbfe 60%,#f4edfa);
+  border: 1px solid #dfd3e9;
+}
+.admin-rail {
+  padding: 1.4rem .65rem;
+  color: white;
+  background: linear-gradient(155deg,#381249,#250d37 65%,#441254);
+  border-inline-end: 2px solid #80558c;
+}
+.admin-rail-title {
+  margin: 0 .5rem 1.3rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid transparent;
+  border-image: linear-gradient(to right,var(--gold),#9e53b4,transparent) 1;
+  font-weight: 750;
+  letter-spacing: .075em;
+  text-transform: uppercase;
+}
+.admin-sections {display: grid;gap: .35rem}
+.admin-nav-link {
+  display: flex;
+  align-items: center;
+  gap: .7rem;
+  min-height: 44px;
+  padding: .55rem .75rem;
+  color: #f5edfb;
+  border-inline-start: 3px solid transparent;
+  border-radius: 3px 9px 3px 3px;
+}
+.admin-nav-link:hover {background: #512662}
+.admin-nav-link[aria-current=page] {
+  background: linear-gradient(105deg,#70328e,#4c1b69);
+  border-color: var(--gold);
+  font-weight: 700;
+}
+.admin-upcoming {margin: 2rem .5rem 0;color:#e5d8ef;font-size:.8rem}
+.admin-upcoming summary {cursor:pointer}
+.admin-upcoming ul {margin-top:.5rem}
+.admin-upcoming li {padding-inline:0;color:#eadff2}
+.admin-workspace {min-width:0;padding:clamp(12px,1.55vw,26px);container-type:inline-size}
+.admin-workspace > nav {margin-bottom:.75rem}
+.admin-overview {display:grid;gap:1rem}
+.admin-heading h1,.admin-management h1 {font:750 clamp(1.5rem,2.3vw,2.35rem)/1.15 var(--font-display,system-ui);color:var(--ink);letter-spacing:-.035em}
+.admin-heading p {margin-top:.35rem;color:#614b70;font-size:.95rem}
+.admin-metrics {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.7rem}
+.admin-dashboard-row {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}
+.admin-catalog-row {grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr)}
+.admin-activity-row {grid-template-columns:minmax(0,1.13fr) minmax(0,.87fr)}
+.admin-panel,.admin-metric {
+  position:relative;
+  isolation:isolate;
+  min-width:0;
+  background:transparent;
+  overflow:visible;
+  border:0;
+  border-radius:0;
+  box-shadow:none;
+}
+.admin-panel::before,.admin-metric::before,.admin-panel::after,.admin-metric::after {
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:-2;
+  pointer-events:none;
+  clip-path:polygon(11px 0,calc(100% - 11px) 0,100% 11px,100% calc(100% - 13px),calc(100% - 13px) 100%,11px 100%,0 calc(100% - 11px),0 11px);
+  background:linear-gradient(135deg,#835799,var(--edge) 55%,#653c7e);
+}
+.admin-panel::after,.admin-metric::after {
+  inset:1px;
+  z-index:-1;
+  background:linear-gradient(135deg,transparent calc(100% - 13px),#d4971a calc(100% - 12px),#ffe19a calc(100% - 9px),#bf7d13),linear-gradient(120deg,#fff,#fcfaff 75%,#f4edf9);
+}
+.admin-panel-heading,.admin-management > div:first-child {
+  margin-inline:1px;
+  background:linear-gradient(to right,transparent,#efe6f84d,transparent);
+  border-color:#ded0ea;
+}
+.admin-panel-heading h2,.admin-metric h2 {
+  color:var(--ink);
+  text-transform:uppercase;
+  font-weight:750;
+  letter-spacing:.025em;
+}
+.admin-metric {padding:1rem}
+.admin-metric > div:first-child > span {color:#65118e;background:#f4eafb;border-radius:7px}
+.admin-number {color:#30173e;font:700 clamp(1.55rem,2.1vw,2.1rem)/1.1 ui-monospace,monospace;font-variant-numeric:tabular-nums}
+.admin-text-link,.admin-panel-heading a {font-size:.8rem;color:#631487;text-decoration:underline;text-underline-offset:.2em;font-weight:650}
+.admin-distribution {display:flex;align-items:center;justify-content:space-evenly;gap:1rem;flex-wrap:wrap;padding:clamp(1rem,1.8vw,2rem)}
+.admin-donut {display:grid;place-items:center;width:clamp(140px,11.5vw,192px);aspect-ratio:1;border-radius:50%;flex:none}
+.admin-donut-center {display:grid;place-content:center;width:62%;aspect-ratio:1;border-radius:50%;background:#fcfaff;text-align:center}
+.admin-distribution table {flex:1 1 185px;max-width:340px}
+.admin-workspace table thead {color:#4d2d5e;background:#f0e7f8}
+.admin-workspace tbody tr:nth-child(even),.admin-management li:nth-child(even) {background:#f5effa}
+.admin-workspace tbody tr:hover,.admin-management li:hover {background:#ece1f5}
+.admin-management {padding-bottom:.25rem}
+.admin-management h1 {font-size:1.55rem}
+.admin-management > div:first-child {padding-block:1.1rem}
+.admin-dialog[role=dialog] {border:1px solid #a37ab6;border-radius:12px;box-shadow:0 20px 65px #25103352}
+.admin-console :is(a,button,summary):focus-visible,.admin-dialog :is(a,button,summary):focus-visible {
+  outline:3px solid #8341ac;outline-offset:2px;
+}
+.admin-rail :is(a,summary):focus-visible {outline-color:#ffe087}
+@container (max-width:900px) {
+  .admin-metrics {grid-template-columns:repeat(2,minmax(0,1fr))}
+  .admin-dashboard-row {grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:900px) {
+  .admin-shell {grid-template-columns:minmax(0,1fr)}
+  .admin-rail {padding:.45rem .65rem;border-inline-end:0;border-bottom:2px solid #aa7e36}
+  .admin-rail-title,.admin-upcoming {display:none}
+  .admin-sections {grid-template-columns:repeat(3,minmax(0,1fr));gap:.2rem}
+  .admin-nav-link {justify-content:center;gap:.35rem;padding:.45rem .15rem;font-size:.85rem}
+}
+@container (max-width:450px) {
+  .admin-metrics {gap:.45rem}
+  .admin-metric {padding:.75rem}
+  .admin-metric > div:first-child {flex-wrap:wrap;gap:.4rem}
+  .admin-metric h2 {font-size:.68rem}
+  .admin-distribution {padding:1rem}
+}
+.admin-panel-heading h2,.admin-heading h1,.admin-management h1 {font-family:var(--font-sans,system-ui)}
+.admin-workspace .overflow-x-auto {position:relative}
+/* The shared navbar has stacking level 70; admin dialogs must cover it. */
+body > div.fixed:has(.admin-dialog) {z-index:90}
+@container (min-width:901px) {
+  .admin-metric {padding:.9rem 1rem .9rem 3.6rem}
+  .admin-metric > div:first-child > span {position:absolute;left:.85rem;top:50%;transform:translateY(-50%);background:transparent}
+  .admin-metric .admin-number {font-size:clamp(1.6rem,2vw,2rem)}
+  .admin-metric > div:nth-child(2) {margin-top:.35rem}
+}

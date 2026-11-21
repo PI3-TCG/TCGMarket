@@ -5,6 +5,7 @@ import { AdminCatalogPage } from '@/pages/admin/AdminCatalogPage'
 import { AdminOverviewPage } from '@/pages/admin/AdminOverviewPage'
 import { AdminUsersPage } from '@/pages/admin/AdminUsersPage'
 import { DesignSystemPage } from '@/pages/DesignSystemPage'
+import { SearchPage } from '@/pages/SearchPage'
 import { HomePage } from '@/pages/HomePage'
 import { LoginPage } from '@/pages/LoginPage'
 import { RegisterPage } from '@/pages/RegisterPage'
@@ -49,6 +50,15 @@ const siteLayoutRoute = createRoute({
   getParentRoute: () => rootRoute,
   id: 'site-layout',
   component: SiteLayout,
+})
+
+const searchRoute = createRoute({
+  getParentRoute: () => siteLayoutRoute,
+  path: '/busca',
+  validateSearch: (search: Record<string, unknown>) => ({
+    q: typeof search.q === 'string' ? search.q.trim().slice(0, 100) : '',
+  }),
+  component: SearchPage,
 })
 
 const indexRoute = createRoute({
@@ -282,6 +292,7 @@ const checkoutResultRoute = createRoute({
 const routeTree = rootRoute.addChildren([
   siteLayoutRoute.addChildren([
     indexRoute,
+    searchRoute,
     marketplaceRoute,
     marketplaceAdRoute,
     cartRoute,

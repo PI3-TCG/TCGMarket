@@ -7,12 +7,18 @@ import {
   STATUS_LABEL,
   reasonError,
 } from '@/components/admin/adminUserFormat'
+import {
+  AdminPanel,
+  AdminState,
+  adminButtonClass,
+  adminFilterClearClass,
+} from '@/components/admin/AdminPanel'
 import { ReasonField } from '@/components/admin/ReasonField'
 import { Alert } from '@/components/ui/Alert'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
-import { Card } from '@/components/ui/Card'
 import { Checkbox } from '@/components/ui/Checkbox'
+import { Icon } from '@/components/ui/Icon'
 import { Input } from '@/components/ui/Input'
 import { Modal } from '@/components/ui/Modal'
 import { Select, type SelectOption } from '@/components/ui/Select'
@@ -71,6 +77,7 @@ export function AdminUsersPage() {
   const [formError, setFormError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
 
+  // Mesmas consultas, permissões e operações da página original.
   const fetcher = useCallback(() => searchUsers(search), [search])
   const { state, retry } = useRemoteData(
     `admin-users:${JSON.stringify(search)}:${version}`,
@@ -149,7 +156,7 @@ export function AdminUsersPage() {
   const hasFilters = Boolean(search.q || search.role || search.status)
 
   return (
-    <div className="space-y-4">
+    <div className="min-w-0 space-y-4 pb-6">
       {error ? (
         <Alert variant="error" onDismiss={() => setError(null)}>
           {error}
@@ -161,31 +168,45 @@ export function AdminUsersPage() {
         </Alert>
       ) : null}
 
-      <Card className="overflow-visible">
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-neutral-200 px-5 py-4">
-          <h2 className="text-lg font-semibold text-neutral-900">
-            Gerenciamento de usuários
-          </h2>
-          <p className="text-sm text-neutral-500" aria-live="polite">
+      <AdminPanel
+        title="Gerenciamento de usuários"
+        icon="user"
+        description="Consulte contas, revise permissões e registre ações de moderação."
+        action={
+          <p
+            className="text-xs font-semibold text-[#604473]"
+            aria-live="polite"
+          >
             {data
               ? `${numberFormat.format(data.totalElements)} ${data.totalElements === 1 ? 'usuário encontrado' : 'usuários encontrados'}`
               : null}
           </p>
-        </div>
-
-        <div className="space-y-4 p-5">
-          <div className="filter-panel panel-ornaments grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        }
+      >
+        <div className="border-b border-[#E4D2EC] bg-[linear-gradient(95deg,#FCF7FF,#F8EEFC)] p-4 sm:p-5">
+          <div className="mb-3 flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-[0.13em] text-[#673087]">
+            <Icon name="search" size={16} /> Buscar e filtrar
+          </div>
+          <div className="grid min-w-0 gap-3 sm:grid-cols-2 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)]">
             <form
               role="search"
               onSubmit={submitSearch}
-              className="sm:col-span-2"
+              className="min-w-0 sm:col-span-2 xl:col-span-1"
             >
+              <label
+                htmlFor="admin-user-search-label"
+                className="mb-1.5 block text-xs font-bold text-[#4A2B59]"
+              >
+                Nome, usuário ou e-mail
+              </label>
               <Input
+                id="admin-user-search-label"
                 variant="search"
                 aria-label="Pesquisar por nome, usuário ou e-mail"
                 value={searchInput}
                 onChange={(event) => setSearchInput(event.target.value)}
-                placeholder="Pesquisar por nome, usuário ou e-mail"
+                placeholder="Pesquisar usuários"
+                className="w-full !border-[#D5B8E1] !bg-white focus-visible:!outline-[#8841A0]"
               />
             </form>
             <FilterSelect
@@ -207,66 +228,82 @@ export function AdminUsersPage() {
           </div>
 
           {hasFilters ? (
-            <button
-              type="button"
-              onClick={() => {
-                setSearchInput('')
-                setSearch({ page: 1 })
-              }}
-              className="text-xs font-semibold text-primary-900 underline underline-offset-2"
-            >
-              Limpar filtros
-            </button>
+            <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+              <span className="text-xs text-[#715B7B]">
+                Filtros ativos na listagem.
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchInput('')
+                  setSearch({ page: 1 })
+                }}
+                className={adminFilterClearClass}
+              >
+                <Icon name="close" size={16} /> Limpar filtros
+              </button>
+            </div>
           ) : null}
         </div>
 
         {state.status === 'loading' ? (
-          <p role="status" className="px-5 pb-6 text-sm text-neutral-500">
-            Carregando usuários...
-          </p>
+          <AdminState status="loading" message="Carregando usuários..." />
         ) : state.status !== 'ready' ? (
-          <div role="alert" className="space-y-3 px-5 pb-6 text-sm">
-            <p className="text-neutral-700">
-              Não foi possível carregar os usuários.
-            </p>
-            <Button variant="outline" onClick={retry}>
-              Tentar novamente
-            </Button>
-          </div>
+          <AdminState
+            status="error"
+            message="Não foi possível carregar os usuários."
+            onRetry={retry}
+          />
         ) : rows.length === 0 ? (
-          <p className="px-5 pb-6 text-sm text-neutral-500">
-            {hasFilters
-              ? 'Nenhum usuário encontrado com esses filtros.'
-              : 'Nenhum usuário cadastrado.'}
-          </p>
+          <AdminState
+            status="empty"
+            message={
+              hasFilters
+                ? 'Nenhum usuário encontrado com esses filtros.'
+                : 'Nenhum usuário cadastrado.'
+            }
+          />
         ) : (
-          <ul className="divide-y divide-neutral-200 border-t border-neutral-200">
-            {rows.map((item) => {
+          <ul
+            className="divide-y divide-[#E5D3ED]"
+            aria-label="Usuários encontrados"
+          >
+            {rows.map((item, index) => {
               const isSelf = item.id === current?.id
               const suspended = item.status === 'SUSPENDED'
               const nextRole: UserRole =
                 item.role === 'ADMIN' ? 'USER' : 'ADMIN'
+              const initial =
+                item.name.trim().charAt(0).toLocaleUpperCase('pt-BR') || '?'
               return (
                 <li
                   key={item.id}
-                  className="flex flex-wrap items-center justify-between gap-3 px-5 py-4"
+                  className={`grid min-w-0 gap-3 px-4 py-4 transition-colors hover:bg-[#F4E8FC] sm:px-5 xl:grid-cols-[minmax(0,1fr)_auto] xl:items-center ${index % 2 ? 'bg-[#FAF5FD]' : 'bg-white'}`}
                 >
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold text-neutral-900">
-                      {item.name}
-                      {isSelf ? (
-                        <span className="ml-2 text-xs font-normal text-neutral-500">
-                          (você)
-                        </span>
-                      ) : null}
-                    </p>
-                    <p className="truncate text-xs text-neutral-500">
-                      {item.username ? `@${item.username} · ` : ''}
-                      {item.email} · desde{' '}
-                      {dateFormat.format(new Date(item.registrationDate))}
-                    </p>
+                  <div className="flex min-w-0 items-center gap-3">
+                    <div
+                      aria-hidden="true"
+                      className="grid size-11 shrink-0 place-items-center rounded-full border-2 border-[#D4A7E6] bg-[linear-gradient(145deg,#8D40B4,#4A176D)] font-display text-base font-bold text-white shadow-[0_2px_7px_rgba(69,19,94,0.18)]"
+                    >
+                      {initial}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="flex flex-wrap items-center gap-1.5 text-sm font-extrabold text-[#2E153C]">
+                        <span className="break-words">{item.name}</span>
+                        {isSelf ? (
+                          <span className="text-xs font-normal text-[#725984]">
+                            (você)
+                          </span>
+                        ) : null}
+                      </p>
+                      <p className="mt-1 break-all text-xs leading-relaxed text-[#705E7C]">
+                        {item.username ? `@${item.username} · ` : ''}
+                        {item.email} · desde{' '}
+                        {dateFormat.format(new Date(item.registrationDate))}
+                      </p>
+                    </div>
                   </div>
-                  <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex min-w-0 flex-wrap items-center gap-2 xl:justify-end">
                     <Badge
                       variant={item.role === 'ADMIN' ? 'primary' : 'neutral'}
                     >
@@ -275,12 +312,17 @@ export function AdminUsersPage() {
                     <Badge variant={suspended ? 'error' : 'success'}>
                       {STATUS_LABEL[item.status]}
                     </Badge>
-                    <Button variant="ghost" onClick={() => setDetails(item)}>
+                    <Button
+                      variant="ghost"
+                      onClick={() => setDetails(item)}
+                      className={`${adminButtonClass} !text-[#572079] hover:!bg-[#EDDCF6]`}
+                    >
                       Detalhes
                     </Button>
                     <Button
                       variant="outline"
                       disabled={isSelf || saving}
+                      className={`${adminButtonClass} !border-[#9651AC] !text-[#632381] hover:!bg-[#F1E2F8]`}
                       title={
                         isSelf
                           ? 'Você não pode alterar o próprio perfil.'
@@ -297,6 +339,7 @@ export function AdminUsersPage() {
                     <Button
                       variant={suspended ? 'outline' : 'danger'}
                       disabled={isSelf || saving}
+                      className={adminButtonClass}
                       title={
                         isSelf
                           ? 'Você não pode suspender a própria conta.'
@@ -319,9 +362,44 @@ export function AdminUsersPage() {
         )}
 
         {data && data.totalPages > 1 ? (
-          <PageNavigation label="Paginação de usuários" page={search.page} totalPages={data.totalPages} onPageChange={(page) => setSearch((previous) => ({ ...previous, page }))} className="border-t border-neutral-200 px-5 py-3" />
+          <nav
+            aria-label="Paginação de usuários"
+            className="flex flex-wrap items-center justify-between gap-3 border-t border-[#E0C9E9] bg-[#FCF9FE] px-4 py-3 sm:px-5"
+          >
+            <p className="text-xs font-semibold text-[#6A507C]">
+              Página {search.page} de {data.totalPages}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                variant="outline"
+                className={`${adminButtonClass} !border-[#9C6FB0] !text-[#632381]`}
+                disabled={search.page <= 1}
+                onClick={() =>
+                  setSearch((previous) => ({
+                    ...previous,
+                    page: previous.page - 1,
+                  }))
+                }
+              >
+                Anterior
+              </Button>
+              <Button
+                variant="outline"
+                className={`${adminButtonClass} !border-[#9C6FB0] !text-[#632381]`}
+                disabled={search.page >= data.totalPages}
+                onClick={() =>
+                  setSearch((previous) => ({
+                    ...previous,
+                    page: previous.page + 1,
+                  }))
+                }
+              >
+                Próxima
+              </Button>
+            </div>
+          </nav>
         ) : null}
-      </Card>
+      </AdminPanel>
 
       {details ? (
         <AdminUserDetailsModal
@@ -352,6 +430,9 @@ export function AdminUsersPage() {
         open={pending !== null}
         title={pending ? MODAL_TITLE[pending.kind] : ''}
         onClose={close}
+        closeDisabled={saving}
+        presentation="refined"
+        headerIcon="shield-check"
         secondaryAction={{ label: 'Cancelar' }}
         primaryAction={{
           label: saving ? 'Salvando...' : 'Confirmar',
@@ -359,60 +440,62 @@ export function AdminUsersPage() {
           onClick: () => void confirm(),
         }}
       >
-        {pending?.kind === 'role' ? (
-          <p>
-            Alterar o perfil de <strong>{pending.user.name}</strong> para{' '}
-            <strong>{ROLE_LABEL[pending.role].toLowerCase()}</strong>?
-          </p>
-        ) : null}
-        {pending?.kind === 'suspend' ? (
-          <p className="text-sm">
-            <strong>{pending.user.name}</strong> perde o acesso à plataforma a
-            partir da próxima ação, e o perfil público deixa de aparecer.
-          </p>
-        ) : null}
-        {pending?.kind === 'reactivate' ? (
-          <p className="text-sm">
-            <strong>{pending.user.name}</strong> volta a acessar a plataforma, e
-            o perfil público volta a aparecer.
-          </p>
-        ) : null}
-        {pending?.kind === 'moderate' ? (
-          <fieldset className="space-y-2">
-            <legend className="text-sm">
-              Escolha o que remover do perfil de{' '}
-              <strong>{pending.user.name}</strong>. Nome e usuário só podem ser
-              alterados pelo próprio jogador.
-            </legend>
-            {MODERATED_FIELDS.map((field) => (
-              <Checkbox
-                key={field}
-                label={FIELD_LABEL[field]}
-                checked={fields.includes(field)}
-                onChange={(event) => {
-                  const checked = event.target.checked
-                  setFields((list) =>
-                    checked
-                      ? [...list, field]
-                      : list.filter((item) => item !== field),
-                  )
-                  setFormError(null)
-                }}
-              />
-            ))}
-          </fieldset>
-        ) : null}
-        {pending && pending.kind !== 'role' ? (
-          <ReasonField
-            value={reason}
-            error={formError}
-            placeholder={REASON_PLACEHOLDER[pending.kind]}
-            onChange={(value) => {
-              setReason(value)
-              setFormError(null)
-            }}
-          />
-        ) : null}
+        <div className="space-y-4 text-[#362342]">
+          {pending?.kind === 'role' ? (
+            <p className="rounded-lg border border-[#E3D3EB] bg-[#FBF7FE] p-3 text-sm leading-relaxed">
+              Alterar o perfil de <strong>{pending.user.name}</strong> para{' '}
+              <strong>{ROLE_LABEL[pending.role].toLowerCase()}</strong>?
+            </p>
+          ) : null}
+          {pending?.kind === 'suspend' ? (
+            <p className="rounded-lg border border-[#F1C7CF] bg-[#FFF5F6] p-3 text-sm leading-relaxed">
+              <strong>{pending.user.name}</strong> perde o acesso à plataforma a
+              partir da próxima ação, e o perfil público deixa de aparecer.
+            </p>
+          ) : null}
+          {pending?.kind === 'reactivate' ? (
+            <p className="rounded-lg border border-[#D9CDE5] bg-[#F8F4FB] p-3 text-sm leading-relaxed">
+              <strong>{pending.user.name}</strong> volta a acessar a plataforma,
+              e o perfil público volta a aparecer.
+            </p>
+          ) : null}
+          {pending?.kind === 'moderate' ? (
+            <fieldset className="space-y-3 rounded-lg border border-[#E3D3EB] bg-[#FBF7FE] p-4">
+              <legend className="px-1 text-sm font-semibold leading-relaxed text-[#3D2750]">
+                Escolha o que remover do perfil de{' '}
+                <strong>{pending.user.name}</strong>. Nome e usuário só podem
+                ser alterados pelo próprio jogador.
+              </legend>
+              {MODERATED_FIELDS.map((field) => (
+                <Checkbox
+                  key={field}
+                  label={FIELD_LABEL[field]}
+                  checked={fields.includes(field)}
+                  onChange={(event) => {
+                    const checked = event.target.checked
+                    setFields((list) =>
+                      checked
+                        ? [...list, field]
+                        : list.filter((item) => item !== field),
+                    )
+                    setFormError(null)
+                  }}
+                />
+              ))}
+            </fieldset>
+          ) : null}
+          {pending && pending.kind !== 'role' ? (
+            <ReasonField
+              value={reason}
+              error={formError}
+              placeholder={REASON_PLACEHOLDER[pending.kind]}
+              onChange={(value) => {
+                setReason(value)
+                setFormError(null)
+              }}
+            />
+          ) : null}
+        </div>
       </Modal>
     </div>
   )
@@ -475,11 +558,14 @@ function FilterSelect({
 }) {
   const id = useId()
   return (
-    <div>
-      <label htmlFor={id} className="sr-only">
+    <div className="min-w-0">
+      <label
+        htmlFor={id}
+        className="mb-1.5 block text-xs font-bold text-[#4A2B59]"
+      >
         {label}
       </label>
-      <Select id={id} variant="filter" {...props} />
+      <Select id={id} variant="filter" {...props} className="w-full" />
     </div>
   )
 }

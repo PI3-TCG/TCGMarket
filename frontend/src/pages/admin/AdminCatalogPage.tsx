@@ -5,11 +5,18 @@ import {
   SOURCE_LABEL,
   apiMessage,
 } from '@/components/admin/adminFormat'
+import {
+  AdminPanel,
+  AdminState,
+  adminButtonClass,
+  adminFilterClearClass,
+  adminTableHeaderClass,
+  adminTableRowClass,
+} from '@/components/admin/AdminPanel'
 import { typeLabels } from '@/components/catalog/catalogLabels'
 import { Alert } from '@/components/ui/Alert'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
-import { Card } from '@/components/ui/Card'
 import { Icon } from '@/components/ui/Icon'
 import { Input } from '@/components/ui/Input'
 import { Modal } from '@/components/ui/Modal'
@@ -30,7 +37,6 @@ import { useCallback, useEffect, useId, useState } from 'react'
 
 const REASON_MIN = 10
 const REASON_MAX = 300
-
 const ALL = ''
 
 const VISIBILITY_OPTIONS: SelectOption[] = [
@@ -74,6 +80,7 @@ export function AdminCatalogPage() {
     setSearchInput(q ?? '')
   }
 
+  // Mantém a busca por URL, debounce e regras de visibilidade do arquivo original.
   const fetchPage = useCallback(
     () => searchAdminCatalog({ game, q, set, rarity, type, visibility, page }),
     [game, q, set, rarity, type, visibility, page],
@@ -189,17 +196,19 @@ export function AdminCatalogPage() {
   const hasFilters = Boolean(q || game || set || rarity || type || visibility)
 
   return (
-    <Card className="overflow-visible">
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-neutral-200 px-5 py-4">
-        <h2 className="text-lg font-semibold text-neutral-900">Catálogo</h2>
-        <p className="text-sm text-neutral-500" aria-live="polite">
+    <AdminPanel
+      title="Gerenciamento do catálogo"
+      icon="layers"
+      description="Pesquise cartas importadas e controle quais aparecem no catálogo público."
+      action={
+        <p className="text-xs font-semibold text-[#604473]" aria-live="polite">
           {data
             ? `${numberFormat.format(data.totalElements)} ${data.totalElements === 1 ? 'carta encontrada' : 'cartas encontradas'}`
             : null}
         </p>
-      </div>
-
-      <div className="space-y-4 p-5">
+      }
+    >
+      <div className="space-y-4 border-b border-[#E4D2EC] bg-[linear-gradient(95deg,#FCF7FF,#F8EEFC)] p-4 sm:p-5">
         <Alert variant="info">
           As cartas vêm das APIs oficiais (Pokémon TCG API, YGOPRODeck e
           Scryfall) e não são editadas aqui. Você pode ocultar uma carta com
@@ -217,16 +226,28 @@ export function AdminCatalogPage() {
           </Alert>
         ) : null}
 
-        <div className="filter-panel panel-ornaments grid gap-3 sm:grid-cols-2 xl:grid-cols-6">
-          <Input
-            variant="search"
-            type="search"
-            className="sm:col-span-2 xl:col-span-2"
-            aria-label="Pesquisar pelo nome da carta"
-            value={searchInput}
-            onChange={(event) => setSearchInput(event.target.value)}
-            placeholder="Pesquisar pelo nome da carta"
-          />
+        <div className="flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-[0.13em] text-[#673087]">
+          <Icon name="search" size={16} /> Filtros do catálogo
+        </div>
+        <div className="grid min-w-0 gap-3 sm:grid-cols-2 xl:grid-cols-6">
+          <div className="min-w-0 sm:col-span-2 xl:col-span-2">
+            <label
+              htmlFor="admin-catalog-search"
+              className="mb-1.5 block text-xs font-bold text-[#4A2B59]"
+            >
+              Nome da carta
+            </label>
+            <Input
+              id="admin-catalog-search"
+              variant="search"
+              type="search"
+              className="w-full !border-[#D5B8E1] !bg-white focus-visible:!outline-[#8841A0]"
+              aria-label="Pesquisar pelo nome da carta"
+              value={searchInput}
+              onChange={(event) => setSearchInput(event.target.value)}
+              placeholder="Pesquisar pelo nome da carta"
+            />
+          </div>
           <FilterSelect
             label="TCG"
             options={GAME_OPTIONS}
@@ -296,105 +317,112 @@ export function AdminCatalogPage() {
         </div>
 
         {hasFilters ? (
-          <button
-            type="button"
-            onClick={() => navigate({ search: {} })}
-            className="text-xs font-semibold text-primary-900 underline underline-offset-2"
-          >
-            Limpar filtros
-          </button>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <span className="text-xs text-[#715B7B]">
+              Filtros ativos na listagem.
+            </span>
+            <button
+              type="button"
+              onClick={() => navigate({ search: {} })}
+              className={adminFilterClearClass}
+            >
+              <Icon name="close" size={16} /> Limpar filtros
+            </button>
+          </div>
         ) : null}
+      </div>
 
+      <div className="min-w-0 p-4 sm:p-5">
         {state.status === 'loading' ? (
-          <div
-            role="status"
-            aria-label="Carregando cartas"
-            className="animate-pulse space-y-2"
-          >
-            {Array.from({ length: 6 }, (_, index) => (
-              <div
-                key={index}
-                className="h-14 rounded-control bg-neutral-100"
-              />
-            ))}
-          </div>
+          <AdminState status="loading" message="Carregando cartas" />
         ) : state.status !== 'ready' ? (
-          <div role="alert" className="space-y-3 py-6 text-center text-sm">
-            <p className="text-neutral-700">
-              Não foi possível carregar o catálogo.
-            </p>
-            <Button variant="outline" onClick={retry}>
-              Tentar novamente
-            </Button>
-          </div>
+          <AdminState
+            status="error"
+            message="Não foi possível carregar o catálogo."
+            onRetry={retry}
+          />
         ) : outOfRange ? (
-          <div className="space-y-3 py-6 text-center text-sm">
-            <p className="text-neutral-700">
+          <div className="space-y-3 rounded-lg border border-[#E3D1EC] bg-[#FCF8FE] px-4 py-8 text-center text-sm">
+            <p className="text-[#665274]">
               Essa página não existe para a busca atual.
             </p>
-            <Button variant="outline" onClick={() => goToPage(1)}>
+            <Button
+              variant="outline"
+              onClick={() => goToPage(1)}
+              className={adminButtonClass}
+            >
               Ir para a primeira página
             </Button>
           </div>
         ) : rows.length === 0 ? (
-          <p className="py-6 text-center text-sm text-neutral-500">
-            Nenhuma carta encontrada para a busca ou os filtros selecionados.
-          </p>
+          <AdminState
+            status="empty"
+            message="Nenhuma carta encontrada para a busca ou os filtros selecionados."
+          />
         ) : (
-          <div className="overflow-x-auto">
+          <div className="min-w-0 overflow-x-auto rounded-md border border-[#E1CAEB] bg-white">
             <table className="w-full min-w-[720px] text-left text-sm">
-              <thead className="text-xs font-semibold tracking-wide text-neutral-500 uppercase">
-                <tr className="border-b border-neutral-200">
-                  <th scope="col" className="py-2 pr-3">
+              <caption className="sr-only">
+                Cartas do catálogo administrativo e opções de visibilidade
+              </caption>
+              <thead className={adminTableHeaderClass}>
+                <tr>
+                  <th scope="col" className="px-4 py-3">
                     Carta
                   </th>
-                  <th scope="col" className="px-3 py-2">
+                  <th scope="col" className="px-3 py-3">
                     TCG
                   </th>
-                  <th scope="col" className="px-3 py-2">
+                  <th scope="col" className="px-3 py-3">
                     Raridade
                   </th>
-                  <th scope="col" className="px-3 py-2">
+                  <th scope="col" className="px-3 py-3">
                     Origem
                   </th>
-                  <th scope="col" className="px-3 py-2">
+                  <th scope="col" className="px-3 py-3">
                     Catálogo público
                   </th>
-                  <th scope="col" className="py-2 pl-3">
-                    <span className="sr-only">Ações</span>
+                  <th scope="col" className="px-3 py-3 text-right">
+                    Ações
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-neutral-200">
+              <tbody>
                 {rows.map((card) => (
-                  <tr key={card.id}>
-                    <td className="py-3 pr-3">
-                      <div className="flex items-center gap-3">
+                  <tr key={card.id} className={adminTableRowClass}>
+                    <td className="px-4 py-3">
+                      <div className="flex min-w-0 items-center gap-3">
                         <CardThumb card={card} />
                         <div className="min-w-0">
-                          <p className="truncate font-semibold text-neutral-900">
+                          <p
+                            className="max-w-[260px] truncate font-bold text-[#331541]"
+                            title={card.name}
+                          >
                             {card.name}
                           </p>
-                          <p className="truncate text-xs text-neutral-500">
+                          <p
+                            className="max-w-[260px] truncate text-xs text-[#735F80]"
+                            title={card.setName ?? undefined}
+                          >
                             {card.setName}
                           </p>
                         </div>
                       </div>
                     </td>
-                    <td className="px-3 py-3 whitespace-nowrap text-neutral-700">
+                    <td className="whitespace-nowrap px-3 py-3 text-[#4B3559]">
                       {GAME_LABEL[card.cardGame]}
                     </td>
-                    <td className="px-3 py-3 text-neutral-700">
+                    <td className="px-3 py-3 text-[#4B3559]">
                       {card.rarity ?? 'Não informada'}
                     </td>
                     <td className="px-3 py-3">
-                      <div className="flex flex-col items-start gap-1">
+                      <div className="flex flex-col items-start gap-1.5">
                         <Badge variant="secondary">
                           {SOURCE_LABEL[card.source]}
                         </Badge>
                         <code
                           title={card.externalId}
-                          className="max-w-40 truncate rounded bg-neutral-100 px-1.5 py-0.5 text-xs text-neutral-700"
+                          className="max-w-40 truncate rounded bg-[#F2E8F7] px-1.5 py-0.5 text-xs text-[#624B70]"
                         >
                           {card.externalId}
                         </code>
@@ -409,10 +437,11 @@ export function AdminCatalogPage() {
                         <Badge variant="success">Visível</Badge>
                       )}
                     </td>
-                    <td className="py-3 pl-3 text-right">
+                    <td className="px-3 py-3 text-right">
                       {card.hidden ? (
                         <Button
                           variant="outline"
+                          className={`${adminButtonClass} !border-[#9553AA] !text-[#632381] hover:!bg-[#F2E5F8]`}
                           onClick={() => open(card, 'unhide')}
                           aria-label={`Reexibir ${cardLabel(card)}`}
                         >
@@ -421,6 +450,7 @@ export function AdminCatalogPage() {
                       ) : (
                         <Button
                           variant="ghost"
+                          className={`${adminButtonClass} !text-[#632381] hover:!bg-[#F1E0F7]`}
                           onClick={() => open(card, 'hide')}
                           aria-label={`Ocultar ${cardLabel(card)}`}
                         >
@@ -436,12 +466,50 @@ export function AdminCatalogPage() {
         )}
 
         {data && !outOfRange && data.totalElements > 0 ? (
-          <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
-            <p className="text-xs text-neutral-500">
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-[#E7D6ED] pt-4">
+            <p className="text-xs text-[#6F5879]">
               {`Exibindo ${numberFormat.format(data.page * data.size + 1)}–${numberFormat.format(data.page * data.size + rows.length)} de ${numberFormat.format(data.totalElements)} cartas`}
             </p>
             {data.totalPages > 1 ? (
-              <PageNavigation label="Paginação do catálogo administrativo" page={currentPage} totalPages={data.totalPages} onPageChange={goToPage} />
+              <nav
+                aria-label="Paginação do catálogo administrativo"
+                className="flex flex-wrap items-center gap-1.5"
+              >
+                <PageButton
+                  label="Página anterior"
+                  disabled={currentPage === 1}
+                  onClick={() => goToPage(currentPage - 1)}
+                >
+                  ‹
+                </PageButton>
+                {pageItems(currentPage, data.totalPages).map((item, index) =>
+                  item === 'gap' ? (
+                    <span
+                      key={`gap-${index}`}
+                      aria-hidden="true"
+                      className="px-1 text-sm text-[#745C81]"
+                    >
+                      …
+                    </span>
+                  ) : (
+                    <PageButton
+                      key={item}
+                      label={`Página ${item}`}
+                      current={item === currentPage}
+                      onClick={() => goToPage(item)}
+                    >
+                      {item}
+                    </PageButton>
+                  ),
+                )}
+                <PageButton
+                  label="Próxima página"
+                  disabled={currentPage >= data.totalPages}
+                  onClick={() => goToPage(currentPage + 1)}
+                >
+                  ›
+                </PageButton>
+              </nav>
             ) : null}
           </div>
         ) : null}
@@ -451,6 +519,9 @@ export function AdminCatalogPage() {
         open={pending?.action === 'hide'}
         title="Ocultar carta do catálogo"
         onClose={close}
+        closeDisabled={saving}
+        presentation="refined"
+        headerIcon="cards"
         secondaryAction={{ label: 'Cancelar' }}
         primaryAction={{
           label: saving ? 'Ocultando...' : 'Ocultar carta',
@@ -458,31 +529,31 @@ export function AdminCatalogPage() {
         }}
       >
         {pending ? (
-          <>
-            <p className="text-sm">
+          <div className="space-y-3 text-[#35223F]">
+            <p className="text-sm leading-relaxed">
               A carta some do catálogo público, mas continua válida para
               coleções e anúncios existentes.
             </p>
-            <div className="flex items-center gap-3 rounded-control border border-neutral-200 p-3">
+            <div className="flex items-center gap-3 rounded-lg border border-[#DFCBEB] bg-[#FBF6FE] p-3">
               <CardThumb card={pending.card} />
               <div className="min-w-0 text-sm">
-                <p className="truncate font-semibold text-neutral-900">
+                <p className="break-words font-bold text-[#32183F]">
                   {pending.card.name}
                 </p>
-                <p className="truncate text-xs text-neutral-500">
+                <p className="mt-1 break-words text-xs text-[#715F7C]">
                   {pending.card.setName} · {SOURCE_LABEL[pending.card.source]} ·{' '}
                   <code>{pending.card.externalId}</code>
                 </p>
               </div>
             </div>
-            <p className="flex gap-2 rounded-control bg-primary-100/60 p-3 text-xs text-primary-900">
+            <p className="flex gap-2 rounded-lg border border-[#D7C0E2] bg-[#F5EAFB] p-3 text-xs leading-relaxed text-[#572477]">
               <Icon name="info" size={16} />
               Os dados importados não são alterados. A ocultação continua
               valendo mesmo se a carta for importada de novo.
             </p>
             <label
               htmlFor="hide-reason"
-              className="block pt-2 text-sm font-semibold text-neutral-900"
+              className="block pt-2 text-sm font-bold text-[#341740]"
             >
               Motivo <span className="text-error-700">*</span>
             </label>
@@ -498,23 +569,23 @@ export function AdminCatalogPage() {
               aria-invalid={reasonError ? true : undefined}
               aria-describedby="hide-reason-hint"
               placeholder="Ex.: imagem da carta está trocada na API."
-              className="w-full rounded-control border border-neutral-300 px-3 py-2 text-sm text-neutral-900 outline-none placeholder:text-neutral-500 hover:border-primary-900 focus:border-primary-900 focus:ring-2 focus:ring-secondary-500 aria-invalid:border-error-700"
+              className="w-full rounded-lg border border-[#CAACDA] bg-white px-3 py-2 text-sm text-[#301A3E] outline-none placeholder:text-[#806C8A] hover:border-[#9C57B3] focus:border-[#7B3B9B] focus:ring-2 focus:ring-[#DDB5EA] aria-invalid:border-error-700"
             />
             <div
               id="hide-reason-hint"
               className="flex justify-between gap-3 text-xs"
             >
               <span
-                className={reasonError ? 'text-error-700' : 'text-neutral-500'}
+                className={reasonError ? 'text-error-700' : 'text-[#75647F]'}
               >
                 {reasonError ??
                   `Entre ${REASON_MIN} e ${REASON_MAX} caracteres.`}
               </span>
-              <span className="text-neutral-500">
+              <span className="text-[#75647F]">
                 {reason.trim().length}/{REASON_MAX}
               </span>
             </div>
-          </>
+          </div>
         ) : null}
       </Modal>
 
@@ -522,6 +593,9 @@ export function AdminCatalogPage() {
         open={pending?.action === 'unhide'}
         title="Reexibir carta"
         onClose={close}
+        closeDisabled={saving}
+        presentation="refined"
+        headerIcon="cards"
         secondaryAction={{ label: 'Cancelar' }}
         primaryAction={{
           label: saving ? 'Reexibindo...' : 'Reexibir',
@@ -529,20 +603,20 @@ export function AdminCatalogPage() {
         }}
       >
         {pending ? (
-          <>
+          <div className="space-y-3 rounded-lg border border-[#DFCBEB] bg-[#FBF6FE] p-4 text-sm leading-relaxed text-[#35223F]">
             <p>
               <strong>{pending.card.name}</strong> volta a aparecer no catálogo
               público.
             </p>
             {pending.card.hiddenReason ? (
-              <p className="text-sm text-neutral-500">
+              <p className="text-xs text-[#725D80]">
                 Motivo da ocultação: {pending.card.hiddenReason}
               </p>
             ) : null}
-          </>
+          </div>
         ) : null}
       </Modal>
-    </Card>
+    </AdminPanel>
   )
 }
 
@@ -556,15 +630,42 @@ function CardThumb({ card }: { card: AdminCatalogCard }) {
       src={card.imageUrl}
       alt=""
       loading="lazy"
-      className="h-11 w-8 shrink-0 rounded object-cover"
+      className="h-12 w-9 shrink-0 rounded object-cover ring-1 ring-[#DAC1E8]"
     />
   ) : (
     <span
       aria-hidden="true"
-      className="font-display flex h-11 w-8 shrink-0 items-center justify-center rounded bg-gradient-to-br from-primary-300 to-primary-700 text-xs font-bold text-white"
+      className="font-display flex h-12 w-9 shrink-0 items-center justify-center rounded bg-gradient-to-br from-primary-300 to-primary-700 text-xs font-bold text-white"
     >
       {card.name.charAt(0)}
     </span>
+  )
+}
+
+function PageButton({
+  label,
+  current = false,
+  disabled = false,
+  onClick,
+  children,
+}: {
+  label: string
+  current?: boolean
+  disabled?: boolean
+  onClick: () => void
+  children: ReactNode
+}) {
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      aria-current={current ? 'page' : undefined}
+      disabled={disabled}
+      onClick={onClick}
+      className={`grid size-9 place-items-center rounded-md border text-sm font-bold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8B49A9] disabled:cursor-not-allowed disabled:opacity-40 ${current ? 'border-[#5D2180] bg-[#6C248E] text-white' : 'border-[#DABDE8] bg-white text-[#632381] hover:border-[#9861B0] hover:bg-[#F3E8FA]'}`}
+    >
+      {children}
+    </button>
   )
 }
 
@@ -582,11 +683,14 @@ function FilterSelect({
 }) {
   const id = useId()
   return (
-    <div className={className}>
-      <label htmlFor={id} className="sr-only">
+    <div className={`min-w-0 ${className ?? ''}`}>
+      <label
+        htmlFor={id}
+        className="mb-1.5 block text-xs font-bold text-[#4A2B59]"
+      >
         {label}
       </label>
-      <Select id={id} variant="filter" {...props} />
+      <Select id={id} variant="filter" {...props} className="w-full" />
     </div>
   )
 }

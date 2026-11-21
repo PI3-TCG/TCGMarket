@@ -122,7 +122,7 @@ export function AdminUserDetailsModal({
       presentation="refined"
       headerIcon="user"
       size="lg"
-      className="mx-auto max-w-[790px]"
+      className="admin-dialog mx-auto max-w-[790px]"
       title="Detalhes do usuário"
       onClose={onClose}
       footer={
@@ -177,7 +177,7 @@ export function AdminUserDetailsModal({
         {/* Resumo da conta: mesmo arranjo horizontal da referência. */}
         <section
           aria-label="Resumo do usuário"
-          className="rounded-[18px] border border-[#E6D8F0] bg-[linear-gradient(145deg,#FFFFFF_0%,#FCF9FF_100%)] p-4 shadow-[0_5px_18px_rgba(65,20,87,0.07)] sm:p-5"
+          className="rounded-lg border border-[#E6D8F0] bg-[linear-gradient(145deg,#FFFFFF_0%,#FCF9FF_100%)] p-4 shadow-[0_5px_18px_rgba(65,20,87,0.07)] sm:p-5"
         >
           <div className="grid gap-4 border-b border-[#DDD0E8] pb-4 md:grid-cols-[minmax(0,1.45fr)_minmax(0,1fr)]">
             <div className="flex min-w-0 items-center gap-4">

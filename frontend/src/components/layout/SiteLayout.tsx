@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import './siteChrome.css'
 import { Outlet } from '@tanstack/react-router'
 import { Alert } from '@/components/ui/Alert'
 import { SiteHeader } from './SiteHeader'
@@ -20,10 +21,12 @@ export function SiteLayout() {
 
   return (
     <div className="flex min-h-svh flex-col bg-neutral-50 text-neutral-900">
-      <SiteHeader onSoon={soon} />
-      <GameNavigation onSoon={soon} />
+      <div className="tcg-page-nav">
+        <SiteHeader onSoon={soon} />
+        <GameNavigation />
+      </div>
       {notice && (
-        <div className="fixed top-24 right-4 left-4 z-30 mx-auto max-w-md sm:left-auto">
+        <div className="tcg-layout-notice fixed right-4 left-4 z-[80] mx-auto max-w-md sm:left-auto">
           <Alert variant="info" onDismiss={() => setNotice(null)}>
             {notice}
           </Alert>
