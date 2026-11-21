@@ -14,7 +14,7 @@ type ButtonProps = ComponentPropsWithRef<'button'> & {
 }
 
 const rest: Record<ButtonVariant, string> = {
-  primary: 'bg-primary-900 text-white',
+  primary: 'bg-primary-900 button-vignette text-white',
   secondary: 'bg-secondary-500 text-white',
   outline: 'border border-primary-900 bg-transparent text-primary-900',
   ghost: 'bg-transparent text-primary-900',
@@ -30,7 +30,7 @@ const hover: Record<ButtonVariant, string> = {
 }
 
 const hovered: Record<ButtonVariant, string> = {
-  primary: 'bg-primary-800 text-white',
+  primary: 'bg-primary-800 button-vignette text-white',
   secondary: 'bg-secondary-700 text-white',
   outline: 'border border-primary-900 bg-primary-100 text-primary-900',
   ghost: 'bg-primary-100 text-primary-900',

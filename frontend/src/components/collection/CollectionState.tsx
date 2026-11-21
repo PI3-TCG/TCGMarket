@@ -66,7 +66,7 @@ export function CollectionState({
                             <button
                                 type="button"
                                 onClick={onRetry}
-                                className="inline-flex min-h-11 items-center justify-center rounded-lg bg-primary-900 px-5 py-3 text-sm font-semibold text-white hover:bg-primary-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500"
+                                className="inline-flex min-h-11 items-center justify-center rounded-lg bg-primary-900 button-vignette px-5 py-3 text-sm font-semibold text-white hover:bg-primary-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500"
                             >
                                 Tentar novamente
                             </button>
@@ -84,7 +84,7 @@ export function CollectionState({
                     <Link
                         to="/catalogo/$game"
                         params={{ game: 'pokemon' }}
-                        className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-primary-900 px-5 py-3 text-sm font-semibold text-white hover:bg-primary-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500"
+                        className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-primary-900 button-vignette px-5 py-3 text-sm font-semibold text-white hover:bg-primary-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500"
                     >
                         <Icon name="search" size={16} />
                         Explorar catálogo

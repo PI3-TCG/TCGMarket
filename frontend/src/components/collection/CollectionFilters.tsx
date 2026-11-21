@@ -29,12 +29,10 @@ export function CollectionFilters({
   )
 
   const editions =
-    options?.editions ??
-    [...new Set(items.map((item) => item.card.edition))].filter(Boolean)
+    [...new Set([...(options?.editions ?? items.map((item) => item.card.edition)), draft.edition])].filter(Boolean)
 
   const rarities =
-    options?.rarities ??
-    [...new Set(items.map((item) => item.card.officialRarity))].filter(Boolean)
+    [...new Set([...(options?.rarities ?? items.map((item) => item.card.officialRarity)), draft.rarity])].filter(Boolean)
 
   function updateFilter(
     field: keyof CollectionFilterValues,
@@ -52,10 +50,10 @@ export function CollectionFilters({
   }
 
   const fieldClass =
-    'mt-2 h-10 w-full rounded-control border border-neutral-200 bg-white px-3 text-sm text-neutral-900 focus:border-primary-900 focus:outline-none focus:ring-2 focus:ring-secondary-500 disabled:cursor-not-allowed disabled:opacity-50'
+    'mt-2 h-10 w-full rounded-control border border-neutral-200 bg-white filter-field px-3 text-sm text-neutral-900 focus:border-primary-900 focus:outline-none focus:ring-2 focus:ring-secondary-500 disabled:cursor-not-allowed disabled:opacity-50'
 
   return (
-    <aside className="min-w-0 self-start rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
+    <aside className="filter-panel panel-ornaments min-w-0 self-start">
       <div className="mb-5 flex items-center justify-between gap-2">
         <h2 className="text-sm font-bold text-primary-900">
           FILTROS
@@ -193,7 +191,7 @@ export function CollectionFilters({
 
         <button
           type="submit"
-          className="min-h-10 w-full cursor-pointer rounded-lg bg-primary-900 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500"
+          className="filter-button min-h-11 w-full cursor-pointer"
         >
           Aplicar filtros
         </button>

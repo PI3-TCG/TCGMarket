@@ -11,4 +11,10 @@ public record CatalogSearchRequest(
     String type,
     Integer page,
     Integer size,
-    String sort) {}
+    String sort,
+    String cardNumber) {
+  public CatalogSearchRequest(String q, String set, String rarity, String type,
+                              Integer page, Integer size, String sort) {
+    this(q, set, rarity, type, page, size, sort, null);
+  }
+}

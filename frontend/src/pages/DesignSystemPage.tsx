@@ -87,7 +87,7 @@ export function DesignSystemPage() {
   )
 
   return (
-    <div className="min-h-svh bg-neutral-100">
+    <div className="page-vignette min-h-svh">
       <header className="bg-primary-900 text-white">
         <div className="mx-auto flex max-w-360 flex-wrap items-center gap-4 px-4 py-4 sm:px-6">
           <Link

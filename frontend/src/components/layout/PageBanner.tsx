@@ -1,8 +1,10 @@
+import type { ReactNode } from 'react'
+import { ModalGoldDivider } from '@/components/ui/modalTheme'
 import collectionBanner from '@/assets/images/image-collection.png'
 
 type Props = {
   title: string
-  subtitle: string
+  subtitle: ReactNode
   symbol?: string
   /** Permite que cada página use sua própria arte. Sem a prop, mantém o banner atual. */
   image?: string
@@ -18,18 +20,13 @@ export function PageBanner({
   imagePosition = 'center',
 }: Props) {
   return (
-    <header className="relative mb-4 flex h-[160px] items-center overflow-hidden rounded-xl border-2 border-[#FCD203]/70 bg-[#130b30] shadow-sm sm:h-[200px]">
+    <header className="relative mb-4 flex h-[160px] items-center rounded-xl border-2 border-b-0 border-[#FCD203]/70 bg-[#130b30] shadow-sm sm:h-[200px]">
       <img
         src={image}
         alt=""
         aria-hidden="true"
         style={{ objectPosition: imagePosition }}
-        className="pointer-events-none absolute inset-0 h-full w-full object-cover"
-      />
-
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#130b30]/85 via-[#280f41]/50 to-transparent"
+        className="pointer-events-none absolute inset-0 h-full w-full rounded-[inherit] object-cover"
       />
 
       <div className="relative z-10 flex items-center gap-4 px-6 py-5 sm:px-8">
@@ -41,13 +38,25 @@ export function PageBanner({
         </span>
 
         <div>
-          <h1 className="font-display text-2xl font-bold leading-tight text-white drop-shadow-sm sm:text-4xl">
+          <h1 className="banner-text-outline font-display text-2xl font-bold leading-tight text-white drop-shadow-sm sm:text-4xl">
             {title}
           </h1>
 
           <p className="mt-1 text-xs text-white/90 sm:text-sm">{subtitle}</p>
         </div>
       </div>
+      <BannerGoldDivider />
     </header>
+  )
+}
+
+export function BannerGoldDivider() {
+  return (
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-x-2 bottom-0 z-10 translate-y-1/2"
+    >
+      <ModalGoldDivider />
+    </div>
   )
 }

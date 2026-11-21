@@ -1,7 +1,9 @@
+import { BannerGoldDivider } from '@/components/layout/PageBanner'
+import { tradingCardGrid } from '@/components/ui/tradingCardStyles'
 import { Alert } from '@/components/ui/Alert'
 import { GAMES } from '@/components/layout/siteGames'
 import { useSession } from '@/session'
-import { Link, useNavigate } from '@tanstack/react-router'
+import { useNavigate } from '@tanstack/react-router'
 import { useCallback, useEffect, useState } from 'react'
 import hero from '@/assets/images/image-banner-home.png'
 import pokemonBanner from '@/assets/images/image-nav-pokemon.png'
@@ -11,10 +13,8 @@ import onePieceBanner from '@/assets/images/image-nav-onePiece.png'
 import digimonBanner from '@/assets/images/image-nav-digimon.png'
 import { Button } from '@/components/ui/Button'
 import { MarketplaceAdCard } from '@/components/marketplace/MarketplaceAdCard'
-import { formatCurrency } from '@/components/ads/adFormat'
 import { useRemoteData } from '@/hooks/useRemoteData'
 import { getMarketplaceAds } from '@/services/marketplace'
-import type { MarketplaceSort } from '@/types/Marketplace'
 
 
 
@@ -38,9 +38,8 @@ export function HomePage() {
   function soon(feature: string) {
     setNotice(`${feature} será implementado no futuro.`)
   }
-  const firstName = user?.name.split(' ')[0]
   return (
-    <div className="min-h-svh bg-neutral-50 text-neutral-900">
+    <div className="min-h-svh text-neutral-900">
       {notice ? (
         <div className="fixed top-24 right-4 left-4 z-30 mx-auto max-w-md sm:left-auto">
           <Alert variant="info" onDismiss={() => setNotice(null)}>
@@ -56,27 +55,21 @@ export function HomePage() {
           </p>
         ) : null}
 
-        <section className="relative grid overflow-hidden rounded-lg border-2 border-[#FCD203]/70 bg-[#130b30] text-white shadow-lg">
+        <section className="relative grid rounded-lg border-2 border-b-0 border-[#FCD203]/70 bg-[#130b30] text-white shadow-lg">
           <img
             src={hero}
             alt=""
-            className="pointer-events-none col-start-1 row-start-1 block h-auto w-full min-w-0 self-start"
-          />
-
-          <div
-            aria-hidden="true"
-            className="pointer-events-none col-start-1 row-start-1 hidden bg-linear-to-r from-[#130b30]/85 from-0% via-[#130b30]/55 via-45% to-transparent to-80% xl:block"
+            className="pointer-events-none col-start-1 row-start-1 block h-auto w-full min-w-0 self-start rounded-t-[inherit] xl:rounded-b-[inherit]"
           />
 
           <div className="relative col-start-1 row-start-2 flex max-w-xl flex-col justify-center px-6 py-6 sm:px-8 sm:py-8 xl:row-start-1">
-            <h1 className="text-3xl leading-tight font-bold tracking-tight sm:text-4xl">
+            <h1 className="banner-text-outline text-3xl leading-tight font-bold tracking-tight sm:text-4xl">
               Mais que cartas,{' '}
               <span className="text-primary-100">uma comunidade.</span>
             </h1>
 
-            <p className="mt-4 max-w-md text-sm leading-relaxed text-white/85 sm:text-base">
-              Compre, venda, troque e expanda sua coleção de TCGs com outros fãs
-              como você.
+            <p className="banner-text-outline mt-4 max-w-md text-sm leading-relaxed text-white/85 sm:text-base">
+              Compre, venda, troque e expanda sua coleção!
             </p>
 
             <div className="mt-5 flex flex-wrap gap-3">
@@ -90,7 +83,7 @@ export function HomePage() {
                   })
                 }
 
-                className="rounded-md bg-primary-900 px-5 py-3 text-sm font-semibold hover:bg-primary-800"
+                className="rounded-md border border-[#280B3A] bg-primary-900 px-5 py-3 text-sm font-semibold hover:bg-primary-800"
               >
                 Explorar anúncios
               </button>
@@ -102,7 +95,7 @@ export function HomePage() {
                   navigate({ to: user ? '/anuncios/novo' : '/login' })
                 }
 
-                className="rounded-md border border-white/70 bg-white/10 px-5 py-3 text-sm font-semibold hover:bg-white/20"
+                className="rounded-md border border-white/80 bg-white/90 px-5 py-3 text-sm font-semibold text-primary-900 hover:bg-white"
               >
                 Criar anúncio
               </button>
@@ -122,6 +115,7 @@ export function HomePage() {
               </li>
             </ul>
           </div>
+          <BannerGoldDivider />
         </section>
 
         <section>
@@ -180,96 +174,27 @@ export function HomePage() {
           </div>
         </section>
 
-        <section className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
-          <div>
-            <div className="mb-4 flex items-end justify-between">
-              <h2 className="text-xl font-bold">Anúncios em destaque</h2>
+        <section className="panel-ornaments rounded-xl border border-rare-500 bg-white p-4">
+          <div className="mb-4 flex items-end justify-between">
+            <h2 className="text-xl font-bold">Anúncios em destaque</h2>
 
-              <button
-                type="button"
+            <button
+              type="button"
 
-                onClick={() =>
-                  navigate({
-                    to: '/marketplace',
-                    search: { sort: 'priceDesc' },
-                  })
-                }
+              onClick={() =>
+                navigate({
+                  to: '/marketplace',
+                  search: { sort: 'priceDesc' },
+                })
+              }
 
-                className="text-sm font-semibold text-primary-900"
-              >
-                Ver todos os anúncios
-              </button>
-            </div>
-
-            <HomeAds sort="priceDesc" variant="cards" />
+              className="text-sm font-semibold text-primary-900"
+            >
+              Ver todos os anúncios
+            </button>
           </div>
 
-          <div className="space-y-4">
-            <div className="rounded-lg border border-neutral-200 bg-white p-4 shadow-sm">
-              <div className="mb-3 flex items-center justify-between">
-                <h2 className="font-bold">Últimos anúncios</h2>
-
-                <button
-                  type="button"
-
-                  onClick={() =>
-                    navigate({
-                      to: '/marketplace',
-                      search: { sort: 'recent' },
-                    })
-                  }
-
-                  className="text-xs font-semibold text-primary-900"
-                >
-                  Ver todos
-                </button>
-              </div>
-
-              <HomeAds sort="recent" variant="list" />
-            </div>
-
-            <aside className="rounded-lg bg-linear-to-br from-primary-100 to-neutral-100 p-5">
-              <h2 className="text-lg font-bold">
-                {user ? `Olá, ${firstName}` : 'Faça parte da nossa comunidade'}
-              </h2>
-
-              <p className="mt-2 text-sm leading-relaxed text-neutral-700">
-                {user
-                  ? 'Organize sua coleção, publique seus anúncios e encontre cartas para comprar ou trocar.'
-                  : 'Siga outros colecionadores, participe de trocas e fique por dentro das novidades.'}
-              </p>
-
-              {user ? (
-                <button
-                  type="button"
-
-                  onClick={() => navigate({ to: '/anuncios/novo' })}
-
-                  className="mt-4 w-full rounded-md bg-primary-900 py-3 text-sm font-semibold text-white hover:bg-primary-800"
-                >
-                  Criar anúncio
-                </button>
-              ) : (
-                <button
-                  type="button"
-
-                  onClick={() => navigate({ to: '/cadastro' })}
-
-                  className="mt-4 w-full rounded-md bg-primary-900 py-3 text-sm font-semibold text-white hover:bg-primary-800"
-                >
-                  Criar uma conta gratuita
-                </button>
-              )}
-
-              <ul className="mt-4 space-y-2 text-sm text-neutral-700">
-                <li>Anuncie suas cartas</li>
-
-                <li>Monte sua coleção</li>
-
-                <li>Conecte-se com outros fãs</li>
-              </ul>
-            </aside>
-          </div>
+          <HomeAds />
         </section>
       </main>
     </div>
@@ -436,68 +361,31 @@ function GameMark({ kind }: { kind: (typeof GAMES)[number]['mark'] }) {
   )
 }
 
-type HomeAdsProps = {
-  sort: MarketplaceSort
-  variant: 'cards' | 'list'
-}
-
-const homeAdsGrid =
-  'grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5'
-
-const homeGameLabels: Record<string, string> = {
-  POKEMON: 'Pokémon',
-  MAGIC_THE_GATHERING: 'Magic: The Gathering',
-  YUGIOH: 'Yu-Gi-Oh!',
-}
-
-function HomeAds({ sort, variant }: HomeAdsProps) {
-  const fetchAds = useCallback(
-    () => getMarketplaceAds(1, sort),
-    [sort],
-  )
-
-  const { state, retry } = useRemoteData(
-    `home-ads:${sort}`,
-    fetchAds,
-  )
+function HomeAds() {
+  const fetchAds = useCallback(() => getMarketplaceAds(1, 'priceDesc'), [])
+  const { state, retry } = useRemoteData('home-ads:priceDesc', fetchAds)
 
   if (state.status === 'loading') {
     return (
       <div
         role="status"
         aria-busy="true"
-        aria-label={
-          variant === 'cards'
-            ? 'Carregando anúncios em destaque'
-            : 'Carregando últimos anúncios'
-        }
+        aria-label="Carregando anúncios em destaque"
       >
         <span className="sr-only">Carregando anúncios...</span>
 
-        <div
-          aria-hidden="true"
-          className={variant === 'cards' ? homeAdsGrid : 'space-y-3'}
-        >
-          {Array.from({ length: 5 }, (_, index) => (
+        <div aria-hidden="true" className={tradingCardGrid}>
+          {Array.from({ length: 4 }, (_, index) => (
             <div
               key={index}
-              className={
-                variant === 'cards'
-                  ? 'overflow-hidden rounded-xl border border-neutral-200 bg-white motion-safe:animate-pulse'
-                  : 'h-16 rounded-lg bg-primary-100/60 motion-safe:animate-pulse'
-              }
+              className="overflow-hidden rounded-xl border border-neutral-200 bg-white motion-safe:animate-pulse"
             >
-              {variant === 'cards' && (
-                <>
-                  <div className="aspect-[4/5] bg-primary-100/70" />
-
-                  <div className="space-y-3 p-3">
-                    <div className="h-4 w-3/4 rounded bg-neutral-200" />
-                    <div className="h-3 w-1/2 rounded bg-neutral-200" />
-                    <div className="h-8 rounded bg-primary-100" />
-                  </div>
-                </>
-              )}
+              <div className="aspect-square bg-primary-100" />
+              <div className="space-y-3 p-3">
+                <div className="h-4 w-3/4 rounded bg-neutral-200" />
+                <div className="h-3 w-1/2 rounded bg-neutral-200" />
+                <div className="h-8 rounded bg-primary-100" />
+              </div>
             </div>
           ))}
         </div>
@@ -526,9 +414,7 @@ function HomeAds({ sort, variant }: HomeAdsProps) {
     )
   }
 
-  // A Home apresenta uma prévia dos cinco primeiros resultados.
-  // A ordenação já foi aplicada pelo backend.
-  const ads = state.data.content.slice(0, 5)
+  const ads = state.data.content.slice(0, 4)
 
   if (ads.length === 0) {
     return (
@@ -547,66 +433,11 @@ function HomeAds({ sort, variant }: HomeAdsProps) {
     )
   }
 
-  if (variant === 'cards') {
-    return (
-      <div className={homeAdsGrid}>
-        {ads.map((ad) => (
-          <MarketplaceAdCard key={ad.id} ad={ad} />
-        ))}
-      </div>
-    )
-  }
-
   return (
-    <ul className="divide-y divide-neutral-200">
+    <div className={tradingCardGrid}>
       {ads.map((ad) => (
-        <li key={ad.id}>
-          <Link
-            to="/marketplace/anuncios/$id"
-            params={{ id: ad.id }}
-            aria-label={`Ver anúncio de ${ad.cardName}`}
-            className="flex w-full cursor-pointer flex-wrap items-center justify-between gap-2 rounded-lg px-2 py-3 text-left transition hover:bg-primary-100/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500"
-          >
-            <span className="min-w-0 flex-1">
-              <span className="block break-words text-sm font-semibold text-primary-900">
-                {ad.cardName}
-              </span>
-
-              <span className="mt-1 block break-words text-xs text-neutral-700">
-                {homeGameLabels[ad.game] ?? ad.game}
-                {ad.edition ? ` • ${ad.edition}` : ''}
-              </span>
-
-              <span className="mt-1 block text-xs text-neutral-700">
-                {ad.remainingQuantity}{' '}
-                {ad.remainingQuantity === 1
-                  ? 'unidade disponível'
-                  : 'unidades disponíveis'}
-                {' • '}
-                {ad.saleEnabled && ad.tradeEnabled
-                  ? 'Venda e troca'
-                  : ad.saleEnabled
-                    ? 'Venda'
-                    : 'Troca'}
-              </span>
-            </span>
-
-            <span className="text-right text-sm font-semibold text-primary-900">
-              {ad.saleEnabled
-                ? ad.unitPrice !== null
-                  ? formatCurrency(ad.unitPrice)
-                  : 'Preço indisponível'
-                : 'Somente troca'}
-
-              {ad.saleEnabled && ad.unitPrice !== null && (
-                <span className="block text-[10px] font-normal text-neutral-700">
-                  por unidade
-                </span>
-              )}
-            </span>
-          </Link>
-        </li>
+        <MarketplaceAdCard key={ad.id} ad={ad} />
       ))}
-    </ul>
+    </div>
   )
 }

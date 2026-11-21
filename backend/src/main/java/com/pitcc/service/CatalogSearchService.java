@@ -50,6 +50,10 @@ public class CatalogSearchService {
     PageRequest pageable = pageRequest(request.page(), request.size(), request.sort());
     Criteria criteria =
         criteria(selected, request.q(), request.set(), request.rarity(), request.type());
+    String cardNumber = TextNormalizer.normalizeOptionalText(request.cardNumber());
+    if (cardNumber != null) {
+      criteria.and("cardNumber").regex("^" + Pattern.quote(cardNumber) + "$", "i");
+    }
 
     List<String> hidden = hiddenCards.findBySource(CatalogGameResolver.source(selected)).stream()
         .map(HiddenCard::getExternalId).toList();

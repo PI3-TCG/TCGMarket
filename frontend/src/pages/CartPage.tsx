@@ -21,7 +21,7 @@ import { Link, useNavigate } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 
 const panelClass =
-  'rounded-xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-6'
+  'rounded-xl border border-rare-500 bg-white p-5 shadow-sm sm:p-6'
 
 const UNKNOWN_RESULT =
   'Não foi possível confirmar a alteração. Mostramos o estado atual do seu carrinho.'
@@ -32,7 +32,7 @@ export function CartPage() {
   const { state, reload } = useCart()
 
   return (
-    <main className="min-h-screen bg-neutral-50 pb-12 text-neutral-900">
+    <main className="min-h-screen pb-12 text-neutral-900">
       <div className="mx-auto w-full max-w-[1400px] px-4 pt-4 sm:px-6 xl:px-[38px]">
         <PageBanner
           image={pageBanners.checkout}
@@ -40,11 +40,13 @@ export function CartPage() {
           subtitle="Revise os itens antes de continuar."
         />
 
-        {state.status === 'idle' || state.status === 'loading' ? (
-          <CartSkeleton />
-        ) : null}
-        {state.status === 'error' ? <CartLoadError onRetry={reload} /> : null}
-        {state.status === 'ready' ? <CartContent cart={state.cart} /> : null}
+        <div className="pt-5">
+          {state.status === 'idle' || state.status === 'loading' ? (
+            <CartSkeleton />
+          ) : null}
+          {state.status === 'error' ? <CartLoadError onRetry={reload} /> : null}
+          {state.status === 'ready' ? <CartContent cart={state.cart} /> : null}
+        </div>
       </div>
     </main>
   )
@@ -227,7 +229,7 @@ function CartContent({ cart }: { cart: Cart }) {
         <EmptyCart />
       ) : (
         <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)]">
-          <section aria-labelledby="cart-title" className="min-w-0 space-y-3">
+          <section aria-labelledby="cart-title" className="min-w-0 space-y-3 rounded-xl border border-rare-500 bg-white p-4">
             <h2
               id="cart-title"
               className="font-display text-2xl font-bold text-primary-900"
@@ -249,7 +251,7 @@ function CartContent({ cart }: { cart: Cart }) {
               </Alert>
             ) : null}
 
-            <div className="flex items-center justify-between gap-3 rounded-xl border border-neutral-200 bg-white px-4 py-3 shadow-sm">
+            <div className="flex items-center justify-between gap-3 rounded-xl border border-rare-500 bg-white px-4 py-3 shadow-sm">
               <Checkbox
                 label="Selecionar todos"
                 checked={allSelected}

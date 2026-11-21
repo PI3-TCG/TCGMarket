@@ -338,7 +338,7 @@ function ActivityPanel() {
               type="button"
               aria-pressed={days === value}
               onClick={() => setDays(value)}
-              className={`px-3 py-2 text-xs font-semibold transition focus-visible:relative focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-secondary-500 ${days === value ? 'bg-primary-900 text-white' : 'bg-white text-neutral-700 hover:bg-primary-100'}`}
+              className={`px-3 py-2 text-xs font-semibold transition focus-visible:relative focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-secondary-500 ${days === value ? 'bg-primary-900 button-vignette text-white' : 'bg-white text-neutral-700 hover:bg-primary-100'}`}
             >
               {value} dias
             </button>
@@ -537,12 +537,13 @@ function Distribution({ data }: { data: AdminCatalogSummary }) {
   }))
   const total = games.reduce((count, item) => count + item.amount, 0)
   if (!total) return <Empty>Nenhuma carta importada ainda.</Empty>
+  const stops: string[] = []
   let offset = 0
-  const stops = games.map((item) => {
-    const begin = offset
-    offset += (item.amount / total) * 100
-    return `${GAME_COLOR[item.game]} ${begin}% ${offset}%`
-  })
+  for (const item of games) {
+    const end = offset + (item.amount / total) * 100
+    stops.push(`${GAME_COLOR[item.game]} ${offset}% ${end}%`)
+    offset = end
+  }
   return (
     <div className="flex min-w-0 flex-col items-center gap-5 p-4 sm:p-5">
       <div

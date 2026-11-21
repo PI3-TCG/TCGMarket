@@ -6,6 +6,7 @@ export function parseCatalogSearch(
   const page = Number(search.page)
   return {
     q: text(search.q),
+    cardNumber: text(search.cardNumber)?.trim(),
     set: text(search.set),
     rarity: text(search.rarity),
     type: text(search.type),

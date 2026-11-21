@@ -29,7 +29,7 @@ export function SiteLayout() {
           </Alert>
         </div>
       )}
-      <div className="flex-1">
+      <div className="page-vignette flex-1">
         <Outlet />
       </div>
       <SiteFooter onSoon={soon} />

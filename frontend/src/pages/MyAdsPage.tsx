@@ -1,3 +1,5 @@
+import { Pagination as PageNavigation } from '@/components/ui/Pagination'
+import { tradingCardGrid } from '@/components/ui/tradingCardStyles'
 import { pageBanners } from '@/config/pageBanners'
 import { useEffect, useState, type ReactNode } from 'react'
 import { Link } from '@tanstack/react-router'
@@ -26,7 +28,7 @@ export function MyAdsPage() {
   const { user } = useSession()
 
   return (
-    <main className="min-h-screen bg-[#FAFBFE] pb-12 text-[#171443]">
+    <main className="min-h-screen pb-12 text-[#171443]">
       <div className="mx-auto w-full max-w-[1600px] px-4 pt-4 sm:px-6 xl:px-[38px]">
         <PageBanner
           image={pageBanners.myAds}
@@ -47,7 +49,7 @@ function MyAdsContent() {
   const [formVersion, setFormVersion] = useState(0)
 
   return (
-    <div className="mt-6 grid items-start gap-6 lg:grid-cols-[240px_minmax(0,1fr)]">
+    <div className="mt-10 grid items-start gap-6 lg:grid-cols-[240px_minmax(0,1fr)]">
       <ResponsiveFilters>
         <MyAdsFilters
           key={formVersion}
@@ -121,7 +123,7 @@ function MyAdsResults({
     <section
       aria-label="Seus anúncios"
       aria-busy={result.status === 'loading' || undefined}
-      className="min-w-0 rounded-xl border border-neutral-200 bg-white p-4"
+      className="min-w-0 panel-ornaments rounded-xl border border-rare-500 bg-white p-4"
     >
       {result.status === 'loading' ? (
         <ResultsSkeleton />
@@ -172,7 +174,7 @@ function MyAdsResults({
             {result.data.totalElements === 1 ? 'anúncio' : 'anúncios'}
           </h2>
 
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 2xl:grid-cols-5">
+          <div className={tradingCardGrid}>
             {result.data.content.map((ad) => (
               <MyAdCard
                 key={ad.id}
@@ -216,8 +218,7 @@ function Pagination({
   const to = data.number * data.size + data.content.length
 
   return (
-    <nav
-      aria-label="Paginação dos anúncios"
+    <div
       className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-neutral-200 pt-4"
     >
       <span className="text-sm text-neutral-700">
@@ -225,30 +226,8 @@ function Pagination({
         {data.totalElements === 1 ? 'anúncio' : 'anúncios'}
       </span>
 
-      {data.totalPages > 1 && (
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            disabled={data.first}
-            onClick={() => onPageChange(data.number - 1)}
-            className={pageButton}
-          >
-            Anterior
-          </button>
-          <span className="text-sm text-neutral-700">
-            Página {data.number + 1} de {data.totalPages}
-          </span>
-          <button
-            type="button"
-            disabled={data.last}
-            onClick={() => onPageChange(data.number + 1)}
-            className={pageButton}
-          >
-            Próxima
-          </button>
-        </div>
-      )}
-    </nav>
+      <PageNavigation label="Paginação dos anúncios" page={data.number + 1} totalPages={data.totalPages} onPageChange={(page) => onPageChange(page - 1)} />
+    </div>
   )
 }
 
@@ -288,16 +267,16 @@ function ResultsSkeleton() {
       <span className="sr-only">Carregando seus anúncios...</span>
       <div
         aria-hidden="true"
-        className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 2xl:grid-cols-5"
+        className={tradingCardGrid}
       >
         {Array.from({ length: 5 }, (_, index) => (
           <div
             key={index}
-            className="rounded-xl border border-neutral-200 p-3 motion-safe:animate-pulse"
+            className="overflow-hidden rounded-xl border border-neutral-200 bg-secondary-100/20 motion-safe:animate-pulse"
           >
-            <div className="flex gap-3">
-              <div className="h-28 w-20 rounded-lg bg-primary-100" />
-              <div className="flex-1 space-y-2">
+            <div>
+              <div className="aspect-square bg-primary-100" />
+              <div className="space-y-2 p-3">
                 <div className="h-4 w-16 rounded bg-neutral-100" />
                 <div className="h-4 w-3/4 rounded bg-neutral-200" />
                 <div className="h-3 w-full rounded bg-neutral-100" />
@@ -313,10 +292,7 @@ function ResultsSkeleton() {
 }
 
 const primaryButton =
-  'inline-flex min-h-11 cursor-pointer items-center justify-center rounded-lg bg-primary-900 px-5 py-3 text-sm font-semibold text-white hover:bg-primary-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500'
+  'inline-flex min-h-11 cursor-pointer items-center justify-center rounded-lg bg-primary-900 button-vignette px-5 py-3 text-sm font-semibold text-white hover:bg-primary-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500'
 
 const outlineButton =
   'inline-flex min-h-11 cursor-pointer items-center justify-center rounded-lg border border-primary-900 px-5 py-3 text-sm font-semibold text-primary-900 hover:bg-primary-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500'
-
-const pageButton =
-  'min-h-10 rounded-lg border border-primary-900 px-4 py-2 text-sm font-semibold text-primary-900 enabled:cursor-pointer enabled:hover:bg-primary-100 disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500'

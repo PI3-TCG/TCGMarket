@@ -1,3 +1,4 @@
+import { Pagination as PageNavigation } from '@/components/ui/Pagination'
 import { useCallback, useState } from 'react'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -5,6 +6,9 @@ import { useRemoteData } from '@/hooks/useRemoteData'
 import { api } from '@/services/api'
 import type { ProfileReputation as ReputationData } from '@/types/Review'
 import { ReputationIndicator } from './ReputationIndicator'
+
+// Tamanho da página retornada por ReputationService.
+const REVIEWS_PER_PAGE = 10
 
 export function ProfileReputation({ username }: { username: string }) {
   const [page, setPage] = useState(1)
@@ -38,7 +42,7 @@ export function ProfileReputation({ username }: { username: string }) {
         </Card>
       ) : (
         <div className="grid gap-5 md:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
-          <Card className="p-5">
+          <Card className="border-rare-500/70 p-5">
             <h2 className="text-lg font-semibold text-primary-900">
               Reputação
             </h2>
@@ -65,7 +69,7 @@ export function ProfileReputation({ username }: { username: string }) {
               </ul>
             )}
           </Card>
-          <Card className="p-5">
+          <Card className="border-rare-500/70 p-5">
             <h2 className="text-lg font-semibold text-primary-900">
               Avaliações recebidas
             </h2>
@@ -106,26 +110,7 @@ export function ProfileReputation({ username }: { username: string }) {
               </ul>
             )}
             {(page > 1 || state.data.hasNext) && (
-              <nav
-                aria-label="Páginas de avaliações"
-                className="mt-4 flex flex-wrap items-center gap-3"
-              >
-                <Button
-                  variant="outline"
-                  disabled={page === 1}
-                  onClick={() => setPage(page - 1)}
-                >
-                  Anterior
-                </Button>
-                <span>Página {page}</span>
-                <Button
-                  variant="outline"
-                  disabled={!state.data.hasNext}
-                  onClick={() => setPage(page + 1)}
-                >
-                  Próxima
-                </Button>
-              </nav>
+              <PageNavigation label="Páginas de avaliações" page={page} totalPages={Math.ceil(state.data.summary.totalReviews / REVIEWS_PER_PAGE)} onPageChange={setPage} className="mt-4" />
             )}
           </Card>
         </div>

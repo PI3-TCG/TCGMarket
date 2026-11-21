@@ -35,7 +35,7 @@ export function TransactionDetailPage() {
   const search = useSearch({ from: ROUTE_ID })
 
   return (
-    <main className="min-h-screen bg-neutral-50 pb-12 text-neutral-900">
+    <main className="min-h-screen pb-12 text-neutral-900">
       <div className="mx-auto w-full max-w-[1400px] px-4 pt-4 sm:px-6 xl:px-[38px]">
         <PageBanner
           image={pageBanners.profile}
@@ -329,4 +329,4 @@ function ItemSection({
 }
 
 const button =
-  'inline-flex min-h-11 cursor-pointer items-center justify-center rounded-lg bg-primary-900 px-5 py-3 text-sm font-semibold text-white hover:bg-primary-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500'
+  'inline-flex min-h-11 cursor-pointer items-center justify-center rounded-lg bg-primary-900 button-vignette px-5 py-3 text-sm font-semibold text-white hover:bg-primary-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500'

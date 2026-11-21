@@ -75,3 +75,59 @@
     cursor: not-allowed;
   }
 }
+
+@utility banner-text-outline {
+  -webkit-text-stroke: 2px #130b30;
+  paint-order: stroke fill;
+}
+
+@utility button-vignette {
+  background-image:
+    linear-gradient(90deg, rgb(0 0 0 / 20%), transparent 18%, transparent 82%, rgb(0 0 0 / 20%)),
+    radial-gradient(ellipse at center, transparent 20%, rgb(0 0 0 / 14%) 65%, rgb(0 0 0 / 42%) 100%);
+}
+
+@utility filter-panel {
+  border: 1px solid var(--color-rare-500);
+  border-radius: var(--radius-surface);
+  background: linear-gradient(180deg, #e9daf5, #fcf9ff);
+  box-shadow: 0 0 12px rgb(48 43 64 / 13%), 0 6px 16px rgb(48 43 64 / 12%);
+  padding: 1rem;
+}
+
+@utility panel-ornaments {
+  position: relative;
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    z-index: 1;
+    left: 50%;
+    width: 12px;
+    height: 12px;
+    border: 2px solid #f6c846;
+    border-radius: 2px;
+    background: linear-gradient(135deg, #fff9e0, #ffe36d);
+    box-shadow: 0 0 0 1px #aa7400, 0 0 6px rgb(252 210 3 / 35%);
+    translate: -50% -50%;
+    rotate: 45deg;
+    pointer-events: none;
+  }
+
+  &::before { top: -0.5px; }
+  &::after { top: calc(100% + 0.5px); }
+}
+
+@utility filter-button {
+  @apply button-vignette rounded-control bg-primary-900 px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-900;
+}
+
+@utility filter-field {
+  box-shadow: inset 0 1px 3px rgb(48 43 64 / 8%);
+}
+
+@utility page-vignette {
+  background-color: white;
+  background-image: radial-gradient(ellipse at center, #ffffff 32%, #f4edf8 64%, #a477ae 100%);
+}

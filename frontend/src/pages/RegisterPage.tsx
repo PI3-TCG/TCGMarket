@@ -1,3 +1,4 @@
+import { BannerGoldDivider } from '@/components/layout/PageBanner'
 import { validationFields } from '@/services/feedback'
 import mark from '@/assets/mark-3cartas-roxo.svg'
 import hero from '@/assets/login-hero.webp'
@@ -170,13 +171,14 @@ export function RegisterPage() {
   }
 
   return (
-    <main className="min-h-svh bg-neutral-50 text-neutral-900 lg:grid lg:h-svh lg:grid-cols-2 lg:overflow-hidden">
-      <section className="relative lg:h-svh">
+    <main className="page-vignette min-h-svh text-neutral-900 lg:grid lg:h-svh lg:grid-cols-2 lg:overflow-hidden">
+      <section className="relative lg:h-[calc(100svh_-_1rem)]">
         <img
           src={hero}
           alt="Eevee dormindo sobre uma mesa de cartas. Colecione, troque e conecte no TCG Market."
           className="h-80 w-full object-cover object-[center_72%] sm:h-112 lg:h-full"
         />
+        <BannerGoldDivider />
       </section>
 
       <section className="relative overflow-y-auto px-6 py-10 lg:h-svh">
@@ -367,7 +369,7 @@ export function RegisterPage() {
             <button
               type="submit"
               disabled={submitting}
-              className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary-900 text-sm font-semibold text-white transition hover:bg-primary-800 focus-visible:ring-2 focus-visible:ring-secondary-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+              className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary-900 button-vignette text-sm font-semibold text-white transition hover:bg-primary-800 focus-visible:ring-2 focus-visible:ring-secondary-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <UserIcon />
               {submitting ? 'Criando conta...' : 'Criar conta'}

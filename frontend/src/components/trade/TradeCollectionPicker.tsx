@@ -1,3 +1,4 @@
+import { Pagination as PageNavigation } from '@/components/ui/Pagination'
 import { useEffect, useId, useState } from 'react'
 import { Alert } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
@@ -258,27 +259,7 @@ export function TradeCollectionPicker({
               })}
             </div>
             {result.data.totalPages > 1 ? (
-              <div className="mt-4 flex items-center justify-center gap-3">
-                <Button
-                  variant="outline"
-                  className={modalSecondaryButton}
-                  disabled={result.data.first}
-                  onClick={() => setPage((n) => Math.max(0, n - 1))}
-                >
-                  Anterior
-                </Button>
-                <span className="text-sm font-semibold text-[#5E496D]">
-                  Página {result.data.number + 1} de {result.data.totalPages}
-                </span>
-                <Button
-                  variant="outline"
-                  className={modalSecondaryButton}
-                  disabled={result.data.last}
-                  onClick={() => setPage((n) => n + 1)}
-                >
-                  Próxima
-                </Button>
-              </div>
+              <PageNavigation label="Paginação das cartas para troca" page={result.data.number + 1} totalPages={result.data.totalPages} onPageChange={(page) => setPage(page - 1)} className="mt-4" />
             ) : null}
           </>
         )}

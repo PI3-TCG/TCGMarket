@@ -1,3 +1,4 @@
+import { Pagination as PageNavigation } from '@/components/ui/Pagination'
 import { FeedbackState } from '@/components/ui/FeedbackState'
 import { TransactionReviewButton } from '@/components/history/TransactionReviewButton'
 import { pageBanners } from '@/config/pageBanners'
@@ -47,12 +48,18 @@ export function TransactionHistoryPage() {
   const search = useSearch({ from: '/site-layout/perfil/historico' })
 
   return (
-    <main className="min-h-screen bg-neutral-50 pb-12 text-neutral-900">
+    <main className="min-h-screen pb-12 text-neutral-900">
       <div className="mx-auto w-full max-w-[1400px] px-4 pt-4 sm:px-6 xl:px-[38px]">
         <PageBanner
           image={pageBanners.profile}
           title="Histórico de transações"
-          subtitle="Consulte suas compras, vendas e trocas realizadas no Marketplace."
+          subtitle={
+            <>
+              Consulte suas compras, vendas e trocas
+              <br />
+              realizadas no Marketplace.
+            </>
+          }
         />
 
         {user && <HistoryContent key={user.id} search={search} />}
@@ -97,11 +104,11 @@ function HistoryContent({ search }: { search: TransactionHistorySearch }) {
   const current = result?.key === requestKey ? result : null
 
   return (
-    <div className="mt-6 space-y-4">
+    <div className="mt-10 space-y-4">
       <div
         role="tablist"
         aria-label="Tipo de transação"
-        className="flex flex-wrap gap-2"
+        className="filter-panel flex flex-wrap gap-2"
       >
         {tabs.map((tab) => {
           const selected = tab.type === search.type
@@ -123,7 +130,7 @@ function HistoryContent({ search }: { search: TransactionHistorySearch }) {
       <section
         aria-label="Transações"
         aria-busy={current === null || undefined}
-        className="rounded-xl border border-neutral-200 bg-white p-4"
+        className="rounded-xl border border-rare-500 bg-white p-4"
       >
         {current === null ? (
           <HistorySkeleton />
@@ -315,8 +322,7 @@ function Pagination({
   const to = data.number * data.size + data.content.length
 
   return (
-    <nav
-      aria-label="Paginação do histórico"
+    <div
       className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-neutral-200 pt-4"
     >
       <span className="text-sm text-neutral-700">
@@ -324,30 +330,8 @@ function Pagination({
         {data.totalElements === 1 ? 'transação' : 'transações'}
       </span>
 
-      {data.totalPages > 1 && (
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            disabled={data.first}
-            onClick={() => onPageChange(data.number - 1)}
-            className={pageButton}
-          >
-            Anterior
-          </button>
-          <span className="text-sm text-neutral-700">
-            Página {data.number + 1} de {data.totalPages}
-          </span>
-          <button
-            type="button"
-            disabled={data.last}
-            onClick={() => onPageChange(data.number + 1)}
-            className={pageButton}
-          >
-            Próxima
-          </button>
-        </div>
-      )}
-    </nav>
+      <PageNavigation label="Paginação do histórico" page={data.number + 1} totalPages={data.totalPages} onPageChange={(page) => onPageChange(page - 1)} />
+    </div>
   )
 }
 
@@ -380,15 +364,12 @@ function HistorySkeleton() {
 const tabBase =
   'min-h-10 cursor-pointer rounded-full px-5 py-2 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500'
 
-const selectedTab = `${tabBase} bg-primary-900 text-white`
+const selectedTab = `${tabBase} button-vignette bg-primary-900 text-white`
 
 const idleTab = `${tabBase} border border-neutral-300 bg-white text-primary-900 hover:bg-primary-100`
 
 const primaryButton =
-  'inline-flex min-h-11 cursor-pointer items-center justify-center rounded-lg bg-primary-900 px-5 py-3 text-sm font-semibold text-white hover:bg-primary-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500'
+  'inline-flex min-h-11 cursor-pointer items-center justify-center rounded-lg bg-primary-900 button-vignette px-5 py-3 text-sm font-semibold text-white hover:bg-primary-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500'
 
 const outlineButton =
   'inline-flex min-h-10 cursor-pointer items-center justify-center rounded-lg border border-primary-900 px-4 py-2 text-sm font-semibold text-primary-900 hover:bg-primary-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500'
-
-const pageButton =
-  'min-h-10 rounded-lg border border-primary-900 px-4 py-2 text-sm font-semibold text-primary-900 enabled:cursor-pointer enabled:hover:bg-primary-100 disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500'

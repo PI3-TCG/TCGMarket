@@ -1,3 +1,4 @@
+import { FilterHeading } from '@/components/ui/ResponsiveFilters'
 import { useId, useState, type FormEvent } from 'react'
 import { Icon } from '@/components/ui/Icon'
 import { MAX_UNIT_PRICE, conditionLabels, languageLabels } from '@/components/ads/adFormat'
@@ -11,7 +12,7 @@ type Props = {
 
 
 const fieldClass =
-  'min-h-11 w-full rounded-lg border border-primary-300/40 bg-white px-3 py-2 text-sm text-primary-900 transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500'
+  'min-h-11 w-full rounded-lg border border-primary-300/40 bg-white filter-field px-3 py-2 text-sm text-primary-900 transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500'
 
 export function MarketplaceFilters({ onApply }: Props) {
   const id = useId()
@@ -50,27 +51,9 @@ export function MarketplaceFilters({ onApply }: Props) {
   return (
     <aside
       aria-labelledby={`${id}-title`}
-      className="rounded-xl border border-primary-300/30 bg-white p-4"
+      className="filter-panel panel-ornaments min-w-0"
     >
-      <h2
-        id={`${id}-title`}
-        className="mb-5 flex items-center gap-2 font-display text-xl font-bold text-primary-900"
-      >
-        <svg
-          width="23"
-          height="23"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden="true"
-        >
-          <path d="M3 4h18l-7 8v8l-4-2v-6L3 4Z" />
-        </svg>
-        Filtros
-      </h2>
+      <FilterHeading id={`${id}-title`} />
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
@@ -200,7 +183,7 @@ export function MarketplaceFilters({ onApply }: Props) {
         <div className="space-y-3 pt-1">
           <button
             type="submit"
-            className="min-h-11 w-full cursor-pointer rounded-lg bg-gradient-to-r from-primary-900 to-primary-500 px-4 py-2.5 text-sm font-semibold text-white transition hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500"
+            className="filter-button min-h-11 w-full cursor-pointer"
           >
             Aplicar filtros
           </button>

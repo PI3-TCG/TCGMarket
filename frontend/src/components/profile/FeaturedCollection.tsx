@@ -13,7 +13,7 @@ export function FeaturedCollection() {
   const { user } = useSession()
   const { state, retry } = useRemoteData(`featured:${user?.id}`, loadFeatured)
   return (
-    <Card className="p-5">
+    <Card className="panel-ornaments overflow-visible! border-rare-500! p-5">
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <h2 className="flex items-center gap-2 text-lg font-semibold text-primary-900">
           <Icon name="grid" size={24} />

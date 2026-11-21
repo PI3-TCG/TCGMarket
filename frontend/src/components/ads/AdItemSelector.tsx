@@ -1,3 +1,4 @@
+import { Pagination as PageNavigation } from '@/components/ui/Pagination'
 import { useEffect, useId, useState, type ReactNode } from 'react'
 import { Link } from '@tanstack/react-router'
 import { Alert } from '@/components/ui/Alert'
@@ -99,7 +100,7 @@ export function AdItemSelector({ onSelect, onBackToForm }: Props) {
   return (
     <section
       aria-labelledby="ad-selector-title"
-      className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm sm:p-6"
+      className="panel-ornaments rounded-xl border border-rare-500 bg-white p-4 shadow-sm sm:p-6"
     >
       <h2
         id="ad-selector-title"
@@ -247,7 +248,7 @@ function SelectorBody({
           <Link
             to="/catalogo/$game"
             params={{ game: 'pokemon' }}
-            className="inline-flex h-10 items-center rounded-control bg-primary-900 px-4 text-sm font-semibold text-white hover:bg-primary-800 focus-visible:outline-2 focus-visible:outline-secondary-500"
+            className="inline-flex h-10 items-center rounded-control bg-primary-900 button-vignette px-4 text-sm font-semibold text-white hover:bg-primary-800 focus-visible:outline-2 focus-visible:outline-secondary-500"
           >
             Explorar catálogo
           </Link>
@@ -284,28 +285,7 @@ function SelectorBody({
       </ul>
 
       {data.totalPages > 1 && (
-        <nav
-          aria-label="Paginação da seleção"
-          className="mt-4 flex flex-wrap items-center justify-between gap-3"
-        >
-          <Button
-            variant="outline"
-            disabled={data.first}
-            onClick={() => onPageChange(data.number - 1)}
-          >
-            Anterior
-          </Button>
-          <span className="text-sm text-neutral-700">
-            Página {data.number + 1} de {data.totalPages}
-          </span>
-          <Button
-            variant="outline"
-            disabled={data.last}
-            onClick={() => onPageChange(data.number + 1)}
-          >
-            Próxima
-          </Button>
-        </nav>
+        <PageNavigation label="Paginação da seleção" page={data.number + 1} totalPages={data.totalPages} onPageChange={(page) => onPageChange(page - 1)} className="mt-4" />
       )}
     </>
   )

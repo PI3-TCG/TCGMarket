@@ -21,6 +21,7 @@ export async function searchCatalogCards(
     {
       params: {
         q: search.q,
+        cardNumber: search.cardNumber,
         set: search.set,
         rarity: search.rarity,
         type: search.type,

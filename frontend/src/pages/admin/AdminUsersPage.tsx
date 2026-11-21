@@ -1,3 +1,4 @@
+import { Pagination as PageNavigation } from '@/components/ui/Pagination'
 import { AdminUserDetailsModal } from '@/components/admin/AdminUserDetailsModal'
 import { apiMessage } from '@/components/admin/adminFormat'
 import {
@@ -160,7 +161,7 @@ export function AdminUsersPage() {
         </Alert>
       ) : null}
 
-      <Card>
+      <Card className="overflow-visible">
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-neutral-200 px-5 py-4">
           <h2 className="text-lg font-semibold text-neutral-900">
             Gerenciamento de usuários
@@ -173,7 +174,7 @@ export function AdminUsersPage() {
         </div>
 
         <div className="space-y-4 p-5">
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="filter-panel panel-ornaments grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <form
               role="search"
               onSubmit={submitSearch}
@@ -318,40 +319,7 @@ export function AdminUsersPage() {
         )}
 
         {data && data.totalPages > 1 ? (
-          <nav
-            aria-label="Paginação de usuários"
-            className="flex flex-wrap items-center justify-between gap-3 border-t border-neutral-200 px-5 py-3"
-          >
-            <p className="text-xs text-neutral-500">
-              Página {search.page} de {data.totalPages}
-            </p>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                disabled={search.page <= 1}
-                onClick={() =>
-                  setSearch((previous) => ({
-                    ...previous,
-                    page: previous.page - 1,
-                  }))
-                }
-              >
-                Anterior
-              </Button>
-              <Button
-                variant="outline"
-                disabled={search.page >= data.totalPages}
-                onClick={() =>
-                  setSearch((previous) => ({
-                    ...previous,
-                    page: previous.page + 1,
-                  }))
-                }
-              >
-                Próxima
-              </Button>
-            </div>
-          </nav>
+          <PageNavigation label="Paginação de usuários" page={search.page} totalPages={data.totalPages} onPageChange={(page) => setSearch((previous) => ({ ...previous, page }))} className="border-t border-neutral-200 px-5 py-3" />
         ) : null}
       </Card>
 

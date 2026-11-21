@@ -1,130 +1,91 @@
-import { useState } from 'react'
-import { Card } from '@/components/ui/Card'
+import { conditionLabels, languageLabels } from '@/components/ads/adFormat'
 import { Icon } from '@/components/ui/Icon'
-import type {
-    CardCondition,
-    CardLanguage,
-    CollectionItem,
-} from '@/types/Collection'
-
-const conditionLabels: Record<CardCondition, string> = {
-    NEAR_MINT: 'Near Mint',
-    LIGHTLY_PLAYED: 'Lightly Played',
-    MODERATELY_PLAYED: 'Moderately Played',
-    HEAVILY_PLAYED: 'Heavily Played',
-    DAMAGED: 'Damaged',
-}
-
-const languageLabels: Record<CardLanguage, string> = {
-    PORTUGUESE: 'Português',
-    ENGLISH: 'Inglês',
-    JAPANESE: 'Japonês',
-}
+import { TradingCardImage } from '@/components/ui/TradingCard'
+import {
+  cardConditionBadge,
+  tradingCardLanguage,
+  tradingCardRarity,
+  tradingCardSurface,
+} from '@/components/ui/tradingCardStyles'
+import type { CollectionItem } from '@/types/Collection'
 
 type CollectionItemCardProps = {
-    item: CollectionItem
-    onDetails?: (item: CollectionItem) => void
-    onEdit?: (item: CollectionItem) => void
-    onRemove?: (item: CollectionItem) => void
-    onAdvertise?: (item: CollectionItem) => void
+  item: CollectionItem
+  onDetails?: (item: CollectionItem) => void
+  onEdit?: (item: CollectionItem) => void
+  onRemove?: (item: CollectionItem) => void
+  onAdvertise?: (item: CollectionItem) => void
 }
 
 export function CollectionItemCard({
-    item,
-    onDetails,
-    onEdit,
-    onRemove,
-    onAdvertise,
+  item,
+  onDetails,
+  onEdit,
+  onRemove,
+  onAdvertise,
 }: CollectionItemCardProps) {
-    const [failedImageUrl, setFailedImageUrl] = useState<string | null>(null)
+  const actions = [
+    { label: 'Detalhes', icon: 'search', handler: onDetails },
+    { label: 'Editar', icon: 'hammer', handler: onEdit },
+    { label: 'Remover', icon: 'trash', handler: onRemove },
+    { label: 'Anunciar', icon: 'megaphone', handler: onAdvertise },
+  ] as const
 
-    const hasImage =
-        Boolean(item.card.imageUrl) && failedImageUrl !== item.card.imageUrl
+  return (
+    <article className={tradingCardSurface}>
+      <TradingCardImage url={item.card.imageUrl} name={item.card.name}>
+        <span
+          aria-label={`${item.quantity} exemplares`}
+          className="absolute right-2 bottom-2 rounded-md bg-white px-2 py-1 text-xs font-bold text-neutral-900"
+        >
+          ×{item.quantity}
+        </span>
+      </TradingCardImage>
 
-    const actions = [
-        { label: 'Detalhes', icon: 'search', handler: onDetails },
-        { label: 'Editar', icon: 'settings', handler: onEdit },
-        { label: 'Remover', icon: 'trash', handler: onRemove },
-        { label: 'Anunciar', icon: 'cart', handler: onAdvertise },
-    ] as const
+      <div className="flex flex-1 flex-col gap-2 p-3">
+        <h3 className="font-display text-sm font-bold wrap-anywhere text-neutral-900">
+          {item.card.name}
+        </h3>
 
-    return (
-        <Card className="flex h-full min-w-0 flex-col">
-            <div className="relative m-2 flex h-36 items-center justify-center overflow-hidden rounded-lg bg-primary-100">
-                {hasImage ? (
-                    <img
-                        src={item.card.imageUrl}
-                        alt={item.card.name}
-                        loading="lazy"
-                        onError={() => setFailedImageUrl(item.card.imageUrl)}
-                        className="h-full w-full object-contain p-2"
-                    />
-                ) : (
-                    <div className="flex flex-col items-center gap-2 text-primary-700">
-                        <Icon name="grid" size={32} />
-                        <span className="text-xs">Imagem indisponível</span>
-                    </div>
-                )}
+        <p className="text-xs text-neutral-500">
+          {item.card.edition}
+          {item.card.cardNumber ? ` · Nº ${item.card.cardNumber}` : ''}
+        </p>
 
-                <span
-                    aria-label={`${item.quantity} exemplares`}
-                    className="absolute right-2 bottom-2 rounded-md bg-primary-900 px-2 py-1 text-xs font-bold text-white"
-                >
-                    ×{item.quantity}
-                </span>
-            </div>
+        <span className={tradingCardRarity}>{item.card.officialRarity}</span>
 
-            <div className="flex flex-1 flex-col gap-2 px-3 pb-3">
-                <h3 className="font-display text-sm font-bold text-neutral-900">
-                    {item.card.name}
-                </h3>
+        <div className="mt-auto flex flex-wrap items-center gap-2 pt-1">
+          <span className={cardConditionBadge(item.condition)}>
+            {conditionLabels[item.condition] ?? item.condition}
+          </span>
+          <span className={tradingCardLanguage}>
+            {languageLabels[item.language] ?? item.language}
+          </span>
+        </div>
+      </div>
 
-                <p className="text-xs text-neutral-500">
-                    {item.card.edition}
-                    {item.card.cardNumber ? ` · Nº ${item.card.cardNumber}` : ''}
-                </p>
-
-                <span className="w-fit rounded-full bg-primary-100 px-2 py-1 text-xs font-medium text-primary-900">
-                    {item.card.officialRarity}
-                </span>
-
-                <dl className="mt-auto grid grid-cols-2 gap-2 border-t border-neutral-100 pt-2">
-                    <div>
-                        <dt className="text-xs text-neutral-500">Condição</dt>
-                        <dd className="text-xs font-semibold text-primary-900">
-                            {conditionLabels[item.condition]}
-                        </dd>
-                    </div>
-
-                    <div>
-                        <dt className="text-xs text-neutral-500">Idioma</dt>
-                        <dd className="text-xs font-semibold text-primary-900">
-                            {languageLabels[item.language]}
-                        </dd>
-                    </div>
-                </dl>
-            </div>
-
-            <div className="grid grid-cols-4 border-t border-neutral-200">
-                {actions.map((action) => (
-                    <button
-                        key={action.label}
-                        type="button"
-                        disabled={!action.handler}
-                        onClick={() => action.handler?.(item)}
-                        aria-label={`${action.label}: ${item.card.name}`}
-                        title={
-                            action.handler
-                                ? action.label
-                                : `${action.label} — ainda não disponível nesta prévia`
-                        }
-                        className="flex min-h-12 flex-col items-center justify-center gap-1 px-1 py-2 text-primary-900 transition-colors enabled:cursor-pointer enabled:hover:bg-primary-100 focus-visible:outline-2 focus-visible:outline-secondary-500 disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                        <Icon name={action.icon} size={16} />
-                        <span className="text-[10px] font-medium">{action.label}</span>
-                    </button>
-                ))}
-            </div>
-        </Card>
-    )
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(2.75rem,1fr))] gap-1 border-t border-neutral-200 p-2">
+        {actions.map((action) => (
+          <button
+            key={action.label}
+            type="button"
+            disabled={!action.handler}
+            onClick={() => action.handler?.(item)}
+            aria-label={`${action.label}: ${item.card.name}`}
+            title={
+              action.handler
+                ? action.label
+                : `${action.label} — ainda não disponível nesta prévia`
+            }
+            className="flex min-h-12 flex-col items-center justify-center gap-1 rounded-md px-1 py-2 text-primary-900 transition-colors enabled:cursor-pointer enabled:hover:bg-primary-100 focus-visible:outline-2 focus-visible:outline-secondary-500 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            <Icon name={action.icon} size={16} />
+            <span className="text-[10px] font-medium text-neutral-700">
+              {action.label}
+            </span>
+          </button>
+        ))}
+      </div>
+    </article>
+  )
 }

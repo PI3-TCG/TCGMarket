@@ -1,3 +1,4 @@
+import { Pagination as PageNavigation } from '@/components/ui/Pagination'
 import {
   ADMIN_GAMES,
   GAME_LABEL,
@@ -23,10 +24,9 @@ import { fetchCatalogFilters } from '@/services/catalogApi'
 import { useSession } from '@/session'
 import type { AdminCatalogCard, AdminCatalogSearch } from '@/types/AdminCatalog'
 import type { CatalogFilters } from '@/types/Catalog'
-import { pageItems } from '@/utils/pagination'
 import { useNavigate, useSearch } from '@tanstack/react-router'
 import axios from 'axios'
-import { useCallback, useEffect, useId, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useId, useState } from 'react'
 
 const REASON_MIN = 10
 const REASON_MAX = 300
@@ -189,7 +189,7 @@ export function AdminCatalogPage() {
   const hasFilters = Boolean(q || game || set || rarity || type || visibility)
 
   return (
-    <Card>
+    <Card className="overflow-visible">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-neutral-200 px-5 py-4">
         <h2 className="text-lg font-semibold text-neutral-900">Catálogo</h2>
         <p className="text-sm text-neutral-500" aria-live="polite">
@@ -217,7 +217,7 @@ export function AdminCatalogPage() {
           </Alert>
         ) : null}
 
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-6">
+        <div className="filter-panel panel-ornaments grid gap-3 sm:grid-cols-2 xl:grid-cols-6">
           <Input
             variant="search"
             type="search"
@@ -441,45 +441,7 @@ export function AdminCatalogPage() {
               {`Exibindo ${numberFormat.format(data.page * data.size + 1)}–${numberFormat.format(data.page * data.size + rows.length)} de ${numberFormat.format(data.totalElements)} cartas`}
             </p>
             {data.totalPages > 1 ? (
-              <nav
-                aria-label="Paginação do catálogo administrativo"
-                className="flex flex-wrap items-center gap-1"
-              >
-                <PageButton
-                  label="Página anterior"
-                  disabled={currentPage === 1}
-                  onClick={() => goToPage(currentPage - 1)}
-                >
-                  ‹
-                </PageButton>
-                {pageItems(currentPage, data.totalPages).map((item, index) =>
-                  item === 'gap' ? (
-                    <span
-                      key={`gap-${index}`}
-                      aria-hidden="true"
-                      className="px-1 text-sm text-neutral-500"
-                    >
-                      …
-                    </span>
-                  ) : (
-                    <PageButton
-                      key={item}
-                      label={`Página ${item}`}
-                      current={item === currentPage}
-                      onClick={() => goToPage(item)}
-                    >
-                      {item}
-                    </PageButton>
-                  ),
-                )}
-                <PageButton
-                  label="Próxima página"
-                  disabled={currentPage >= data.totalPages}
-                  onClick={() => goToPage(currentPage + 1)}
-                >
-                  ›
-                </PageButton>
-              </nav>
+              <PageNavigation label="Paginação do catálogo administrativo" page={currentPage} totalPages={data.totalPages} onPageChange={goToPage} />
             ) : null}
           </div>
         ) : null}
@@ -603,33 +565,6 @@ function CardThumb({ card }: { card: AdminCatalogCard }) {
     >
       {card.name.charAt(0)}
     </span>
-  )
-}
-
-function PageButton({
-  label,
-  current = false,
-  disabled = false,
-  onClick,
-  children,
-}: {
-  label: string
-  current?: boolean
-  disabled?: boolean
-  onClick: () => void
-  children: ReactNode
-}) {
-  return (
-    <button
-      type="button"
-      aria-label={label}
-      aria-current={current ? 'page' : undefined}
-      disabled={disabled}
-      onClick={onClick}
-      className={`size-8 rounded-control text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-40 ${current ? 'bg-primary-900 text-white' : 'border border-neutral-200 bg-white text-neutral-700 hover:border-primary-900'}`}
-    >
-      {children}
-    </button>
   )
 }
 

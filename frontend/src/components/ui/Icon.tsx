@@ -22,6 +22,7 @@ export type IconName =
   | 'cart'
   | 'bell'
   | 'settings'
+  | 'hammer'
   | 'close'
   | 'chevron-down'
   | 'check'
@@ -228,6 +229,13 @@ function paths(name: IconName, filled: boolean) {
         <>
           <path d="M6 16V11a6 6 0 1 1 12 0v5l1.2 2H4.8z" />
           <path d="M10 19a2 2 0 0 0 4 0" />
+        </>
+      )
+    case 'hammer':
+      return (
+        <>
+          <path d="m13 10-8.5 8.5a1.4 1.4 0 0 0 2 2L15 12" />
+          <path d="m10 7 4-4 7 7-4 4-7-7Z" />
         </>
       )
     case 'settings':

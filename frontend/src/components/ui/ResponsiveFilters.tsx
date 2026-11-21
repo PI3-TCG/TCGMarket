@@ -24,7 +24,7 @@ export function ResponsiveFilters({ children }: { children: ReactNode }) {
     >
       <Button
         ref={toggle}
-        variant="outline"
+        variant="primary"
         className="min-h-11 w-full justify-between lg:hidden"
         aria-expanded={open}
         aria-controls={panelId}
@@ -36,10 +36,34 @@ export function ResponsiveFilters({ children }: { children: ReactNode }) {
 
       <div id={panelId} className={open ? 'mt-3 lg:mt-0' : 'hidden lg:block'}>
         {children}
-        <Button variant="outline" className="mt-3 min-h-11 w-full lg:hidden" onClick={close}>
+        <Button variant="primary" className="mt-3 min-h-11 w-full lg:hidden" onClick={close}>
           Fechar filtros
         </Button>
       </div>
     </div>
+  )
+}
+
+export function FilterHeading({ id }: { id: string }) {
+  return (
+    <h2
+      id={id}
+      className="mb-5 flex items-center gap-2 font-display text-xl font-bold text-primary-900"
+    >
+      <svg
+        width="23"
+        height="23"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M3 4h18l-7 8v8l-4-2v-6L3 4Z" />
+      </svg>
+      Filtros
+    </h2>
   )
 }
