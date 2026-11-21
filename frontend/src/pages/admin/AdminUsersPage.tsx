@@ -1,4 +1,3 @@
-import { Pagination as PageNavigation } from '@/components/ui/Pagination'
 import { AdminUserDetailsModal } from '@/components/admin/AdminUserDetailsModal'
 import { apiMessage } from '@/components/admin/adminFormat'
 import {

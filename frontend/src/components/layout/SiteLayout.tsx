@@ -20,7 +20,7 @@ export function SiteLayout() {
   }
 
   return (
-    <div className="flex min-h-svh flex-col bg-neutral-50 text-neutral-900">
+    <div className="page-vignette flex min-h-svh flex-col text-neutral-900">
       <div className="tcg-page-nav">
         <SiteHeader onSoon={soon} />
         <GameNavigation />
@@ -32,7 +32,7 @@ export function SiteLayout() {
           </Alert>
         </div>
       )}
-      <div className="page-vignette flex-1">
+      <div className="min-w-0 flex-1">
         <Outlet />
       </div>
       <SiteFooter onSoon={soon} />
