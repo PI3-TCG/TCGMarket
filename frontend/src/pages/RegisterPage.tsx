@@ -1,11 +1,12 @@
-import { BannerGoldDivider } from '@/components/layout/PageBanner'
+import { AuthLayout } from '@/components/layout/AuthLayout'
+import { authInputClass, authLinkClass } from '@/components/layout/authStyles'
+import { Button } from '@/components/ui/Button'
 import { validationFields } from '@/services/feedback'
-import mark from '@/assets/mark-3cartas-roxo.svg'
-import hero from '@/assets/login-hero.webp'
+import hero from '@/assets/images/imagePage-cadastro.png'
 import { Alert } from '@/components/ui/Alert'
 import { registerUser } from '@/services/userApi'
 import { useSession } from '@/session'
-import { useNavigate } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 import type { ApiErrorResponse } from '@/types/User'
 import {
   isStrongPassword,
@@ -13,7 +14,13 @@ import {
   utf8ByteLength,
 } from '@/utils/password'
 import axios from 'axios'
-import { type FormEvent, type ReactNode, useEffect, useRef, useState } from 'react'
+import {
+  type FormEvent,
+  type ReactNode,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 
 const FUTURE_TERMS = 'Os termos de uso serão implementados no futuro.'
 const FUTURE_PRIVACY = 'A política de privacidade será implementada no futuro.'
@@ -53,9 +60,6 @@ const EMPTY_FORM = {
 }
 
 type FieldName = keyof typeof EMPTY_FORM
-
-const inputClass =
-  'w-full rounded-xl border border-neutral-300 bg-white py-3 pr-4 pl-11 text-sm outline-none placeholder:text-neutral-500 focus:border-primary-900 focus:ring-2 focus:ring-secondary-500'
 
 export function RegisterPage() {
   const navigate = useNavigate()
@@ -149,6 +153,7 @@ export function RegisterPage() {
     const nextErrors = validate()
     setErrors(nextErrors)
     if (Object.keys(nextErrors).length > 0) {
+      document.getElementById(Object.keys(nextErrors)[0])?.focus()
       return
     }
 
@@ -171,224 +176,197 @@ export function RegisterPage() {
   }
 
   return (
-    <main className="page-vignette min-h-svh text-neutral-900 lg:grid lg:h-svh lg:grid-cols-2 lg:overflow-hidden">
-      <section className="relative lg:h-[calc(100svh_-_1rem)]">
-        <img
-          src={hero}
-          alt="Eevee dormindo sobre uma mesa de cartas. Colecione, troque e conecte no TCG Market."
-          className="h-80 w-full object-cover object-[center_72%] sm:h-112 lg:h-full"
-        />
-        <BannerGoldDivider />
-      </section>
+    <AuthLayout
+      image={hero}
+      title="Crie sua conta"
+      description="Faça parte da nossa comunidade de colecionadores e comece sua jornada no mundo dos TCGs."
+      wide
+    >
+      {notice ? (
+        <div className="mt-5">
+          <Alert variant="info" onDismiss={() => setNotice(null)}>
+            {notice}
+          </Alert>
+        </div>
+      ) : null}
 
-      <section className="relative overflow-y-auto px-6 py-10 lg:h-svh">
-        <Sparkles />
-        {notice ? (
-          <div className="sticky top-0 z-10 mb-4">
-            <Alert variant="info" onDismiss={() => setNotice(null)}>
-              {notice}
-            </Alert>
+      <form className="mt-8 space-y-5" onSubmit={handleSubmit} noValidate>
+        <TextField
+          id="name"
+          label="Nome completo"
+          required
+          value={form.name}
+          placeholder="Seu nome completo"
+          autoComplete="name"
+          error={errors.name}
+          icon={<UserIcon />}
+          onChange={(value) => updateField('name', value)}
+        />
+
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+          <TextField
+            id="username"
+            label="Nome de usuário"
+            required
+            value={form.username}
+            placeholder="Ex.: alineguilhoto"
+            autoComplete="username"
+            error={errors.username}
+            icon={<AtIcon />}
+            onChange={(value) => updateField('username', value)}
+          />
+          <TextField
+            id="email"
+            label="E-mail"
+            required
+            type="email"
+            value={form.email}
+            placeholder="seu@email.com"
+            autoComplete="email"
+            error={errors.email}
+            icon={<MailIcon />}
+            onChange={(value) => updateField('email', value)}
+          />
+        </div>
+
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+          <PasswordField
+            id="password"
+            label="Senha"
+            value={form.password}
+            placeholder="Mínimo de 6 caracteres"
+            autoComplete="new-password"
+            visible={showPassword}
+            error={errors.password}
+            onToggle={() => setShowPassword((current) => !current)}
+            onChange={(value) => updateField('password', value)}
+          />
+          <PasswordField
+            id="confirmPassword"
+            label="Confirmar senha"
+            value={form.confirmPassword}
+            placeholder="Repita sua senha"
+            autoComplete="new-password"
+            visible={showConfirmPassword}
+            error={errors.confirmPassword}
+            onToggle={() => setShowConfirmPassword((current) => !current)}
+            onChange={(value) => updateField('confirmPassword', value)}
+          />
+        </div>
+
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+          <TextField
+            id="birthDate"
+            label="Data de nascimento"
+            required
+            type="date"
+            value={form.birthDate}
+            placeholder=""
+            autoComplete="bday"
+            error={errors.birthDate}
+            icon={<CalendarIcon />}
+            onChange={(value) => updateField('birthDate', value)}
+          />
+          <div>
+            <FieldLabel htmlFor="country" required>
+              País
+            </FieldLabel>
+            <div className="relative">
+              <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-neutral-500">
+                <GlobeIcon />
+              </span>
+              <select
+                id="country"
+                name="country"
+                required
+                aria-describedby={errors.country ? 'country-error' : undefined}
+                value={form.country}
+                aria-invalid={errors.country ? true : undefined}
+                onChange={(event) => updateField('country', event.target.value)}
+                className={`${authInputClass} appearance-none pr-10`}
+              >
+                {COUNTRIES.map((country) => (
+                  <option key={country} value={country}>
+                    {country}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {errors.country ? (
+              <FieldError id="country-error" message={errors.country} />
+            ) : null}
           </div>
+        </div>
+
+        <p className="flex items-start gap-2 rounded-xl bg-info-50 px-3 py-3 text-sm text-info-700">
+          <InfoIcon />
+          <span>
+            Você precisa ter pelo menos 13 anos para criar uma conta no TCG
+            Market.
+          </span>
+        </p>
+
+        <div>
+          <label className="flex items-start gap-3 text-sm text-neutral-700">
+            <input
+              type="checkbox"
+              id="acceptedTerms"
+              required
+              aria-invalid={errors.acceptedTerms ? true : undefined}
+              aria-describedby={
+                errors.acceptedTerms ? 'acceptedTerms-error' : undefined
+              }
+              checked={form.acceptedTerms}
+              onChange={(event) =>
+                updateField('acceptedTerms', event.target.checked)
+              }
+              className="mt-0.5 size-4 shrink-0 rounded border-neutral-300 accent-primary-900 focus-visible:ring-2 focus-visible:ring-secondary-500"
+            />
+            <span>
+              Li e concordo com os{' '}
+              <TextButton onClick={() => setNotice(FUTURE_TERMS)}>
+                Termos de uso
+              </TextButton>{' '}
+              e a{' '}
+              <TextButton onClick={() => setNotice(FUTURE_PRIVACY)}>
+                Política de privacidade
+              </TextButton>
+              .
+              <RequiredMark />
+            </span>
+          </label>
+          {errors.acceptedTerms ? (
+            <FieldError
+              id="acceptedTerms-error"
+              message={errors.acceptedTerms}
+            />
+          ) : null}
+        </div>
+
+        {feedback ? (
+          <Alert variant="error" onDismiss={() => setFeedback(null)}>
+            {feedback}
+          </Alert>
         ) : null}
 
-        <div className="relative mx-auto w-full max-w-xl">
-          <div className="flex flex-col items-center text-center">
-            <button
-              type="button"
-              onClick={() => navigate({ to: '/' })}
-              className="rounded-lg"
-            >
-              <img
-                src={mark}
-                alt="Voltar para o início"
-                className="h-16 w-auto"
-              />
-            </button>
-            <p className="font-display mt-4 text-2xl tracking-wide text-neutral-900">
-              TCG MARKET
-            </p>
-            <h1 className="mt-5 text-3xl font-bold tracking-tight">
-              Crie sua conta
-            </h1>
-            <p className="mt-2 max-w-md text-sm text-neutral-500">
-              Faça parte da nossa comunidade de colecionadores e comece sua
-              jornada no mundo dos TCGs.
-            </p>
-          </div>
-
-          <form className="mt-8 space-y-5" onSubmit={handleSubmit} noValidate>
-            <TextField
-              id="name"
-              label="Nome completo"
-              required
-              value={form.name}
-              placeholder="Seu nome completo"
-              autoComplete="name"
-              error={errors.name}
-              icon={<UserIcon />}
-              onChange={(value) => updateField('name', value)}
-            />
-
-            <div className="grid gap-5 sm:grid-cols-2">
-              <TextField
-                id="username"
-                label="Nome de usuário"
-                required
-                value={form.username}
-                placeholder="Ex.: alineguilhoto"
-                autoComplete="username"
-                error={errors.username}
-                icon={<AtIcon />}
-                onChange={(value) => updateField('username', value)}
-              />
-              <TextField
-                id="email"
-                label="E-mail"
-                required
-                type="email"
-                value={form.email}
-                placeholder="seu@email.com"
-                autoComplete="email"
-                error={errors.email}
-                icon={<MailIcon />}
-                onChange={(value) => updateField('email', value)}
-              />
-            </div>
-
-            <div className="grid gap-5 sm:grid-cols-2">
-              <PasswordField
-                id="password"
-                label="Senha"
-                value={form.password}
-                placeholder="Mínimo de 6 caracteres"
-                autoComplete="new-password"
-                visible={showPassword}
-                error={errors.password}
-                onToggle={() => setShowPassword((current) => !current)}
-                onChange={(value) => updateField('password', value)}
-              />
-              <PasswordField
-                id="confirmPassword"
-                label="Confirmar senha"
-                value={form.confirmPassword}
-                placeholder="Repita sua senha"
-                autoComplete="new-password"
-                visible={showConfirmPassword}
-                error={errors.confirmPassword}
-                onToggle={() => setShowConfirmPassword((current) => !current)}
-                onChange={(value) => updateField('confirmPassword', value)}
-              />
-            </div>
-
-            <div className="grid gap-5 sm:grid-cols-2">
-              <TextField
-                id="birthDate"
-                label="Data de nascimento"
-                required
-                type="date"
-                value={form.birthDate}
-                placeholder=""
-                autoComplete="bday"
-                error={errors.birthDate}
-                icon={<CalendarIcon />}
-                onChange={(value) => updateField('birthDate', value)}
-              />
-              <div>
-                <FieldLabel htmlFor="country" required>
-                  País
-                </FieldLabel>
-                <div className="relative">
-                  <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-neutral-500">
-                    <GlobeIcon />
-                  </span>
-                  <select
-                    id="country"
-                    name="country"
-                    value={form.country}
-                    aria-invalid={errors.country ? true : undefined}
-                    onChange={(event) =>
-                      updateField('country', event.target.value)
-                    }
-                    className={`${inputClass} appearance-none pr-10`}
-                  >
-                    {COUNTRIES.map((country) => (
-                      <option key={country} value={country}>
-                        {country}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                {errors.country ? (
-                  <FieldError message={errors.country} />
-                ) : null}
-              </div>
-            </div>
-
-            <p className="flex items-start gap-2 rounded-xl bg-info-50 px-3 py-3 text-sm text-info-700">
-              <InfoIcon />
-              <span>
-                Você precisa ter pelo menos 13 anos para criar uma conta no TCG
-                Market.
-              </span>
-            </p>
-
-            <div>
-              <label className="flex items-start gap-3 text-sm text-neutral-700">
-                <input
-                  type="checkbox"
-                  checked={form.acceptedTerms}
-                  onChange={(event) =>
-                    updateField('acceptedTerms', event.target.checked)
-                  }
-                  className="mt-0.5 size-4 rounded border-neutral-300 text-primary-900"
-                />
-                <span>
-                  Li e concordo com os{' '}
-                  <TextButton onClick={() => setNotice(FUTURE_TERMS)}>
-                    Termos de uso
-                  </TextButton>{' '}
-                  e a{' '}
-                  <TextButton onClick={() => setNotice(FUTURE_PRIVACY)}>
-                    Política de privacidade
-                  </TextButton>
-                  .
-                  <RequiredMark />
-                </span>
-              </label>
-              {errors.acceptedTerms ? (
-                <FieldError message={errors.acceptedTerms} />
-              ) : null}
-            </div>
-
-            {feedback ? (
-              <Alert variant="error" onDismiss={() => setFeedback(null)}>
-                {feedback}
-              </Alert>
-            ) : null}
-
-            <button
-              type="submit"
-              disabled={submitting}
-              className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary-900 button-vignette text-sm font-semibold text-white transition hover:bg-primary-800 focus-visible:ring-2 focus-visible:ring-secondary-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              <UserIcon />
-              {submitting ? 'Criando conta...' : 'Criar conta'}
-            </button>
-          </form>
-
-          <p className="mt-6 mb-4 text-center text-sm text-neutral-500">
-            Já tem uma conta?{' '}
-            <button
-              type="button"
-              onClick={() => navigate({ to: '/login' })}
-              className="font-semibold text-primary-900 hover:text-primary-800"
-            >
-              Entrar
-            </button>
-          </p>
+        <div className="flex justify-center">
+          <Button
+            type="submit"
+            disabled={submitting}
+            className="w-52 max-w-full"
+          >
+            {submitting ? 'Criando conta...' : 'Criar conta'}
+          </Button>
         </div>
-      </section>
-    </main>
+      </form>
+
+      <p className="mt-6 text-center text-sm text-neutral-700">
+        Já tem uma conta?{' '}
+        <Link to="/login" className={authLinkClass}>
+          Entrar
+        </Link>
+      </p>
+    </AuthLayout>
   )
 }
 
@@ -427,16 +405,18 @@ function TextField({
         <input
           id={id}
           name={id}
+          required={required}
           type={type}
           value={value}
           placeholder={placeholder}
           autoComplete={autoComplete}
           aria-invalid={error ? true : undefined}
+          aria-describedby={error ? `${id}-error` : undefined}
           onChange={(event) => onChange(event.target.value)}
-          className={inputClass}
+          className={authInputClass}
         />
       </div>
-      {error ? <FieldError message={error} /> : null}
+      {error ? <FieldError id={`${id}-error`} message={error} /> : null}
     </div>
   )
 }
@@ -474,24 +454,26 @@ function PasswordField({
         <input
           id={id}
           name={id}
+          required
           type={visible ? 'text' : 'password'}
           value={value}
           placeholder={placeholder}
           autoComplete={autoComplete}
           aria-invalid={error ? true : undefined}
+          aria-describedby={error ? `${id}-error` : undefined}
           onChange={(event) => onChange(event.target.value)}
-          className={`${inputClass} pr-12`}
+          className={`${authInputClass} pr-12`}
         />
         <button
           type="button"
           onClick={onToggle}
-          className="absolute top-1/2 right-3 -translate-y-1/2 text-neutral-500 hover:text-primary-900"
+          className="absolute top-1/2 right-3 -translate-y-1/2 text-neutral-700 hover:text-primary-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500"
           aria-label={visible ? 'Ocultar senha' : 'Mostrar senha'}
         >
           {visible ? <EyeOffIcon /> : <EyeIcon />}
         </button>
       </div>
-      {error ? <FieldError message={error} /> : null}
+      {error ? <FieldError id={`${id}-error`} message={error} /> : null}
     </div>
   )
 }
@@ -514,11 +496,20 @@ function FieldLabel({
 }
 
 function RequiredMark() {
-  return <span className="text-error-700"> *</span>
+  return (
+    <span className="text-error-700" aria-hidden="true">
+      {' '}
+      *
+    </span>
+  )
 }
 
-function FieldError({ message }: { message: string }) {
-  return <p className="mt-2 text-sm text-error-700">{message}</p>
+function FieldError({ id, message }: { id: string; message: string }) {
+  return (
+    <p id={id} className="mt-2 text-sm text-error-700">
+      {message}
+    </p>
+  )
 }
 
 function TextButton({
@@ -529,11 +520,7 @@ function TextButton({
   onClick: () => void
 }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="font-semibold text-primary-900 underline-offset-2 hover:underline"
-    >
+    <button type="button" onClick={onClick} className={authLinkClass}>
       {children}
     </button>
   )
@@ -585,20 +572,6 @@ function isPersistedField(
   field: string,
 ): field is 'name' | 'email' | 'password' {
   return field === 'name' || field === 'email' || field === 'password'
-}
-
-function Sparkles() {
-  return (
-    <div className="pointer-events-none absolute inset-0" aria-hidden="true">
-      <span className="absolute top-16 right-8 text-3xl text-primary-300">
-        ✦
-      </span>
-      <span className="absolute top-48 left-6 text-xl text-primary-100">✦</span>
-      <span className="absolute right-12 bottom-16 text-2xl text-primary-100">
-        ✦
-      </span>
-    </div>
-  )
 }
 
 function Icon({ children }: { children: ReactNode }) {

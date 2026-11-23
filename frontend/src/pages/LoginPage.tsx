@@ -1,11 +1,12 @@
-import { BannerGoldDivider } from '@/components/layout/PageBanner'
-import mark from '@/assets/mark-3cartas-roxo.svg'
-import hero from '@/assets/login-hero.webp'
+import { AuthLayout } from '@/components/layout/AuthLayout'
+import { authInputClass, authLinkClass } from '@/components/layout/authStyles'
+import { Button } from '@/components/ui/Button'
+import hero from '@/assets/images/imagePage-login.png'
 import { Alert } from '@/components/ui/Alert'
 import { login as loginRequest } from '@/services/authApi'
 import { useSession } from '@/session'
 import { responseStatus } from '@/services/feedback'
-import { useNavigate, useRouter, useSearch } from '@tanstack/react-router'
+import { Link, useNavigate, useRouter, useSearch } from '@tanstack/react-router'
 import {
   type FormEvent,
   type ReactNode,
@@ -14,7 +15,6 @@ import {
   useState,
 } from 'react'
 
-const FUTURE_GOOGLE = 'Entrar com o Google será implementado no futuro.'
 const FUTURE_PASSWORD = 'A recuperação de senha será implementada no futuro.'
 
 export function LoginPage() {
@@ -117,149 +117,101 @@ export function LoginPage() {
   }
 
   return (
-    <main className="page-vignette min-h-svh text-neutral-900 lg:grid lg:grid-cols-2">
-      <section className="relative lg:sticky lg:top-0 lg:h-[calc(100svh_-_1rem)]">
-        <img
-          src={hero}
-          alt="Eevee dormindo sobre uma mesa de cartas. Colecione, troque e conecte no TCG Market."
-          className="h-80 w-full object-cover object-[center_72%] sm:h-112 lg:absolute lg:inset-0 lg:h-full"
-        />
-        <BannerGoldDivider />
-      </section>
-
-      <section className="relative flex items-center justify-center overflow-hidden px-6 py-12">
-        <Sparkles />
-        {notice ? (
-          <div className="absolute top-4 right-4 left-4 z-10 mx-auto max-w-md sm:left-auto">
-            <Alert variant="info" onDismiss={() => setNotice(null)}>
-              {notice}
-            </Alert>
-          </div>
-        ) : null}
-
-        <div className="relative w-full max-w-md">
-          <div className="flex flex-col items-center text-center">
-            <button
-              type="button"
-              onClick={() => navigate({ to: '/' })}
-              className="rounded-lg"
-            >
-              <img
-                src={mark}
-                alt="Voltar para o início"
-                className="h-16 w-auto"
-              />
-            </button>
-            <p className="font-display mt-4 text-2xl tracking-wide text-neutral-900">
-              TCG MARKET
-            </p>
-            <h1 className="mt-6 text-3xl font-bold tracking-tight">
-              Bem-vinda de volta!
-            </h1>
-            <p className="mt-2 text-sm text-neutral-700">
-              Faça login para continuar sua jornada no mundo dos TCGs.
-            </p>
-          </div>
-
-          <form className="mt-8 space-y-5" onSubmit={handleSubmit} noValidate>
-            <Field
-              id="email"
-              label="E-mail"
-              type="email"
-              value={email}
-              placeholder="seu@email.com"
-              autoComplete="email"
-              error={errors.email}
-              icon={<MailIcon />}
-              onChange={updateEmail}
-            />
-            <div>
-              <div className="mb-2 flex items-center justify-between">
-                <label htmlFor="password" className="text-sm font-medium">
-                  Senha
-                </label>
-                <button
-                  type="button"
-                  onClick={() => setNotice(FUTURE_PASSWORD)}
-                  className="text-sm font-medium text-primary-900 hover:text-primary-800"
-                >
-                  Esqueceu sua senha?
-                </button>
-              </div>
-              <div className="relative">
-                <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-neutral-700">
-                  <LockIcon />
-                </span>
-                <input
-                  id="password"
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  placeholder="Sua senha"
-                  autoComplete="current-password"
-                  aria-invalid={errors.password ? true : undefined}
-                  aria-describedby={
-                    errors.password ? 'password-error' : undefined
-                  }
-                  onChange={(event) => updatePassword(event.target.value)}
-                  className="w-full rounded-xl border border-neutral-300 bg-white py-3 pr-12 pl-11 text-sm outline-none placeholder:text-neutral-700 focus:border-primary-900 focus:ring-2 focus:ring-secondary-500"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((current) => !current)}
-                  className="absolute top-1/2 right-3 -translate-y-1/2 text-neutral-700 hover:text-primary-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500"
-                  aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
-                >
-                  {showPassword ? <EyeOffIcon /> : <EyeIcon />}
-                </button>
-              </div>
-              {errors.password ? (
-                <p id="password-error" className="mt-2 text-sm text-error-700">
-                  {errors.password}
-                </p>
-              ) : null}
-            </div>
-
-            {feedback ? <Alert variant="error">{feedback}</Alert> : null}
-
-            <button
-              type="submit"
-              disabled={submitting}
-              className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary-900 button-vignette text-sm font-semibold text-white transition hover:bg-primary-800 focus-visible:ring-2 focus-visible:ring-secondary-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              <LoginIcon />
-              {submitting ? 'Entrando...' : 'Entrar'}
-            </button>
-          </form>
-
-          <div className="my-6 flex items-center gap-4 text-sm text-neutral-700">
-            <span className="h-px flex-1 bg-neutral-200" />
-            ou
-            <span className="h-px flex-1 bg-neutral-200" />
-          </div>
-
-          <button
-            type="button"
-            onClick={() => setNotice(FUTURE_GOOGLE)}
-            className="flex h-12 w-full items-center justify-center gap-3 rounded-xl border border-neutral-300 bg-white text-sm font-semibold text-neutral-900 transition hover:bg-primary-100 focus-visible:ring-2 focus-visible:ring-secondary-500 focus-visible:ring-offset-2"
-          >
-            <GoogleIcon />
-            Entrar com o Google
-          </button>
-
-          <p className="mt-8 text-center text-sm text-neutral-700">
-            Ainda não tem uma conta?{' '}
-            <button
-              type="button"
-              onClick={() => navigate({ to: '/cadastro' })}
-              className="font-semibold text-primary-900 hover:text-primary-800"
-            >
-              Criar conta gratuita
-            </button>
-          </p>
+    <AuthLayout
+      image={hero}
+      bannerContent={<LoginBannerContent />}
+      title="Bem-vinda de volta!"
+      description="Faça login para continuar sua jornada no mundo dos TCGs."
+    >
+      {notice ? (
+        <div className="mt-5">
+          <Alert variant="info" onDismiss={() => setNotice(null)}>
+            {notice}
+          </Alert>
         </div>
-      </section>
-    </main>
+      ) : null}
+
+      <form className="mt-8 space-y-5" onSubmit={handleSubmit} noValidate>
+        <Field
+          id="email"
+          label="E-mail"
+          type="email"
+          value={email}
+          placeholder="seu@email.com"
+          autoComplete="email"
+          error={errors.email}
+          icon={<MailIcon />}
+          onChange={updateEmail}
+        />
+        <div>
+          <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+            <label htmlFor="password" className="text-sm font-medium">
+              Senha{' '}
+              <span className="text-error-700" aria-hidden="true">
+                *
+              </span>
+            </label>
+            <button
+              type="button"
+              onClick={() => setNotice(FUTURE_PASSWORD)}
+              className={`text-sm ${authLinkClass}`}
+            >
+              Esqueceu sua senha?
+            </button>
+          </div>
+          <div className="relative">
+            <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-neutral-700">
+              <LockIcon />
+            </span>
+            <input
+              id="password"
+              required
+              name="password"
+              type={showPassword ? 'text' : 'password'}
+              value={password}
+              placeholder="Sua senha"
+              autoComplete="current-password"
+              aria-invalid={errors.password ? true : undefined}
+              aria-describedby={errors.password ? 'password-error' : undefined}
+              onChange={(event) => updatePassword(event.target.value)}
+              className={`${authInputClass} pr-12`}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((current) => !current)}
+              className="absolute top-1/2 right-3 -translate-y-1/2 text-neutral-700 hover:text-primary-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500"
+              aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+            >
+              {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+            </button>
+          </div>
+          {errors.password ? (
+            <p id="password-error" className="mt-2 text-sm text-error-700">
+              {errors.password}
+            </p>
+          ) : null}
+        </div>
+
+        {feedback ? <Alert variant="error">{feedback}</Alert> : null}
+
+        <div className="flex justify-center">
+          <Button
+            type="submit"
+            disabled={submitting}
+            className="w-52 max-w-full"
+          >
+            {submitting ? 'Entrando...' : 'Entrar'}
+          </Button>
+        </div>
+      </form>
+
+      <p className="mt-6 text-center text-sm text-neutral-700">
+        Ainda não tem uma conta?{' '}
+        <Link to="/cadastro" className={authLinkClass}>
+          Criar conta gratuita
+        </Link>
+      </p>
+    </AuthLayout>
   )
 }
 
@@ -287,13 +239,17 @@ function Field({
   return (
     <div>
       <label htmlFor={id} className="mb-2 block text-sm font-medium">
-        {label}
+        {label}{' '}
+        <span className="text-error-700" aria-hidden="true">
+          *
+        </span>
       </label>
       <div className="relative">
         <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-neutral-700">
           {icon}
         </span>
         <input
+          required
           id={id}
           name={id}
           type={type}
@@ -303,7 +259,7 @@ function Field({
           aria-invalid={error ? true : undefined}
           aria-describedby={error ? `${id}-error` : undefined}
           onChange={(event) => onChange(event.target.value)}
-          className="w-full rounded-xl border border-neutral-300 bg-white py-3 pr-4 pl-11 text-sm outline-none placeholder:text-neutral-700 focus:border-primary-900 focus:ring-2 focus:ring-secondary-500"
+          className={`${authInputClass} pr-4`}
         />
       </div>
       {error ? (
@@ -323,23 +279,6 @@ function loginErrorMessage(error: unknown) {
     return 'O serviço de login está indisponível. Tente novamente em instantes.'
   }
   return 'Não foi possível entrar. Tente novamente.'
-}
-
-function Sparkles() {
-  return (
-    <div className="pointer-events-none absolute inset-0" aria-hidden="true">
-      <span className="absolute top-16 right-10 text-3xl text-primary-300">
-        ✦
-      </span>
-      <span className="absolute top-40 left-8 text-xl text-primary-100">✦</span>
-      <span className="absolute right-16 bottom-24 text-2xl text-primary-100">
-        ✦
-      </span>
-      <span className="absolute bottom-10 left-16 text-lg text-primary-100">
-        ✦
-      </span>
-    </div>
-  )
 }
 
 function MailIcon() {
@@ -404,40 +343,17 @@ function EyeOffIcon() {
   )
 }
 
-function LoginIcon() {
+function LoginBannerContent() {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      className="size-5"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-    >
-      <path d="M10 7V5a2 2 0 0 1 2-2h7v18h-7a2 2 0 0 1-2-2v-2" />
-      <path d="M15 12H3m0 0 3-3m-3 3 3 3" />
-    </svg>
-  )
-}
-
-function GoogleIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="size-5" aria-hidden="true">
-      <path
-        fill="#4285F4"
-        d="M23 12.3c0-.8-.1-1.6-.2-2.3H12v4.4h6.2a5.3 5.3 0 0 1-2.3 3.5v2.9h3.7c2.2-2 3.4-5 3.4-8.5Z"
-      />
-      <path
-        fill="#34A853"
-        d="M12 24c3.2 0 5.8-1 7.7-2.8l-3.7-2.9c-1 .7-2.4 1.2-4 1.2-3.1 0-5.7-2.1-6.6-4.9H1.6v3c2 4 6 6.4 10.4 6.4Z"
-      />
-      <path
-        fill="#FBBC05"
-        d="M5.4 14.6A7.2 7.2 0 0 1 5 12c0-.9.1-1.8.4-2.6V6.4H1.6A12 12 0 0 0 0 12c0 1.9.4 3.8 1.6 5.6l3.8-3Z"
-      />
-      <path
-        fill="#EA4335"
-        d="M12 4.8c1.7 0 3.3.6 4.5 1.8l3.4-3.4C17.8 1.2 15.2 0 12 0 7.6 0 3.6 2.4 1.6 6.4l3.8 3C6.3 6.9 8.9 4.8 12 4.8Z"
-      />
-    </svg>
+    <div className="text-white text-shadow-sm text-shadow-black/70">
+      <p className="font-display space-y-1.5 text-2xl leading-tight font-bold xl:text-4xl">
+        <span className="block">Negocie.</span>
+        <span className="block">Colecione.</span>
+        <span className="block">Conecte-se.</span>
+      </p>
+      <p className="mt-2 max-w-xs text-sm">
+        Entre para organizar sua coleção e encontrar as cartas que faltam.
+      </p>
+    </div>
   )
 }
