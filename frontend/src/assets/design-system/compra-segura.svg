@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48" fill="none" role="img" aria-labelledby="title desc">
+  <title id="title">Compra segura</title>
+  <desc id="desc">Ícone dourado de escudo com marca de verificação.</desc>
+  <defs>
+    <linearGradient id="gold-stroke" x1="8" y1="6" x2="37" y2="41" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F3E0AF"/>
+      <stop offset="0.34" stop-color="#C99A4A"/>
+      <stop offset="0.68" stop-color="#9B692C"/>
+      <stop offset="1" stop-color="#F1D289"/>
+    </linearGradient>
+  </defs>
+  <path d="M24 5C28.6 9.1 34.3 11.2 40 11.6V23.4C39.1 31.9 33.8 39.2 24 43C14.2 39.2 8.9 31.9 8 23.4V11.6C13.7 11.2 19.4 9.1 24 5Z" stroke="url(#gold-stroke)" stroke-width="2.2" stroke-linejoin="round"/>
+  <path d="M18.2 24.5L22.4 28.7L30.8 19.3" stroke="url(#gold-stroke)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M24 9.6C27.2 12 31.2 13.4 35.1 13.8V23.1C34.4 29.8 30.4 35.3 24 38.2C17.6 35.3 13.6 29.8 12.9 23.1V13.8C16.8 13.4 20.8 12 24 9.6Z" stroke="#8F622A" stroke-opacity="0.45" stroke-width="0.8"/>
+</svg>

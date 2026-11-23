@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48" fill="none" role="img" aria-labelledby="title desc">
+  <title id="title">Insígnia dourada extra</title>
+  <desc id="desc">Ícone ornamental dourado com estrela e ramos laterais.</desc>
+  <defs>
+    <linearGradient id="gold-stroke" x1="6" y1="7" x2="39" y2="41" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F3E0AF"/>
+      <stop offset="0.34" stop-color="#C99A4A"/>
+      <stop offset="0.68" stop-color="#9B692C"/>
+      <stop offset="1" stop-color="#F1D289"/>
+    </linearGradient>
+  </defs>
+  <path d="M17 40.2C10.7 38.6 7.4 34.8 8.2 26.7" stroke="url(#gold-stroke)" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M31 40.2C37.3 38.6 40.6 34.8 39.8 26.7" stroke="url(#gold-stroke)" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M24 9.2L27 16.1L34.4 17L28.9 22.1L30.3 29.3L24 25.8L17.7 29.3L19.1 22.1L13.6 17L21 16.1L24 9.2Z" fill="url(#gold-stroke)" stroke="#8F622A" stroke-width="0.8" stroke-linejoin="round"/>
+  <path d="M12.8 29.2C13.9 31.2 15.4 32.9 17.3 34.1" stroke="#B98A48" stroke-width="1.8" stroke-linecap="round"/>
+  <path d="M35.2 29.2C34.1 31.2 32.6 32.9 30.7 34.1" stroke="#B98A48" stroke-width="1.8" stroke-linecap="round"/>
+</svg>

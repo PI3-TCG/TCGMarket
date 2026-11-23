@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="56" height="60" viewBox="0 0 56 60" fill="none" role="img" aria-labelledby="title desc">
+  <title id="title">Gestão da coleção</title>
+  <desc id="desc">Ícone dourado com três cartas sobrepostas representando organização da coleção.</desc>
+  <defs>
+    <linearGradient id="gold-stroke" x1="10" y1="8" x2="42" y2="54" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F3E0AF"/>
+      <stop offset="0.34" stop-color="#C99A4A"/>
+      <stop offset="0.68" stop-color="#9B692C"/>
+      <stop offset="1" stop-color="#F1D289"/>
+    </linearGradient>
+  </defs>
+  <g transform="rotate(-14 28 30)">
+    <rect x="10" y="9" width="27.5" height="40" rx="3.2" fill="#34203A" stroke="url(#gold-stroke)" stroke-width="2.2"/>
+  </g>
+  <g transform="rotate(14 28 30)">
+    <rect x="18.5" y="9" width="27.5" height="40" rx="3.2" fill="#34203A" stroke="url(#gold-stroke)" stroke-width="2.2"/>
+  </g>
+  <rect x="14.2" y="10.2" width="27.5" height="40.6" rx="3.2" fill="#3A2440" stroke="url(#gold-stroke)" stroke-width="2.2"/>
+  <rect x="17.6" y="14" width="20.8" height="33" rx="1.6" stroke="#BE955A" stroke-opacity="0.75" stroke-width="1.1"/>
+  <path d="M28 20L34.7 29.2L28 39L21.3 29.2L28 20Z" fill="url(#gold-stroke)"/>
+  <path d="M28 24.2L31.4 29.2L28 34.2L24.6 29.2L28 24.2Z" fill="#8F622A" opacity="0.76"/>
+</svg>

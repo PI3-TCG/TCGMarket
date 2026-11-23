@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48" fill="none" role="img" aria-labelledby="title desc">
+  <title id="title">Comunidade ativa</title>
+  <desc id="desc">Ícone dourado de três pessoas representando uma comunidade.</desc>
+  <defs>
+    <linearGradient id="gold-stroke" x1="6" y1="7" x2="39" y2="41" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F3E0AF"/>
+      <stop offset="0.34" stop-color="#C99A4A"/>
+      <stop offset="0.68" stop-color="#9B692C"/>
+      <stop offset="1" stop-color="#F1D289"/>
+    </linearGradient>
+  </defs>
+  <circle cx="24" cy="14.5" r="5.8" stroke="url(#gold-stroke)" stroke-width="2.2"/>
+  <path d="M12.8 38.5V35.6C12.8 30 17.4 25.4 23 25.4H25C30.6 25.4 35.2 30 35.2 35.6V38.5" stroke="url(#gold-stroke)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="13.5" cy="16.8" r="3.8" stroke="url(#gold-stroke)" stroke-width="2" opacity="0.86"/>
+  <circle cx="34.5" cy="16.8" r="3.8" stroke="url(#gold-stroke)" stroke-width="2" opacity="0.86"/>
+  <path d="M4.8 35.2C5.2 31 8.3 27.5 12.4 26.7" stroke="url(#gold-stroke)" stroke-width="2" stroke-linecap="round"/>
+  <path d="M43.2 35.2C42.8 31 39.7 27.5 35.6 26.7" stroke="url(#gold-stroke)" stroke-width="2" stroke-linecap="round"/>
+</svg>
