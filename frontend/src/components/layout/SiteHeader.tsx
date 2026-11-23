@@ -26,7 +26,6 @@ const profileRow =
 
 function AccountPhoto({ url }: { url: string | null }) {
   const [failed, setFailed] = useState(false)
-  useEffect(() => setFailed(false), [url])
   if (url && !failed) {
     return (
       <img
@@ -310,7 +309,7 @@ export function SiteHeader({ onSoon }: Props) {
                   }}
                   className={`grid size-10 place-items-center overflow-hidden rounded-full border-[2px] border-[#FFDB72] bg-[radial-gradient(circle_at_35%_25%,#6A2690,#320B4B_80%)] text-white shadow-[inset_0_1px_0_rgba(255,245,207,0.35),0_0_0_1px_rgba(252,160,244,0.4),0_0_12px_rgba(234,83,229,0.22)] transition hover:border-[#FFF1AE] hover:shadow-[0_0_14px_rgba(241,163,73,0.35)] ${goldFocus}`}
                 >
-                  <AccountPhoto url={avatarUrl} />
+                  <AccountPhoto key={avatarUrl} url={avatarUrl} />
                 </button>
 
                 {menuOpen && (
@@ -332,7 +331,7 @@ export function SiteHeader({ onSoon }: Props) {
                     >
                       <div className="flex items-center gap-3 border-b border-[#EAC375]/30 bg-[linear-gradient(110deg,rgba(255,255,255,0.12),rgba(255,255,255,0))] px-4 py-4">
                         <span className="grid size-11 shrink-0 place-items-center overflow-hidden rounded-full border border-[#F3C958] bg-[#2A093D] text-[#FFE49A]">
-                          <AccountPhoto url={avatarUrl} />
+                          <AccountPhoto key={avatarUrl} url={avatarUrl} />
                         </span>
                         <div className="min-w-0">
                           <p className="truncate text-sm font-bold">
