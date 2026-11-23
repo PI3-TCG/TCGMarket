@@ -65,6 +65,7 @@ export function ProfilePage() {
             }
           />
           <ProfileDashboard
+            username={state.data.username}
             about={
               <AboutCard
                 profile={toViewData(state.data)}

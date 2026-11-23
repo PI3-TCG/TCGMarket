@@ -5,7 +5,9 @@ import axios from 'axios'
 export const SESSION_EXPIRED_EVENT = 'tcgmarket:session-expired'
 
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL:
+    import.meta.env.VITE_API_URL ||
+    (import.meta.env.DEV ? 'http://localhost:8080' : undefined),
 })
 
 api.interceptors.request.use((config) => {
