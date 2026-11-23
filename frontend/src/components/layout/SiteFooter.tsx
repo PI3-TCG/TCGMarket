@@ -1,43 +1,29 @@
-import frame from '@/assets/moldura-rodape.webp'
-import logo from '@/assets/marca-referencia.webp'
-import { useNavigate } from '@tanstack/react-router'
+import logo from '@/assets/design-system/logo-dourada.svg'
+import cornerTL from '@/assets/design-system/canto-se.svg'
+import cornerTR from '@/assets/design-system/canto-sd.svg'
+import cornerBL from '@/assets/design-system/canto-ie.svg'
+import cornerBR from '@/assets/design-system/canto-id.svg'
+import { Link } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
 
-type Props = { onSoon: (feature: string) => void }
-
+type Props = { onSoon?: (feature: string) => void }
 type Platform = 'youtube' | 'instagram' | 'tiktok' | 'discord' | 'twitch'
 
-const socials: { label: string; platform: Platform }[] = [
-  { label: 'YouTube', platform: 'youtube' },
-  { label: 'Instagram', platform: 'instagram' },
-  { label: 'TikTok', platform: 'tiktok' },
-  { label: 'Discord', platform: 'discord' },
-  { label: 'Twitch', platform: 'twitch' },
-]
+type SocialLink = { label: string; platform: Platform; href: string }
 
-function SocialAction({
-  children,
-  label,
-  onClick,
-}: {
-  children: ReactNode
-  label: string
-  onClick: () => void
-}) {
-  return (
-    <button
-      type="button"
-      aria-label={label}
-      title={label}
-      onClick={onClick}
-      className="grid size-8 place-items-center rounded-md border border-transparent text-[#FBF5FF] transition duration-200 hover:-translate-y-0.5 hover:border-[#F3D078]/50 hover:bg-[#CF65EB]/20 hover:text-[#FFE59C] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FFE18D] [&>svg]:size-[21px]"
-    >
-      {children}
-    </button>
-  )
-}
+/**
+ * Preserva as redes existentes. Conforme o DS v2.2, exibe somente links reais:
+ * configure as VITE_SOCIAL_*_URL no frontend/.env, quando publicados.
+ */
+const socialLinks: SocialLink[] = [
+  { label: 'YouTube', platform: 'youtube', href: import.meta.env.VITE_SOCIAL_YOUTUBE_URL ?? '' },
+  { label: 'Instagram', platform: 'instagram', href: import.meta.env.VITE_SOCIAL_INSTAGRAM_URL ?? '' },
+  { label: 'TikTok', platform: 'tiktok', href: import.meta.env.VITE_SOCIAL_TIKTOK_URL ?? '' },
+  { label: 'Discord', platform: 'discord', href: import.meta.env.VITE_SOCIAL_DISCORD_URL ?? '' },
+  { label: 'Twitch', platform: 'twitch', href: import.meta.env.VITE_SOCIAL_TWITCH_URL ?? '' },
+].filter(({ href }) => /^https:\/\//i.test(href))
 
-function SocialIcon({ platform }: { platform: Platform }) {
+function SocialIcon({ platform }: { platform: Platform }): ReactNode {
   switch (platform) {
     case 'youtube':
       return (
@@ -47,13 +33,7 @@ function SocialIcon({ platform }: { platform: Platform }) {
       )
     case 'instagram':
       return (
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          aria-hidden="true"
-        >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
           <rect x="3" y="3" width="18" height="18" rx="5" />
           <circle cx="12" cy="12" r="4" />
           <circle cx="17.5" cy="6.6" r="1" fill="currentColor" stroke="none" />
@@ -80,46 +60,37 @@ function SocialIcon({ platform }: { platform: Platform }) {
   }
 }
 
-export function SiteFooter({ onSoon }: Props) {
-  const navigate = useNavigate()
-
+export function SiteFooter({ onSoon: _onSoon }: Props) {
   return (
     <footer aria-label="Rodapé do TCG Market" className="tcg-footer">
-      <div className="tcg-footer-frame">
-        <img
-          src={frame}
-          alt=""
-          aria-hidden="true"
-          draggable={false}
-          className="tcg-frame-art"
-        />
-        <div className="tcg-footer-row">
-          <button
-            type="button"
-            onClick={() => void navigate({ to: '/' })}
-            aria-label="TCG Market — página inicial"
-            className="min-w-0 justify-self-start rounded-sm transition hover:drop-shadow-[0_0_7px_rgba(255,208,119,0.45)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FFE18D] max-[430px]:justify-self-center"
-          >
-            <img src={logo} alt="" decoding="async" className="tcg-brand" />
-          </button>
-
-          <p className="tcg-copyright">
-            © {new Date().getFullYear()} TCGMarket. Todos os direitos
-            reservados.
-          </p>
-
-          <div role="group" aria-label="Redes sociais" className="tcg-socials">
-            {socials.map(({ label, platform }) => (
-              <SocialAction
+      <img src={cornerTL} alt="" aria-hidden="true" className="tcg-chrome-corner tcg-chrome-corner--tl" />
+      <img src={cornerTR} alt="" aria-hidden="true" className="tcg-chrome-corner tcg-chrome-corner--tr" />
+      <img src={cornerBL} alt="" aria-hidden="true" className="tcg-chrome-corner tcg-chrome-corner--bl" />
+      <img src={cornerBR} alt="" aria-hidden="true" className="tcg-chrome-corner tcg-chrome-corner--br" />
+      <div className="tcg-footer-inner">
+        <Link to="/" className="tcg-logo-link tcg-footer-brand" aria-label="TCG Market — página inicial">
+          <img src={logo} alt="" decoding="async" className="tcg-footer-logo" />
+        </Link>
+        <p className="tcg-footer-copyright">
+          © {new Date().getFullYear()} TCGMarket. Todos os direitos reservados.
+        </p>
+        {socialLinks.length > 0 && (
+          <nav aria-label="Redes sociais" className="tcg-social-links">
+            {socialLinks.map(({ label, platform, href }) => (
+              <a
                 key={platform}
-                label={label}
-                onClick={() => onSoon(label)}
+                href={href}
+                aria-label={label}
+                title={label}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="tcg-social-link"
               >
                 <SocialIcon platform={platform} />
-              </SocialAction>
+              </a>
             ))}
-          </div>
-        </div>
+          </nav>
+        )}
       </div>
     </footer>
   )

@@ -1,341 +1,491 @@
-.tcg-page-nav,
-.tcg-footer {
-  width: min(96.6%, 1617px);
-  margin-inline: auto;
-  color: white;
-  font-family: Arial, sans-serif;
-}
-:root {
-  --tcg-nav-top: env(safe-area-inset-top, 0px);
-  --tcg-upper: clamp(76px, 6.1vw, 102px);
-  --tcg-lower: clamp(58px, 4.66vw, 78px);
-  --tcg-nav-space: calc(
-    var(--tcg-nav-top) + var(--tcg-upper) + var(--tcg-lower)
-  );
-}
-.tcg-page-nav {
-  position: relative;
-  flex: none;
-  margin-top: var(--tcg-nav-top);
-  z-index: 70;
+/* TCG Market — Navegação v2.2
+   Cores e fontes vêm exclusivamente do @theme de src/index.css.
+   Sem gradientes arbitrários nem molduras pesadas fora do mapa de ornamentos. */
+
+.tcg-site-layout {
   isolation: isolate;
+  font-family: var(--font-sans);
 }
-.tcg-layout-notice {
-  top: calc(var(--tcg-nav-space) + 4px);
+
+.tcg-header,
+.tcg-footer {
+  color: var(--color-text-inverse);
+  font-family: var(--font-sans);
+  background: color-mix(in srgb, var(--color-brand-deep) 87%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
+
 .tcg-header {
   position: relative;
-  z-index: 2;
+  z-index: 40; /* Menor que o portal dos modais, z-50. */
+  border-bottom: 1px solid var(--color-accent-gold-frame);
+  border-radius: 0 0 10px 10px;
+  box-shadow: 0 6px 17px rgb(28 8 32 / 0.16);
 }
-.tcg-header-row {
-  height: var(--tcg-upper);
-  padding: 0 5.6% 0.45%;
+
+.tcg-header::after {
+  position: absolute;
+  bottom: 2px;
+  left: 2.2%;
+  right: 2.2%;
+  height: 1px;
+  content: '';
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, var(--color-accent-bronze) 12%, var(--color-accent-bronze) 88%, transparent);
+  opacity: 0.54;
+}
+
+.tcg-header-inner {
+  position: relative;
+  z-index: 1;
   display: grid;
+  grid-template-columns: 151px max-content minmax(190px, 1fr) auto;
   align-items: center;
-  grid-template-columns: 36% 34.6% 29.4%;
+  gap: clamp(12px, 2vw, 26px);
+  min-height: 65px;
+  width: min(100%, 1600px);
+  padding: 4px clamp(18px, 3.1vw, 38px);
+  margin-inline: auto;
 }
-.tcg-brand {
+
+.tcg-logo-link {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  text-decoration: none;
+}
+
+.tcg-header-logo {
   display: block;
+  width: 141px;
   height: auto;
-  width: clamp(145px, 17.25vw, 288px);
+  max-height: 51px;
+  object-fit: contain;
 }
-.tcg-search {
+
+.tcg-chrome-corner {
+  position: absolute;
+  width: 29px;
+  height: 29px;
+  z-index: 0;
+  pointer-events: none;
+  user-select: none;
+  opacity: 0.78;
+}
+.tcg-chrome-corner--tl { top: 0; left: 0; }
+.tcg-chrome-corner--tr { top: 0; right: 0; }
+.tcg-chrome-corner--bl { bottom: 0; left: 0; }
+.tcg-chrome-corner--br { bottom: 0; right: 0; }
+
+.tcg-primary-nav {
+  display: flex;
+  align-items: center;
+  gap: clamp(1px, 0.5vw, 12px);
+  white-space: nowrap;
+}
+
+.tcg-menu-anchor {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.tcg-nav-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 44px;
+  padding: 0 11px;
+  border-radius: 4px;
+  color: var(--color-text-inverse);
+  font-size: 13px;
+  line-height: 20px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 150ms ease, background-color 150ms ease;
+}
+
+.tcg-nav-link:hover,
+.tcg-nav-link[data-active],
+.tcg-nav-link[aria-current='page'] {
+  background: rgb(255 255 255 / 0.055);
+  color: var(--color-surface-sand);
+}
+
+.tcg-nav-link[data-active]::after,
+.tcg-nav-link[aria-current='page']::after {
+  content: '';
+  position: absolute;
+  bottom: 3px;
+  left: 18%;
+  right: 18%;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--color-accent-gold-frame);
+}
+
+.tcg-search-form {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  width: min(100%, clamp(220px, 24vw, 335px));
+  min-height: 38px;
+  justify-self: end;
+  border: 1px solid var(--color-border-default);
+  border-radius: 9px;
+  background: var(--color-surface-input);
+  box-shadow: 0 1px 3px rgb(22 8 22 / 0.14);
+  transition: box-shadow 150ms ease, border-color 150ms ease;
+}
+
+.tcg-search-form:focus-within {
+  border-color: var(--color-accent-gold-frame);
+  box-shadow: 0 0 0 2px rgb(255 230 164 / 0.3);
+}
+
+.tcg-search-input {
+  display: block;
+  min-width: 0;
+  width: 100%;
+  height: 36px;
+  flex: 1 1 auto;
+  border: 0;
+  padding: 0 5px 0 13px;
+  background: transparent;
+  color: var(--color-text-ink);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  outline: 0;
+}
+
+.tcg-search-input::placeholder {
+  color: var(--color-text-secondary);
+  opacity: 1;
+}
+
+.tcg-search-submit {
+  display: grid;
+  place-items: center;
+  flex: 0 0 38px;
+  height: 36px;
+  border-radius: 8px;
+  color: var(--color-brand-deep);
+}
+
+.tcg-search-submit:hover { background: var(--color-surface-subtle); }
+
+.tcg-header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: end;
+  gap: clamp(3px, 0.8vw, 12px);
+}
+
+.tcg-header-icon {
+  display: grid;
+  place-items: center;
+  position: relative;
+  flex: 0 0 44px;
+  height: 44px;
+  border-radius: 8px;
+  color: var(--color-text-inverse);
+  transition: color 150ms ease, background 150ms ease;
+}
+
+.tcg-header-icon:hover { background: rgb(255 255 255 / 0.07); color: var(--color-surface-sand); }
+
+.tcg-cart-count,
+.tcg-bottom-count {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 3px;
+  border-radius: 999px;
+  border: 1px solid var(--color-brand-deep);
+  background: var(--color-accent-gold-frame);
+  color: var(--color-text-ink);
+  font-size: 10px;
+  line-height: 1;
+  font-weight: 800;
+}
+
+.tcg-notification-wrap > button {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 8px;
+  color: var(--color-text-inverse);
+}
+.tcg-notification-wrap > button:hover { background: rgb(255 255 255 / 0.07); }
+.tcg-notification-wrap > button:focus-visible { outline-color: var(--color-surface-sand); }
+
+.tcg-account-trigger {
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  width: 39px;
+  height: 39px;
+  border-radius: 50%;
+  border: 2px solid var(--color-accent-gold-frame);
+  background: var(--color-brand-primary-deep);
+  color: var(--color-text-inverse);
+  box-shadow: 0 0 0 2px rgb(255 246 225 / 0.08);
+}
+.tcg-account-trigger:hover { border-color: var(--color-surface-sand); }
+.tcg-account-photo { width: 100%; height: 100%; object-fit: cover; }
+
+.tcg-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 42;
+  width: min(315px, calc(100vw - 20px));
+  overflow-y: auto;
+  max-height: min(610px, calc(100dvh - 90px));
+  overscroll-behavior: contain;
+  border: 1px solid var(--color-accent-gold-frame);
+  border-radius: 12px;
+  padding: 7px;
+  background: color-mix(in srgb, var(--color-brand-deep) 96%, transparent);
+  color: var(--color-text-inverse);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 12px 32px rgb(29 9 31 / 0.34);
+}
+
+.tcg-games-menu { left: 0; right: auto; width: 255px; }
+.tcg-dropdown-caption {
+  padding: 8px 11px 5px;
+  color: var(--color-surface-sand);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.tcg-dropdown-link {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 11px;
+  min-height: 43px;
+  padding: 8px 11px;
+  border-radius: 7px;
+  color: var(--color-text-inverse);
+  text-align: left;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.tcg-dropdown-link svg { color: var(--color-surface-sand); }
+.tcg-dropdown-link:hover { color: var(--color-text-inverse); background: rgb(255 255 255 / 0.09); }
+.tcg-dropdown-link--danger { color: #ffe2e2; }
+.tcg-dropdown-link--danger:hover { background: rgb(185 28 28 / 0.17); }
+
+.tcg-account-identity {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 11px;
+  border-bottom: 1px solid rgb(233 161 80 / 0.3);
+}
+.tcg-account-name,
+.tcg-account-email { display: block; max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tcg-account-name { font-size: 13px; }
+.tcg-account-email { font-size: 11px; color: #e5d5eb; }
+.tcg-account-list { padding: 5px 0; }
+.tcg-account-exit { border-top: 1px solid rgb(233 161 80 / 0.3); padding-top: 5px; }
+
+.tcg-guest-actions { display: flex; align-items: center; gap: 8px; }
+.tcg-guest-register,
+.tcg-guest-login {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 11px;
+  border-radius: 8px;
+  color: var(--color-text-inverse);
+  font-size: 12px;
+  font-weight: 600;
+}
+.tcg-guest-register:hover { background: rgb(255 255 255 / 0.08); }
+.tcg-guest-login { background: var(--color-surface-sand); color: var(--color-brand-deep); }
+.tcg-guest-login:hover { background: var(--color-surface-default); }
+
+.tcg-mobile-menu-anchor { display: none; }
+.tcg-bottom-nav { display: none; }
+.tcg-layout-notice { top: 78px; }
+
+.tcg-footer {
   position: relative;
   width: 100%;
-  min-width: 0;
+  z-index: 1;
+  margin-top: 32px;
+  border-top: 1px solid var(--color-accent-gold-frame);
+  border-bottom: 1px solid var(--color-accent-bronze);
 }
-.tcg-search-field {
-  height: clamp(40px, 3.1vw, 52px);
-  padding-inline: 5%;
-  background: linear-gradient(155deg, #e3c9f0, #c5a2dc 78%, #d9bde9);
-  border: 2px solid #f7e9ff;
-}
-.tcg-search input {
-  font:
-    400 clamp(14px, 1.09vw, 18px) Arial,
-    sans-serif;
-}
-.tcg-search input::placeholder {
-  color: #573571;
-}
-.tcg-search kbd {
-  font:
-    500 clamp(12px, 0.98vw, 16px) Arial,
-    sans-serif;
-  border: 1px solid #f3dffa;
-  background: #ffffff30;
-}
-.tcg-search::before,
-.tcg-search::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  width: 38%;
-  height: 14px;
-  pointer-events: none;
-  background:
-    linear-gradient(to right, transparent, #ffce6a) left center /
-      calc(100% - 14px) 1.5px no-repeat,
-    conic-gradient(from 45deg, #ffec99, #f1a32c, #fff5bc, #ffec99) right
-      center / 14px 14px no-repeat;
-  clip-path: polygon(0 44%, 92% 44%, 96% 0, 100% 50%, 96% 100%, 92% 56%, 0 56%);
-  transform: translateY(-50%);
-}
-.tcg-search::before {
-  right: 105%;
-}
-.tcg-search::after {
-  left: 105%;
-  transform: translateY(-50%) rotate(180deg);
-  width: 33%;
-}
-.tcg-actions {
-  display: flex;
-  align-items: center;
-  justify-self: end;
-  gap: clamp(5px, 1.5vw, 25px);
-}
-.tcg-actions > button svg,
-.tcg-actions > span svg {
-  width: clamp(21px, 1.9vw, 32px);
-  height: auto;
-}
-.tcg-actions button[aria-expanded] {
-  width: clamp(40px, 3.35vw, 56px);
-  height: clamp(40px, 3.35vw, 56px);
-}
-.tcg-nav {
-  height: var(--tcg-lower);
-  padding: 0 7% 1.1%;
-  display: grid;
-  align-items: center;
-}
-.tcg-nav-scroll {
-  overflow-x: auto;
-  overscroll-behavior-x: contain;
-  scrollbar-width: none;
-}
-.tcg-tabs {
-  width: max-content;
-  margin: auto;
-  display: flex;
-  align-items: center;
-  gap: clamp(8px, 1.9vw, 32px);
-  padding: 4px;
-}
-.tcg-tab {
+.tcg-footer-inner {
   position: relative;
-  isolation: isolate;
-  display: inline-flex;
-  min-height: 44px;
-  align-items: center;
-  gap: 0.6em;
-  padding: 3px 0.85em;
-  color: white;
-  text-decoration: none;
-  white-space: nowrap;
-  font:
-    600 clamp(15px, 1.24vw, 21px) Arial,
-    sans-serif;
-}
-.tcg-tab svg {
-  width: 1.25em;
-  height: 1.25em;
-}
-.tcg-tab[aria-current='page']::before,
-.tcg-tab:hover::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  transform: skew(-18deg);
-  border: 2px solid #ffcd53;
-  border-radius: 6px;
-  background: linear-gradient(#742591, #390d54);
-}
-.tcg-tab:focus-visible {
-  outline: 2px solid #ffe393;
-  outline-offset: 1px;
-}
-.tcg-footer {
-  margin-block: 26px clamp(18px, 2.8vw, 47px);
-  width: min(96%, 1605px);
-}
-.tcg-footer-frame {
-  position: relative;
-  isolation: isolate;
-}
-.tcg-footer-row {
-  min-height: clamp(66px, 4.96vw, 83px);
-  padding: 0 6.7%;
+  z-index: 1;
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  gap: 12px;
+  gap: 26px;
+  width: min(100%, 1600px);
+  min-height: 90px;
+  padding: 12px clamp(18px, 3.1vw, 38px);
+  margin-inline: auto;
 }
-.tcg-footer .tcg-brand {
-  width: clamp(150px, 13.9vw, 232px);
-}
-.tcg-copyright {
-  text-align: center;
-  font:
-    400 clamp(12px, 1.05vw, 18px) Arial,
-    sans-serif;
-}
-.tcg-socials {
-  display: flex;
+.tcg-footer-logo { display: block; width: 141px; height: auto; }
+.tcg-footer-copyright { color: var(--color-text-inverse); font-size: 12px; line-height: 20px; text-align: center; }
+.tcg-social-links { display: flex; align-items: center; justify-self: end; justify-content: end; gap: 5px; }
+.tcg-social-link {
+  display: inline-flex;
+  width: 38px;
+  height: 38px;
   align-items: center;
-  justify-self: end;
-  gap: clamp(2px, 1vw, 17px);
+  justify-content: center;
+  border-radius: 8px;
+  color: var(--color-surface-sand);
 }
-.tcg-socials svg {
-  width: clamp(18px, 1.55vw, 26px);
-  height: auto;
+.tcg-social-link svg { width: 20px; height: 20px; }
+.tcg-social-link:hover { background: rgb(255 255 255 / 0.08); color: var(--color-text-inverse); }
+
+/* Foco sempre claro sobre o fundo plum translúcido. */
+.tcg-logo-link:focus-visible,
+.tcg-nav-link:focus-visible,
+.tcg-header-icon:focus-visible,
+.tcg-search-submit:focus-visible,
+.tcg-account-trigger:focus-visible,
+.tcg-dropdown-link:focus-visible,
+.tcg-social-link:focus-visible,
+.tcg-guest-register:focus-visible,
+.tcg-guest-login:focus-visible,
+.tcg-bottom-item:focus-visible {
+  outline: 2px solid var(--color-surface-sand);
+  outline-offset: 2px;
 }
-@media (max-width: 849px) {
-  :root {
-    --tcg-upper: 108px;
-    --tcg-lower: 74px;
-  }
-  .tcg-header-row {
-    padding: 9px 8% 12px;
+
+@media (max-width: 1050px) and (min-width: 861px) {
+  .tcg-header-inner { grid-template-columns: 158px max-content minmax(170px, 1fr) auto; gap: 12px; padding-left: clamp(18px, 4.4vw, 45px); padding-right: 18px; }
+  .tcg-header-logo { width: 136px; }
+  .tcg-nav-link { padding-inline: 7px; font-size: 12px; }
+  .tcg-search-input { font-size: 11px; }
+  .tcg-header-actions { gap: 0; }
+  .tcg-guest-register { display: none; }
+}
+
+@media (max-width: 860px) {
+  .tcg-header-inner {
     grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-rows: 44px 42px;
-    gap: 3px;
+    grid-template-rows: 50px 42px;
+    gap: 5px 12px;
+    padding: 7px 14px 11px;
+    min-height: 0;
   }
-  .tcg-search {
-    grid-column: 1/-1;
+  .tcg-header-logo { width: 126px; max-height: 46px; }
+  .tcg-primary-nav { display: none; }
+  .tcg-search-form {
+    grid-column: 1 / -1;
     grid-row: 2;
-  }
-  .tcg-search::before,
-  .tcg-search::after {
-    display: none;
-  }
-  .tcg-search-field {
-    height: 42px;
-  }
-  .tcg-search input {
-    font-size: 16px;
-  }
-  .tcg-search kbd {
-    display: none;
-  }
-  .tcg-nav {
-    padding: 0 7% 8px;
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .tcg-tabs {
     width: 100%;
+    min-height: 44px;
+  }
+  .tcg-search-input { height: 42px; font-size: 14px; }
+  .tcg-search-submit { height: 44px; width: 44px; }
+  .tcg-header-actions { grid-column: 2; grid-row: 1; gap: 0; }
+  .tcg-header-icon { width: 44px; flex-basis: 44px; }
+  .tcg-desktop-account { display: none; }
+  .tcg-mobile-menu-anchor { display: block; }
+  .tcg-mobile-panel { top: calc(100% + 13px); right: -2px; width: min(320px, calc(100vw - 20px)); }
+  .tcg-bottom-nav {
+    position: fixed;
+    z-index: 40;
+    display: block;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border-top: 1px solid var(--color-accent-gold-frame);
+    background: color-mix(in srgb, var(--color-brand-deep) 96%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    color: var(--color-text-inverse);
+    padding-bottom: env(safe-area-inset-bottom);
+    box-shadow: 0 -6px 20px rgb(27 7 34 / 0.2);
+  }
+  .tcg-bottom-nav-inner {
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 2px;
+    width: min(100%, 550px);
+    margin-inline: auto;
+    height: 67px;
+    align-items: stretch;
   }
-  .tcg-tab {
-    flex-direction: column;
-    justify-content: center;
-    gap: 3px;
-    padding: 2px;
-    min-width: 0;
-    font-size: 14px;
-  }
-  .tcg-header-row > button {
-    min-height: 44px;
-  }
-  .tcg-actions > button,
-  .tcg-actions button[aria-haspopup] {
-    min-width: 44px;
-    min-height: 44px;
-  }
-  #tcg-account-dropdown {
-    width: min(305px, 80vw);
-    max-height: calc(100dvh - var(--tcg-nav-top) - 75px);
-    overflow-y: auto;
-    overscroll-behavior: contain;
-  }
-  .tcg-actions {
-    grid-column: 2;
-    grid-row: 1;
-    gap: 2px;
-  }
-  .tcg-footer-row {
-    grid-template-columns: auto auto;
-    justify-content: space-around;
-    padding: 12px 7%;
-    gap: 4px;
-  }
-  .tcg-copyright {
-    grid-column: 1/-1;
-    grid-row: 2;
-  }
-}
-@media (max-width: 520px) {
-  :root {
-    --tcg-lower: 102px;
-  }
-  .tcg-tabs {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-    gap: 0 2px;
-    padding: 2px;
-  }
-  .tcg-tab {
-    grid-column: span 2;
-    flex-direction: row;
-    font-size: clamp(12px, 3.3vw, 15px);
-    gap: 4px;
-  }
-  .tcg-tab:nth-child(-n + 2) {
-    grid-column: span 3;
-  }
-  .tcg-tab[aria-current='page']::before,
-  .tcg-tab:hover::before {
-    inset: 2px;
-  }
-
-  .tcg-footer-row {
+  .tcg-bottom-item {
+    position: relative;
     display: flex;
+    width: 100%;
+    min-width: 0;
+    min-height: 63px;
+    align-items: center;
+    justify-content: center;
     flex-direction: column;
-    gap: 4px;
-    padding: 14px 12%;
+    gap: 3px;
+    color: var(--color-text-inverse);
+    font-size: 10px;
+    font-weight: 600;
+    text-decoration: none;
   }
-  .tcg-copyright {
-    order: 3;
+  .tcg-bottom-item:hover,
+  .tcg-bottom-item[aria-current='page'],
+  .tcg-bottom-item[data-active] { color: var(--color-surface-sand); background: rgb(255 255 255 / 0.06); }
+  .tcg-bottom-icon-wrap { position: relative; }
+  .tcg-bottom-count { right: -8px; top: -5px; transform: scale(0.87); }
+  .tcg-bottom-explore { position: relative; }
+  .tcg-bottom-popover {
+    position: fixed;
+    bottom: calc(75px + env(safe-area-inset-bottom));
+    left: 50%;
+    width: min(285px, calc(100vw - 18px));
+    transform: translateX(-50%);
+    border: 1px solid var(--color-accent-gold-frame);
+    border-radius: 12px;
+    padding: 7px;
+    background: var(--color-brand-deep);
+    box-shadow: 0 12px 32px rgb(29 9 31 / 0.32);
   }
-  .tcg-header-row .tcg-brand {
-    width: clamp(100px, 33vw, 145px);
-  }
+  .tcg-site-content { padding-bottom: 24px; }
+  .tcg-footer { margin-bottom: calc(67px + env(safe-area-inset-bottom)); }
+  .tcg-footer-inner { grid-template-columns: 1fr; justify-items: center; min-height: 0; gap: 6px; padding: 13px 14px; }
+  .tcg-footer-logo { width: 123px; }
+  .tcg-footer-copyright { order: 3; }
+  .tcg-social-links { justify-content: center; }
+  .tcg-layout-notice { top: 116px; }
 }
 
-.tcg-game-icon {
-  width: 1.4em;
-  height: 1.4em;
-  object-fit: contain;
+@media (max-width: 360px) {
+  .tcg-header-inner { gap: 4px 6px; padding-inline: 8px; }
+  .tcg-header-logo { width: 115px; }
+  .tcg-header-icon { width: 40px; flex-basis: 40px; }
+  .tcg-notification-wrap > button { min-width: 40px; }
+  .tcg-header-actions { gap: 0; }
+  .tcg-bottom-item { font-size: 9px; }
 }
-/* Each frame occupies the same box as its controls. */
-.tcg-header,
-.tcg-nav,
-.tcg-footer-frame {
-  position: relative;
-  isolation: isolate;
-}
-.tcg-header-inner,
-.tcg-nav-scroll,
-.tcg-footer-row {
-  position: relative;
-  z-index: 1;
-}
-.tcg-frame-art {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  display: block;
-  width: 100%;
-  height: 100%;
-  max-width: none;
-  object-fit: fill;
-  pointer-events: none;
-  user-select: none;
-}
-.tcg-nav > .tcg-frame-art,
-.tcg-footer-frame > .tcg-frame-art {
-  filter: drop-shadow(0 9px 8px rgb(57 20 72 / 26%));
+
+@media (prefers-reduced-motion: reduce) {
+  .tcg-nav-link,
+  .tcg-header-icon,
+  .tcg-dropdown-link,
+  .tcg-search-form { transition: none; }
 }

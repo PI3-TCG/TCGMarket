@@ -3,9 +3,42 @@
 @theme {
   --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
   --font-display: Cinzel, ui-serif, Georgia, serif;
+  --font-title: 'Crimson Text', Georgia, serif;
 
   --spacing: 4px;
 
+  /* Identidade v2.2: paleta extraída do mockup e documentação aprovada. */
+  --color-brand-primary: #660366;
+  --color-brand-primary-hover: #4f024f;
+  --color-brand-primary-light: #721e78;
+  --color-brand-primary-deep: #47114f;
+  --color-brand-deep: #310b43;
+
+  --color-surface-canvas: #f7e9e0;
+  --color-surface-default: #faf1e7;
+  --color-surface-input: #f9f8f9;
+  --color-surface-subtle: #ece1d9;
+  --color-surface-sand: #f6e4cc;
+  --color-surface-lavender: #e1d0e3;
+  --color-surface-brand-tint: #f0e3f0;
+
+  --color-text-ink: #1a1216;
+  --color-text-price: #3a0a38;
+  --color-text-secondary: #5f565b;
+  --color-text-inverse: #ffffff;
+  --color-border-default: #e7ddd3;
+  --color-border-emphasis: #b98fb9;
+  --color-accent-gold: #e0a100;
+  --color-accent-gold-frame: #e9a150;
+  --color-accent-bronze: #b08252;
+  --color-accent-gold-deep: #8a5a12;
+  --color-accent-gold-soft: #fff4cc;
+  --color-support-blue: #0969d7;
+  --color-state-success: #15803d;
+  --color-state-warning: #b45309;
+  --color-state-error: #b91c1c;
+
+  /* Aliases do tema legado: preservar todas as utilitárias atuais. */
   --color-primary-900: #660366;
   --color-primary-800: #4f024f;
   --color-primary-700: #996699;
@@ -46,6 +79,9 @@
 
   --radius-control: 8px;
   --radius-surface: 12px;
+  --radius-card: 12px;
+  --radius-banner: 16px;
+  --radius-modal: 16px;
 
   --shadow-sm: 0 1px 3px rgb(48 43 64 / 0.08);
   --shadow-md: 0 4px 12px rgb(48 43 64 / 0.1);
@@ -54,10 +90,12 @@
 
 @layer base {
   body {
-    @apply bg-neutral-50 font-sans text-neutral-900 antialiased;
+    @apply bg-surface-canvas font-sans text-neutral-900 antialiased;
+    background-image: url('./assets/design-system/pergaminho.webp');
+    background-size: 512px 512px;
+    background-repeat: repeat;
   }
 
-  /* O Tailwind 4 deixou de aplicar cursor: pointer em botões por padrão. */
   button:not(:disabled),
   [role='button']:not([aria-disabled='true']),
   select:not(:disabled),
@@ -76,6 +114,7 @@
   }
 }
 
+/* Mantidos por compatibilidade; não introduzir este contorno em novos banners v2.2. */
 @utility banner-text-outline {
   -webkit-text-stroke: 2px #130b30;
   paint-order: stroke fill;
@@ -127,7 +166,10 @@
   box-shadow: inset 0 1px 3px rgb(48 43 64 / 8%);
 }
 
+/* v2.2: o fundo geral é pergaminho, sem halo roxo. */
 @utility page-vignette {
-  background-color: white;
-  background-image: radial-gradient(ellipse at center, #ffffff 32%, #f4edf8 64%, #a477ae 100%);
+  background-color: var(--color-surface-canvas);
+  background-image: url('./assets/design-system/pergaminho.webp');
+  background-size: 512px 512px;
+  background-repeat: repeat;
 }
