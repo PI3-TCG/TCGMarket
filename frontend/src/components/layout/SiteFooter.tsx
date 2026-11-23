@@ -15,13 +15,38 @@ type SocialLink = { label: string; platform: Platform; href: string }
  * Preserva as redes existentes. Conforme o DS v2.2, exibe somente links reais:
  * configure as VITE_SOCIAL_*_URL no frontend/.env, quando publicados.
  */
-const socialLinks: SocialLink[] = [
-  { label: 'YouTube', platform: 'youtube', href: import.meta.env.VITE_SOCIAL_YOUTUBE_URL ?? '' },
-  { label: 'Instagram', platform: 'instagram', href: import.meta.env.VITE_SOCIAL_INSTAGRAM_URL ?? '' },
-  { label: 'TikTok', platform: 'tiktok', href: import.meta.env.VITE_SOCIAL_TIKTOK_URL ?? '' },
-  { label: 'Discord', platform: 'discord', href: import.meta.env.VITE_SOCIAL_DISCORD_URL ?? '' },
-  { label: 'Twitch', platform: 'twitch', href: import.meta.env.VITE_SOCIAL_TWITCH_URL ?? '' },
-].filter(({ href }) => /^https:\/\//i.test(href))
+
+const configuredSocialLinks: SocialLink[] = [
+  {
+    label: 'YouTube',
+    platform: 'youtube',
+    href: import.meta.env.VITE_SOCIAL_YOUTUBE_URL ?? '',
+  },
+  {
+    label: 'Instagram',
+    platform: 'instagram',
+    href: import.meta.env.VITE_SOCIAL_INSTAGRAM_URL ?? '',
+  },
+  {
+    label: 'TikTok',
+    platform: 'tiktok',
+    href: import.meta.env.VITE_SOCIAL_TIKTOK_URL ?? '',
+  },
+  {
+    label: 'Discord',
+    platform: 'discord',
+    href: import.meta.env.VITE_SOCIAL_DISCORD_URL ?? '',
+  },
+  {
+    label: 'Twitch',
+    platform: 'twitch',
+    href: import.meta.env.VITE_SOCIAL_TWITCH_URL ?? '',
+  },
+]
+
+const socialLinks = configuredSocialLinks.filter(({ href }) =>
+  /^https:\/\//i.test(href),
+)
 
 function SocialIcon({ platform }: { platform: Platform }): ReactNode {
   switch (platform) {
@@ -33,7 +58,13 @@ function SocialIcon({ platform }: { platform: Platform }): ReactNode {
       )
     case 'instagram':
       return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          aria-hidden="true"
+        >
           <rect x="3" y="3" width="18" height="18" rx="5" />
           <circle cx="12" cy="12" r="4" />
           <circle cx="17.5" cy="6.6" r="1" fill="currentColor" stroke="none" />
@@ -63,12 +94,36 @@ function SocialIcon({ platform }: { platform: Platform }): ReactNode {
 export function SiteFooter({ onSoon: _onSoon }: Props) {
   return (
     <footer aria-label="Rodapé do TCG Market" className="tcg-footer">
-      <img src={cornerTL} alt="" aria-hidden="true" className="tcg-chrome-corner tcg-chrome-corner--tl" />
-      <img src={cornerTR} alt="" aria-hidden="true" className="tcg-chrome-corner tcg-chrome-corner--tr" />
-      <img src={cornerBL} alt="" aria-hidden="true" className="tcg-chrome-corner tcg-chrome-corner--bl" />
-      <img src={cornerBR} alt="" aria-hidden="true" className="tcg-chrome-corner tcg-chrome-corner--br" />
+      <img
+        src={cornerTL}
+        alt=""
+        aria-hidden="true"
+        className="tcg-chrome-corner tcg-chrome-corner--tl"
+      />
+      <img
+        src={cornerTR}
+        alt=""
+        aria-hidden="true"
+        className="tcg-chrome-corner tcg-chrome-corner--tr"
+      />
+      <img
+        src={cornerBL}
+        alt=""
+        aria-hidden="true"
+        className="tcg-chrome-corner tcg-chrome-corner--bl"
+      />
+      <img
+        src={cornerBR}
+        alt=""
+        aria-hidden="true"
+        className="tcg-chrome-corner tcg-chrome-corner--br"
+      />
       <div className="tcg-footer-inner">
-        <Link to="/" className="tcg-logo-link tcg-footer-brand" aria-label="TCG Market — página inicial">
+        <Link
+          to="/"
+          className="tcg-logo-link tcg-footer-brand"
+          aria-label="TCG Market — página inicial"
+        >
           <img src={logo} alt="" decoding="async" className="tcg-footer-logo" />
         </Link>
         <p className="tcg-footer-copyright">

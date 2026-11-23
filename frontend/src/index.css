@@ -1,18 +1,40 @@
 @import 'tailwindcss';
 
+/*
+ * TCG Market — Design System v2.2
+ *
+ * Fonte única dos tokens visuais da aplicação.
+ * Não é necessário importar tokens.css ou pergaminho.css.
+ */
+
 @theme {
+  /* ========================================
+     TIPOGRAFIA
+     ======================================== */
+
   --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
   --font-display: Cinzel, ui-serif, Georgia, serif;
   --font-title: 'Crimson Text', Georgia, serif;
 
+  /* ========================================
+     ESPAÇAMENTO
+     ======================================== */
+
   --spacing: 4px;
 
-  /* Identidade v2.2: paleta extraída do mockup e documentação aprovada. */
+  /* ========================================
+     IDENTIDADE VISUAL — V2.2
+     ======================================== */
+
   --color-brand-primary: #660366;
   --color-brand-primary-hover: #4f024f;
   --color-brand-primary-light: #721e78;
   --color-brand-primary-deep: #47114f;
   --color-brand-deep: #310b43;
+
+  /* ========================================
+     SUPERFÍCIES
+     ======================================== */
 
   --color-surface-canvas: #f7e9e0;
   --color-surface-default: #faf1e7;
@@ -22,23 +44,47 @@
   --color-surface-lavender: #e1d0e3;
   --color-surface-brand-tint: #f0e3f0;
 
+  /* ========================================
+     TEXTOS
+     ======================================== */
+
   --color-text-ink: #1a1216;
   --color-text-price: #3a0a38;
   --color-text-secondary: #5f565b;
   --color-text-inverse: #ffffff;
+
+  /* ========================================
+     BORDAS
+     ======================================== */
+
   --color-border-default: #e7ddd3;
   --color-border-emphasis: #b98fb9;
+
+  /* ========================================
+     DOURADO E ORNAMENTOS
+     ======================================== */
+
   --color-accent-gold: #e0a100;
   --color-accent-gold-frame: #e9a150;
   --color-accent-bronze: #b08252;
   --color-accent-gold-deep: #8a5a12;
   --color-accent-gold-soft: #fff4cc;
+
+  /* ========================================
+     CORES SEMÂNTICAS
+     ======================================== */
+
   --color-support-blue: #0969d7;
+
   --color-state-success: #15803d;
   --color-state-warning: #b45309;
   --color-state-error: #b91c1c;
 
-  /* Aliases do tema legado: preservar todas as utilitárias atuais. */
+  /* ========================================
+     COMPATIBILIDADE COM O TEMA ANTERIOR
+     Não remover antes da migração completa.
+     ======================================== */
+
   --color-primary-900: #660366;
   --color-primary-800: #4f024f;
   --color-primary-700: #996699;
@@ -63,19 +109,27 @@
   --color-success-700: #15803d;
   --color-success-200: #b7e4c7;
   --color-success-50: #e7f6ec;
+
   --color-warning-700: #d97706;
   --color-warning-200: #f6d7a8;
   --color-warning-50: #fff6e8;
+
   --color-error-700: #b91c1c;
   --color-error-600: #991b1b;
   --color-error-200: #f5c2c2;
   --color-error-50: #fdecec;
+
   --color-info-700: #1d4ed8;
   --color-info-200: #c5d7fb;
   --color-info-50: #e8f0fe;
+
   --color-rare-700: #8a6500;
   --color-rare-500: #e0a100;
   --color-rare-100: #fff4cc;
+
+  /* ========================================
+     BORDAS ARREDONDADAS
+     ======================================== */
 
   --radius-control: 8px;
   --radius-surface: 12px;
@@ -83,17 +137,26 @@
   --radius-banner: 16px;
   --radius-modal: 16px;
 
+  /* ========================================
+     SOMBRAS
+     ======================================== */
+
   --shadow-sm: 0 1px 3px rgb(48 43 64 / 0.08);
   --shadow-md: 0 4px 12px rgb(48 43 64 / 0.1);
   --shadow-lg: 0 8px 24px rgb(48 43 64 / 0.14);
 }
 
+/* ========================================
+   ESTILOS GLOBAIS
+   ======================================== */
+
 @layer base {
   body {
     @apply bg-surface-canvas font-sans text-neutral-900 antialiased;
+
     background-image: url('./assets/design-system/pergaminho.webp');
-    background-size: 512px 512px;
     background-repeat: repeat;
+    background-size: 512px 512px;
   }
 
   button:not(:disabled),
@@ -114,26 +177,50 @@
   }
 }
 
-/* Mantidos por compatibilidade; não introduzir este contorno em novos banners v2.2. */
+/* ========================================
+   UTILITÁRIOS LEGADOS
+   Mantidos durante a migração para v2.2.
+   ======================================== */
+
+/*
+ * Compatibilidade com banners anteriores.
+ * Novos banners não devem usar text-stroke.
+ */
 @utility banner-text-outline {
   -webkit-text-stroke: 2px #130b30;
   paint-order: stroke fill;
 }
 
+/* Compatibilidade com botões anteriores. */
 @utility button-vignette {
   background-image:
-    linear-gradient(90deg, rgb(0 0 0 / 20%), transparent 18%, transparent 82%, rgb(0 0 0 / 20%)),
-    radial-gradient(ellipse at center, transparent 20%, rgb(0 0 0 / 14%) 65%, rgb(0 0 0 / 42%) 100%);
+    linear-gradient(
+      90deg,
+      rgb(0 0 0 / 20%),
+      transparent 18%,
+      transparent 82%,
+      rgb(0 0 0 / 20%)
+    ),
+    radial-gradient(
+      ellipse at center,
+      transparent 20%,
+      rgb(0 0 0 / 14%) 65%,
+      rgb(0 0 0 / 42%) 100%
+    );
 }
 
+/* Será atualizado na tarefa de filtros (DS-10). */
 @utility filter-panel {
   border: 1px solid var(--color-rare-500);
   border-radius: var(--radius-surface);
   background: linear-gradient(180deg, #e9daf5, #fcf9ff);
-  box-shadow: 0 0 12px rgb(48 43 64 / 13%), 0 6px 16px rgb(48 43 64 / 12%);
+  box-shadow:
+    0 0 12px rgb(48 43 64 / 13%),
+    0 6px 16px rgb(48 43 64 / 12%);
   padding: 1rem;
 }
 
+/* Ornamentos legados: remover somente após auditar consumidores. */
 @utility panel-ornaments {
   position: relative;
 
@@ -148,14 +235,21 @@
     border: 2px solid #f6c846;
     border-radius: 2px;
     background: linear-gradient(135deg, #fff9e0, #ffe36d);
-    box-shadow: 0 0 0 1px #aa7400, 0 0 6px rgb(252 210 3 / 35%);
+    box-shadow:
+      0 0 0 1px #aa7400,
+      0 0 6px rgb(252 210 3 / 35%);
     translate: -50% -50%;
     rotate: 45deg;
     pointer-events: none;
   }
 
-  &::before { top: -0.5px; }
-  &::after { top: calc(100% + 0.5px); }
+  &::before {
+    top: -0.5px;
+  }
+
+  &::after {
+    top: calc(100% + 0.5px);
+  }
 }
 
 @utility filter-button {
@@ -166,10 +260,20 @@
   box-shadow: inset 0 1px 3px rgb(48 43 64 / 8%);
 }
 
-/* v2.2: o fundo geral é pergaminho, sem halo roxo. */
+/* ========================================
+   PERGAMINHO — DESIGN SYSTEM V2.2
+   ======================================== */
+
+/*
+ * Mantém compatibilidade com páginas que
+ * utilizam a classe page-vignette.
+ *
+ * A aparência antiga com halo roxo foi
+ * substituída pelo pergaminho oficial.
+ */
 @utility page-vignette {
   background-color: var(--color-surface-canvas);
   background-image: url('./assets/design-system/pergaminho.webp');
-  background-size: 512px 512px;
   background-repeat: repeat;
+  background-size: 512px 512px;
 }
