@@ -75,7 +75,7 @@ function UserResults({ q }: { q: string }) {
           ))}
         </ul>
       ) : (
-        <p>Nenhum usuário encontrado.</p>
+        <p role="status">Nenhum usuário encontrado.</p>
       )}
       <Pagination page={page} hasMore={state.data.hasMore} change={setPage} />
     </>

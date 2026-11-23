@@ -147,11 +147,13 @@ const statusVariants: Record<string, BadgeVariant> = {
   EXPIRED: 'neutral',
 }
 export function ProfileDashboard({
+  username,
   about,
   privacy,
   reputation,
   collection,
 }: {
+  username: string
   about: ReactNode
   privacy: ReactNode
   reputation?: ReactNode
@@ -162,9 +164,7 @@ export function ProfileDashboard({
     `dashboard:${user?.id}`,
     getProfileDashboard,
   )
-  const username = user?.username
   const getReputation = useCallback(async () => {
-    if (!username) return null
     const response = await api.get<ReputationDataResponse>(
       `/api/users/${encodeURIComponent(username)}/reputation`,
     )
@@ -209,7 +209,16 @@ export function ProfileDashboard({
               >
                 <p className="flex items-center justify-center gap-2 text-sm text-neutral-700">
                   <Icon name={icon as IconName} size={20} />
-                  <span>{label}</span>
+                  {label === 'Reputação' ? (
+                    <Link
+                      to="/perfil/reputacao"
+                      className="font-semibold text-primary-900 underline-offset-4 hover:underline focus-visible:underline"
+                    >
+                      {label}
+                    </Link>
+                  ) : (
+                    <span>{label}</span>
+                  )}
                 </p>
                 <p className={`flex items-center justify-center font-bold text-primary-900 ${label === 'Reputação' && summary?.average == null ? 'text-sm' : 'font-display text-2xl'}`}>
                   {typeof value === 'number'

@@ -13,6 +13,7 @@ import { CardDetailsPage } from '@/pages/CardDetailsPage'
 import { CatalogPage } from '@/pages/CatalogPage'
 import { ProfileEditPage } from '@/pages/ProfileEditPage'
 import { ProfilePage } from '@/pages/ProfilePage'
+import { MyReputationPage } from '@/pages/MyReputationPage'
 import { PublicProfilePage } from '@/pages/PublicProfilePage'
 import { NotFound, RootLayout } from '@/routes/RootLayout'
 import { parseAdminCatalogSearch } from '@/utils/adminCatalogSearch'
@@ -22,6 +23,9 @@ import {
   createRootRoute,
   createRoute,
   createRouter,
+  defaultParseSearch,
+  defaultStringifySearch,
+  redirect,
 } from '@tanstack/react-router'
 import { MyCollectionPage } from '@/pages/MyCollectionPage'
 import { CreateAdPage } from '@/pages/CreateAdPage'
@@ -202,8 +206,27 @@ const myTradeProposalsRoute = createRoute({
   path: '/perfil/propostas',
   validateSearch: parseTradeProposalsSearch,
   component: () => (
-    <RequireAuth>
+    <RequireAuth returnAfterLogin>
       <MyTradeProposalsPage />
+    </RequireAuth>
+  ),
+})
+
+const legacyTradesRoute = createRoute({
+  getParentRoute: () => siteLayoutRoute,
+  path: '/perfil/trades',
+  validateSearch: parseTradeProposalsSearch,
+  beforeLoad: ({ search }) => {
+    throw redirect({ to: '/perfil/propostas', search, replace: true })
+  },
+})
+
+const myReputationRoute = createRoute({
+  getParentRoute: () => siteLayoutRoute,
+  path: '/perfil/reputacao',
+  component: () => (
+    <RequireAuth returnAfterLogin>
+      <MyReputationPage />
     </RequireAuth>
   ),
 })
@@ -313,6 +336,8 @@ const routeTree = rootRoute.addChildren([
     createAdRoute,
     myAdsRoute,
     myTradeProposalsRoute,
+    legacyTradesRoute,
+    myReputationRoute,
     transactionHistoryRoute,
     transactionDetailRoute,
   ]),
@@ -321,7 +346,20 @@ const routeTree = rootRoute.addChildren([
   designSystemRoute,
 ])
 
-export const router = createRouter({ routeTree })
+export const router = createRouter({
+  routeTree,
+  // Termos da busca, como "123" e "true", precisam continuar sendo texto.
+  parseSearch: (search) => {
+    const parsed = defaultParseSearch(search)
+    const query = new URLSearchParams(search).get('q')
+    return query === null ? parsed : { ...parsed, q: query }
+  },
+  stringifySearch: ({ q, ...search }) => {
+    if (typeof q !== 'string') return defaultStringifySearch({ ...search, q })
+    const encoded = defaultStringifySearch(search)
+    return `${encoded || '?'}${encoded ? '&' : ''}q=${encodeURIComponent(q)}`
+  },
+})
 
 declare module '@tanstack/react-router' {
   interface Register {

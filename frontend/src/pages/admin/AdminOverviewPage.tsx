@@ -614,28 +614,26 @@ function Distribution({ data }: { data: AdminCatalogSummary }) {
   const total = games.reduce((sum, item) => sum + item.amount, 0)
   if (!total) return <Empty>Nenhuma carta importada ainda.</Empty>
 
-  let offset = 0
-  const stops = games.map((item) => {
-    const begin = offset
-    offset += (item.amount / total) * 100
-    return `${GAME_COLOR[item.game]} ${begin}% ${offset}%`
-  })
+  let cumulativeCards = 0
+  const stops: string[] = []
+  const labels = []
 
-  // As etiquetas seguem as porcentagens verdadeiras. Segmentos pequenos não
-  // recebem etiqueta sobre o gráfico; os valores continuam visíveis na tabela.
-  let angle = 0
-  const labels = games.map((item) => {
+  // Segmentos pequenos mantêm a proporção e aparecem na tabela.
+  for (const item of games) {
+    const begin = cumulativeCards / total
     const fraction = item.amount / total
-    const middle = angle + fraction * 180
-    angle += fraction * 360
-    const radians = (middle * Math.PI) / 180
-    return {
+    cumulativeCards += item.amount
+    const end = cumulativeCards / total
+    const radians = (begin + fraction / 2) * 2 * Math.PI
+
+    stops.push(`${GAME_COLOR[item.game]} ${begin * 100}% ${end * 100}%`)
+    labels.push({
       ...item,
       fraction,
       x: 50 + 34 * Math.sin(radians),
       y: 50 - 34 * Math.cos(radians),
-    }
-  })
+    })
+  }
 
   return (
     <div className="flex min-w-0 flex-col items-center justify-center gap-6 px-4 py-5 sm:px-6 2xl:flex-row 2xl:gap-7">
