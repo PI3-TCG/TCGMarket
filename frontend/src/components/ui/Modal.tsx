@@ -183,9 +183,12 @@ export function Modal({
     }
   }, [open, embedded, presentation])
 
-  // Mudança de etapa/título dentro do mesmo diálogo, sem recriar a instância.
+  // Atualizações assíncronas do título não podem roubar o foco de quem
+  // já começou a interagir com campos e botões dentro do diálogo.
   useEffect(() => {
-    if (open && presentation === 'refined' && !embedded) {
+    if (!open || embedded || presentation !== 'refined') return
+    const active = document.activeElement
+    if (active === dialogRef.current || active === headingRef.current) {
       headingRef.current?.focus()
     }
   }, [title, open, presentation, embedded])
@@ -340,7 +343,7 @@ export function Modal({
   return createPortal(
     <div
       data-tcg-modal-root="true"
-      className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-5"
+      className="fixed inset-0 z-[200] isolate flex items-center justify-center p-3 sm:p-5"
     >
       <div
         aria-hidden="true"

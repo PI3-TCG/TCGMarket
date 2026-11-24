@@ -9,10 +9,10 @@ import cornerBottomRight from '@/assets/design-system/canto-id.svg'
  * A moldura ornamentada é usada somente por diálogos de apresentação refinada.
  */
 export const modalFrame =
-  'relative isolate border border-accent-gold-frame bg-surface-default shadow-[0_24px_72px_rgba(20,7,29,0.48),0_5px_18px_rgba(49,11,67,0.22),inset_0_0_0_4px_var(--color-surface-default),inset_0_0_0_5px_var(--color-accent-bronze)]'
+  'relative isolate border border-accent-gold-frame bg-surface-default shadow-[0_24px_72px_rgba(20,7,29,0.48),0_5px_18px_rgba(49,11,67,0.22)] before:pointer-events-none before:absolute before:inset-1 before:z-20 before:rounded-[12px] before:border before:border-accent-bronze/80 before:content-[""]'
 
 export const modalHeader =
-  'relative isolate border-b border-border-default bg-surface-default text-text-primary [&_h2]:text-text-ink [&_p]:text-text-secondary'
+  'relative isolate bg-surface-default text-text-primary [&_h2]:text-text-ink [&_p]:text-text-secondary [&_h2]:font-title'
 
 export const modalHeadingIcon =
   'flex size-10 shrink-0 items-center justify-center rounded-control border border-accent-bronze/70 bg-surface-sand/50 text-brand-deep'
