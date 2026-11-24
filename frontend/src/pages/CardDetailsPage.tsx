@@ -1,3 +1,4 @@
+import { CollectionAdditionNotice } from '@/components/catalog/CollectionAdditionNotice'
 import { AddToCollectionModal } from '@/components/catalog/AddToCollectionModal'
 import {
   attackCost,
@@ -49,6 +50,7 @@ function CardDetailsView({ id }: { id: string }) {
   const fetchCard = useCallback(() => fetchCatalogCard(id), [id])
   const { state, retry } = useRemoteData(id, fetchCard)
   const [modalOpen, setModalOpen] = useState(false)
+  const [addedCard, setAddedCard] = useState<string | null>(null)
 
   const card = state.status === 'ready' ? state.data : null
   // Volta do login com a intenção de adicionar: o modal abre sozinho.
@@ -56,6 +58,7 @@ function CardDetailsView({ id }: { id: string }) {
 
   function addToCollection() {
     if (user) {
+      setAddedCard(null)
       setModalOpen(true)
       return
     }
@@ -72,12 +75,7 @@ function CardDetailsView({ id }: { id: string }) {
   }
 
   return (
-    <main
-      className={cn(
-        'mx-auto w-full max-w-[1400px] space-y-5 px-4 py-6 sm:px-6',
-        card && 'pb-28 sm:pb-6',
-      )}
-    >
+    <main className="mx-auto w-full max-w-[1400px] space-y-5 px-4 py-6 sm:px-6">
       <Breadcrumb card={card} loading={state.status === 'loading'} />
 
       {state.status === 'loading' ? <DetailsSkeleton /> : null}
@@ -87,8 +85,19 @@ function CardDetailsView({ id }: { id: string }) {
       ) : null}
       {card ? <Details card={card} onAdd={addToCollection} /> : null}
 
+      <CollectionAdditionNotice
+        cardName={addedCard}
+        onDismiss={() => setAddedCard(null)}
+      />
       {card && showModal ? (
-        <AddToCollectionModal card={toCatalogCard(card)} onClose={closeModal} />
+        <AddToCollectionModal
+          card={toCatalogCard(card)}
+          onClose={closeModal}
+          onSuccess={() => {
+            setAddedCard(card.name)
+            closeModal()
+          }}
+        />
       ) : null}
     </main>
   )
@@ -182,62 +191,60 @@ function Details({
   const namePt = localizedName(card.name, card.localizations)
 
   return (
-    <>
-      <div className="grid items-start gap-6 md:grid-cols-[260px_minmax(0,1fr)] xl:grid-cols-[300px_minmax(0,1fr)_300px]">
-        <CardImage card={card} />
+    <div className="grid items-start gap-6 md:grid-cols-[260px_minmax(0,1fr)] xl:grid-cols-[300px_minmax(0,1fr)_300px]">
+      <CardImage card={card} />
 
-        <section className="min-w-0 space-y-4" aria-labelledby="card-name">
-          <div className="space-y-2">
-            <Badge variant="primary">{game.name}</Badge>
-            <h1
-              id="card-name"
-              className="font-display line-clamp-2 text-3xl leading-tight font-bold break-words text-neutral-900 sm:text-4xl"
-            >
-              {card.name}
-            </h1>
-            {namePt ? (
-              <p lang="pt-BR" className="text-base text-neutral-700">
-                Em português: <span className="font-semibold">{namePt}</span>
-              </p>
+      <section className="min-w-0 space-y-4" aria-labelledby="card-name">
+        <div className="space-y-2">
+          <Badge variant="primary">{game.name}</Badge>
+          <h1
+            id="card-name"
+            className="font-display line-clamp-2 text-3xl leading-tight font-bold break-words text-neutral-900 sm:text-4xl"
+          >
+            {card.name}
+          </h1>
+          {namePt ? (
+            <p lang="pt-BR" className="text-base text-neutral-700">
+              Em português: <span className="font-semibold">{namePt}</span>
+            </p>
+          ) : null}
+          {line ? <p className="text-sm text-neutral-700">{line}</p> : null}
+        </div>
+
+        <div className="sm:hidden">
+          <AddButton onClick={onAdd} />
+        </div>
+
+        {card.rarity || chips.length ? (
+          <ul className="flex flex-wrap gap-2" aria-label="Destaques">
+            {card.rarity ? (
+              <li>
+                <Badge variant="rare">{card.rarity}</Badge>
+              </li>
             ) : null}
-            {line ? <p className="text-sm text-neutral-700">{line}</p> : null}
-          </div>
+            {chips.map((chip) => (
+              <li key={chip}>
+                <Badge variant="neutral">{chip}</Badge>
+              </li>
+            ))}
+          </ul>
+        ) : null}
 
-          {card.rarity || chips.length ? (
-            <ul className="flex flex-wrap gap-2" aria-label="Destaques">
-              {card.rarity ? (
-                <li>
-                  <Badge variant="rare">{card.rarity}</Badge>
-                </li>
-              ) : null}
-              {chips.map((chip) => (
-                <li key={chip}>
-                  <Badge variant="neutral">{chip}</Badge>
-                </li>
-              ))}
-            </ul>
-          ) : null}
-
-          {info.length ? (
-            <Card className="px-4">
-              <InfoList rows={info} />
-            </Card>
-          ) : null}
-
-          <InfoTabs card={card} />
-        </section>
-
-        <aside className="hidden sm:block md:col-start-2 xl:sticky xl:top-4 xl:col-start-3 xl:row-start-1">
-          <Card className="space-y-3 p-4">
-            <AddButton onClick={onAdd} />
+        {info.length ? (
+          <Card className="px-4">
+            <InfoList rows={info} />
           </Card>
-        </aside>
-      </div>
+        ) : null}
 
-      <div className="fixed inset-x-0 bottom-0 z-20 border-t border-neutral-200 bg-white p-3 shadow-[0_-4px_12px_rgba(0,0,0,0.06)] sm:hidden">
-        <AddButton onClick={onAdd} />
-      </div>
-    </>
+        <InfoTabs card={card} />
+      </section>
+
+      <aside className="hidden sm:block md:col-start-2 xl:sticky xl:top-4 xl:col-start-3 xl:row-start-1">
+        <Card className="space-y-3 p-4">
+          <AddButton onClick={onAdd} />
+        </Card>
+      </aside>
+    </div>
   )
 }
 
@@ -271,7 +278,9 @@ function CardImage({ card }: { card: CatalogCardDetails }) {
 
   return (
     <div className="mx-auto w-full max-w-[300px] space-y-2 md:row-span-2 xl:row-span-1">
-      {ptImage ? <ImageLanguageToggle showPt={showPt} onChange={setShowPt} /> : null}
+      {ptImage ? (
+        <ImageLanguageToggle showPt={showPt} onChange={setShowPt} />
+      ) : null}
       <div className="aspect-[63/88] overflow-hidden rounded-surface border border-neutral-200 bg-white shadow-sm">
         {available ? (
           <img

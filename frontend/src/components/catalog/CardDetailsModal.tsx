@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useId, useState } from 'react'
 
 import { fetchCatalogCard, localizedName } from '@/services/catalogApi'
 import { ImageLanguageToggle } from '@/components/catalog/ImageLanguageToggle'
@@ -13,7 +13,6 @@ import {
   imageAlt,
   rulesText,
   setLine,
-  toCatalogCard,
 } from './cardDetailsFormat'
 import { Badge } from '@/components/ui/Badge'
 import { cn } from '@/components/ui/cn'
@@ -23,14 +22,17 @@ import {
   modalPrimaryButton,
   modalSecondaryButton,
 } from '@/components/ui/modalTheme'
-import type { CatalogCard, CatalogCardDetails } from '@/types/Catalog'
+import { CollectionOwnershipFields } from '@/components/collection/CollectionOwnershipModalBase'
+import { Alert } from '@/components/ui/Alert'
+import { useCollectionAddition } from './useCollectionAddition'
+import type { CatalogCardDetails } from '@/types/Catalog'
 
 type Props = {
   cardId: string
   context?: 'catalog' | 'collection'
   onClose: () => void
-  onAdd?: (card: CatalogCard) => void
-  onAddToCollection?: (card: CatalogCardDetails) => void
+  onAdded?: (cardName: string) => void
+  onRequireLogin?: (cardId: string) => void
   onCreateListing?: (card: CatalogCardDetails) => void
 }
 
@@ -41,8 +43,8 @@ export function CardDetailsModal({
   cardId,
   context = 'catalog',
   onClose,
-  onAdd,
-  onAddToCollection,
+  onAdded,
+  onRequireLogin,
   onCreateListing,
 }: Props) {
   const [showPt, setShowPt] = useState(false)
@@ -55,19 +57,17 @@ export function CardDetailsModal({
   const ptImage = card?.localizations?.pt?.imageUrl ?? null
   const imageUrl = showPt && ptImage ? ptImage : (card?.imageUrl ?? null)
   const isCollection = context === 'collection'
+  const additionFormId = useId()
+  const addition = useCollectionAddition()
   const canPerformAction = isCollection
     ? Boolean(onCreateListing)
-    : Boolean(onAdd || onAddToCollection)
+    : Boolean(onAdded || onRequireLogin)
+  const showAddition = !isCollection && Boolean(onAdded)
 
   function handlePrimaryAction() {
     if (!card) return
-    if (isCollection) {
-      onCreateListing?.(card)
-    } else if (onAdd) {
-      onAdd(toCatalogCard(card))
-    } else {
-      onAddToCollection?.(card)
-    }
+    if (isCollection) onCreateListing?.(card)
+    else onRequireLogin?.(card.id)
   }
 
   const detailRows = card ? [...commonRows(card), ...gameRows(card)] : []
@@ -88,23 +88,30 @@ export function CardDetailsModal({
       title={card?.name ?? 'Detalhes da carta'}
       eyebrow={`${isCollection ? 'Minha coleção' : 'Catálogo'} / Detalhes`}
       onClose={onClose}
+      closeDisabled={addition.isSaving}
       footer={
         <div className="flex w-full flex-wrap items-center justify-end gap-2.5">
           <button
             type="button"
+            disabled={addition.isSaving}
             onClick={onClose}
             className={cn(detailButton, modalSecondaryButton)}
           >
             Fechar
           </button>
           <button
-            type="button"
-            onClick={handlePrimaryAction}
-            disabled={!card || !canPerformAction}
+            type={showAddition ? 'submit' : 'button'}
+            form={showAddition ? additionFormId : undefined}
+            onClick={showAddition ? undefined : handlePrimaryAction}
+            disabled={!card || !canPerformAction || addition.isSaving}
             className={cn(detailButton, modalPrimaryButton)}
           >
             <Icon name={isCollection ? 'cart' : 'plus'} size={16} />
-            {isCollection ? 'Criar anúncio' : 'Adicionar à coleção'}
+            {isCollection
+              ? 'Criar anúncio'
+              : addition.isSaving
+                ? 'Adicionando...'
+                : 'Adicionar à coleção'}
           </button>
         </div>
       }
@@ -150,6 +157,23 @@ export function CardDetailsModal({
 
       {card && (
         <div className="space-y-5">
+          {showAddition && onAdded && (
+            <form
+              id={additionFormId}
+              noValidate
+              className="space-y-3 rounded-surface border border-border-default bg-surface-input p-4"
+              onSubmit={(event) => {
+                event.preventDefault()
+                void addition.submit(card.id, () => onAdded(card.name))
+              }}
+            >
+              <h3 className="text-sm font-semibold text-brand-deep">
+                Adicionar à minha coleção
+              </h3>
+              <CollectionOwnershipFields {...addition.fields} />
+              {addition.error && <Alert variant="error">{addition.error}</Alert>}
+            </form>
+          )}
           <div className="grid items-start gap-5 sm:grid-cols-[minmax(0,255px)_minmax(0,1fr)] sm:gap-7 lg:grid-cols-[minmax(0,285px)_minmax(0,1fr)]">
             <aside className="mx-auto w-full max-w-[310px] sm:max-w-none">
               <div className="rounded-surface border border-border-default bg-surface-input p-3 shadow-sm">
