@@ -1,5 +1,6 @@
 import { useId, useState } from 'react'
 import {
+  CollapsibleFilterChoices,
   FilterChips,
   FilterHeading,
   filterApplyClass,
@@ -15,20 +16,23 @@ type MyAdsFiltersProps = {
 }
 
 const gameNames: Record<string, string> = {
-  POKEMON: 'Pokémon',
-  YUGIOH: 'Yu-Gi-Oh!',
+  POKEMON: 'Pokémon TCG',
+  YUGIOH: 'Yu-Gi-Oh! TCG',
   MAGIC_THE_GATHERING: 'Magic: The Gathering',
 }
+const gameOptions = Object.entries(gameNames).map(([value, label]) => ({ value, label }))
 const modalityNames: Record<string, string> = {
   SALE: 'Venda',
   TRADE: 'Troca',
   BOTH: 'Venda e troca',
 }
+const modalityOptions = Object.entries(modalityNames).map(([value, label]) => ({ value, label }))
 const statusNames: Record<string, string> = {
   ACTIVE: 'Ativo',
   SOLD_OUT: 'Finalizado',
   CANCELLED: 'Cancelado',
 }
+const statusOptions = Object.entries(statusNames).map(([value, label]) => ({ value, label }))
 
 export function MyAdsFilters({ onApply }: MyAdsFiltersProps) {
   const titleId = useId()
@@ -80,43 +84,29 @@ export function MyAdsFilters({ onApply }: MyAdsFiltersProps) {
           />
         </label>
 
-        <label className={filterLabelClass}>
-          Tipo de anúncio
-          <select
+        <div>
+          <CollapsibleFilterChoices
+            title="TCG"
+            options={gameOptions}
+            value={draft.game}
+            onValueChange={(value) => update('game', value)}
+            defaultOpen={false}
+          />
+          <CollapsibleFilterChoices
+            title="Tipo de anúncio"
+            options={modalityOptions}
             value={draft.modality}
-            onChange={(event) => update('modality', event.target.value as OwnAdFilterValues['modality'])}
-            className={filterFieldClass}
-          >
-            <option value="">Todos</option>
-            <option value="SALE">Venda</option>
-            <option value="TRADE">Troca</option>
-            <option value="BOTH">Venda e troca</option>
-          </select>
-        </label>
-
-        <label className={filterLabelClass}>
-          TCG
-          <select value={draft.game} onChange={(event) => update('game', event.target.value)} className={filterFieldClass}>
-            <option value="">Todos</option>
-            <option value="POKEMON">Pokémon</option>
-            <option value="YUGIOH">Yu-Gi-Oh!</option>
-            <option value="MAGIC_THE_GATHERING">Magic: The Gathering</option>
-          </select>
-        </label>
-
-        <label className={filterLabelClass}>
-          Status do anúncio
-          <select
+            onValueChange={(value) => update('modality', value as OwnAdFilterValues['modality'])}
+            defaultOpen={false}
+          />
+          <CollapsibleFilterChoices
+            title="Status do anúncio"
+            options={statusOptions}
             value={draft.status}
-            onChange={(event) => update('status', event.target.value as OwnAdFilterValues['status'])}
-            className={filterFieldClass}
-          >
-            <option value="">Todos</option>
-            <option value="ACTIVE">Ativo</option>
-            <option value="SOLD_OUT">Finalizado</option>
-            <option value="CANCELLED">Cancelado</option>
-          </select>
-        </label>
+            onValueChange={(value) => update('status', value as OwnAdFilterValues['status'])}
+            defaultOpen={false}
+          />
+        </div>
 
         <div className="space-y-2 pt-2">
           <button type="submit" className={filterApplyClass}>Aplicar filtros</button>

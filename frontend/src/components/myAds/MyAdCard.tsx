@@ -30,7 +30,7 @@ export function MyAdCard({ ad, onDetails, onEdit, onCancel }: MyAdCardProps) {
       >
         Ver detalhes
       </button>
-      <div className="grid min-h-11 grid-cols-2 gap-2">
+      <div className="grid min-h-11 w-full grid-cols-2 gap-2">
         {ad.status === 'ACTIVE' && (
           <>
             <CardAction

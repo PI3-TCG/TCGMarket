@@ -62,15 +62,16 @@ public class OwnAdRepository {
 
         if (filters.hasCardFilters()) {
             addCardFilters(pipeline, filters);
+        } else if (filters.sort().byName()) {
+            lookupCatalogCard(pipeline);
         }
 
-        // Mais recentes primeiro; o _id desempata para a paginação ficar estável.
-        pipeline.add(new Document("$sort", new Document("createdAt", -1).append("_id", -1)));
+        filters.sort().addToPipeline(pipeline, "createdAt");
 
         List<Document> contentPipeline = List.of(
                 new Document("$skip", pageable.getOffset()),
                 new Document("$limit", pageable.getPageSize()),
-                new Document("$project", new Document("cardLookupIds", 0).append("catalogCard", 0))
+                new Document("$project", new Document("cardLookupIds", 0).append("catalogCard", 0).append("listingSortName", 0))
         );
 
         pipeline.add(new Document(
@@ -100,7 +101,7 @@ public class OwnAdRepository {
         return new PageImpl<>(ads, pageable, total);
     }
 
-    private void addCardFilters(List<Document> pipeline, OwnAdFilters filters) {
+    private void lookupCatalogCard(List<Document> pipeline) {
         // Aceita referências a IDs armazenados como String ou ObjectId.
         pipeline.add(Document.parse("""
                 {
@@ -130,6 +131,10 @@ public class OwnAdRepository {
                   }
                 }
                 """));
+    }
+
+    private void addCardFilters(List<Document> pipeline, OwnAdFilters filters) {
+        lookupCatalogCard(pipeline);
 
         Document cardMatch = new Document();
 

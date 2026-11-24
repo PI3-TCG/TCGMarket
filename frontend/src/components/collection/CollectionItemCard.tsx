@@ -29,7 +29,7 @@ export function CollectionItemCard({
     { label: 'Detalhes', icon: 'search', handler: onDetails },
     { label: 'Editar', icon: 'hammer', handler: onEdit },
     { label: 'Remover', icon: 'trash', handler: onRemove },
-    { label: 'Anunciar', icon: 'megaphone', handler: onAdvertise },
+    { label: 'Criar anúncio', icon: 'megaphone', handler: onAdvertise },
   ] as const
 
   return (
@@ -85,12 +85,9 @@ export function CollectionItemCard({
                 ? action.label
                 : `${action.label} — ainda não disponível nesta prévia`
             }
-            className="flex min-h-11 min-w-0 flex-col items-center justify-center gap-1 rounded-control px-1 py-2 text-brand-primary transition-colors duration-150 enabled:cursor-pointer enabled:hover:bg-surface-brand-tint enabled:active:bg-surface-subtle focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-support-blue disabled:cursor-not-allowed disabled:opacity-40 motion-reduce:transition-none"
+            className="grid min-h-11 min-w-0 place-items-center rounded-control px-1 py-2 text-brand-primary transition-colors duration-150 enabled:cursor-pointer enabled:hover:bg-surface-brand-tint enabled:active:bg-surface-subtle focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-support-blue disabled:cursor-not-allowed disabled:opacity-40 motion-reduce:transition-none"
           >
             <Icon name={action.icon} size={20} />
-            <span className="text-[11px] leading-4 font-semibold text-text-primary">
-              {action.label}
-            </span>
           </button>
         ))}
       </div>

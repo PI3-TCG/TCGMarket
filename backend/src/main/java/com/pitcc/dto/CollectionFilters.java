@@ -10,10 +10,16 @@ public record CollectionFilters(
         String edition,
         String rarity,
         CardCondition condition,
-        CardLanguage language
+        CardLanguage language,
+        ListingSort sort
 ) {
 
+    public CollectionFilters(String search, CardGame game, String edition, String rarity, CardCondition condition, CardLanguage language) {
+        this(search, game, edition, rarity, condition, language, ListingSort.RECENT);
+    }
+
     public CollectionFilters {
+        sort = sort == null ? ListingSort.RECENT : sort;
         search = normalize(search, 120, "A pesquisa");
         edition = normalize(edition, 200, "A edição");
         rarity = normalize(rarity, 120, "A raridade");

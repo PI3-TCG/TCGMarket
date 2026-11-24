@@ -11,12 +11,12 @@ import com.pitcc.repository.CardRepository;
 import com.pitcc.repository.CollectionItemRepository;
 import com.pitcc.dto.CollectionSummaryResponse;
 import com.pitcc.dto.CollectionFilters;
+import com.pitcc.dto.ListingSort;
 import com.pitcc.repository.CollectionSearchRepository;
 import com.pitcc.dto.CollectionFilterOptionsResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -70,8 +70,7 @@ public class CollectionService {
 
         Pageable pageable = PageRequest.of(
                 page,
-                size,
-                Sort.by(Sort.Direction.ASC, "id")
+                size
         );
 
         Page<CollectionItem> items =
@@ -179,7 +178,8 @@ public class CollectionService {
                         null,
                         null,
                         null,
-                        null
+                        null,
+                        ListingSort.OLDEST
                 )
         );
     }

@@ -1,3 +1,5 @@
+import { cardSurface } from '@/components/ui/Card'
+import { tradingCardDetailsButton } from '@/components/ui/tradingCardStyles'
 import { Link } from '@tanstack/react-router'
 import { Icon } from '@/components/ui/Icon'
 
@@ -42,9 +44,9 @@ export function CollectionSummary({
             {indicators.map((indicator) => (
                 <div
                     key={indicator.label}
-                    className="flex min-h-20 items-center gap-3 rounded-xl border border-rare-500/70 bg-white px-4 py-4 shadow-sm"
+                    className={`${cardSurface} flex min-h-20 items-center gap-3 p-4`}
                 >
-                    <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary-100 text-primary-900">
+                    <span className="flex size-11 shrink-0 items-center justify-center rounded-control border border-border-default bg-surface-sand text-brand-deep">
                         <Icon name={indicator.icon} size={24} />
                     </span>
 
@@ -54,32 +56,32 @@ export function CollectionSummary({
                                 <>
                                     <span
                                         aria-hidden="true"
-                                        className="h-6 w-12 rounded bg-primary-100 motion-safe:animate-pulse"
+                                        className="h-6 w-12 rounded bg-surface-subtle motion-safe:animate-pulse"
                                     />
                                     <span className="sr-only">Carregando</span>
                                 </>
                             ) : status === 'error' ? (
-                                <span className="text-xs font-medium text-neutral-500">
+                                <span className="text-xs font-medium text-text-secondary">
                                     Indisponível
                                 </span>
                             ) : (
-                                <span className="font-display text-2xl leading-none font-bold text-primary-900">
+                                <span className="font-title text-2xl leading-none font-bold text-text-ink">
                                     {indicator.value ?? '-'}
                                 </span>
                             )}
                         </div>
 
-                        <p className="mt-1.5 text-xs text-neutral-700">
+                        <p className="mt-1.5 text-xs text-text-secondary">
                             {indicator.label}
                         </p>
                     </div>
                 </div>
             ))}
 
-            <div className="flex min-h-20 items-center justify-center rounded-xl border border-rare-500/70 bg-white p-3 shadow-sm">
+            <div className={`${cardSurface} flex min-h-20 items-center justify-center p-3`}>
                 <Link
                     to="/anuncios/novo"
-                    className="button-vignette inline-flex min-h-11 w-fit max-w-full items-center justify-center gap-2 rounded-lg bg-primary-900 px-5 py-3 text-sm font-semibold whitespace-nowrap text-white transition-colors hover:bg-primary-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500"
+                    className={`${tradingCardDetailsButton} gap-2`}
                 >
                     <Icon name="plus" size={20} />
                     Criar anúncio

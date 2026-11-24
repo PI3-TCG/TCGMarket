@@ -1,3 +1,5 @@
+import { ListingSort, type ListingSortOrder } from '@/components/ui/ListingSort'
+import { Button } from '@/components/ui/Button'
 import { Pagination as PageNavigation } from '@/components/ui/Pagination'
 import { tradingCardGrid } from '@/components/ui/tradingCardStyles'
 import { FeedbackState } from '@/components/ui/FeedbackState'
@@ -41,7 +43,7 @@ export function MyCollectionPage() {
   const { user } = useSession()
 
   return (
-    <main className="min-h-screen pb-12 text-[#171443]">
+    <main className="min-h-screen pb-12 text-text-primary">
       <div className="mx-auto w-full max-w-[1600px] px-4 pt-4 sm:px-6 xl:px-[38px]">
         <PageBanner
           title="Minha Coleção"
@@ -62,6 +64,7 @@ export function MyCollectionPage() {
 
 function CollectionContent() {
   const [page, setPage] = useState(0)
+  const [sort, setSort] = useState<ListingSortOrder>('RECENT')
   const [attempt, setAttempt] = useState(0)
   const [summaryAttempt, setSummaryAttempt] = useState(0)
 
@@ -106,16 +109,15 @@ function CollectionContent() {
   }
 
   return (
-    <div className="space-y-6 pt-4">
+    <div className="mt-10 space-y-6">
       <CollectionSummaryData key={summaryAttempt} />
 
-      <button
-        type="button"
+      <Button
+        variant="ghost"
         onClick={() => setSummaryAttempt((current) => current + 1)}
-        className="cursor-pointer rounded text-xs text-primary-900 underline focus-visible:outline-2 focus-visible:outline-secondary-500"
       >
         Atualizar resumo
-      </button>
+      </Button>
 
       <div className="grid items-start gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
         <CollectionFilters
@@ -128,32 +130,42 @@ function CollectionContent() {
           onApply={applyFilters}
         />
 
-        <CollectionPageData
-          key={`${page}-${attempt}`}
-          page={page}
-          filters={filters}
-          onPageChange={setPage}
-          onRetry={() => setAttempt((current) => current + 1)}
-          onCollectionUpdated={() => {
-            setAttempt((current) => current + 1)
-            setSummaryAttempt((current) => current + 1)
-          }}
-          onItemRemoved={(pageBecameEmpty) => {
-            if (pageBecameEmpty) {
-              setPage((current) => Math.max(0, current - 1))
-            }
-            setAttempt((current) => current + 1)
-            setSummaryAttempt((current) => current + 1)
-            setOptionsAttempt((current) => current + 1)
-          }}
-        />
+        <div className="min-w-0">
+          <CollectionPageData
+            attempt={attempt}
+            page={page}
+            filters={filters}
+            sort={sort}
+            onSortChange={(value) => {
+              setSort(value)
+              setPage(0)
+            }}
+            onPageChange={setPage}
+            onRetry={() => setAttempt((current) => current + 1)}
+            onCollectionUpdated={() => {
+              setAttempt((current) => current + 1)
+              setSummaryAttempt((current) => current + 1)
+            }}
+            onItemRemoved={(pageBecameEmpty) => {
+              if (pageBecameEmpty) {
+                setPage((current) => Math.max(0, current - 1))
+              }
+              setAttempt((current) => current + 1)
+              setSummaryAttempt((current) => current + 1)
+              setOptionsAttempt((current) => current + 1)
+            }}
+          />
+        </div>
       </div>
     </div>
   )
 }
 
 type CollectionPageDataProps = {
+  attempt: number
   page: number
+  sort: ListingSortOrder
+  onSortChange: (sort: ListingSortOrder) => void
   filters: CollectionFilterValues
   onPageChange: (page: number) => void
   onRetry: () => void
@@ -167,7 +179,10 @@ type CollectionModal =
   | null
 
 function CollectionPageData({
+  attempt,
   page,
+  sort,
+  onSortChange,
   filters,
   onPageChange,
   onRetry,
@@ -176,9 +191,9 @@ function CollectionPageData({
 }: CollectionPageDataProps) {
   const navigate = useNavigate()
   const [activeModal, setActiveModal] = useState<CollectionModal>(null)
-  const [result, setResult] = useState<CollectionResult>({
-    status: 'loading',
-  })
+  const requestKey = `${attempt}-${sort}-${page}`
+  const [response, setResponse] = useState<{ requestKey: string; result: CollectionResult }>()
+  const result = response?.requestKey === requestKey ? response.result : { status: 'loading' as const }
 
   useEffect(() => {
     const controller = new AbortController()
@@ -187,20 +202,21 @@ function CollectionPageData({
       page,
       size: 20,
       filters,
+      sort,
       signal: controller.signal,
     })
       .then((data) => {
         if (!controller.signal.aborted) {
-          setResult({ status: 'success', data })
+          setResponse({ requestKey, result: { status: 'success', data } })
         }
       })
       .catch(() => {
         if (!controller.signal.aborted) {
-          setResult({ status: 'error' })
+          setResponse({ requestKey, result: { status: 'error' } })
         }
       })
     return () => controller.abort()
-  }, [page, filters])
+  }, [page, filters, sort, requestKey])
 
   function openDetails(item: CollectionItem) {
     setActiveModal({ mode: 'details', card: item.card, itemId: item.id })
@@ -224,15 +240,25 @@ function CollectionPageData({
 
   const hasFilters = Object.values(filters).some((value) => value.trim() !== '')
 
-  const pageButtonClass =
-    'min-h-10 rounded-lg border border-primary-900 px-4 py-2 text-sm font-semibold text-primary-900 enabled:cursor-pointer enabled:hover:bg-primary-100 disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500'
-
   return (
     <>
       <section
         aria-label="Itens da coleção"
-        className="panel-ornaments rounded-xl border border-rare-500 bg-white p-4"
+        className="min-w-0 rounded-surface border border-border-default bg-surface-default p-3 shadow-sm sm:p-5"
       >
+        <header className="mb-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-3 border-b border-border-default pb-4">
+          <div className="min-w-0">
+            <h2 className="font-title text-xl font-bold text-text-ink">Itens da coleção</h2>
+            {result.status === 'success' && (
+              <p aria-live="polite" className="mt-1 text-sm text-text-secondary">
+                {result.data.totalElements.toLocaleString('pt-BR')}{' '}
+                {result.data.totalElements === 1 ? 'item na coleção' : 'itens na coleção'}
+              </p>
+            )}
+          </div>
+          <ListingSort value={sort} onChange={onSortChange} />
+        </header>
+
         <AppliedCollectionFilters filters={filters} />
 
         {result.status === 'loading' ? (
@@ -251,20 +277,6 @@ function CollectionPageData({
           )
         ) : (
           <>
-            <h2
-              aria-live="polite"
-              className="mb-4 text-sm font-semibold text-primary-900"
-            >
-              {result.data.totalElements}{' '}
-              {hasFilters
-                ? result.data.totalElements === 1
-                  ? 'item encontrado'
-                  : 'itens encontrados'
-                : result.data.totalElements === 1
-                  ? 'item na coleção'
-                  : 'itens na coleção'}
-            </h2>
-
             {result.data.content.length > 0 ? (
               <div className={tradingCardGrid}>
                 {result.data.content.map((item) => (
@@ -279,23 +291,26 @@ function CollectionPageData({
                 ))}
               </div>
             ) : (
-              <p className="py-8 text-center text-sm text-neutral-700">
+              <p className="py-8 text-center text-sm text-text-secondary">
                 Esta página não possui itens. Volte à primeira página.
               </p>
             )}
 
-            <div className="mt-6 flex flex-wrap items-center justify-center gap-3 border-t border-neutral-200 pt-4">
-              <PageNavigation label="Paginação da coleção" page={result.data.number + 1} totalPages={result.data.totalPages} onPageChange={(page) => onPageChange(page - 1)} />
-              {result.data.content.length === 0 && (
-                <button
-                  type="button"
-                  onClick={() => onPageChange(0)}
-                  className={pageButtonClass}
-                >
-                  Primeira página
-                </button>
-              )}
-            </div>
+            {(result.data.totalPages > 1 || result.data.content.length === 0) && (
+              <div className="mt-6 flex flex-wrap items-center justify-center gap-3 border-t border-border-default pt-4">
+                <PageNavigation
+                  label="Paginação da coleção"
+                  page={result.data.number + 1}
+                  totalPages={result.data.totalPages}
+                  onPageChange={(page) => onPageChange(page - 1)}
+                />
+                {result.data.content.length === 0 && (
+                  <Button variant="outline" onClick={() => onPageChange(0)}>
+                    Primeira página
+                  </Button>
+                )}
+              </div>
+            )}
           </>
         )}
       </section>
