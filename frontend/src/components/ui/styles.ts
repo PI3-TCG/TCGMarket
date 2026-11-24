@@ -27,3 +27,10 @@ export const controlInvalid =
 
 export const menuSurface =
   'rounded-control border border-border-default bg-surface-default p-1 shadow-md'
+
+/**
+ * Ação clara sobre superfícies plum (Home e detalhes de anúncios).
+ * Mantida como API pública compartilhada para os consumidores existentes.
+ */
+export const lightAction =
+  'inline-flex min-h-11 items-center justify-center gap-2 rounded-control border border-accent-gold-frame bg-surface-sand px-5 py-3 text-sm font-semibold text-brand-deep shadow-sm transition-colors duration-150 hover:bg-surface-default active:bg-surface-subtle disabled:cursor-not-allowed disabled:opacity-50'
