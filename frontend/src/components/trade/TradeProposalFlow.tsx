@@ -238,7 +238,10 @@ export function TradeProposalFlow({
       resetAndClose()
       return
     }
-    if (step === 'discard') return
+    if (step === 'discard') {
+      setStep(beforeDiscard)
+      return
+    }
     setBeforeDiscard(step === 'picker' ? 'compose' : step)
     setStep('discard')
   }
@@ -409,6 +412,7 @@ export function TradeProposalFlow({
             variant="outline"
             className={modalSecondaryButton}
             onClick={() => setStep(beforeDiscard)}
+            data-autofocus
           >
             Manter proposta
           </Button>
@@ -457,6 +461,9 @@ export function TradeProposalFlow({
       subtitle={subtitles[step]}
       onClose={requestClose}
       closeDisabled={busy}
+      busy={busy}
+      focusKey={step}
+      role={step === 'discard' ? 'alertdialog' : 'dialog'}
       footer={footer}
     >
       <div className="min-w-0 space-y-5 wrap-anywhere">

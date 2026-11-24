@@ -1,4 +1,4 @@
-import { useRef, useState, type FormEvent } from 'react'
+import { useId, useRef, useState, type FormEvent } from 'react'
 import { Alert } from '@/components/ui/Alert'
 import { Checkbox } from '@/components/ui/Checkbox'
 import { Icon } from '@/components/ui/Icon'
@@ -64,6 +64,7 @@ export function AddressFormModal({
   const [saving, setSaving] = useState(false)
   const [failure, setFailure] = useState<string | null>(null)
   const [confirmingDiscard, setConfirmingDiscard] = useState(false)
+  const formId = useId()
   const formRef = useRef<HTMLFormElement>(null)
 
   function change<K extends keyof AddressDraft>(
@@ -72,12 +73,15 @@ export function AddressFormModal({
   ) {
     const next = { ...draft, [key]: value }
     setDraft(next)
-    setConfirmingDiscard(false)
     if (submitted) setErrors(validateDraft(next))
   }
 
   function requestClose() {
     if (saving) return
+    if (confirmingDiscard) {
+      setConfirmingDiscard(false)
+      return
+    }
     if (sameDraft(draft, initial)) {
       onClose()
       return
@@ -95,7 +99,7 @@ export function AddressFormModal({
 
   async function submit(event: FormEvent) {
     event.preventDefault()
-    if (saving) return
+    if (saving || confirmingDiscard) return
 
     setSubmitted(true)
     setFailure(null)
@@ -142,20 +146,80 @@ export function AddressFormModal({
   return (
     <Modal
       presentation="refined"
-      headerIcon="map-pin"
+      headerIcon={confirmingDiscard ? 'alert' : 'map-pin'}
+      role={confirmingDiscard ? 'alertdialog' : 'dialog'}
+      focusKey={confirmingDiscard ? 'discard' : 'form'}
       open
-      title={title}
+      title={confirmingDiscard ? 'Descartar as alterações?' : title}
       subtitle={
-        editing
-          ? 'Atualize as informações do seu endereço de entrega.'
-          : 'Cadastre um novo endereço para suas entregas.'
+        confirmingDiscard
+          ? 'Os dados preenchidos neste endereço serão perdidos.'
+          : editing
+            ? 'Atualize as informações do seu endereço de entrega.'
+            : 'Cadastre um novo endereço para suas entregas.'
       }
       onClose={requestClose}
       closeDisabled={saving}
-      size="lg"
+      busy={saving}
+      size={confirmingDiscard ? 'sm' : 'lg'}
       className="mx-auto max-w-[780px]"
+      footer={
+        confirmingDiscard ? (
+          <>
+            <button
+              type="button"
+              className={`${modalSecondaryButton} ${modalAction}`}
+              onClick={requestClose}
+              data-autofocus
+            >
+              Continuar editando
+            </button>
+            <button
+              type="button"
+              className={`${modalDangerButton} ${modalAction}`}
+              onClick={onClose}
+            >
+              <Icon name="trash" size={16} /> Descartar
+            </button>
+          </>
+        ) : (
+          <>
+            <button
+              type="button"
+              className={`${modalSecondaryButton} ${modalAction}`}
+              disabled={saving}
+              onClick={requestClose}
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              form={formId}
+              className={`${modalPrimaryButton} ${modalAction}`}
+              disabled={saving}
+            >
+              {saving ? (
+                <span
+                  aria-hidden="true"
+                  className="size-4 rounded-full border-2 border-white/40 border-t-white motion-safe:animate-spin"
+                />
+              ) : (
+                <Icon name="check" size={16} />
+              )}
+              {saving
+                ? 'Salvando...'
+                : editing
+                  ? 'Salvar alterações'
+                  : 'Salvar endereço'}
+            </button>
+          </>
+        )
+      }
     >
-      <div className="space-y-4 text-[#4A4256]">
+      {confirmingDiscard && (
+        <Alert variant="warning">Alterações não salvas</Alert>
+      )}
+      <div hidden={confirmingDiscard} className="space-y-4 text-[#4A4256]">
         <div className="flex items-start gap-3 rounded-xl border border-[#D4E6FC] bg-[linear-gradient(115deg,#F1F7FF_0%,#EAF2FF_100%)] px-4 py-3 text-sm text-[#174D8E]">
           <Icon name="info" size={20} className="mt-0.5" />
           <p>
@@ -164,7 +228,7 @@ export function AddressFormModal({
           </p>
         </div>
 
-        <form ref={formRef} noValidate onSubmit={submit} className="space-y-4">
+        <form id={formId} ref={formRef} noValidate onSubmit={submit} className="space-y-4">
           <fieldset disabled={saving} className="space-y-4">
             <legend className="sr-only">{title}</legend>
 
@@ -329,63 +393,6 @@ export function AddressFormModal({
             >
               {failure}
             </Alert>
-          )}
-
-          {confirmingDiscard ? (
-            <section
-              aria-label="Confirmar descarte"
-              className="rounded-[18px] border border-[#F2CB8B] bg-[#FFFAED] p-4 shadow-sm"
-            >
-              <Alert variant="warning" title="Descartar as alterações?">
-                Os dados preenchidos neste endereço serão perdidos.
-              </Alert>
-              <div className="mt-4 flex flex-wrap justify-end gap-3">
-                <button
-                  type="button"
-                  className={`${modalSecondaryButton} ${modalAction}`}
-                  onClick={() => setConfirmingDiscard(false)}
-                >
-                  Continuar editando
-                </button>
-                <button
-                  type="button"
-                  className={`${modalDangerButton} ${modalAction}`}
-                  onClick={onClose}
-                >
-                  <Icon name="trash" size={16} /> Descartar
-                </button>
-              </div>
-            </section>
-          ) : (
-            <div className="flex flex-wrap items-center justify-end gap-3 border-t border-[#DFD3E8] pt-5">
-              <button
-                type="button"
-                className={`${modalSecondaryButton} ${modalAction}`}
-                disabled={saving}
-                onClick={requestClose}
-              >
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                className={`${modalPrimaryButton} ${modalAction}`}
-                disabled={saving}
-              >
-                {saving ? (
-                  <span
-                    aria-hidden="true"
-                    className="size-4 rounded-full border-2 border-white/40 border-t-white motion-safe:animate-spin"
-                  />
-                ) : (
-                  <Icon name="check" size={16} />
-                )}
-                {saving
-                  ? 'Salvando...'
-                  : editing
-                    ? 'Salvar alterações'
-                    : 'Salvar endereço'}
-              </button>
-            </div>
           )}
         </form>
       </div>

@@ -221,8 +221,11 @@ export function TradeProposalDetailsModal({
           ? 'Confira sua decisão antes de continuar.'
           : 'Confira os termos registrados na negociação.'
       }
-      onClose={processing ? undefined : onClose}
+      onClose={confirming ? () => setConfirming(null) : onClose}
       closeDisabled={processing}
+      busy={processing}
+      focusKey={confirming ?? 'details'}
+      role={confirming && confirming !== 'accept' ? 'alertdialog' : 'dialog'}
       footer={
         confirmation ? (
           <>

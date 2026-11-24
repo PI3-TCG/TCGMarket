@@ -258,7 +258,7 @@ function AddButton({
   return (
     <div className="flex justify-center">
       <Button
-        className="w-52 max-w-full whitespace-normal"
+        className="w-64 max-w-full whitespace-normal"
         icon={<Icon name="plus" size={20} />}
         onClick={onClick}
         disabled={disabled}

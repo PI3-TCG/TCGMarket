@@ -78,7 +78,7 @@ export function CreateAdPage() {
         )}
       </div>
 
-      {blocker.status === 'blocked' && (
+      {blocker.status === 'blocked' ? (
         <DiscardChangesDialog
           title="Sair sem publicar?"
           description="Os dados preenchidos serão perdidos."
@@ -86,9 +86,7 @@ export function CreateAdPage() {
           onContinue={blocker.reset}
           onConfirm={blocker.proceed}
         />
-      )}
-
-      {pendingItemId && (
+      ) : pendingItemId ? (
         <DiscardChangesDialog
           title="Trocar de carta?"
           description="Os dados preenchidos para a carta atual serão perdidos."
@@ -96,7 +94,7 @@ export function CreateAdPage() {
           onContinue={() => setPendingItemId(null)}
           onConfirm={() => openItem(pendingItemId)}
         />
-      )}
+      ) : null}
     </main>
   )
 }

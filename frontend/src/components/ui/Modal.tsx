@@ -37,6 +37,10 @@ type ModalProps = {
   headerIcon?: IconName
   footer?: ReactNode
   closeDisabled?: boolean
+  busy?: boolean
+  role?: 'dialog' | 'alertdialog'
+  /** Move o foco quando o conteúdo muda de etapa sem abrir outro diálogo. */
+  focusKey?: string
   /** Complemento opcional ao título. Utilizado pelo adaptador DetailsModal. */
   eyebrow?: string
   /** Cabeçalho mínimo para detalhes com título destacado no corpo. */
@@ -79,6 +83,9 @@ export function Modal({
   headerIcon = 'gem',
   footer,
   closeDisabled = false,
+  busy,
+  role = 'dialog',
+  focusKey,
   eyebrow,
   headerLayout = 'standard',
 }: ModalProps) {
@@ -103,12 +110,6 @@ export function Modal({
         : null
     const dialog = dialogRef.current
     if (!dialog) return
-
-    const initial =
-      presentation === 'refined'
-        ? headingRef.current
-        : (visibleFocusable(dialog)[0] ?? dialog)
-    initial?.focus()
 
     function onKey(event: KeyboardEvent) {
       if (event.defaultPrevented || event.isComposing) return
@@ -181,7 +182,19 @@ export function Modal({
       document.documentElement.style.overflow = previousHtmlOverflow
       if (previouslyFocused?.isConnected) previouslyFocused.focus()
     }
-  }, [open, embedded, presentation])
+  }, [open, embedded])
+
+  useEffect(() => {
+    if (!open || embedded || !dialogRef.current) return
+    const dialog = dialogRef.current
+    const focusable = visibleFocusable(dialog)
+    const preferred = focusable.find((element) =>
+      element.hasAttribute('data-autofocus'),
+    )
+    const initial = presentation === 'refined' ? headingRef.current : focusable[0]
+    const target = preferred ?? initial ?? dialog
+    target.focus()
+  }, [open, embedded, presentation, focusKey])
 
   // Atualizações assíncronas do título não podem roubar o foco de quem
   // já começou a interagir com campos e botões dentro do diálogo.
@@ -223,7 +236,8 @@ export function Modal({
   const panel = (
     <div
       ref={dialogRef}
-      role="dialog"
+      role={role}
+      aria-busy={busy || undefined}
       tabIndex={-1}
       aria-modal={embedded ? undefined : true}
       aria-labelledby={titleId}

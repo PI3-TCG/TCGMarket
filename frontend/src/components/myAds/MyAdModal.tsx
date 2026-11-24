@@ -1,14 +1,12 @@
 import { mutationResultUnknown, validationFields } from '@/services/feedback'
 import axios from 'axios'
 import {
-  useEffect,
   useId,
   useRef,
   useState,
   type ReactNode,
   type RefObject,
 } from 'react'
-import { createPortal } from 'react-dom'
 import {
   conditionLabels,
   copies,
@@ -20,17 +18,9 @@ import {
   parsePrice,
 } from '@/components/ads/adFormat'
 import { Button } from '@/components/ui/Button'
-import { cn } from '@/components/ui/cn'
+import { Modal } from '@/components/ui/Modal'
 import { Icon, type IconName } from '@/components/ui/Icon'
 import {
-  ModalGoldDivider,
-  ModalHeaderOrnaments,
-  modalBody,
-  modalCloseButton,
-  modalFooter,
-  modalFrame,
-  modalHeader,
-  modalHeadingIcon,
   modalPrimaryButton,
   modalDangerButton,
   modalSecondaryButton,
@@ -115,9 +105,7 @@ export function MyAdModal({
   const [verificationFailed, setVerificationFailed] = useState(false)
   const [busy, setBusy] = useState<Busy>(null)
   const [notice, setNotice] = useState<Notice>(null)
-  const titleId = useId()
   const priceId = useId()
-  const dialogRef = useRef<HTMLDivElement>(null)
   const saleRef = useRef<HTMLInputElement>(null)
   const priceRef = useRef<HTMLInputElement>(null)
   const active = ad.status === 'ACTIVE'
@@ -153,15 +141,6 @@ export function MyAdModal({
     }
     onClose()
   }
-  const requestCloseRef = useRef(requestClose)
-  useEffect(() => {
-    requestCloseRef.current = requestClose
-  })
-  useDialogBehavior(
-    dialogRef,
-    requestCloseRef,
-    view.kind === 'cancel' ? `cancel-${view.failure}` : view.kind,
-  )
   function startEdit() {
     setDraft(draftFrom(ad))
     setAttempted(false)
@@ -317,200 +296,34 @@ export function MyAdModal({
         : view.kind === 'cancel'
           ? 'Cancelar anúncio?'
           : 'Detalhes do anúncio'
-  return createPortal(
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[#170b24]/60 p-4"
-      onMouseDown={(event) => {
-        if (event.target === event.currentTarget) requestClose()
-      }}
-    >
-      <div
-        ref={dialogRef}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={titleId}
-        aria-busy={busy ? true : undefined}
-        className={cn(
-          'flex max-h-[calc(100dvh_-_2rem)] w-full max-w-[790px] flex-col wrap-anywhere overflow-hidden [@media(max-height:420px)]:overflow-y-auto rounded-[22px] bg-white sm:rounded-[24px]',
-          modalFrame,
-        )}
-      >
-        <header
-          className={cn('relative shrink-0 px-5 py-5 sm:px-6', modalHeader)}
-        >
-          <ModalHeaderOrnaments />
-
-          <div className="relative z-10 grid grid-cols-[40px_minmax(0,1fr)_36px] items-center gap-3">
-            {/* Ícone contextual */}
-
-            <span aria-hidden="true" className={modalHeadingIcon}>
-              <Icon
-                name={
-                  view.kind === 'edit'
-                    ? 'edit'
-                    : view.kind === 'cancel'
-                      ? 'close-circle'
-                      : view.kind === 'discard'
-                        ? 'alert'
-                        : 'megaphone'
-                }
-                size={24}
-              />
-            </span>
-
-            {/* Título */}
-
-            <div className="min-w-0 text-center">
-              <h2
-                id={titleId}
-                tabIndex={-1}
-                className="font-display text-lg font-bold leading-tight text-white outline-none sm:text-xl"
-              >
-                {title}
-              </h2>
-
-              <p className="mt-1 text-xs leading-relaxed text-white/90 sm:text-sm">
-                {view.kind === 'edit'
-                  ? 'Atualize as informações do seu anúncio.'
-                  : view.kind === 'cancel'
-                    ? 'Confira os detalhes antes de confirmar.'
-                    : view.kind === 'discard'
-                      ? 'Você possui alterações não salvas.'
-                      : 'Confira as informações do seu anúncio.'}
-              </p>
-            </div>
-
-            {/* Fechar */}
-
-            <button
-              type="button"
-              aria-label="Fechar modal"
-              disabled={busy !== null}
-              onClick={requestClose}
-              className={cn(
-                'grid size-9 place-items-center rounded-lg transition-colors disabled:cursor-not-allowed disabled:opacity-40',
-                modalCloseButton,
-              )}
-            >
-              <Icon name="close" size={20} />
-            </button>
-          </div>
-        </header>
-
-        <ModalGoldDivider />
-
-        <div
-          className={cn(
-            'min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 [@media(max-height:420px)]:flex-none [@media(max-height:420px)]:overflow-visible py-5 sm:px-6 sm:py-6',
-            modalBody,
-          )}
-        >
-          {view.kind === 'discard' ? (
-            <div className="space-y-2 text-neutral-700">
-              <p className="font-semibold text-neutral-900">
-                As alterações não salvas serão perdidas.
-              </p>
-
-              <p className="text-sm">O anúncio continuará como está.</p>
-            </div>
-          ) : view.kind === 'cancel' ? (
-            <>
-              <CancelContent ad={ad} failure={view.failure} />
-              {view.failure === 'uncertain' && verificationFailed ? (
-                <Feedback tone="error" icon="close-circle" role="alert">
-                  Não foi possível consultar o anúncio. Verifique sua conexão e atualize o status novamente.
-                </Feedback>
-              ) : null}
-            </>
-          ) : (
-            <div className="grid grid-cols-1 gap-5 rounded-[18px] border border-[#DBC7E4] bg-[linear-gradient(180deg,#FFFFFF_0%,#FBF7FD_100%)] p-4 shadow-[0_3px_12px_rgba(60,17,87,0.07)] sm:grid-cols-[160px_minmax(0,1fr)] sm:p-5">
-              <CardImage ad={ad} />
-
-              <div className="min-w-0">
-                <h3 className="font-display text-2xl font-bold wrap-anywhere text-primary-900">
-                  {ad.card.name}
-                </h3>
-
-                <p className="mt-1 text-sm text-primary-700">
-                  {gameLabels[ad.card.game] ?? ad.card.game} • {ad.card.edition}
-                  {ad.card.cardNumber ? ` • ${ad.card.cardNumber}` : ''}
-                  {ad.card.officialRarity ? ` • ${ad.card.officialRarity}` : ''}
-                </p>
-
-                <dl className="mt-4 divide-y divide-neutral-100 text-sm">
-                  <InfoRow
-                    label="Condição"
-                    value={conditionLabels[ad.condition]}
-                  />
-
-                  <InfoRow label="Idioma" value={languageLabels[ad.language]} />
-
-                  {ad.status === 'CANCELLED' && ad.releasedQuantity !== null ? (
-                    <InfoRow
-                      label="Liberados no cancelamento"
-                      value={copies(ad.releasedQuantity)}
-                    />
-                  ) : (
-                    <InfoRow
-                      label="Quantidade restante"
-                      value={copies(ad.remainingQuantity)}
-                    />
-                  )}
-                </dl>
-
-                {view.kind === 'edit' ? (
-                  <EditFields
-                    draft={draft}
-                    onDraft={setDraft}
-                    disabled={busy !== null}
-                    saleRef={saleRef}
-                    priceRef={priceRef}
-                    priceId={priceId}
-                    modalityError={shownModalityError}
-                    priceError={shownPriceError}
-                  />
-                ) : (
-                  <ModalityView ad={ad} />
-                )}
-              </div>
-            </div>
-          )}
-
-          {view.kind !== 'discard' && view.kind !== 'cancel' && (
-            <div className="mt-5 space-y-3">
-              <NoticeArea notice={notice} />
-
-              {view.kind === 'edit' && view.saveFailed && (
-                <Feedback tone="error" icon="close-circle" role="alert">
-                  <strong>Não foi possível salvar.</strong> Tente novamente.
-                  Seus dados foram mantidos.
-                </Feedback>
-              )}
-
-              {view.kind === 'details' && <StatusSummary ad={ad} />}
-
-              {view.kind === 'edit' && (
-                <Feedback tone="primary" icon="info">
-                  {copies(ad.remainingQuantity)} •{' '}
-                  {modalityLabel(draft.sale, draft.trade)}
-                </Feedback>
-              )}
-            </div>
-          )}
-
-          {busy === 'saving' && (
-            <p role="status" className="sr-only">
-              Salvando alterações...
-            </p>
-          )}
-        </div>
-
-        <footer
-          className={cn(
-            'flex shrink-0 flex-wrap items-center justify-end gap-2 px-4 py-3 sm:px-6',
-            modalFooter,
-          )}
-        >
+  const headerIcon = {
+    details: 'megaphone',
+    edit: 'edit',
+    discard: 'alert',
+    cancel: 'close-circle',
+  } as const
+  const subtitle = {
+    details: 'Confira as informações do seu anúncio.',
+    edit: 'Atualize as informações do seu anúncio.',
+    discard: 'Você possui alterações não salvas.',
+    cancel: 'Confira os detalhes antes de confirmar.',
+  }
+  return (
+    <Modal
+      open
+      presentation="refined"
+      size={view.kind === 'discard' ? 'sm' : 'lg'}
+      className="mx-auto max-w-[790px] wrap-anywhere"
+      title={title}
+      subtitle={subtitle[view.kind]}
+      headerIcon={headerIcon[view.kind]}
+      role={view.kind === 'discard' || view.kind === 'cancel' ? 'alertdialog' : 'dialog'}
+      focusKey={view.kind === 'cancel' ? `cancel-${view.failure}` : view.kind}
+      onClose={requestClose}
+      closeDisabled={busy !== null}
+      busy={busy !== null}
+      footer={
+        <>
           {view.kind === 'details' &&
             (active && notice?.kind !== 'notFound' ? (
               <>
@@ -587,8 +400,8 @@ export function MyAdModal({
           {view.kind === 'discard' && (
             <>
               <Button
-                variant="outline"
-                className={modalSecondaryButton}
+                variant="danger"
+                className={modalDangerButton}
                 onClick={backToDetails}
               >
                 Descartar alterações
@@ -644,10 +457,108 @@ export function MyAdModal({
               )}
             </>
           )}
-        </footer>
-      </div>
-    </div>,
-    document.body,
+        </>
+      }
+    >
+      {view.kind === 'discard' ? (
+        <div className="space-y-2 text-neutral-700">
+          <p className="font-semibold text-neutral-900">
+            As alterações não salvas serão perdidas.
+          </p>
+
+          <p className="text-sm">O anúncio continuará como está.</p>
+        </div>
+      ) : view.kind === 'cancel' ? (
+        <>
+          <CancelContent ad={ad} failure={view.failure} />
+          {view.failure === 'uncertain' && verificationFailed ? (
+            <Feedback tone="error" icon="close-circle" role="alert">
+              Não foi possível consultar o anúncio. Verifique sua conexão e atualize o status novamente.
+            </Feedback>
+          ) : null}
+        </>
+      ) : (
+        <div className="grid grid-cols-1 gap-5 rounded-[18px] border border-[#DBC7E4] bg-[linear-gradient(180deg,#FFFFFF_0%,#FBF7FD_100%)] p-4 shadow-[0_3px_12px_rgba(60,17,87,0.07)] sm:grid-cols-[160px_minmax(0,1fr)] sm:p-5">
+          <CardImage ad={ad} />
+
+          <div className="min-w-0">
+            <h3 className="font-display text-2xl font-bold wrap-anywhere text-primary-900">
+              {ad.card.name}
+            </h3>
+
+            <p className="mt-1 text-sm text-primary-700">
+              {gameLabels[ad.card.game] ?? ad.card.game} • {ad.card.edition}
+              {ad.card.cardNumber ? ` • ${ad.card.cardNumber}` : ''}
+              {ad.card.officialRarity ? ` • ${ad.card.officialRarity}` : ''}
+            </p>
+
+            <dl className="mt-4 divide-y divide-neutral-100 text-sm">
+              <InfoRow
+                label="Condição"
+                value={conditionLabels[ad.condition]}
+              />
+
+              <InfoRow label="Idioma" value={languageLabels[ad.language]} />
+
+              {ad.status === 'CANCELLED' && ad.releasedQuantity !== null ? (
+                <InfoRow
+                  label="Liberados no cancelamento"
+                  value={copies(ad.releasedQuantity)}
+                />
+              ) : (
+                <InfoRow
+                  label="Quantidade restante"
+                  value={copies(ad.remainingQuantity)}
+                />
+              )}
+            </dl>
+
+            {view.kind === 'edit' ? (
+              <EditFields
+                draft={draft}
+                onDraft={setDraft}
+                disabled={busy !== null}
+                saleRef={saleRef}
+                priceRef={priceRef}
+                priceId={priceId}
+                modalityError={shownModalityError}
+                priceError={shownPriceError}
+              />
+            ) : (
+              <ModalityView ad={ad} />
+            )}
+          </div>
+        </div>
+      )}
+
+      {view.kind !== 'discard' && view.kind !== 'cancel' && (
+        <div className="mt-5 space-y-3">
+          <NoticeArea notice={notice} />
+
+          {view.kind === 'edit' && view.saveFailed && (
+            <Feedback tone="error" icon="close-circle" role="alert">
+              <strong>Não foi possível salvar.</strong> Tente novamente.
+              Seus dados foram mantidos.
+            </Feedback>
+          )}
+
+          {view.kind === 'details' && <StatusSummary ad={ad} />}
+
+          {view.kind === 'edit' && (
+            <Feedback tone="primary" icon="info">
+              {copies(ad.remainingQuantity)} •{' '}
+              {modalityLabel(draft.sale, draft.trade)}
+            </Feedback>
+          )}
+        </div>
+      )}
+
+      {busy === 'saving' && (
+        <p role="status" className="sr-only">
+          Salvando alterações...
+        </p>
+      )}
+    </Modal>
   )
 }
 function conflictStatus(error: unknown): AdStatus | null {
@@ -665,60 +576,6 @@ function conflictStatus(error: unknown): AdStatus | null {
     (field) => field.field === 'status',
   )?.message
   return AD_STATUSES.find((status) => status === value) ?? null
-}
-function useDialogBehavior(
-  dialogRef: RefObject<HTMLDivElement | null>,
-  requestCloseRef: RefObject<() => void>,
-  stateKey: string,
-) {
-  useEffect(() => {
-    const previousFocus =
-      document.activeElement instanceof HTMLElement
-        ? document.activeElement
-        : null
-    const previousOverflow = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') {
-        event.preventDefault()
-        requestCloseRef.current()
-        return
-      }
-      if (event.key !== 'Tab' || !dialogRef.current) return
-      const focusable = [
-        ...dialogRef.current.querySelectorAll<HTMLElement>(
-          'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [href]',
-        ),
-      ]
-      if (focusable.length === 0) {
-        event.preventDefault()
-        return
-      }
-      const first = focusable[0]
-      const last = focusable[focusable.length - 1]
-      if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault()
-        last.focus()
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault()
-        first.focus()
-      }
-    }
-    document.addEventListener('keydown', handleKeyDown)
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown)
-      document.body.style.overflow = previousOverflow
-      if (previousFocus?.isConnected) previousFocus.focus()
-    }
-  }, [dialogRef, requestCloseRef])
-  useEffect(() => {
-    const dialog = dialogRef.current
-    if (!dialog) return
-    const target =
-      dialog.querySelector<HTMLElement>('[data-autofocus]:not([disabled])') ??
-      dialog.querySelector<HTMLElement>('h2')
-    target?.focus()
-  }, [dialogRef, stateKey])
 }
 function CardImage({ ad, small = false }: { ad: OwnAd; small?: boolean }) {
   const [failed, setFailed] = useState(false)

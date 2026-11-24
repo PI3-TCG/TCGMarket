@@ -108,6 +108,9 @@ export function CollectionOwnershipModalBase({
       headerIcon={HEADER_ICONS[mode]}
       onClose={onClose}
       closeDisabled={isSaving}
+      busy={isSaving}
+      focusKey={isComplete ? 'complete' : 'form'}
+      role={mode === 'remove' && !isComplete ? 'alertdialog' : 'dialog'}
       footer={
         <div className="flex w-full flex-wrap items-center justify-center gap-2.5 sm:gap-3">
           <button
