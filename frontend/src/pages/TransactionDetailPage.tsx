@@ -1,7 +1,7 @@
-import { pageBanners } from '@/config/pageBanners'
+import { cardSurface } from '@/components/ui/Card'
+import { focusRing } from '@/components/ui/styles'
 import { useCallback } from 'react'
 import { Link, useParams, useSearch } from '@tanstack/react-router'
-import { PageBanner } from '@/components/layout/PageBanner'
 import {
   conditionLabels,
   copies,
@@ -35,31 +35,29 @@ export function TransactionDetailPage() {
   const search = useSearch({ from: ROUTE_ID })
 
   return (
-    <main className="min-h-screen pb-12 text-neutral-900">
-      <div className="mx-auto w-full max-w-[1400px] px-4 pt-4 sm:px-6 xl:px-[38px]">
-        <PageBanner
-          image={pageBanners.profile}
-          title="Detalhes da transação"
-          subtitle="Informações registradas no momento da negociação."
-        />
-
+    <main className="mx-auto w-full max-w-[1400px] space-y-4 px-4 pt-4 pb-12 sm:px-6 xl:px-[38px]">
+      <header className="space-y-2">
         <Link
           to="/perfil/historico"
           search={search}
           activeOptions={{ exact: true }}
-          className="mt-6 inline-flex items-center gap-1 text-sm font-semibold text-primary-900 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500"
+          className={`${focusRing} inline-flex items-center gap-1 rounded-sm text-sm font-semibold text-brand-primary hover:underline`}
         >
           ← Voltar ao histórico
         </Link>
 
-        {user && (
-          <TransactionDetail
-            key={`${user.id}:${transactionId}`}
-            transactionId={transactionId}
-            search={search}
-          />
-        )}
-      </div>
+        <h1 className="font-display text-2xl font-bold text-brand-primary">
+          Detalhes da transação
+        </h1>
+      </header>
+
+      {user && (
+        <TransactionDetail
+          key={`${user.id}:${transactionId}`}
+          transactionId={transactionId}
+          search={search}
+        />
+      )}
     </main>
   )
 }
@@ -85,7 +83,7 @@ function TransactionDetail({
       <div
         role="status"
         aria-busy="true"
-        className="mt-4 h-96 rounded-xl border border-neutral-200 bg-white motion-safe:animate-pulse"
+        className="h-36 rounded-xl border border-neutral-200 bg-white motion-safe:animate-pulse"
       >
         <span className="sr-only">Carregando transação...</span>
       </div>
@@ -97,7 +95,7 @@ function TransactionDetail({
     return (
       <div
         role={notFound ? 'status' : 'alert'}
-        className="mt-4 flex min-h-80 flex-col items-center justify-center rounded-xl border border-neutral-200 bg-white px-4 py-10 text-center"
+        className="flex flex-col items-center justify-center rounded-xl border border-neutral-200 bg-white px-4 py-10 text-center"
       >
         <span className="mb-5 rounded-full bg-primary-100 p-5 text-primary-900">
           <Icon name={notFound ? 'search' : 'alert'} size={32} />
@@ -140,41 +138,14 @@ function TransactionSummary({ entry }: { entry: TransactionHistoryEntry }) {
   const status = historyStatusMeta[entry.status]
 
   return (
-    <div className="mt-4 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
-      <div className="space-y-6">
-        {entry.type === 'TRADE' ? (
-          <>
-            <ItemSection
-              id="transaction-items-sent"
-              title="Cartas entregues"
-              items={entry.items.filter((item) => item.direction === 'SENT')}
-            />
-            <ItemSection
-              id="transaction-items-received"
-              title="Cartas recebidas"
-              items={entry.items.filter((item) => item.direction === 'RECEIVED')}
-            />
-          </>
-        ) : (
-          <ItemSection
-            id="transaction-items"
-            title={entry.type === 'PURCHASE' ? 'Cartas compradas' : 'Cartas vendidas'}
-            items={entry.items}
-          />
-        )}
-
-        <TransactionReviewSection
-          canReview={entry.type !== 'SALE'}
-          canReceiveReview={entry.type !== 'PURCHASE'}
-          transactionId={entry.id}
-          counterpartyName={counterpartyName(entry)}
-        />
-      </div>
-
+    <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(280px,2fr)]">
       <aside
         aria-label="Resumo da transação"
-        className="space-y-4 rounded-xl border border-neutral-200 bg-white p-4"
+        className={`${cardSurface} min-w-0 space-y-3 p-4 lg:col-start-2 lg:row-start-1`}
       >
+        <h2 className="font-display text-lg font-bold text-brand-primary">
+          Resumo da transação
+        </h2>
         <div className="flex flex-wrap gap-2">
           <span
             className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${type.className}`}
@@ -189,7 +160,7 @@ function TransactionSummary({ entry }: { entry: TransactionHistoryEntry }) {
           </span>
         </div>
 
-        <dl className="space-y-3 text-sm">
+        <dl className="grid grid-cols-2 gap-3 break-words text-sm">
           <div>
             <dt className="text-neutral-500">Data</dt>
             <dd className="font-medium">
@@ -205,7 +176,7 @@ function TransactionSummary({ entry }: { entry: TransactionHistoryEntry }) {
                 <Link
                   to="/jogadores/$username"
                   params={{ username: entry.counterparty.username }}
-                  className="text-primary-900 hover:underline"
+                  className={`${focusRing} rounded-sm text-brand-primary hover:underline`}
                 >
                   {counterpartyName(entry)}
                 </Link>
@@ -225,7 +196,9 @@ function TransactionSummary({ entry }: { entry: TransactionHistoryEntry }) {
           {entry.tradeProposalId && (
             <div>
               <dt className="text-neutral-500">Proposta de troca</dt>
-              <dd className="break-all font-mono text-xs">{entry.tradeProposalId}</dd>
+              <dd className="break-all font-mono text-xs">
+                {entry.tradeProposalId}
+              </dd>
             </div>
           )}
         </dl>
@@ -233,14 +206,17 @@ function TransactionSummary({ entry }: { entry: TransactionHistoryEntry }) {
         {entry.type === 'TRADE' ? (
           <div className="border-t border-neutral-200 pt-4">
             <div className="flex items-center justify-between gap-3">
-              <span className="text-sm text-neutral-700">Complemento financeiro</span>
+              <span className="text-sm text-neutral-700">
+                Complemento financeiro
+              </span>
               <span className="text-right font-display text-lg font-bold text-primary-900">
                 {adjustmentLabel(entry)}
               </span>
             </div>
             {entry.financialAdjustment && (
               <p className="mt-1 text-xs text-neutral-500">
-                Valor apenas registrado na negociação; nenhum pagamento foi processado.
+                Valor apenas registrado na negociação; nenhum pagamento foi
+                processado.
               </p>
             )}
           </div>
@@ -253,6 +229,39 @@ function TransactionSummary({ entry }: { entry: TransactionHistoryEntry }) {
           </div>
         )}
       </aside>
+      <div className="min-w-0 space-y-4 lg:col-start-1 lg:row-start-1">
+        {entry.type === 'TRADE' ? (
+          <>
+            <ItemSection
+              id="transaction-items-sent"
+              title="Cartas entregues"
+              items={entry.items.filter((item) => item.direction === 'SENT')}
+            />
+            <ItemSection
+              id="transaction-items-received"
+              title="Cartas recebidas"
+              items={entry.items.filter(
+                (item) => item.direction === 'RECEIVED',
+              )}
+            />
+          </>
+        ) : (
+          <ItemSection
+            id="transaction-items"
+            title={
+              entry.type === 'PURCHASE' ? 'Cartas compradas' : 'Cartas vendidas'
+            }
+            items={entry.items}
+          />
+        )}
+
+        <TransactionReviewSection
+          canReview={entry.type !== 'SALE'}
+          canReceiveReview={entry.type !== 'PURCHASE'}
+          transactionId={entry.id}
+          counterpartyName={counterpartyName(entry)}
+        />
+      </div>
     </div>
   )
 }
@@ -267,11 +276,11 @@ function ItemSection({
   items: TransactionHistoryItem[]
 }) {
   return (
-    <section
-      aria-labelledby={id}
-      className="rounded-xl border border-neutral-200 bg-white p-4"
-    >
-      <h2 id={id} className="mb-4 font-display text-xl font-bold text-primary-900">
+    <section aria-labelledby={id} className={`${cardSurface} p-4`}>
+      <h2
+        id={id}
+        className="mb-3 font-display text-lg font-bold text-primary-900"
+      >
         {title}
       </h2>
 
@@ -279,26 +288,30 @@ function ItemSection({
         {items.map((item, index) => (
           <li
             key={`${item.cardId}-${index}`}
-            className="flex gap-4 py-3 first:pt-0 last:pb-0"
+            className="flex flex-wrap gap-3 py-2 first:pt-0 last:pb-0"
           >
             {item.imageUrl ? (
               <img
                 src={item.imageUrl}
                 alt={`Carta ${item.name}`}
-                className="h-28 w-20 shrink-0 rounded-lg object-cover"
+                className="h-20 w-14 shrink-0 rounded-lg object-contain"
               />
             ) : (
               <div
                 role="img"
                 aria-label={`Imagem indisponível de ${item.name}`}
-                className="h-28 w-20 shrink-0 rounded-lg bg-primary-100"
+                className="h-20 w-14 shrink-0 rounded-lg bg-primary-100"
               />
             )}
 
-            <div className="min-w-0 flex-1">
+            <div className="min-w-0 basis-32 grow wrap-anywhere">
               <p className="font-semibold text-neutral-900">{item.name}</p>
               <p className="text-sm text-neutral-700">
-                {[gameLabels[item.game] ?? item.game, item.edition, item.cardNumber]
+                {[
+                  gameLabels[item.game] ?? item.game,
+                  item.edition,
+                  item.cardNumber,
+                ]
                   .filter(Boolean)
                   .join(' · ')}
               </p>

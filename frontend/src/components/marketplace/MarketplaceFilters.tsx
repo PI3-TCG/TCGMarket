@@ -180,10 +180,10 @@ export function MarketplaceFilters({ onApply }: Props) {
         </fieldset>
         {error && <p role="alert" className="text-sm text-error-700">{error}</p>}
 
-        <div className="space-y-3 pt-1">
+        <div className="flex flex-col items-center gap-3 pt-1">
           <button
             type="submit"
-            className="filter-button min-h-11 w-full cursor-pointer"
+            className="filter-button min-h-11 w-fit max-w-full cursor-pointer"
           >
             Aplicar filtros
           </button>
@@ -191,7 +191,7 @@ export function MarketplaceFilters({ onApply }: Props) {
           <button
             type="button"
             onClick={clearFilters}
-            className="min-h-11 w-full cursor-pointer rounded-lg text-sm font-semibold text-primary-900 underline underline-offset-4 hover:bg-primary-100/50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500"
+            className="min-h-11 w-fit max-w-full cursor-pointer rounded-lg px-3 text-sm font-semibold text-primary-900 underline underline-offset-4 hover:bg-primary-100/50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500"
           >
             Limpar filtros
           </button>

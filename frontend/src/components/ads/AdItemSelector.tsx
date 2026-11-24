@@ -356,14 +356,16 @@ function SelectableItem({
           </>
         )}
 
-        <Button
-          className="mt-2 w-full"
-          disabled={available === 0}
-          onClick={() => onSelect(item)}
-          aria-label={`Selecionar ${card.name}, ${conditionLabels[item.condition]}, ${languageLabels[item.language]}`}
-        >
-          Selecionar
-        </Button>
+        <div className="flex justify-center">
+          <Button
+            className="mt-2"
+            disabled={available === 0}
+            onClick={() => onSelect(item)}
+            aria-label={`Selecionar ${card.name}, ${conditionLabels[item.condition]}, ${languageLabels[item.language]}`}
+          >
+            Selecionar
+          </Button>
+        </div>
       </div>
     </article>
   )

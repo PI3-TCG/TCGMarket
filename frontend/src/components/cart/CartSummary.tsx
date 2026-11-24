@@ -1,3 +1,4 @@
+import { cardSurface } from '@/components/ui/Card'
 import { copies, formatCurrency } from '@/components/ads/adFormat'
 import { Alert } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
@@ -48,7 +49,7 @@ export function CartSummary({ items }: { items: CartItem[] }) {
   return (
     <aside
       aria-labelledby={`${hintId}-title`}
-      className="rounded-xl border border-rare-500 bg-white p-5 shadow-sm sm:p-6 lg:sticky lg:top-24"
+      className={`${cardSurface} p-5 sm:p-6 lg:sticky lg:top-24`}
     >
       <h2
         id={`${hintId}-title`}
@@ -110,13 +111,15 @@ export function CartSummary({ items }: { items: CartItem[] }) {
           Nenhum valor será cobrado.
         </Alert>
 
-        <Button
-          className="h-12 w-full"
-          disabled={!canContinue || checking}
-          onClick={handleContinue}
-        >
-          {checking ? 'Validando...' : 'Continuar'}
-        </Button>
+        <div className="flex justify-center">
+          <Button
+            className="w-52 max-w-full whitespace-normal"
+            disabled={!canContinue || checking}
+            onClick={handleContinue}
+          >
+            {checking ? 'Validando...' : 'Continuar'}
+          </Button>
+        </div>
 
         <div className="text-center">
           <Link

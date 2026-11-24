@@ -102,7 +102,7 @@ export function AdListingCard({
 
         <div className="mt-auto space-y-2 border-t border-border-default pt-2">
           {!priceBesideModality && price}
-          {children}
+          <div className="flex flex-wrap justify-center gap-2">{children}</div>
         </div>
       </div>
     </article>

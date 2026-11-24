@@ -151,11 +151,13 @@ function ReviewContent({ cart, userId }: { cart: Cart; userId: string }) {
 
   return (
     <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)]">
+      <h2
+        id="review-title"
+        className="font-display text-3xl font-bold text-primary-900 lg:col-span-2"
+      >
+        Revisão do pedido
+      </h2>
       <section aria-labelledby="review-title" className="min-w-0 space-y-4">
-        <h2 id="review-title" className="font-display text-3xl font-bold text-primary-900">
-          Revisão do pedido
-        </h2>
-
         {items.length === 0 ? (
           <Alert variant="warning" title="Nenhum anúncio selecionado">
             Volte ao{' '}
@@ -309,7 +311,7 @@ function ReviewSummary({ items, orderCount, blocked, submit, onConfirm }: Review
   return (
     <aside
       aria-labelledby={`${id}-title`}
-      className="rounded-xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-6 lg:sticky lg:top-24"
+      className="rounded-xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-6 self-start"
     >
       <h2 id={`${id}-title`} className="font-display text-2xl font-bold text-primary-900">
         Resumo
@@ -356,15 +358,15 @@ function ReviewSummary({ items, orderCount, blocked, submit, onConfirm }: Review
           Nenhum valor será cobrado. Os exemplares ficam reservados enquanto o pagamento é processado.
         </Alert>
 
-        <Button
-          className="h-12 w-full"
-          disabled={blocked || submitting || submit.status === 'unknown'}
-          onClick={onConfirm}
-        >
-          {submitting
-            ? 'Processando pagamento simulado...'
-            : 'Simular pagamento'}
-        </Button>
+        <div className="flex justify-center">
+          <Button
+            className="w-52 max-w-full whitespace-normal"
+            disabled={blocked || submitting || submit.status === 'unknown'}
+            onClick={onConfirm}
+          >
+            {submitting ? 'Processando...' : 'Simular pagamento'}
+          </Button>
+        </div>
 
         <div className="border-t border-neutral-100 pt-3 text-center">
           <Link to="/carrinho/entrega" className={`${linkClass} text-sm`}>
@@ -384,7 +386,7 @@ function LoadError({ title, onRetry }: { title: string; onRetry: () => void }) {
       </span>
       <h3 className="font-display text-2xl font-bold text-primary-900">{title}</h3>
       <p className="text-neutral-700">Tente novamente em instantes.</p>
-      <Button className="h-12 px-8" onClick={onRetry}>
+      <Button onClick={onRetry}>
         Tentar novamente
       </Button>
     </div>

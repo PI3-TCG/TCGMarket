@@ -256,14 +256,16 @@ function AddButton({
   disabled?: boolean
 }) {
   return (
-    <Button
-      className="h-12 w-full"
-      icon={<Icon name="plus" size={20} />}
-      onClick={onClick}
-      disabled={disabled}
-    >
-      Adicionar à minha coleção
-    </Button>
+    <div className="flex justify-center">
+      <Button
+        className="w-52 max-w-full whitespace-normal"
+        icon={<Icon name="plus" size={20} />}
+        onClick={onClick}
+        disabled={disabled}
+      >
+        Adicionar à minha coleção
+      </Button>
+    </div>
   )
 }
 
@@ -305,7 +307,6 @@ function CardImage({ card }: { card: CatalogCardDetails }) {
       {available ? (
         <Button
           variant="ghost"
-          className="w-full"
           onClick={() => setZoomed(true)}
         >
           Ver imagem completa

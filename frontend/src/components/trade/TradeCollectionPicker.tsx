@@ -246,7 +246,7 @@ export function TradeCollectionPicker({
                         Na coleção: <strong>{item.quantity}</strong>
                       </p>
                       <Button
-                        className={`${selected ? modalSecondaryButton : modalPrimaryButton} mt-auto w-full`}
+                        className={`${selected ? modalSecondaryButton : modalPrimaryButton} mt-auto w-fit max-w-full self-center`}
                         variant={selected ? 'outline' : 'primary'}
                         disabled={selected || item.quantity < 1}
                         onClick={() => onAdd(item)}

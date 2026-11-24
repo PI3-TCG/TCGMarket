@@ -264,13 +264,12 @@ function CheckoutResult({
         className={`${panelClass} flex flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap sm:justify-center`}
       >
         {pending ? (
-          <Button className="h-12" variant="outline" onClick={onRefresh}>
+          <Button variant="outline" onClick={onRefresh}>
             Verificar resultado
           </Button>
         ) : null}
         {anyFailed ? (
           <Button
-            className="h-12"
             onClick={() => void navigate({ to: '/carrinho' })}
           >
             Tentar novamente
@@ -278,7 +277,6 @@ function CheckoutResult({
         ) : null}
         {!pending || !anyFailed ? (
           <Button
-            className="h-12"
             variant={anyFailed ? 'outline' : 'primary'}
             onClick={() =>
               void navigate({ to: '/marketplace', search: { sort: 'recent' } })
@@ -449,7 +447,7 @@ function LoadError({ title, onRetry }: { title: string; onRetry: () => void }) {
         compra.
       </p>
       <div className="flex flex-col items-center gap-3 sm:flex-row">
-        <Button className="h-12 px-8" onClick={onRetry}>
+        <Button onClick={onRetry}>
           Verificar resultado
         </Button>
         <Link to="/carrinho" className={linkClass}>

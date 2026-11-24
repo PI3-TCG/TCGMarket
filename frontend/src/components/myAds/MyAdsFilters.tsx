@@ -98,7 +98,7 @@ export function MyAdsFilters({ onApply }: MyAdsFiltersProps) {
 
         <button
           type="submit"
-          className="filter-button min-h-11 w-full cursor-pointer"
+          className="filter-button mx-auto block min-h-11 w-fit max-w-full cursor-pointer"
         >
           Aplicar filtros
         </button>
@@ -106,7 +106,7 @@ export function MyAdsFilters({ onApply }: MyAdsFiltersProps) {
         <button
           type="button"
           onClick={clearFilters}
-          className="mx-auto block min-h-11 w-full cursor-pointer text-sm text-primary-900 underline focus-visible:outline-2 focus-visible:outline-secondary-500"
+          className="mx-auto block min-h-11 w-fit max-w-full cursor-pointer px-3 text-sm text-primary-900 underline focus-visible:outline-2 focus-visible:outline-secondary-500"
         >
           Limpar filtros
         </button>

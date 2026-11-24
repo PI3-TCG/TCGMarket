@@ -1,3 +1,4 @@
+import { cardSurface } from '@/components/ui/Card'
 import { pageBanners } from '@/config/pageBanners'
 import { useCart } from '@/cart'
 import { copies } from '@/components/ads/adFormat'
@@ -21,7 +22,7 @@ import { Link, useNavigate } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 
 const panelClass =
-  'rounded-xl border border-rare-500 bg-white p-5 shadow-sm sm:p-6'
+  `${cardSurface} p-5 sm:p-6`
 
 const UNKNOWN_RESULT =
   'Não foi possível confirmar a alteração. Mostramos o estado atual do seu carrinho.'
@@ -229,7 +230,7 @@ function CartContent({ cart }: { cart: Cart }) {
         <EmptyCart />
       ) : (
         <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)]">
-          <section aria-labelledby="cart-title" className="min-w-0 space-y-3 rounded-xl border border-rare-500 bg-white p-4">
+          <section aria-labelledby="cart-title" className={`${cardSurface} min-w-0 space-y-3 p-4`}>
             <h2
               id="cart-title"
               className="font-display text-2xl font-bold text-primary-900"
@@ -251,7 +252,7 @@ function CartContent({ cart }: { cart: Cart }) {
               </Alert>
             ) : null}
 
-            <div className="flex items-center justify-between gap-3 rounded-xl border border-rare-500 bg-white px-4 py-3 shadow-sm">
+            <div className={`${cardSurface} flex items-center justify-between gap-3 px-4 py-3`}>
               <Checkbox
                 label="Selecionar todos"
                 checked={allSelected}
@@ -305,7 +306,6 @@ function EmptyCart() {
         Explore os anúncios e encontre sua próxima carta.
       </p>
       <Button
-        className="h-12 px-8"
         icon={<Icon name="search" size={20} />}
         onClick={() => navigate({ to: '/marketplace', search: { sort: 'recent' } })}
       >
@@ -329,7 +329,7 @@ function CartLoadError({ onRetry }: { onRetry: () => void }) {
         Não foi possível carregar seu carrinho
       </h2>
       <p className="text-neutral-700">Tente novamente para visualizar seus itens.</p>
-      <Button className="h-12 px-8" onClick={onRetry}>
+      <Button onClick={onRetry}>
         Tentar novamente
       </Button>
       <Link

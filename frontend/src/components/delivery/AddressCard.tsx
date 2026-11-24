@@ -17,13 +17,13 @@ export function AddressCard({ address, selected, onSelect, onEdit }: AddressCard
   return (
     <li
       className={cn(
-        'flex items-start gap-3 rounded-xl border bg-white p-4 shadow-sm transition-colors sm:p-5',
+        'flex flex-wrap items-start gap-x-3 gap-y-2 rounded-card border bg-white p-3 shadow-sm transition-colors sm:p-4',
         selected
           ? 'border-secondary-500 ring-1 ring-secondary-500'
           : 'border-neutral-200 hover:border-secondary-500',
       )}
     >
-      <label className="flex min-w-0 flex-1 cursor-pointer items-start gap-4">
+      <label className="flex min-w-0 basis-48 grow cursor-pointer items-start gap-3">
         <input
           type="radio"
           name="delivery-address"
@@ -42,12 +42,12 @@ export function AddressCard({ address, selected, onSelect, onEdit }: AddressCard
         >
           {selected ? <span className="size-2.5 rounded-full bg-secondary-500" /> : null}
         </span>
-        <span className="hidden size-12 shrink-0 place-items-center rounded-lg bg-secondary-100 text-secondary-700 sm:grid">
+        <span className="hidden size-9 shrink-0 place-items-center rounded-lg bg-secondary-100 text-secondary-700 sm:grid">
           <Icon name={address.label?.toLowerCase() === 'casa' ? 'home' : 'map-pin'} size={24} />
         </span>
         <span className="min-w-0 wrap-anywhere text-sm text-neutral-700">
           <span className="flex flex-wrap items-center gap-2">
-            <span className="font-display text-lg font-bold text-secondary-700">
+            <span className="font-display text-base font-bold text-secondary-700">
               {title}
             </span>
             {address.primary ? <Badge variant="success">Principal</Badge> : null}
@@ -65,7 +65,7 @@ export function AddressCard({ address, selected, onSelect, onEdit }: AddressCard
         type="button"
         onClick={onEdit}
         aria-label={`Editar endereço ${title}`}
-        className="inline-flex shrink-0 cursor-pointer items-center gap-1.5 rounded-control px-2 py-1 text-sm font-semibold text-secondary-700 hover:bg-secondary-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary-500"
+        className="ml-auto inline-flex shrink-0 cursor-pointer items-center gap-1.5 rounded-control px-2 py-1 text-sm font-semibold text-secondary-700 hover:bg-secondary-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary-500"
       >
         <Icon name="edit" size={16} />
         Editar

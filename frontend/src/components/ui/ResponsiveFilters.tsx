@@ -22,23 +22,27 @@ export function ResponsiveFilters({ children }: { children: ReactNode }) {
         }
       }}
     >
-      <Button
-        ref={toggle}
-        variant="primary"
-        className="min-h-11 w-full justify-between lg:hidden"
-        aria-expanded={open}
-        aria-controls={panelId}
-        onClick={() => (open ? close() : setOpen(true))}
-      >
-        {open ? 'Ocultar filtros' : 'Mostrar filtros'}
-        <Icon name="chevron-down" className={open ? 'rotate-180' : undefined} size={16} />
-      </Button>
+      <div className="flex justify-center lg:hidden">
+        <Button
+          ref={toggle}
+          variant="primary"
+          className="min-h-11 w-fit max-w-full lg:hidden"
+          aria-expanded={open}
+          aria-controls={panelId}
+          onClick={() => (open ? close() : setOpen(true))}
+        >
+          {open ? 'Ocultar filtros' : 'Mostrar filtros'}
+          <Icon name="chevron-down" className={open ? 'rotate-180' : undefined} size={16} />
+        </Button>
+      </div>
 
       <div id={panelId} className={open ? 'mt-3 lg:mt-0' : 'hidden lg:block'}>
         {children}
-        <Button variant="primary" className="mt-3 min-h-11 w-full lg:hidden" onClick={close}>
-          Fechar filtros
-        </Button>
+        <div className="flex justify-center lg:hidden">
+          <Button variant="primary" className="mt-3 lg:hidden" onClick={close}>
+            Fechar filtros
+          </Button>
+        </div>
       </div>
     </div>
   )
