@@ -21,7 +21,7 @@ import yugiohBanner from '@/assets/images/image-yugioh.png'
 import onePieceBanner from '@/assets/images/image-onePiece.png'
 import digimonBanner from '@/assets/images/image-digimon.png'
 import { CardDetailsModal } from '@/components/catalog/CardDetailsModal'
-import { AddToCollectionModal } from '@/components/catalog/AddToCollectionModal'
+import { CollectionAdditionNotice } from '@/components/catalog/CollectionAdditionNotice'
 import type { CatalogCard as CatalogCardData } from '@/types/Catalog'
 import { useSession } from '@/session'
 
@@ -51,13 +51,9 @@ export function CatalogPage() {
   const { game } = useParams({ from: '/site-layout/catalogo/$game' })
   return <CatalogView key={game} game={game} />
 }
-type CatalogModal =
-  | { mode: 'details'; card: CatalogCardData }
-  | { mode: 'add'; card: CatalogCardData }
-  | null
-
 function CatalogView({ game }: { game: string }) {
-  const [activeModal, setActiveModal] = useState<CatalogModal>(null)
+  const [activeCard, setActiveCard] = useState<CatalogCardData | null>(null)
+  const [addedCard, setAddedCard] = useState<string | null>(null)
 
   const { user, setLoginNotice } = useSession()
 
@@ -163,34 +159,25 @@ function CatalogView({ game }: { game: string }) {
   const total = data?.totalElements ?? 0
 
   function openCardDetails(card: CatalogCardData) {
-    setActiveModal({
-      mode: 'details',
-      card,
-    })
+    setAddedCard(null)
+    setActiveCard(card)
   }
 
-  function openAddToCollection(card: CatalogCardData) {
-    if (!user) {
-      setLoginNotice('Entre na sua conta para adicionar cartas à coleção.')
-
-      navigate({
-        to: '/login',
-        search: {
-          redirect: `/cartas/${encodeURIComponent(card.id)}?adicionar=1`,
-        },
-      })
-
-      return
-    }
-
-    setActiveModal({
-      mode: 'add',
-      card,
+  function redirectToLogin(cardId: string) {
+    setLoginNotice('Entre na sua conta para adicionar cartas à coleção.')
+    navigate({
+      to: '/login',
+      search: { redirect: `/cartas/${encodeURIComponent(cardId)}?adicionar=1` },
     })
   }
 
   function closeModal() {
-    setActiveModal(null)
+    setActiveCard(null)
+  }
+
+  function confirmAddition(cardName: string) {
+    setAddedCard(cardName)
+    closeModal()
   }
 
   return (
@@ -358,20 +345,14 @@ function CatalogView({ game }: { game: string }) {
           </section>
         </div>
       </div>
-      {activeModal?.mode === 'details' && (
+      <CollectionAdditionNotice cardName={addedCard} onDismiss={() => setAddedCard(null)} />
+      {activeCard && (
         <CardDetailsModal
-          key={activeModal.card.id}
-          cardId={activeModal.card.id}
+          key={activeCard.id}
+          cardId={activeCard.id}
           onClose={closeModal}
-          onAdd={openAddToCollection}
-        />
-      )}
-
-      {activeModal?.mode === 'add' && (
-        <AddToCollectionModal
-          key={activeModal.card.id}
-          card={activeModal.card}
-          onClose={closeModal}
+          onAdded={user ? confirmAddition : undefined}
+          onRequireLogin={user ? undefined : redirectToLogin}
         />
       )}
     </main>
