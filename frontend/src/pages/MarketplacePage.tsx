@@ -74,7 +74,7 @@ export function MarketplacePage({ sort = 'recent' }: Props) {
           }
         />
 
-        <div className="grid items-start gap-6 pt-5 lg:grid-cols-[240px_minmax(0,1fr)]">
+        <div className="grid items-start gap-6 pt-5 lg:grid-cols-[280px_minmax(0,1fr)]">
           <ResponsiveFilters>
             <MarketplaceFilters onApply={applyFilters} />
           </ResponsiveFilters>

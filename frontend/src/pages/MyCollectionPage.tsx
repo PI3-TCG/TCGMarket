@@ -117,7 +117,7 @@ function CollectionContent() {
         Atualizar resumo
       </button>
 
-      <div className="grid items-start gap-6 lg:grid-cols-[240px_minmax(0,1fr)]">
+      <div className="grid items-start gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
         <CollectionFilters
           options={options}
           optionsStatus={optionsStatus}
