@@ -18,7 +18,11 @@ export interface CatalogCard {
   imageUrl: string
 }
 
-export type CatalogSort = 'name-asc' | 'name-desc'
+export type CatalogSort =
+  | 'name-asc'
+  | 'name-desc'
+  | 'edition-asc'
+  | 'edition-desc'
 
 /** Estado da busca na URL do catálogo. {@link page} começa em 1. */
 export interface CatalogSearch {

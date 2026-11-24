@@ -33,7 +33,11 @@ export interface MarketplacePageResponse {
   totalPages: number
 }
 
-export type MarketplaceSort = 'recent' | 'priceDesc'
+export type MarketplaceSort =
+  | 'recent'
+  | 'oldest'
+  | 'priceAsc'
+  | 'priceDesc'
 
 export type MarketplaceModality = '' | 'SALE' | 'TRADE' | 'BOTH'
 

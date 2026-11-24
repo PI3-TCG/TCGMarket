@@ -260,7 +260,12 @@ const marketplaceRoute = createRoute({
   validateSearch: (
     search: Record<string, unknown>,
   ): { sort: MarketplaceSort } => ({
-    sort: search.sort === 'priceDesc' ? 'priceDesc' : 'recent',
+    sort:
+      search.sort === 'priceDesc' ||
+      search.sort === 'priceAsc' ||
+      search.sort === 'oldest'
+        ? search.sort
+        : 'recent',
   }),
 
   component: MarketplaceRouteView,

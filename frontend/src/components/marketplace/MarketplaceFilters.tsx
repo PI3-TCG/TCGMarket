@@ -12,7 +12,11 @@ import {
 import type { MarketplaceFilters as FilterValues } from '@/types/Marketplace'
 import { emptyMarketplaceFilters } from './marketplaceFilterDefaults'
 
-type Props = { onApply: (filters: FilterValues) => void }
+type Props = {
+  onApply: (filters: FilterValues) => void
+  /** Mantém o formulário sincronizado com chips removidos nos resultados. */
+  initialFilters?: FilterValues
+}
 
 const games = [
   { value: 'POKEMON', label: 'Pokémon TCG' },
@@ -29,12 +33,12 @@ const languageOptions = Object.entries(languageLabels).map(([value, label]) => (
 const labelFor = (options: { value: string; label: string }[], value: string) =>
   options.find((item) => item.value === value)?.label ?? value
 
-export function MarketplaceFilters({ onApply }: Props) {
+export function MarketplaceFilters({ onApply, initialFilters = emptyMarketplaceFilters }: Props) {
   const titleId = useId()
   const errorId = useId()
   const [error, setError] = useState('')
-  const [draft, setDraft] = useState<FilterValues>({ ...emptyMarketplaceFilters })
-  const [applied, setApplied] = useState<FilterValues>({ ...emptyMarketplaceFilters })
+  const [draft, setDraft] = useState<FilterValues>({ ...initialFilters })
+  const [applied, setApplied] = useState<FilterValues>({ ...initialFilters })
 
   function apply(filters: FilterValues) {
     setError('')
