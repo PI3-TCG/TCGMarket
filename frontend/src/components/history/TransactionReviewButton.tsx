@@ -44,13 +44,14 @@ export function TransactionReviewButton({
       {open && (
         <Modal
           open
-          presentation="refined"
           title={label}
           subtitle="Escolha de 1 a 5 estrelas. O comentário é opcional."
           headerIcon="star"
           size="md"
           onClose={close}
           closeDisabled={submitting}
+          busy={submitting}
+          secondaryAction={{ label: 'Fechar' }}
         >
           <TransactionReviewSection
             transactionId={transactionId}

@@ -42,10 +42,9 @@ type AddressFormModalProps = {
 
 const STATE_OPTIONS = STATES.map((state) => ({ value: state, label: state }))
 const sectionStyle =
-  'rounded-[18px] border border-[#DCCAE7] bg-[linear-gradient(180deg,#FFFFFF_0%,#FBF7FD_100%)] p-4 shadow-[0_4px_15px_rgba(60,17,87,0.065)] sm:p-5'
+  'rounded-[18px] border border-border-default bg-surface-input p-4 shadow-sm sm:p-5'
 const sectionTitle =
-  'mb-4 flex items-center gap-2 border-b border-[#E9DDED] pb-3 font-display text-sm font-bold uppercase tracking-[0.035em] text-[#672677]'
-const modalAction = 'inline-flex min-h-11 items-center justify-center gap-2'
+  'mb-4 flex items-center gap-2 border-b border-border-default pb-3 font-title text-sm font-bold uppercase tracking-[0.035em] text-text-primary'
 
 export function AddressFormModal({
   address,
@@ -145,7 +144,6 @@ export function AddressFormModal({
 
   return (
     <Modal
-      presentation="refined"
       headerIcon={confirmingDiscard ? 'alert' : 'map-pin'}
       role={confirmingDiscard ? 'alertdialog' : 'dialog'}
       focusKey={confirmingDiscard ? 'discard' : 'form'}
@@ -168,7 +166,7 @@ export function AddressFormModal({
           <>
             <button
               type="button"
-              className={`${modalSecondaryButton} ${modalAction}`}
+              className={modalSecondaryButton}
               onClick={requestClose}
               data-autofocus
             >
@@ -176,7 +174,7 @@ export function AddressFormModal({
             </button>
             <button
               type="button"
-              className={`${modalDangerButton} ${modalAction}`}
+              className={modalDangerButton}
               onClick={onClose}
             >
               <Icon name="trash" size={16} /> Descartar
@@ -186,7 +184,7 @@ export function AddressFormModal({
           <>
             <button
               type="button"
-              className={`${modalSecondaryButton} ${modalAction}`}
+              className={modalSecondaryButton}
               disabled={saving}
               onClick={requestClose}
             >
@@ -195,7 +193,7 @@ export function AddressFormModal({
             <button
               type="submit"
               form={formId}
-              className={`${modalPrimaryButton} ${modalAction}`}
+              className={modalPrimaryButton}
               disabled={saving}
             >
               {saving ? (
@@ -219,8 +217,8 @@ export function AddressFormModal({
       {confirmingDiscard && (
         <Alert variant="warning">Alterações não salvas</Alert>
       )}
-      <div hidden={confirmingDiscard} className="space-y-4 text-[#4A4256]">
-        <div className="flex items-start gap-3 rounded-xl border border-[#D4E6FC] bg-[linear-gradient(115deg,#F1F7FF_0%,#EAF2FF_100%)] px-4 py-3 text-sm text-[#174D8E]">
+      <div hidden={confirmingDiscard} className="space-y-4 text-text-primary">
+        <div className="flex items-start gap-3 rounded-surface border border-info-200 bg-surface-input px-4 py-3 text-sm text-state-info">
           <Icon name="info" size={20} className="mt-0.5" />
           <p>
             Preencha os dados de entrega.{' '}
@@ -369,7 +367,7 @@ export function AddressFormModal({
               <h3 id="address-preferences-title" className={sectionTitle}>
                 <Icon name="check-circle" size={20} /> Preferências de entrega
               </h3>
-              <div className="rounded-xl border border-[#E6DAED] bg-[#F8F2FC] px-4 py-3">
+              <div className="rounded-surface border border-border-default bg-surface-input px-4 py-3">
                 <Checkbox
                   label="Definir como endereço principal"
                   checked={draft.primary || firstAddress}
@@ -377,7 +375,7 @@ export function AddressFormModal({
                   onChange={(event) => change('primary', event.target.checked)}
                 />
                 {firstAddress && (
-                  <p className="mt-2 text-xs text-[#655471]">
+                  <p className="mt-2 text-xs text-text-primary">
                     Seu primeiro endereço será o principal.
                   </p>
                 )}

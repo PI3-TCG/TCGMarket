@@ -93,7 +93,6 @@ export function CollectionOwnershipModalBase({
   return (
     <Modal
       open
-      presentation="refined"
       size="lg"
       className={cn(
         'mx-auto',

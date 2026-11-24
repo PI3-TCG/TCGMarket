@@ -17,7 +17,6 @@ import {
   modalityLabel,
   parsePrice,
 } from '@/components/ads/adFormat'
-import { Button } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
 import { Icon, type IconName } from '@/components/ui/Icon'
 import {
@@ -311,7 +310,6 @@ export function MyAdModal({
   return (
     <Modal
       open
-      presentation="refined"
       size={view.kind === 'discard' ? 'sm' : 'lg'}
       className="mx-auto max-w-[790px] wrap-anywhere"
       title={title}
@@ -327,57 +325,59 @@ export function MyAdModal({
           {view.kind === 'details' &&
             (active && notice?.kind !== 'notFound' ? (
               <>
-                <Button
-                  variant="outline"
+                <button
+                  type="button"
                   onClick={() => setView({ kind: 'cancel', failure: 'none' })}
-                  className="mr-auto border-error-700 text-error-700 hover:bg-error-50"
+                  className={modalSecondaryButton}
                 >
                   <Icon name="close-circle" size={16} />
                   Cancelar anúncio
-                </Button>
+                </button>
 
-                <Button
-                  variant="outline"
+                <button
+                  type="button"
                   className={modalSecondaryButton}
                   onClick={onClose}
                 >
                   Fechar
-                </Button>
+                </button>
 
-                <Button
+                <button
+                  type="button"
                   className={modalPrimaryButton}
                   onClick={startEdit}
                   data-autofocus
                 >
                   <Icon name="settings" size={16} />
                   Editar
-                </Button>
+                </button>
               </>
             ) : (
-              <Button
-                variant="outline"
+              <button
+                type="button"
                 className={modalSecondaryButton}
                 onClick={onClose}
                 data-autofocus
               >
                 Fechar
-              </Button>
+              </button>
             ))}
 
           {view.kind === 'edit' && (
             <>
-              <Button
+              <button
+                type="button"
                 className={modalSecondaryButton}
-                variant="outline"
                 disabled={busy !== null}
                 onClick={() =>
                   dirty ? setView({ kind: 'discard' }) : backToDetails()
                 }
               >
                 Cancelar edição
-              </Button>
+              </button>
 
-              <Button
+              <button
+                type="button"
                 className={modalPrimaryButton}
                 onClick={() => void save()}
                 disabled={busy !== null || (!dirty && !view.saveFailed)}
@@ -393,44 +393,46 @@ export function MyAdModal({
                   : view.saveFailed
                     ? 'Tentar novamente'
                     : 'Salvar alterações'}
-              </Button>
+              </button>
             </>
           )}
 
           {view.kind === 'discard' && (
             <>
-              <Button
-                variant="danger"
+              <button
+                type="button"
                 className={modalDangerButton}
                 onClick={backToDetails}
               >
                 Descartar alterações
-              </Button>
+              </button>
 
-              <Button
-                className={modalPrimaryButton}
+              <button
+                type="button"
+                className={modalSecondaryButton}
                 onClick={() => setView({ kind: 'edit', saveFailed: false })}
                 data-autofocus
               >
                 Continuar editando
-              </Button>
+              </button>
             </>
           )}
 
           {view.kind === 'cancel' && (
             <>
-              <Button
+              <button
+                type="button"
                 className={modalSecondaryButton}
-                variant="outline"
                 disabled={busy !== null}
                 onClick={() => setView({ kind: 'details' })}
                 data-autofocus
               >
                 Voltar
-              </Button>
+              </button>
 
               {view.failure === 'uncertain' ? (
-                <Button
+                <button
+                  type="button"
                   className={modalPrimaryButton}
                   disabled={busy !== null}
                   onClick={() => void refreshAfterUncertainCancel()}
@@ -438,11 +440,11 @@ export function MyAdModal({
                   {busy === 'refreshing' && <Spinner />}
 
                   {busy === 'refreshing' ? 'Atualizando...' : 'Atualizar'}
-                </Button>
+                </button>
               ) : (
-                <Button
+                <button
+                  type="button"
                   className={modalDangerButton}
-                  variant="danger"
                   disabled={busy !== null}
                   onClick={() => void confirmCancel()}
                 >
@@ -453,7 +455,7 @@ export function MyAdModal({
                     : view.failure === 'failed'
                       ? 'Tentar novamente'
                       : 'Confirmar cancelamento'}
-                </Button>
+                </button>
               )}
             </>
           )}
@@ -461,8 +463,8 @@ export function MyAdModal({
       }
     >
       {view.kind === 'discard' ? (
-        <div className="space-y-2 text-neutral-700">
-          <p className="font-semibold text-neutral-900">
+        <div className="space-y-2 text-text-secondary">
+          <p className="font-semibold text-text-ink">
             As alterações não salvas serão perdidas.
           </p>
 
@@ -478,21 +480,21 @@ export function MyAdModal({
           ) : null}
         </>
       ) : (
-        <div className="grid grid-cols-1 gap-5 rounded-[18px] border border-[#DBC7E4] bg-[linear-gradient(180deg,#FFFFFF_0%,#FBF7FD_100%)] p-4 shadow-[0_3px_12px_rgba(60,17,87,0.07)] sm:grid-cols-[160px_minmax(0,1fr)] sm:p-5">
+        <div className="grid grid-cols-1 gap-5 rounded-[18px] border border-border-default bg-surface-input p-4 shadow-sm sm:grid-cols-[160px_minmax(0,1fr)] sm:p-5">
           <CardImage ad={ad} />
 
           <div className="min-w-0">
-            <h3 className="font-display text-2xl font-bold wrap-anywhere text-primary-900">
+            <h3 className="font-title text-2xl font-bold wrap-anywhere text-text-ink">
               {ad.card.name}
             </h3>
 
-            <p className="mt-1 text-sm text-primary-700">
+            <p className="mt-1 text-sm text-brand-deep">
               {gameLabels[ad.card.game] ?? ad.card.game} • {ad.card.edition}
               {ad.card.cardNumber ? ` • ${ad.card.cardNumber}` : ''}
               {ad.card.officialRarity ? ` • ${ad.card.officialRarity}` : ''}
             </p>
 
-            <dl className="mt-4 divide-y divide-neutral-100 text-sm">
+            <dl className="mt-4 divide-y divide-border-default text-sm">
               <InfoRow
                 label="Condição"
                 value={conditionLabels[ad.condition]}
@@ -582,7 +584,7 @@ function CardImage({ ad, small = false }: { ad: OwnAd; small?: boolean }) {
   const hasImage = Boolean(ad.card.imageUrl) && !failed
   return (
     <div
-      className={`flex items-center justify-center overflow-hidden rounded-xl bg-primary-100 ${small ? 'h-32 w-24' : 'mx-auto h-64 w-44 sm:mx-0 sm:w-full'}`}
+      className={`flex items-center justify-center overflow-hidden rounded-surface bg-surface-sand ${small ? 'h-32 w-24' : 'mx-auto h-64 w-44 sm:mx-0 sm:w-full'}`}
     >
       {hasImage ? (
         <img
@@ -592,7 +594,7 @@ function CardImage({ ad, small = false }: { ad: OwnAd; small?: boolean }) {
           className="h-full w-full object-contain p-1"
         />
       ) : (
-        <Icon name="grid" size={32} className="text-primary-700" />
+        <Icon name="grid" size={32} className="text-brand-deep" />
       )}
     </div>
   )
@@ -600,27 +602,27 @@ function CardImage({ ad, small = false }: { ad: OwnAd; small?: boolean }) {
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-3 py-2">
-      <dt className="text-neutral-700">{label}</dt>
+      <dt className="text-text-secondary">{label}</dt>
 
-      <dd className="font-semibold text-neutral-900">{value}</dd>
+      <dd className="font-semibold text-text-ink">{value}</dd>
     </div>
   )
 }
 function ModalityView({ ad }: { ad: OwnAd }) {
   return (
     <div className="mt-4">
-      <p className="text-sm font-semibold text-neutral-900">Modalidade</p>
+      <p className="text-sm font-semibold text-text-ink">Modalidade</p>
 
       <div className="mt-2 grid grid-cols-2 gap-2">
         {ad.saleEnabled && (
-          <span className="flex items-center justify-center gap-2 rounded-lg bg-primary-100 px-3 py-2 text-sm font-semibold text-primary-900">
+          <span className="flex items-center justify-center gap-2 rounded-control bg-surface-sand px-3 py-2 text-sm font-semibold text-text-ink">
             <Icon name="cart" size={16} />
             Venda
           </span>
         )}
 
         {ad.tradeEnabled && (
-          <span className="flex items-center justify-center gap-2 rounded-lg bg-secondary-100 px-3 py-2 text-sm font-semibold text-secondary-700">
+          <span className="flex items-center justify-center gap-2 rounded-control bg-surface-sand px-3 py-2 text-sm font-semibold text-brand-deep">
             <Icon name="share" size={16} />
             Troca
           </span>
@@ -629,14 +631,14 @@ function ModalityView({ ad }: { ad: OwnAd }) {
 
       {ad.saleEnabled && ad.unitPrice !== null ? (
         <>
-          <p className="mt-4 text-sm text-neutral-700">Preço por unidade</p>
+          <p className="mt-4 text-sm text-text-secondary">Preço por unidade</p>
 
-          <p className="font-display text-2xl font-bold text-primary-900">
+          <p className="font-title text-2xl font-bold text-text-ink">
             {formatCurrency(ad.unitPrice)}
           </p>
         </>
       ) : (
-        <p className="mt-4 font-display text-lg font-bold text-secondary-700">
+        <p className="mt-4 font-title text-lg font-bold text-brand-deep">
           Somente troca
         </p>
       )}
@@ -666,18 +668,17 @@ function EditFields({
   return (
     <div className="mt-4 space-y-4">
       <fieldset aria-describedby={modalityError ? modalityErrorId : undefined}>
-        <legend className="text-sm font-semibold text-neutral-900">
+        <legend className="text-sm font-semibold text-text-ink">
           Modalidade
         </legend>
 
-        <p className="text-xs text-neutral-700">Selecione uma ou as duas.</p>
+        <p className="text-xs text-text-secondary">Selecione uma ou as duas.</p>
 
         <div className="mt-2 grid grid-cols-2 gap-2">
           <ModalityToggle
             inputRef={saleRef}
             label="Venda"
             icon="cart"
-            tone="sale"
             checked={draft.sale}
             disabled={disabled}
             invalid={Boolean(modalityError)}
@@ -687,7 +688,6 @@ function EditFields({
           <ModalityToggle
             label="Troca"
             icon="share"
-            tone="trade"
             checked={draft.trade}
             disabled={disabled}
             invalid={Boolean(modalityError)}
@@ -704,15 +704,15 @@ function EditFields({
         <div>
           <label
             htmlFor={priceId}
-            className="text-sm font-semibold text-neutral-900"
+            className="text-sm font-semibold text-text-ink"
           >
             Preço por unidade (R$) <span className="text-error-700"></span>
           </label>
 
           <div
-            className={`mt-1.5 flex h-11 items-center gap-2 rounded-control border bg-white px-3 focus-within:ring-2 focus-within:ring-secondary-500 ${priceError ? 'border-error-700' : 'border-neutral-300'}`}
+            className={`mt-1.5 flex h-11 items-center gap-2 rounded-control border bg-surface-input px-3 focus-within:ring-2 focus-within:ring-support-blue ${priceError ? 'border-error-700' : 'border-border-default'}`}
           >
-            <span className="text-sm text-neutral-500">R$</span>
+            <span className="text-sm text-text-secondary">R$</span>
 
             <input
               ref={priceRef}
@@ -737,14 +737,14 @@ function EditFields({
                   }))
                 }
               }}
-              className="min-w-0 flex-1 bg-transparent text-sm text-neutral-900 outline-none disabled:cursor-not-allowed"
+              className="min-w-0 flex-1 bg-transparent text-sm text-text-ink outline-none disabled:cursor-not-allowed"
             />
           </div>
 
           {priceError ? (
             <FieldError id={`${priceId}-hint`}>{priceError}</FieldError>
           ) : (
-            <p id={`${priceId}-hint`} className="mt-1 text-xs text-neutral-700">
+            <p id={`${priceId}-hint`} className="mt-1 text-xs text-text-secondary">
               Obrigatório para venda.
             </p>
           )}
@@ -757,7 +757,6 @@ function ModalityToggle({
   inputRef,
   label,
   icon,
-  tone,
   checked,
   disabled,
   invalid,
@@ -766,24 +765,19 @@ function ModalityToggle({
   inputRef?: RefObject<HTMLInputElement | null>
   label: string
   icon: IconName
-  tone: 'sale' | 'trade'
   checked: boolean
   disabled: boolean
   invalid: boolean
   onChange: (checked: boolean) => void
 }) {
-  const selected =
-    tone === 'sale'
-      ? 'border-primary-900 bg-primary-100 text-primary-900'
-      : 'border-secondary-500 bg-secondary-100 text-secondary-700'
   return (
     <label
-      className={`flex cursor-pointer items-center gap-2 rounded-lg border-2 px-3 py-2 text-sm font-semibold transition-colors focus-within:ring-2 focus-within:ring-secondary-500 has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-60 ${
+      className={`flex cursor-pointer items-center gap-2 rounded-control border-2 px-3 py-2 text-sm font-semibold transition-colors focus-within:ring-2 focus-within:ring-support-blue has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-60 ${
         checked
-          ? selected
+          ? 'border-accent-bronze bg-surface-sand text-brand-deep'
           : invalid
-            ? 'border-error-700 bg-white text-neutral-700'
-            : 'border-neutral-200 bg-white text-neutral-700'
+            ? 'border-error-700 bg-surface-input text-text-secondary'
+            : 'border-border-default bg-surface-input text-text-secondary'
       }`}
     >
       <input
@@ -793,7 +787,7 @@ function ModalityToggle({
         disabled={disabled}
         aria-invalid={invalid || undefined}
         onChange={(event) => onChange(event.target.checked)}
-        className={`size-4 ${tone === 'sale' ? 'accent-primary-900' : 'accent-secondary-500'}`}
+        className="size-4 accent-brand-primary"
       />
 
       <Icon name={icon} size={16} />
@@ -816,14 +810,14 @@ function CancelContent({
 
         <div className="min-w-0 space-y-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="font-display text-xl font-bold wrap-anywhere text-primary-900">
+            <h3 className="font-title text-xl font-bold wrap-anywhere text-text-ink">
               {ad.card.name}
             </h3>
 
             <AdStatusBadge status={ad.status} />
           </div>
 
-          <p className="text-sm text-primary-700">
+          <p className="text-sm text-brand-deep">
             {gameLabels[ad.card.game] ?? ad.card.game} • {ad.card.edition}
           </p>
 
@@ -832,18 +826,18 @@ function CancelContent({
               {conditionLabels[ad.condition]}
             </span>
 
-            <span className="rounded-full bg-primary-100 px-2 py-0.5 text-xs text-primary-900">
+            <span className="rounded-full bg-surface-sand px-2 py-0.5 text-xs text-text-ink">
               {languageLabels[ad.language]}
             </span>
           </div>
 
-          <p className="text-sm text-primary-700">
+          <p className="text-sm text-brand-deep">
             {copies(ad.remainingQuantity)} •{' '}
             {modalityLabel(ad.saleEnabled, ad.tradeEnabled)}
           </p>
 
           {ad.saleEnabled && ad.unitPrice !== null && (
-            <p className="font-display text-lg font-bold text-primary-900">
+            <p className="font-title text-lg font-bold text-text-ink">
               {formatCurrency(ad.unitPrice)}{' '}
               <span className="font-sans text-sm font-normal">por unidade</span>
             </p>
@@ -964,11 +958,11 @@ function StatusSummary({ ad }: { ad: OwnAd }) {
   )
 }
 const feedbackTones = {
-  primary: 'bg-primary-100 text-primary-900',
+  primary: 'bg-surface-sand text-text-ink',
   success: 'bg-success-50 text-success-700',
   warning: 'border border-warning-200 bg-warning-50 text-warning-700',
   error: 'border border-error-200 bg-error-50 text-error-700',
-  neutral: 'bg-neutral-100 text-neutral-700',
+  neutral: 'bg-surface-subtle text-text-secondary',
 }
 function Feedback({
   tone,
@@ -984,7 +978,7 @@ function Feedback({
   return (
     <div
       role={role}
-      className={`flex items-start gap-3 rounded-xl px-4 py-3 text-sm ${feedbackTones[tone]}`}
+      className={`flex items-start gap-3 rounded-surface px-4 py-3 text-sm ${feedbackTones[tone]}`}
     >
       <Icon name={icon} size={20} className="mt-0.5" />
 

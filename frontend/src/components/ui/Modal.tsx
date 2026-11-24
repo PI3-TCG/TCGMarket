@@ -1,7 +1,6 @@
 import { useEffect, useId, useRef, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 
-import { Button, type ButtonVariant } from './Button'
 import { cn } from './cn'
 import { Icon, type IconName } from './Icon'
 import {
@@ -13,12 +12,16 @@ import {
   modalFrame,
   modalHeader,
   modalHeadingIcon,
+  modalDangerButton,
+  modalPrimaryButton,
+  modalSecondaryButton,
 } from './modalTheme'
 
 export type ModalAction = {
   label: string
   onClick?: () => void
-  variant?: ButtonVariant
+  variant?: 'danger'
+  disabled?: boolean
 }
 
 type ModalProps = {
@@ -32,7 +35,6 @@ type ModalProps = {
   primaryAction?: ModalAction
   className?: string
   size?: 'sm' | 'md' | 'lg'
-  presentation?: 'classic' | 'refined'
   subtitle?: string
   headerIcon?: IconName
   footer?: ReactNode
@@ -78,7 +80,6 @@ export function Modal({
   primaryAction,
   className,
   size = 'md',
-  presentation = 'classic',
   subtitle,
   headerIcon = 'gem',
   footer,
@@ -191,44 +192,45 @@ export function Modal({
     const preferred = focusable.find((element) =>
       element.hasAttribute('data-autofocus'),
     )
-    const initial = presentation === 'refined' ? headingRef.current : focusable[0]
-    const target = preferred ?? initial ?? dialog
+    const target = preferred ?? headingRef.current ?? dialog
     target.focus()
-  }, [open, embedded, presentation, focusKey])
+  }, [open, embedded, focusKey])
 
   // Atualizações assíncronas do título não podem roubar o foco de quem
   // já começou a interagir com campos e botões dentro do diálogo.
   useEffect(() => {
-    if (!open || embedded || presentation !== 'refined') return
+    if (!open || embedded) return
     const active = document.activeElement
     if (active === dialogRef.current || active === headingRef.current) {
       headingRef.current?.focus()
     }
-  }, [title, open, presentation, embedded])
+  }, [title, open, embedded])
 
   if (!open) return null
 
-  const isRefined = presentation === 'refined'
   const actions =
     footer ??
     (secondaryAction || primaryAction ? (
       <>
         {secondaryAction && (
-          <Button
-            variant={secondaryAction.variant ?? 'ghost'}
+          <button
+            type="button"
+            className={modalSecondaryButton}
             onClick={secondaryAction.onClick ?? onClose}
-            disabled={closeDisabled && !secondaryAction.onClick}
+            disabled={secondaryAction.disabled || (closeDisabled && !secondaryAction.onClick)}
           >
             {secondaryAction.label}
-          </Button>
+          </button>
         )}
         {primaryAction && (
-          <Button
-            variant={primaryAction.variant ?? 'primary'}
+          <button
+            type="button"
+            className={primaryAction.variant === 'danger' ? modalDangerButton : modalPrimaryButton}
+            disabled={primaryAction.disabled || busy}
             onClick={primaryAction.onClick}
           >
             {primaryAction.label}
-          </Button>
+          </button>
         )}
       </>
     ) : null)
@@ -241,37 +243,31 @@ export function Modal({
       tabIndex={-1}
       aria-modal={embedded ? undefined : true}
       aria-labelledby={titleId}
-      aria-describedby={subtitle ? subtitleId : undefined}
+      aria-describedby={subtitle && headerLayout !== 'compact' ? subtitleId : undefined}
       className={cn(
         'relative flex max-h-[calc(100dvh_-_1.5rem)] w-full flex-col overflow-hidden rounded-modal focus:outline-none sm:max-h-[calc(100dvh_-_2rem)] [@media(max-height:420px)]:overflow-y-auto',
-        isRefined
-          ? modalFrame
-          : 'border border-border-default bg-surface-default shadow-lg',
-        !isRefined && preview === 'hover' && 'border-brand-primary shadow-md',
+        modalFrame,
+        preview === 'hover' && 'border-accent-bronze',
         className,
       )}
     >
       <header
         className={cn(
           'relative flex shrink-0 items-start justify-between gap-3',
-          isRefined
-            ? cn(
-                headerLayout === 'compact'
-                  ? 'min-h-14 items-center px-5 py-2.5 sm:px-7'
-                  : 'px-5 py-3.5 sm:px-7 sm:py-4',
-                modalHeader,
-              )
-            : 'px-5 pt-5 sm:px-6 sm:pt-6',
+          headerLayout === 'compact'
+            ? 'min-h-14 items-center px-5 py-2.5 sm:px-7'
+            : 'px-5 py-3.5 sm:px-7 sm:py-4',
+          modalHeader,
         )}
       >
-        {isRefined && <ModalHeaderOrnaments />}
+        <ModalHeaderOrnaments />
 
         <div
           className={cn(
             'relative z-10 flex min-w-0 flex-1 items-start gap-3',
           )}
         >
-          {isRefined && headerLayout !== 'compact' && (
+          {headerLayout !== 'compact' && (
             <span aria-hidden="true" className={modalHeadingIcon}>
               <Icon name={headerIcon} size={24} />
             </span>
@@ -317,9 +313,7 @@ export function Modal({
             onClick={onClose}
             className={cn(
               'relative z-30 grid size-11 shrink-0 place-items-center rounded-control transition-colors disabled:cursor-not-allowed disabled:opacity-50',
-              isRefined
-                ? modalCloseButton
-                : 'text-text-primary hover:bg-surface-subtle focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-support-blue',
+              modalCloseButton,
             )}
           >
             <Icon name="close" size={20} />
@@ -327,13 +321,12 @@ export function Modal({
         )}
       </header>
 
-      {isRefined && <ModalGoldDivider />}
+      <ModalGoldDivider />
 
       <div
         className={cn(
           'min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-5 text-sm sm:px-7 sm:py-6 [@media(max-height:420px)]:flex-none [@media(max-height:420px)]:overflow-visible',
           modalBody,
-          !isRefined && 'space-y-2 text-base',
         )}
       >
         {children}
@@ -342,7 +335,8 @@ export function Modal({
       {actions && (
         <footer
           className={cn(
-            'flex shrink-0 flex-wrap items-center justify-end gap-3 px-5 py-4 sm:px-7',
+            'flex shrink-0 flex-wrap items-center gap-2.5 px-5 py-4 sm:gap-3 sm:px-7',
+            headerLayout === 'compact' ? 'justify-end' : 'justify-center',
             modalFooter,
           )}
         >
@@ -372,14 +366,10 @@ export function Modal({
         className={cn(
           'relative z-10 w-full',
           size === 'lg'
-            ? isRefined
-              ? 'max-w-5xl'
-              : 'max-w-3xl'
+            ? 'max-w-5xl'
             : size === 'sm'
               ? 'max-w-[440px]'
-              : isRefined
-                ? 'max-w-2xl'
-                : 'max-w-md',
+              : 'max-w-2xl',
         )}
       >
         {panel}

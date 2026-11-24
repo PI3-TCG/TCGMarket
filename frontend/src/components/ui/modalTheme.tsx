@@ -6,7 +6,6 @@ import cornerBottomRight from '@/assets/design-system/canto-id.svg'
 /**
  * DS-05 — apresentação dos diálogos, sem regras de negócio.
  * As cores, fontes e dimensões vêm do @theme de src/index.css (DS-02).
- * A moldura ornamentada é usada somente por diálogos de apresentação refinada.
  */
 export const modalFrame =
   'relative isolate border border-accent-gold-frame bg-surface-default shadow-[0_24px_72px_rgba(20,7,29,0.48),0_5px_18px_rgba(49,11,67,0.22)] before:pointer-events-none before:absolute before:inset-1 before:z-20 before:rounded-[12px] before:border before:border-accent-bronze/80 before:content-[""]'

@@ -108,7 +108,7 @@
 .admin-management {padding-bottom:.25rem}
 .admin-management h1 {font-size:1.55rem}
 .admin-management > div:first-child {padding-block:1.1rem}
-.admin-console :is(a,button,summary):focus-visible,.admin-dialog :is(a,button,summary):focus-visible {
+.admin-console :is(a,button,summary):focus-visible {
   outline:3px solid #8341ac;outline-offset:2px;
 }
 .admin-rail :is(a,summary):focus-visible {outline-color:#ffe087}
@@ -132,7 +132,6 @@
 }
 .admin-panel-heading h2,.admin-heading h1,.admin-management h1 {font-family:var(--font-sans,system-ui)}
 .admin-workspace .overflow-x-auto {position:relative}
-/* The shared navbar has stacking level 70; admin dialogs must cover it. */
 @container (min-width:901px) {
   .admin-metric {padding:.9rem 1rem .9rem 3.6rem}
   .admin-metric > div:first-child > span {position:absolute;left:.85rem;top:50%;transform:translateY(-50%);background:transparent}

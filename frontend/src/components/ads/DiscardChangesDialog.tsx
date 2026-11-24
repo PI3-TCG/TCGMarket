@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
 import {
   modalDangerButton,
@@ -23,7 +22,6 @@ export function DiscardChangesDialog({
   return (
     <Modal
       open
-      presentation="refined"
       size="sm"
       role="alertdialog"
       title={title}
@@ -32,21 +30,21 @@ export function DiscardChangesDialog({
       onClose={onContinue}
       footer={
         <>
-          <Button
-            variant="outline"
+          <button
+            type="button"
             className={modalSecondaryButton}
             onClick={onContinue}
             data-autofocus
           >
             Continuar preenchendo
-          </Button>
-          <Button
-            variant="danger"
+          </button>
+          <button
+            type="button"
             className={modalDangerButton}
             onClick={onConfirm}
           >
             {confirmLabel}
-          </Button>
+          </button>
         </>
       }
     >

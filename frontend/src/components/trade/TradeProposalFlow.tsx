@@ -2,7 +2,6 @@ import { Link } from '@tanstack/react-router'
 import { useRef, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { Alert } from '@/components/ui/Alert'
-import { Button } from '@/components/ui/Button'
 import { Icon } from '@/components/ui/Icon'
 import { Modal } from '@/components/ui/Modal'
 import {
@@ -36,12 +35,12 @@ type OfferedItem = { item: CollectionItem; quantity: number }
 type SendError = { kind: 'rejected' | 'unknown'; message: string }
 
 const surface =
-  'rounded-[16px] border border-[#DCC6E7] bg-[linear-gradient(180deg,#FFFFFF_0%,#FCF9FE_100%)] p-4 shadow-[0_4px_14px_rgba(60,17,87,0.09),inset_0_1px_0_rgba(255,255,255,0.8)]'
+  'rounded-[16px] border border-border-default bg-surface-input p-4 shadow-sm'
 const field =
-  'h-11 w-full rounded-[12px] border border-[#D7C9E0] bg-white px-3 text-sm text-[#302B40] shadow-[inset_0_1px_0_rgba(255,255,255,0.75)] outline-none transition focus:border-[#8B3AA2] focus:ring-2 focus:ring-[#E8D8F0]'
+  'h-11 w-full rounded-[12px] border border-border-default bg-surface-input px-3 text-sm text-text-primary shadow-sm outline-none transition focus:border-support-blue focus:ring-2 focus:ring-support-blue'
 const itemSurface =
-  'rounded-[14px] border border-[#DBC6E6] bg-[linear-gradient(135deg,#FCFAFE,#F6F0FB)] p-3 shadow-[0_2px_9px_rgba(60,17,87,0.055)]'
-const heading = 'font-display text-lg font-bold text-[#75117B]'
+  'rounded-[14px] border border-border-default bg-surface-input p-3 shadow-sm'
+const heading = 'font-title text-lg font-bold text-text-primary'
 
 function validPositiveQuantity(n: number, maximum: number): boolean {
   return Number.isSafeInteger(n) && n >= 1 && n <= maximum
@@ -63,11 +62,11 @@ function TradeCardArt({
       src={src}
       alt=""
       onError={() => setFailed(true)}
-      className={`${dimensions} shrink-0 rounded-lg object-contain shadow-[0_3px_10px_rgba(28,8,39,0.18)]`}
+      className={`${dimensions} shrink-0 rounded-control object-contain shadow-sm`}
     />
   ) : (
     <div
-      className={`flex ${dimensions} shrink-0 flex-col items-center justify-center gap-1 rounded-lg border border-[#E0D0E8] bg-[#F6F0F9] text-[10px] text-[#665875]`}
+      className={`flex ${dimensions} shrink-0 flex-col items-center justify-center gap-1 rounded-control border border-border-default bg-surface-input text-[10px] text-text-primary`}
       role="img"
       aria-label={`Imagem indisponível: ${name}`}
     >
@@ -99,15 +98,15 @@ function ReviewCardItem({
       <div className="flex min-w-0 items-start gap-3">
         <TradeCardArt src={imageUrl} name={name} compact />
         <div className="min-w-0 flex-1">
-          <p className="wrap-anywhere text-sm font-bold text-[#261638]">{name}</p>
-          <p className="mt-1 text-xs text-[#62586D]">
+          <p className="wrap-anywhere text-sm font-bold text-text-primary">{name}</p>
+          <p className="mt-1 text-xs text-text-primary">
             {game}
             {edition ? ` · ${edition}` : ''}
           </p>
-          <p className="mt-1 text-xs text-[#62586D]">
+          <p className="mt-1 text-xs text-text-primary">
             {condition} · {language}
           </p>
-          <span className="mt-2 inline-flex rounded-full border border-[#D8C4DF] bg-[#F0E4F4] px-3 py-1 text-xs font-semibold text-[#75117B]">
+          <span className="mt-2 inline-flex rounded-full border border-border-default bg-surface-input px-3 py-1 text-xs font-semibold text-text-primary">
             {copies(quantity)}
           </span>
         </div>
@@ -130,19 +129,19 @@ function QuantityControl({
   const valid = validPositiveQuantity(value, max)
   return (
     <div>
-      <div className="mb-1 text-xs font-semibold text-[#4D3D60]">{label}</div>
-      <div className="flex w-40 items-center overflow-hidden rounded-[10px] border border-[#CFC2E4] bg-white shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] focus-within:ring-2 focus-within:ring-[#E8D8F0]">
+      <div className="mb-1 text-xs font-semibold text-text-primary">{label}</div>
+      <div className="flex h-11 w-40 overflow-hidden rounded-control border border-border-default bg-surface-input sm:h-10 focus-within:ring-2 focus-within:ring-support-blue">
         <button
           type="button"
           aria-label={`Diminuir quantidade de ${label}`}
-          className="grid size-10 place-items-center border-r border-[#E5DDEF] bg-[linear-gradient(180deg,#FAF8FF,#F0EBFA)] text-[#275FE5] transition hover:bg-[#E8E0FA] disabled:opacity-40"
+          className="grid w-11 shrink-0 place-items-center border-r border-border-default bg-surface-sand text-brand-deep transition-colors enabled:hover:bg-surface-subtle disabled:cursor-not-allowed disabled:opacity-40 sm:w-10"
           disabled={value <= 1}
           onClick={() => onChange(value - 1)}
         >
-          <Icon name="minus" size={16} />
+          <Icon name="minus" size={20} />
         </button>
         <span
-          className="flex-1 text-center font-semibold text-[#261638]"
+          className="flex flex-1 items-center justify-center text-sm font-semibold text-text-primary"
           aria-live="polite"
         >
           {value}
@@ -150,15 +149,15 @@ function QuantityControl({
         <button
           type="button"
           aria-label={`Aumentar quantidade de ${label}`}
-          className="grid size-10 place-items-center border-l border-[#E5DDEF] bg-[linear-gradient(180deg,#FAF8FF,#F0EBFA)] text-[#275FE5] transition hover:bg-[#E8E0FA] disabled:opacity-40"
+          className="grid w-11 shrink-0 place-items-center border-l border-border-default bg-surface-sand text-brand-deep transition-colors enabled:hover:bg-surface-subtle disabled:cursor-not-allowed disabled:opacity-40 sm:w-10"
           disabled={value >= max}
           onClick={() => onChange(value + 1)}
         >
-          <Icon name="plus" size={16} />
+          <Icon name="plus" size={20} />
         </button>
       </div>
       <p
-        className={`mt-1 text-xs ${valid ? 'text-[#62586D]' : 'text-error-700'}`}
+        className={`mt-1 text-xs ${valid ? 'text-text-primary' : 'text-error-700'}`}
       >
         {valid
           ? `Máximo: ${copies(max)}.`
@@ -345,88 +344,93 @@ export function TradeProposalFlow({
     <>
       {step === 'compose' ? (
         <>
-          <Button
-            variant="outline"
+          <button
+            type="button"
             className={modalSecondaryButton}
             onClick={requestClose}
           >
             Fechar
-          </Button>
-          <Button
+          </button>
+          <button
+            type="button"
             className={modalPrimaryButton}
             disabled={!canReview}
             onClick={() => setStep('review')}
           >
             Revisar proposta
-          </Button>
+          </button>
         </>
       ) : null}
       {step === 'picker' ? (
-        <Button
+        <button
+          type="button"
           className={modalPrimaryButton}
           onClick={() => setStep('compose')}
         >
           Voltar à proposta ({distinct})
-        </Button>
+        </button>
       ) : null}
       {step === 'review' ? (
         <>
-          <Button
-            variant="outline"
+          <button
+            type="button"
             className={modalSecondaryButton}
             onClick={() => setStep('compose')}
           >
             Editar proposta
-          </Button>
-          <Button
+          </button>
+          <button
+            type="button"
             className={modalPrimaryButton}
             onClick={() => setStep('confirm')}
             disabled={!canReview}
           >
             Continuar
-          </Button>
+          </button>
         </>
       ) : null}
       {step === 'confirm' ? (
         <>
-          <Button
-            variant="outline"
+          <button
+            type="button"
             className={modalSecondaryButton}
             onClick={() => setStep('review')}
             disabled={busy || sendError?.kind === 'unknown'}
           >
             Voltar
-          </Button>
-          <Button
+          </button>
+          <button
+            type="button"
             className={modalPrimaryButton}
             onClick={submit}
             disabled={busy || !canReview || sendError?.kind === 'unknown'}
           >
             {busy ? 'Enviando...' : 'Confirmar e enviar'}
-          </Button>
+          </button>
         </>
       ) : null}
       {step === 'discard' ? (
         <>
-          <Button
-            variant="outline"
+          <button
+            type="button"
             className={modalSecondaryButton}
             onClick={() => setStep(beforeDiscard)}
             data-autofocus
           >
             Manter proposta
-          </Button>
-          <Button
-            variant="danger"
+          </button>
+          <button
+            type="button"
             className={modalDangerButton}
             onClick={resetAndClose}
           >
             Descartar rascunho
-          </Button>
+          </button>
         </>
       ) : null}
       {step === 'success' ? (
-        <Button
+        <button
+          type="button"
           className={modalPrimaryButton}
           onClick={() => {
             resetAndClose()
@@ -434,7 +438,7 @@ export function TradeProposalFlow({
           }}
         >
           Voltar ao Marketplace
-        </Button>
+        </button>
       ) : null}
     </>
   )
@@ -442,7 +446,6 @@ export function TradeProposalFlow({
   return (
     <Modal
       open={open}
-      presentation="refined"
       size={
         step === 'discard'
           ? 'sm'
@@ -475,18 +478,18 @@ export function TradeProposalFlow({
                   <h3 id="trade-offer-title" className={heading}>
                     Cartas que você oferece
                   </h3>
-                  <span className="rounded-full bg-[#F0E4F4] px-3 py-1 text-xs font-semibold text-[#75117B]">
+                  <span className="rounded-full bg-surface-input px-3 py-1 text-xs font-semibold text-text-primary">
                     {distinct} itens · {offeredCopies} exemplares
                   </span>
                 </div>
                 {offered.length === 0 ? (
-                  <div className="rounded-[14px] border border-dashed border-[#CEB6DC] bg-[linear-gradient(145deg,#FFFEFF,#FBF7FD)] px-4 py-8 text-center text-sm text-[#62586D]">
+                  <div className="rounded-[14px] border border-dashed border-border-default bg-surface-input px-4 py-8 text-center text-sm text-text-primary">
                     <Icon
                       name="gem"
                       size={32}
-                      className="mx-auto text-[#996699]"
+                      className="mx-auto text-text-primary"
                     />
-                    <p className="mt-2 font-semibold text-[#261638]">
+                    <p className="mt-2 font-semibold text-text-primary">
                       Nenhuma carta selecionada
                     </p>
                     <p className="mt-1">
@@ -503,25 +506,25 @@ export function TradeProposalFlow({
                             name={item.card.name}
                           />
                           <div className="min-w-0 flex-1">
-                            <p className="font-semibold text-[#261638]">
+                            <p className="font-semibold text-text-primary">
                               {item.card.name}
                             </p>
-                            <p className="text-xs text-[#62586D]">
+                            <p className="text-xs text-text-primary">
                               {gameLabels[item.card.game] ?? item.card.game} ·{' '}
                               {item.card.edition}
                             </p>
-                            <p className="mt-1 text-xs text-[#62586D]">
+                            <p className="mt-1 text-xs text-text-primary">
                               {conditionLabels[item.condition]} ·{' '}
                               {languageLabels[item.language]}
                             </p>
-                            <p className="mt-1 text-xs text-[#62586D]">
+                            <p className="mt-1 text-xs text-text-primary">
                               Na coleção: {copies(item.quantity)}
                             </p>
                           </div>
                           <button
                             type="button"
                             aria-label={`Remover ${item.card.name} da proposta`}
-                            className="h-9 rounded-control px-2 text-error-700 hover:bg-error-50 focus-visible:outline-2"
+                            className="grid size-11 shrink-0 self-center place-items-center rounded-control border border-state-error bg-state-error text-white shadow-sm transition-colors hover:bg-error-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-support-blue"
                             onClick={() => removeOffered(item.id)}
                           >
                             <Icon name="trash" size={20} />
@@ -540,15 +543,15 @@ export function TradeProposalFlow({
                   </ul>
                 )}
                 <div className="flex justify-center">
-                  <Button
+                  <button
+                    type="button"
                     className={`${modalSecondaryButton} mt-4 w-fit max-w-full`}
-                    variant="outline"
                     onClick={() => setStep('picker')}
                     disabled={offered.length >= 30}
-                    icon={<Icon name="plus" size={16} />}
                   >
+                    <Icon name="plus" size={20} />
                     Escolher cartas da minha coleção
-                  </Button>
+                  </button>
                 </div>
                 {offered.length >= 30 ? (
                   <p className="mt-2 text-xs text-warning-700">
@@ -564,20 +567,20 @@ export function TradeProposalFlow({
                 <h3 id="trade-request-title" className={`${heading} mb-3`}>
                   Cartas que você solicita
                 </h3>
-                <div className="flex gap-3 rounded-[14px] border border-[#CBAFD8] bg-[linear-gradient(135deg,#FCF8FE,#F2EAF8)] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]">
+                <div className="flex gap-3 rounded-[14px] border border-border-default bg-surface-input p-3 shadow-sm">
                   <TradeCardArt src={ad.imageUrl} name={ad.cardName} />
                   <div className="min-w-0 wrap-anywhere">
-                    <p className="font-semibold text-[#261638]">
+                    <p className="font-semibold text-text-primary">
                       {ad.cardName}
                     </p>
-                    <p className="text-xs text-[#62586D]">
+                    <p className="text-xs text-text-primary">
                       {gameLabels[ad.game] ?? ad.game} · {ad.edition}
                     </p>
-                    <p className="mt-1 text-xs text-[#62586D]">
+                    <p className="mt-1 text-xs text-text-primary">
                       {conditionLabels[ad.condition]} ·{' '}
                       {languageLabels[ad.language]}
                     </p>
-                    <p className="mt-1 text-xs text-[#62586D]">
+                    <p className="mt-1 text-xs text-text-primary">
                       De @{ad.sellerUsername ?? 'vendedor'} ·{' '}
                       {copies(ad.remainingQuantity)} no anúncio
                     </p>
@@ -594,7 +597,7 @@ export function TradeProposalFlow({
               </section>
             </div>
             <section className={surface}>
-              <label className="flex cursor-pointer items-center gap-3 font-semibold text-[#261638]">
+              <label className="flex cursor-pointer items-center gap-3 font-semibold text-text-primary">
                 <input
                   type="checkbox"
                   checked={hasAdjustment}
@@ -608,7 +611,7 @@ export function TradeProposalFlow({
                   <div>
                     <label
                       htmlFor="trade-adjustment-amount"
-                      className="mb-1 block text-xs font-semibold text-[#38284D]"
+                      className="mb-1 block text-xs font-semibold text-text-primary"
                     >
                       Valor em reais
                     </label>
@@ -627,7 +630,7 @@ export function TradeProposalFlow({
                     />
                     <p
                       id="trade-adjustment-hint"
-                      className={`mt-1 text-xs ${moneyValid ? 'text-[#62586D]' : 'text-error-700'}`}
+                      className={`mt-1 text-xs ${moneyValid ? 'text-text-primary' : 'text-error-700'}`}
                     >
                       {moneyValid
                         ? 'Até R$ 999.999,99; máximo de duas casas decimais.'
@@ -637,7 +640,7 @@ export function TradeProposalFlow({
                   <div>
                     <label
                       htmlFor="trade-adjustment-payer"
-                      className="mb-1 block text-xs font-semibold text-[#38284D]"
+                      className="mb-1 block text-xs font-semibold text-text-primary"
                     >
                       Quem pagaria?
                     </label>
@@ -658,13 +661,13 @@ export function TradeProposalFlow({
                   </div>
                 </div>
               ) : null}
-              <p className="mt-3 text-xs text-[#62586D]">
+              <p className="mt-3 text-xs text-text-primary">
                 O valor será apenas registrado nos termos da proposta. Nenhum
                 pagamento é feito neste envio.
               </p>
             </section>
             {!canReview ? (
-              <p className="text-sm text-[#62586D]" role="status">
+              <p className="text-sm text-text-primary" role="status">
                 Para revisar, selecione ao menos uma carta e informe quantidades
                 válidas.
               </p>
@@ -686,7 +689,7 @@ export function TradeProposalFlow({
               <section className={surface}>
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <h3 className={heading}>Você oferece</h3>
-                  <span className="rounded-full bg-[#F0E4F4] px-2.5 py-1 text-xs font-semibold text-[#75117B]">
+                  <span className="rounded-full bg-surface-input px-2.5 py-1 text-xs font-semibold text-text-primary">
                     {copies(offeredCopies)}
                   </span>
                 </div>
@@ -704,7 +707,7 @@ export function TradeProposalFlow({
                     />
                   ))}
                 </ul>
-                <p className="mt-3 border-t border-[#D8C4DF]/80 pt-3 text-xs font-semibold text-[#62586D]">
+                <p className="mt-3 border-t border-border-default/80 pt-3 text-xs font-semibold text-text-primary">
                   {distinct}{' '}
                   {distinct === 1 ? 'carta diferente' : 'cartas diferentes'} ·{' '}
                   {copies(offeredCopies)}
@@ -713,7 +716,7 @@ export function TradeProposalFlow({
               <section className={surface}>
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <h3 className={heading}>Você solicita</h3>
-                  <span className="rounded-full bg-[#F0E4F4] px-2.5 py-1 text-xs font-semibold text-[#75117B]">
+                  <span className="rounded-full bg-surface-input px-2.5 py-1 text-xs font-semibold text-text-primary">
                     {copies(requestedQuantity)}
                   </span>
                 </div>
@@ -728,7 +731,7 @@ export function TradeProposalFlow({
                     quantity={requestedQuantity}
                   />
                 </ul>
-                <p className="mt-3 border-t border-[#D8C4DF]/80 pt-3 text-xs font-semibold text-[#62586D]">
+                <p className="mt-3 border-t border-border-default/80 pt-3 text-xs font-semibold text-text-primary">
                   Carta do anúncio · {copies(requestedQuantity)}
                 </p>
               </section>
@@ -785,9 +788,9 @@ export function TradeProposalFlow({
               <div
                 role="status"
                 aria-busy="true"
-                className="flex items-center gap-3 text-sm font-semibold text-[#75117B]"
+                className="flex items-center gap-3 text-sm font-semibold text-text-primary"
               >
-                <span className="size-5 animate-spin rounded-full border-2 border-[#75117B] border-t-transparent" />
+                <span className="size-5 animate-spin rounded-full border-2 border-border-default border-t-transparent" />
                 Enviando sua proposta...
               </div>
             ) : null}
@@ -814,15 +817,15 @@ export function TradeProposalFlow({
             <div className={`${surface} text-left`}>
               <div className="grid gap-4 sm:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] sm:gap-0">
                 <div className="min-w-0 sm:pr-4">
-                  <p className="text-xs font-semibold text-[#62586D]">
+                  <p className="text-xs font-semibold text-text-primary">
                     Identificador da proposta
                   </p>
-                  <p className="mt-1 break-all font-mono text-xs text-[#261638] sm:text-sm">
+                  <p className="mt-1 break-all font-mono text-xs text-text-primary sm:text-sm">
                     {created.id}
                   </p>
                 </div>
-                <div className="min-w-0 border-t border-[#D8C4DF] pt-3 sm:border-l sm:border-t-0 sm:py-0 sm:pl-4">
-                  <p className="text-xs font-semibold text-[#62586D]">
+                <div className="min-w-0 border-t border-border-default pt-3 sm:border-l sm:border-t-0 sm:py-0 sm:pl-4">
+                  <p className="text-xs font-semibold text-text-primary">
                     Situação
                   </p>
                   <p className="mt-1 text-sm font-semibold text-warning-700">
@@ -831,7 +834,7 @@ export function TradeProposalFlow({
                 </div>
               </div>
             </div>
-            <p className="text-sm text-[#62586D]">
+            <p className="text-sm text-text-primary">
               Nenhuma carta foi transferida e nenhum valor foi cobrado.
             </p>
           </div>

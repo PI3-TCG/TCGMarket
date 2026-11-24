@@ -2,6 +2,7 @@ import { responseStatus } from '@/services/feedback'
 import { useState } from 'react'
 import { CollectionOwnershipModalBase } from './CollectionOwnershipModalBase'
 import { Icon } from '@/components/ui/Icon'
+import { modalHeadingIcon } from '@/components/ui/modalTheme'
 import { removeMyCollectionItem } from '@/services/collection'
 import type {
   CardCondition,
@@ -99,14 +100,16 @@ export function RemoveCollectionItemModal({ item, onClose, onRemoved }: Props) {
         {summary.map((field) => (
           <div
             key={field.key}
-            className="flex min-w-0 items-center gap-2 rounded-xl border border-[#D4CFE9] bg-[linear-gradient(160deg,#F9F8FE,#ECEAF8)] px-3 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]"
+            className="flex min-w-0 items-center gap-2 rounded-control border border-border-default bg-surface-input p-2.5"
           >
-            <Icon name={field.icon} size={24} className="text-[#6512BA]" />
+            <span className={modalHeadingIcon}>
+              <Icon name={field.icon} size={20} />
+            </span>
             <div className="min-w-0">
-              <dt className="text-[11px] font-medium text-[#40365B]">
+              <dt className="text-xs font-medium text-text-secondary">
                 {field.label}
               </dt>
-              <dd className="break-words text-xs font-bold text-[#1C1436]">
+              <dd className="wrap-break-word text-xs font-semibold text-text-primary">
                 {field.value}
               </dd>
             </div>

@@ -22,27 +22,27 @@ export function AdminActionList({
   label,
 }: AdminActionListProps) {
   return (
-    <ol aria-label={label} className="divide-y divide-[#E4D3ED]">
+    <ol aria-label={label} className="divide-y divide-border-default">
       {actions.map((action) => (
         <li
           key={action.id}
-          className="space-y-1.5 px-2 py-3.5 text-sm transition-colors hover:bg-[#F8F0FC]"
+          className="space-y-1.5 px-2 py-3.5 text-sm transition-colors hover:bg-surface-subtle"
         >
-          <p className="font-bold text-[#351846]">
+          <p className="font-bold text-text-ink">
             {describeAction(action)}
             {showTarget ? (
-              <span className="font-normal text-[#665676]">
+              <span className="font-normal text-text-secondary">
                 {' '}
                 · {participantName(action.target)}
               </span>
             ) : null}
           </p>
           {action.reason ? (
-            <p className="break-words text-[#665676]">
+            <p className="break-words text-text-secondary">
               Motivo: {action.reason}
             </p>
           ) : null}
-          <p className="text-xs text-[#776984]">
+          <p className="text-xs text-text-secondary">
             Por {participantName(action.actor)} em{' '}
             <time dateTime={action.createdAt}>
               {dateTimeFormat.format(new Date(action.createdAt))}
