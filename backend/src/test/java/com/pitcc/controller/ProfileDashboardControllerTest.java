@@ -48,11 +48,12 @@ class ProfileDashboardControllerTest {
     verifyNoInteractions(service);
   }
   @Test void publicEndpointsAreAnonymousAndNeverCached() throws Exception {
-    when(service.publicSummary("collector")).thenReturn(new ProfileDashboardService.PublicSummary(false, null, 2));
+    when(service.publicSummary("collector")).thenReturn(new ProfileDashboardService.PublicSummary(false, null, 2, java.util.List.of()));
     when(service.publicCollection("collector", 0, 20)).thenReturn(new PageImpl<>(java.util.List.of()));
     mvc.perform(get("/api/users/collector/profile/summary")).andExpect(status().isOk())
         .andExpect(header().string("Cache-Control", "no-store"))
         .andExpect(jsonPath("$.collectionPublic").value(false))
+        .andExpect(jsonPath("$.collectionGames").isEmpty())
         .andExpect(jsonPath("$.email").doesNotExist());
     mvc.perform(get("/api/users/collector/profile/collection")).andExpect(status().isOk())
         .andExpect(header().string("Cache-Control", "no-store"));

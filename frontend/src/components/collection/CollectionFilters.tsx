@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { cardSurface } from '@/components/ui/Card'
 import type {
   CollectionFilterOptions,
   CollectionFilterValues,
@@ -10,6 +11,7 @@ export type { CollectionFilterValues } from '@/types/Collection'
 
 
 type CollectionFiltersProps = {
+  appearance?: 'decorated' | 'card'
   items?: CollectionItem[]
   options?: CollectionFilterOptions
   optionsStatus?: 'loading' | 'success' | 'error'
@@ -18,6 +20,7 @@ type CollectionFiltersProps = {
 }
 
 export function CollectionFilters({
+  appearance = 'decorated',
   items = [],
   options,
   optionsStatus = 'success',
@@ -53,7 +56,11 @@ export function CollectionFilters({
     'mt-2 h-10 w-full rounded-control border border-neutral-200 bg-white filter-field px-3 text-sm text-neutral-900 focus:border-primary-900 focus:outline-none focus:ring-2 focus:ring-secondary-500 disabled:cursor-not-allowed disabled:opacity-50'
 
   return (
-    <aside className="filter-panel panel-ornaments min-w-0 self-start">
+    <aside
+      className={`min-w-0 self-start ${appearance === 'card'
+        ? `${cardSurface} bg-white! p-4`
+        : 'filter-panel panel-ornaments'}`}
+    >
       <div className="mb-5 flex items-center justify-between gap-2">
         <h2 className="text-sm font-bold text-primary-900">
           FILTROS

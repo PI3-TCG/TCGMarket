@@ -1,8 +1,8 @@
+import { profileCollectionSection } from './profileStyles'
 import { Pagination as PageNavigation } from '@/components/ui/Pagination'
 import { CollectionFilters } from '@/components/collection/CollectionFilters'
 import { emptyCollectionFilters } from '@/components/collection/collectionFilterDefaults'
 import type { CollectionFilterValues } from '@/types/Collection'
-import { Icon } from '@/components/ui/Icon'
 import { useCallback, useState } from 'react'
 import { useRemoteData } from '@/hooks/useRemoteData'
 import {
@@ -14,7 +14,7 @@ import { Card } from '@/components/ui/Card'
 import { CatalogCard } from '@/components/catalog/CatalogCard'
 import { gameLabel } from './profileFormat'
 import type { CardGame } from '@/types/User'
-import { ProfileHero, ProfileStatus, AboutCard, GamesCard } from './ProfileView'
+import { ProfileHero, ProfileStatus, AboutCard } from './ProfileView'
 import type { ProfileViewData } from './profileFormat'
 import { ProfileReputation } from './ProfileReputation'
 
@@ -31,32 +31,34 @@ export function PublicCollector({ profile }: { profile: ProfileViewData }) {
     <>
       <ProfileHero
         profile={profile}
+        collectionGames={
+          state.status === 'ready' && state.data.collectionPublic
+            ? (state.data.collectionGames ?? [])
+            : []
+        }
         avatarUrl={state.status === 'ready' ? state.data.avatarUrl : null}
       />
-      <div className="grid items-start gap-5 pt-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-        <AboutCard profile={profile} />
-        <GamesCard profile={profile} title="TCGs que joga" />
-      </div>
+      <ProfileReputation
+        key={profile.username}
+        username={profile.username}
+        about={<AboutCard profile={profile} />}
+        completedTransactions={
+          state.status === 'ready'
+            ? state.data.completedTransactions
+            : undefined
+        }
+      />
       {state.status === 'loading' ? (
         <p role="status">Carregando informações do colecionador...</p>
       ) : state.status !== 'ready' ? (
         <ProfileStatus kind="error" onRetry={retry} />
       ) : (
         <>
-          <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
-            <Card className="border-rare-500/70 p-5">
-              <h2 className="flex items-center gap-2 text-lg font-semibold text-primary-900">
-                <Icon name="handshake" size={24} />
-                Transações concluídas
-              </h2>
-              <p className="mt-2 text-2xl font-bold text-primary-900">
-                {state.data.completedTransactions.toLocaleString('pt-BR')}
-              </p>
-            </Card>
-            <ProfileReputation key={profile.username} username={profile.username} />
-          </div>
-          <section id="colecao" className="panel-ornaments scroll-mt-6 rounded-xl border border-rare-500 bg-white p-4">
-            <h2 className="mb-4 font-display text-2xl font-bold text-primary-900">
+          <section
+            id="colecao"
+            className={`${profileCollectionSection} scroll-mt-6`}
+          >
+            <h2 className="mb-4 font-display text-2xl font-bold wrap-anywhere text-primary-900">
               Coleção de @{profile.username}
             </h2>
             {state.data.collectionPublic ? (
@@ -89,6 +91,7 @@ function PublicCards({ username }: { username: string }) {
   return (
     <div className="grid items-start gap-5 lg:grid-cols-[240px_minmax(0,1fr)]">
       <CollectionFilters
+        appearance="card"
         options={
           options.state.status === 'ready' ? options.state.data : undefined
         }
@@ -184,7 +187,12 @@ function PublicCardsResults({
           : 'registros encontrados'}
       </p>
       {(!data.first || !data.last) && (
-        <PageNavigation label="Paginação da coleção pública" page={data.number + 1} totalPages={data.totalPages} onPageChange={(page) => onPageChange(page - 1)} />
+        <PageNavigation
+          label="Paginação da coleção pública"
+          page={data.number + 1}
+          totalPages={data.totalPages}
+          onPageChange={(page) => onPageChange(page - 1)}
+        />
       )}
     </div>
   )

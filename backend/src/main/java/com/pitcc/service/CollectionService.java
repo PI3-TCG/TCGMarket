@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -160,7 +161,7 @@ public class CollectionService {
         }
 
         return collectionItemRepository.summarizeByUserId(userId)
-                .orElseGet(() -> new CollectionSummaryResponse(0L, 0L, 0L));
+                .orElseGet(() -> new CollectionSummaryResponse(0L, 0L, 0L, List.of()));
     }
 
     public Page<CollectionItemResponse> findOwnCollection(

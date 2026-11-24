@@ -1,3 +1,7 @@
+import {
+  profileOutlineLink,
+  profileTextLink,
+} from '@/components/profile/profileStyles'
 import { ProfileReputation } from '@/components/profile/ProfileReputation'
 import { ProfileSettingsProvider } from '@/components/profile/ProfileSettingsContext'
 import { ProfilePhotoEditor } from '@/components/profile/ProfilePhotoEditor'
@@ -57,7 +61,7 @@ export function ProfilePage() {
                 <Link
                   to="/jogadores/$username"
                   params={{ username: state.data.username }}
-                  className="inline-flex h-10 items-center rounded-control border border-primary-900 bg-white px-4 text-sm font-semibold text-primary-900 hover:bg-primary-100"
+                  className={profileOutlineLink}
                 >
                   Ver perfil público
                 </Link>
@@ -66,23 +70,26 @@ export function ProfilePage() {
           />
           <ProfileDashboard
             username={state.data.username}
-            about={
-              <AboutCard
-                profile={toViewData(state.data)}
-                email={state.data.email}
-                emptyBioAction={
-                  <EditProfileLink label="Escrever bio" compact />
-                }
-              />
-            }
-            privacy={<ProfilePrivacy username={state.data.username} />}
-            reputation={
+            overview={
               <ProfileReputation
                 key={state.data.username}
                 username={state.data.username}
+                about={
+                  <AboutCard
+                    profile={toViewData(state.data)}
+                    email={state.data.email}
+                    emptyBioAction={
+                      <EditProfileLink label="Escrever bio" compact />
+                    }
+                  />
+                }
               />
             }
-            collection={<FeaturedCollection />}
+            collection={
+              <FeaturedCollection
+                privacy={<ProfilePrivacy username={state.data.username} />}
+              />
+            }
           />
         </ProfileSettingsProvider>
       ) : null}
@@ -102,8 +109,8 @@ function EditProfileLink({
       to="/perfil/editar"
       className={
         compact
-          ? 'inline-flex items-center gap-1 text-sm font-semibold text-primary-900 hover:text-primary-800'
-          : 'inline-flex h-10 items-center gap-2 rounded-control border border-primary-900 bg-white px-4 text-sm font-semibold text-primary-900 hover:bg-primary-100'
+          ? `${profileTextLink} inline-flex min-h-11 items-center gap-1`
+          : profileOutlineLink
       }
     >
       <PencilIcon />
