@@ -57,18 +57,6 @@ export function SiteHeader() {
   const avatarUrl = avatarState.status === 'ready' ? avatarState.data : null
   const cartCount = cartState.status === 'ready' ? cartState.cart.distinctItemCount : 0
 
-  // Mantém o atalho já existente no projeto; apenas a dica visual é omitida.
-  useEffect(() => {
-    function handleSearchShortcut(event: KeyboardEvent) {
-      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
-        event.preventDefault()
-        searchRef.current?.focus()
-      }
-    }
-    window.addEventListener('keydown', handleSearchShortcut)
-    return () => window.removeEventListener('keydown', handleSearchShortcut)
-  }, [])
-
   useEffect(() => {
     if (!openPanel) return
     function handleEscape(event: KeyboardEvent) {
@@ -131,6 +119,7 @@ export function SiteHeader() {
             <button
               ref={gamesTriggerRef}
               type="button"
+              aria-label="Explorar catálogos"
               aria-expanded={openPanel === 'games'}
               aria-controls="tcg-games-menu"
               className="tcg-nav-link"
@@ -147,6 +136,7 @@ export function SiteHeader() {
                     key={game.slug}
                     to="/catalogo/$game"
                     params={{ game: game.slug }}
+                    aria-current={pathname.startsWith(`/catalogo/${game.slug}`) ? 'page' : undefined}
                     className="tcg-dropdown-link"
                     onClick={() => setOpenPanel(null)}
                   >
@@ -184,7 +174,7 @@ export function SiteHeader() {
         </form>
 
         <div className="tcg-header-actions">
-          <button type="button" className="tcg-header-icon" title="Carrinho de compras" aria-label={cartCount ? `Carrinho: ${cartCount} anúncios` : 'Carrinho de compras'} onClick={openCart}>
+          <button type="button" className="tcg-header-icon tcg-header-cart" title="Carrinho de compras" aria-label={cartCount ? `Carrinho: ${cartCount} anúncios` : 'Carrinho de compras'} onClick={openCart}>
             <Icon name="cart" size={24} />
             {cartCount > 0 && <span aria-hidden="true" className="tcg-cart-count">{cartCount > 99 ? '99+' : cartCount}</span>}
           </button>
@@ -237,10 +227,10 @@ export function SiteHeader() {
             {openPanel === 'mobile' && (
               <nav id="tcg-mobile-menu" aria-label="Menu mobile" className="tcg-dropdown tcg-mobile-panel">
                 <div className="tcg-dropdown-caption">Navegação</div>
-                <Link to="/marketplace" search={{ sort: 'recent' }} onClick={() => setOpenPanel(null)} className="tcg-dropdown-link"><Icon name="storefront" size={20} /> Marketplace</Link>
+                <Link to="/marketplace" search={{ sort: 'recent' }} onClick={() => setOpenPanel(null)} aria-current={isMarketplace ? 'page' : undefined} className="tcg-dropdown-link"><Icon name="storefront" size={20} /> Marketplace</Link>
                 <div className="tcg-dropdown-caption">Explorar catálogos</div>
                 {NAV_GAMES.map((game) => (
-                  <Link key={game.slug} to="/catalogo/$game" params={{ game: game.slug }} onClick={() => setOpenPanel(null)} className="tcg-dropdown-link"><Icon name="cards" size={20} /> {game.label}</Link>
+                  <Link key={game.slug} to="/catalogo/$game" params={{ game: game.slug }} aria-current={pathname.startsWith(`/catalogo/${game.slug}`) ? 'page' : undefined} onClick={() => setOpenPanel(null)} className="tcg-dropdown-link"><Icon name="cards" size={20} /> {game.label}</Link>
                 ))}
                 <div className="tcg-dropdown-caption">Conta</div>
                 <AccountNavigation onSelect={() => setOpenPanel(null)} />

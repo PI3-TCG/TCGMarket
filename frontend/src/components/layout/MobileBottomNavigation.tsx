@@ -8,17 +8,14 @@ import { NAV_GAMES } from './navigationItems'
 /** Barra inferior do Design System v2.2: Início, Explorar, Carrinho, Coleção, Perfil. */
 export function MobileBottomNavigation() {
   const navigate = useNavigate()
-  const pathname = useRouterState({
-    select: (state) => state.location.pathname,
-  })
+  const pathname = useRouterState({ select: (state) => state.location.pathname })
   const { user, setLoginNotice } = useSession()
   const { state: cartState } = useCart()
   const [exploreOpen, setExploreOpen] = useState(false)
   const containerRef = useRef<HTMLElement>(null)
   const triggerRef = useRef<HTMLButtonElement>(null)
 
-  const cartCount =
-    cartState.status === 'ready' ? cartState.cart.distinctItemCount : 0
+  const cartCount = cartState.status === 'ready' ? cartState.cart.distinctItemCount : 0
 
   useEffect(() => {
     if (!exploreOpen) return
@@ -30,10 +27,7 @@ export function MobileBottomNavigation() {
       }
     }
     function handlePointerDown(event: PointerEvent) {
-      if (
-        event.target instanceof Node &&
-        !containerRef.current?.contains(event.target)
-      ) {
+      if (event.target instanceof Node && !containerRef.current?.contains(event.target)) {
         setExploreOpen(false)
       }
     }
@@ -65,25 +59,15 @@ export function MobileBottomNavigation() {
     }
   }
 
-  const isCatalog =
-    pathname.startsWith('/catalogo') || pathname.startsWith('/cartas/')
+  const isCatalog = pathname.startsWith('/catalogo') || pathname.startsWith('/cartas/')
   const isCart = pathname.startsWith('/carrinho')
   const isCollection = pathname.startsWith('/minha-colecao')
-  const isProfile =
-    pathname.startsWith('/perfil') || pathname.startsWith('/meus-anuncios')
+  const isProfile = pathname.startsWith('/perfil') || pathname.startsWith('/meus-anuncios')
 
   return (
-    <nav
-      ref={containerRef}
-      className="tcg-bottom-nav"
-      aria-label="Navegação inferior"
-    >
+    <nav ref={containerRef} className="tcg-bottom-nav" aria-label="Navegação inferior">
       <div className="tcg-bottom-nav-inner">
-        <Link
-          to="/"
-          className="tcg-bottom-item"
-          aria-current={pathname === '/' ? 'page' : undefined}
-        >
+        <Link to="/" className="tcg-bottom-item" aria-current={pathname === '/' ? 'page' : undefined}>
           <Icon name="home" size={20} /> <span>Início</span>
         </Link>
 
@@ -93,11 +77,7 @@ export function MobileBottomNavigation() {
             type="button"
             aria-expanded={exploreOpen}
             aria-controls="tcg-bottom-games"
-            aria-label={
-              exploreOpen
-                ? 'Fechar opções de jogos'
-                : 'Explorar catálogos de jogos'
-            }
+            aria-label={exploreOpen ? 'Fechar opções de jogos' : 'Explorar catálogos de jogos'}
             className="tcg-bottom-item"
             data-active={isCatalog || exploreOpen || undefined}
             onClick={() => setExploreOpen((open) => !open)}
@@ -130,38 +110,19 @@ export function MobileBottomNavigation() {
           )}
         </div>
 
-        <button
-          type="button"
-          onClick={openCart}
-          className="tcg-bottom-item"
-          data-active={isCart || undefined}
-        >
+        <button type="button" onClick={openCart} className="tcg-bottom-item" data-active={isCart || undefined} aria-current={isCart ? 'page' : undefined} aria-label={cartCount ? `Carrinho: ${cartCount} anúncios` : 'Carrinho'}>
           <span className="tcg-bottom-icon-wrap">
             <Icon name="cart" size={20} />
-            {cartCount > 0 && (
-              <span aria-hidden="true" className="tcg-bottom-count">
-                {cartCount > 99 ? '99+' : cartCount}
-              </span>
-            )}
+            {cartCount > 0 && <span aria-hidden="true" className="tcg-bottom-count">{cartCount > 99 ? '99+' : cartCount}</span>}
           </span>
           <span>Carrinho</span>
         </button>
 
-        <button
-          type="button"
-          onClick={() => openProtected('/minha-colecao')}
-          className="tcg-bottom-item"
-          data-active={isCollection || undefined}
-        >
+        <button type="button" onClick={() => openProtected('/minha-colecao')} className="tcg-bottom-item" data-active={isCollection || undefined} aria-current={isCollection ? 'page' : undefined}>
           <Icon name="layers" size={20} /> <span>Coleção</span>
         </button>
 
-        <button
-          type="button"
-          onClick={() => openProtected('/perfil')}
-          className="tcg-bottom-item"
-          data-active={isProfile || undefined}
-        >
+        <button type="button" onClick={() => openProtected('/perfil')} className="tcg-bottom-item" data-active={isProfile || undefined} aria-current={isProfile ? 'page' : undefined}>
           <Icon name="user" size={20} /> <span>Perfil</span>
         </button>
       </div>
