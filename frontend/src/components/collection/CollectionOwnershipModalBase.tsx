@@ -109,12 +109,12 @@ export function CollectionOwnershipModalBase({
       onClose={onClose}
       closeDisabled={isSaving}
       footer={
-        <div className="flex w-full flex-col-reverse gap-2.5 sm:flex-row sm:items-center sm:justify-end sm:gap-3">
+        <div className="flex w-full flex-wrap items-center justify-center gap-2.5 sm:gap-3">
           <button
             type="button"
             disabled={isSaving}
             onClick={onClose}
-            className={cn(modalSecondaryButton, 'w-full sm:w-auto')}
+            className={cn(modalSecondaryButton, 'w-fit max-w-full')}
           >
             {isComplete ? 'Fechar' : 'Cancelar'}
           </button>
@@ -123,7 +123,7 @@ export function CollectionOwnershipModalBase({
             <button
               type="button"
               onClick={onClose}
-              className={cn(modalPrimaryButton, 'w-full sm:w-auto')}
+              className={cn(modalPrimaryButton, 'w-fit max-w-full')}
             >
               <Icon name="check" size={20} />
               Concluir
@@ -135,7 +135,7 @@ export function CollectionOwnershipModalBase({
               disabled={isSaving || disablePrimary}
               className={cn(
                 mode === 'remove' ? modalDangerButton : modalPrimaryButton,
-                'w-full sm:w-auto',
+                'w-fit max-w-full',
               )}
             >
               <Icon name={PRIMARY_ICONS[mode]} size={20} />

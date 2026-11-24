@@ -638,12 +638,11 @@ function PublishedPanel({ ad }: { ad: AdResponse }) {
         </p>
       </div>
 
-      <div className="mt-6 grid w-full max-w-md gap-3 sm:grid-cols-2">
+      <div className="mt-6 grid w-full max-w-md justify-items-center gap-3 sm:grid-cols-2">
         <MyAdsButton />
         <Button
           disabled
           title="A página do anúncio ainda não está disponível"
-          className="w-full"
         >
           Ver anúncio
         </Button>
@@ -662,7 +661,7 @@ function MyAdsButton() {
   return (
     <Link
       to="/meus-anuncios"
-      className="inline-flex h-10 w-full sm:w-auto items-center justify-center gap-2 rounded-control border border-primary-900 px-4 text-sm font-semibold text-primary-900 hover:bg-primary-100 focus-visible:outline-2 focus-visible:outline-secondary-500"
+      className="inline-flex min-h-11 w-fit max-w-full items-center justify-center gap-2 rounded-control border border-primary-900 px-4 text-sm font-semibold text-primary-900 hover:bg-primary-100 focus-visible:outline-2 focus-visible:outline-secondary-500"
     >
       Meus anúncios
     </Link>

@@ -430,13 +430,13 @@ function CatalogFiltersForm({
           />
         </label>
 
-        <div className="space-y-2">
-          <button type="submit" className="filter-button min-h-11 w-full">
+        <div className="flex flex-col items-center gap-2">
+          <button type="submit" className="filter-button min-h-11 w-fit max-w-full">
             Aplicar filtros
           </button>
           <button
             type="button"
-            className="min-h-11 w-full rounded-lg text-sm font-semibold text-primary-900 underline underline-offset-4 hover:bg-primary-100/50 focus-visible:outline-2 focus-visible:outline-secondary-500"
+            className="min-h-11 w-fit max-w-full rounded-lg px-3 text-sm font-semibold text-primary-900 underline underline-offset-4 hover:bg-primary-100/50 focus-visible:outline-2 focus-visible:outline-secondary-500"
             onClick={() => {
               setDraft({})
               onClear()

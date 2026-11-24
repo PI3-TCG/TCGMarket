@@ -1,3 +1,4 @@
+import { cardSurface } from '@/components/ui/Card'
 import {
   conditionLabels,
   copies,
@@ -57,10 +58,10 @@ export function CartItemRow({
   return (
     <li
       aria-busy={busy || undefined}
-      className={`rounded-xl border bg-white p-4 shadow-sm transition sm:p-5 ${
+      className={`${cardSurface} p-4 sm:p-5 ${
         reduced && item.selected
-          ? 'border-warning-200 bg-warning-50/40'
-          : 'border-neutral-200'
+          ? 'border-warning-200! bg-warning-50/40!'
+          : ''
       }`}
     >
       <div className="flex gap-3 sm:gap-4">

@@ -198,7 +198,7 @@ export function CollectionFilters({
 
         <button
           type="submit"
-          className="filter-button min-h-11 w-full cursor-pointer"
+          className="filter-button mx-auto block min-h-11 w-fit max-w-full cursor-pointer"
         >
           Aplicar filtros
         </button>

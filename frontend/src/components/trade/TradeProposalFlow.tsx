@@ -532,15 +532,17 @@ export function TradeProposalFlow({
                     ))}
                   </ul>
                 )}
-                <Button
-                  className={`${modalSecondaryButton} mt-4 w-full`}
-                  variant="outline"
-                  onClick={() => setStep('picker')}
-                  disabled={offered.length >= 30}
-                  icon={<Icon name="plus" size={16} />}
-                >
-                  Escolher cartas da minha coleção
-                </Button>
+                <div className="flex justify-center">
+                  <Button
+                    className={`${modalSecondaryButton} mt-4 w-fit max-w-full`}
+                    variant="outline"
+                    onClick={() => setStep('picker')}
+                    disabled={offered.length >= 30}
+                    icon={<Icon name="plus" size={16} />}
+                  >
+                    Escolher cartas da minha coleção
+                  </Button>
+                </div>
                 {offered.length >= 30 ? (
                   <p className="mt-2 text-xs text-warning-700">
                     Limite de 30 itens por proposta.

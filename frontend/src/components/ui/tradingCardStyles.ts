@@ -13,7 +13,7 @@ export const tradingCardSurface =
   `${cardSurface} group flex min-w-0 flex-col focus-within:ring-2 focus-within:ring-support-blue focus-within:ring-offset-2 focus-within:ring-offset-surface-canvas hover:border-border-emphasis hover:shadow-md`
 
 export const tradingCardDetailsButton =
-  'inline-flex min-h-11 w-full cursor-pointer items-center justify-center rounded-control bg-brand-primary px-3 py-2.5 text-center font-sans text-sm font-semibold text-text-inverse transition-colors duration-150 hover:bg-brand-primary-hover active:bg-brand-primary-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-support-blue motion-reduce:transition-none'
+  'inline-flex min-h-11 w-fit max-w-full cursor-pointer items-center justify-center rounded-control bg-brand-primary px-3 py-2.5 text-center font-sans text-sm font-semibold text-text-inverse transition-colors duration-150 hover:bg-brand-primary-hover active:bg-brand-primary-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-support-blue motion-reduce:transition-none'
 
 const conditionColors: Record<CardCondition, string> = {
   NEAR_MINT: 'border-success-200 bg-success-50 text-state-success-text',

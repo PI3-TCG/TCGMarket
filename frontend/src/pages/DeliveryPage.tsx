@@ -1,22 +1,25 @@
-import { pageBanners } from '@/config/pageBanners'
+import { cardSurface } from '@/components/ui/Card'
+import { focusRing } from '@/components/ui/styles'
 import { useCart } from '@/cart'
 import { needsReview } from '@/components/cart/cartFormat'
 import { AddressCard } from '@/components/delivery/AddressCard'
 import { AddressFormModal } from '@/components/delivery/AddressFormModal'
 import { DeliverySummary } from '@/components/delivery/DeliverySummary'
-import { PageBanner } from '@/components/layout/PageBanner'
 import { Alert } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
 import { Icon } from '@/components/ui/Icon'
 import { listAddresses } from '@/services/addresses'
-import { readCheckoutAddress, writeCheckoutAddress } from '@/services/checkoutAddress'
+import {
+  readCheckoutAddress,
+  writeCheckoutAddress,
+} from '@/services/checkoutAddress'
 import { useSession } from '@/session'
 import type { Address } from '@/types/Address'
 import type { Cart } from '@/types/Cart'
 import { Link } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 
-const panelClass = 'rounded-xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-6'
+const panelClass = `${cardSurface} p-4 sm:p-5`
 
 type AddressesState =
   | { status: 'loading' }
@@ -31,27 +34,49 @@ export function DeliveryPage() {
   const userId = user?.id ?? null
 
   return (
-    <main className="min-h-screen pb-12 text-neutral-900">
-      <div className="mx-auto w-full max-w-[1400px] px-4 pt-4 sm:px-6 xl:px-[38px]">
-        <PageBanner
-          image={pageBanners.checkout}
-          title="Entrega"
-          subtitle="Escolha onde receber suas cartas."
-        />
+    <main className="mx-auto w-full max-w-[1400px] space-y-4 px-4 pt-4 pb-12 sm:px-6 xl:px-[38px]">
+      <header className="space-y-2">
+        <nav aria-label="Etapas da compra">
+          <ol className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-text-secondary">
+            <li>
+              <Link
+                to="/carrinho"
+                className={`${focusRing} rounded-sm text-brand-primary underline underline-offset-2`}
+              >
+                Carrinho
+              </Link>
+            </li>
+            <li aria-current="step" className="font-bold text-brand-primary">
+              <span aria-hidden="true" className="mr-3 text-text-secondary">
+                ›
+              </span>
+              Entrega
+            </li>
+            <li>
+              <span aria-hidden="true" className="mr-3">
+                ›
+              </span>
+              Revisão
+            </li>
+          </ol>
+        </nav>
+        <h1 className="font-display text-2xl font-bold text-brand-primary">
+          Entrega
+        </h1>
+      </header>
 
-        {cartState.status === 'error' ? (
-          <LoadError
-            title="Não foi possível carregar seu carrinho"
-            onRetry={reloadCart}
-          />
-        ) : null}
-        {cartState.status === 'ready' && userId ? (
-          <DeliveryContent cart={cartState.cart} userId={userId} />
-        ) : null}
-        {cartState.status === 'idle' || cartState.status === 'loading' ? (
-          <DeliverySkeleton />
-        ) : null}
-      </div>
+      {cartState.status === 'error' ? (
+        <LoadError
+          title="Não foi possível carregar seu carrinho"
+          onRetry={reloadCart}
+        />
+      ) : null}
+      {cartState.status === 'ready' && userId ? (
+        <DeliveryContent cart={cartState.cart} userId={userId} />
+      ) : null}
+      {cartState.status === 'idle' || cartState.status === 'loading' ? (
+        <DeliverySkeleton />
+      ) : null}
     </main>
   )
 }
@@ -93,7 +118,9 @@ function DeliveryContent({ cart, userId }: { cart: Cart; userId: string }) {
     setState((current) => {
       if (current.status !== 'ready') return current
       const merged = current.addresses.some((item) => item.id === address.id)
-        ? current.addresses.map((item) => (item.id === address.id ? address : item))
+        ? current.addresses.map((item) =>
+            item.id === address.id ? address : item,
+          )
         : [...current.addresses, address]
       const addresses = address.primary
         ? merged.map((item) =>
@@ -119,25 +146,30 @@ function DeliveryContent({ cart, userId }: { cart: Cart; userId: string }) {
     blocker = 'Selecione ao menos um anúncio no carrinho.'
   } else if (items.some(needsReview)) {
     blocker = 'Revise os itens destacados no carrinho.'
-  } else if (state.status !== 'ready') {
+  } else if (state.status === 'error') {
+    blocker = 'Carregue seus endereços novamente para continuar.'
+  } else if (state.status === 'loading') {
     blocker = 'Carregando seus endereços...'
   } else if (!selected) {
     blocker = 'Cadastre e selecione um endereço.'
   }
 
   return (
-    <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)]">
-      <section aria-labelledby="delivery-title" className="min-w-0 space-y-4">
+    <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(300px,2fr)]">
+      <section
+        aria-labelledby="delivery-title"
+        className={`${panelClass} min-w-0 space-y-3`}
+      >
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <h2
               id="delivery-title"
-              className="font-display text-3xl font-bold text-primary-900"
+              className="font-display text-xl font-bold text-primary-900"
             >
               Endereço de entrega
             </h2>
             <p className="text-sm text-neutral-700">
-              Selecione um endereço para esta compra.
+              Selecione o endereço que será usado para todos os itens.
             </p>
           </div>
           {addresses.length > 0 ? (
@@ -160,7 +192,10 @@ function DeliveryContent({ cart, userId }: { cart: Cart; userId: string }) {
         {items.length === 0 ? (
           <Alert variant="warning" title="Nenhum anúncio selecionado">
             Volte ao{' '}
-            <Link to="/carrinho" className="font-semibold underline underline-offset-2">
+            <Link
+              to="/carrinho"
+              className="font-semibold underline underline-offset-2"
+            >
               carrinho
             </Link>{' '}
             e selecione os anúncios que deseja comprar.
@@ -196,11 +231,6 @@ function DeliveryContent({ cart, userId }: { cart: Cart; userId: string }) {
             </ul>
           </fieldset>
         ) : null}
-
-        <p className="flex items-center gap-2 border-t border-neutral-200 pt-4 text-sm text-neutral-700">
-          <Icon name="info" size={20} />
-          O endereço será usado para todos os itens selecionados.
-        </p>
       </section>
 
       <DeliverySummary items={items} blocker={blocker} />
@@ -220,15 +250,19 @@ function DeliveryContent({ cart, userId }: { cart: Cart; userId: string }) {
 
 function NoAddresses({ onAdd }: { onAdd: () => void }) {
   return (
-    <div className={`${panelClass} flex flex-col items-center gap-4 py-12 text-center`}>
-      <span className="flex size-20 items-center justify-center rounded-full bg-secondary-100 text-secondary-700">
-        <Icon name="map-pin" size={32} />
-      </span>
-      <h3 className="font-display text-2xl font-bold text-primary-900">
+    <div
+      className={
+        'flex flex-col items-start gap-2 rounded-control bg-surface-input p-4'
+      }
+    >
+      <h3 className="text-base font-semibold text-brand-primary">
         Você ainda não tem endereço cadastrado
       </h3>
       <p className="text-neutral-700">Adicione um endereço para continuar.</p>
-      <Button className="h-12 px-8" icon={<Icon name="plus" size={20} />} onClick={onAdd}>
+      <Button
+        icon={<Icon name="plus" size={20} />}
+        onClick={onAdd}
+      >
         Adicionar endereço
       </Button>
     </div>
@@ -244,9 +278,9 @@ function LoadError({ title, onRetry }: { title: string; onRetry: () => void }) {
       <span className="flex size-16 items-center justify-center rounded-full bg-error-50 text-error-700">
         <Icon name="alert" size={32} />
       </span>
-      <h3 className="font-display text-2xl font-bold text-primary-900">{title}</h3>
+      <h3 className="text-base font-semibold text-brand-primary">{title}</h3>
       <p className="text-neutral-700">Tente novamente em instantes.</p>
-      <Button className="h-12 px-8" onClick={onRetry}>
+      <Button onClick={onRetry}>
         Tentar novamente
       </Button>
     </div>
@@ -273,7 +307,7 @@ function AddressesSkeleton() {
 
 function DeliverySkeleton() {
   return (
-    <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)]">
+    <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(300px,2fr)]">
       <div className="space-y-4">
         <span className="block h-9 w-72 max-w-full animate-pulse rounded bg-neutral-200" />
         <AddressesSkeleton />
