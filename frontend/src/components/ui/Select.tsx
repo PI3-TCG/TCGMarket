@@ -244,7 +244,7 @@ export function Select({
           {selected?.label ?? placeholder}
         </span>
         {isError ? (
-          <Icon name="alert" size={18} className="shrink-0 text-state-error" />
+          <Icon name="alert" size={16} className="shrink-0 text-state-error" />
         ) : null}
         <Icon name="chevron-down" size={20} className="shrink-0 text-text-secondary" />
       </button>
