@@ -1,5 +1,9 @@
+/**
+ * Classes compartilhadas de UI.
+ * A paleta e as fontes são definidas exclusivamente em src/index.css (@theme).
+ */
 export const focusRing =
-  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white'
+  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-support-blue focus-visible:ring-offset-2 focus-visible:ring-offset-white'
 
 export const controlHeight = 'h-10'
 
