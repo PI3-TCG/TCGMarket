@@ -10,6 +10,13 @@ type CardProps = HTMLAttributes<HTMLElement> & {
   interactive?: boolean
 }
 
+/**
+ * DS-04: somente a superfície visual. Navegação e ações pertencem aos
+ * componentes especializados, não ao <article>.
+ */
+export const cardSurface =
+  'overflow-hidden rounded-card border border-border-default bg-surface-default shadow-sm transition-[border-color,box-shadow] duration-150 motion-reduce:transition-none'
+
 export function Card({
   preview,
   interactive = false,
@@ -22,14 +29,14 @@ export function Card({
     <article
       tabIndex={preview === 'focus' ? 0 : undefined}
       className={cn(
-        'overflow-hidden rounded-surface border bg-white shadow-sm transition-[border-color,box-shadow] duration-150',
-        emphasized ? 'border-primary-900' : 'border-neutral-200',
+        cardSurface,
+        emphasized && 'border-border-emphasis',
         preview === 'hover' && 'shadow-md',
         interactive &&
           preview !== 'hover' &&
-          'hover:border-primary-900 hover:shadow-md',
+          'hover:border-border-emphasis hover:shadow-md',
         preview === 'focus' &&
-          'ring-2 ring-secondary-500 ring-offset-2 ring-offset-white',
+          'ring-2 ring-support-blue ring-offset-2 ring-offset-surface-canvas',
         preview === 'disabled' && 'opacity-50',
         className,
       )}
@@ -69,6 +76,11 @@ const transactionLabel: Record<ListingTransaction, string> = {
   both: 'Venda e troca',
 }
 
+/**
+ * Componente ilustrativo usado na DesignSystemPage; recebe dados do consumidor.
+ * O favorito só aparece quando existe uma ação onFavorite real disponível.
+ * A listagem de produção usa MarketplaceAdCard/AdListingCard.
+ */
 export function ListingCard({
   title,
   seller,
@@ -87,19 +99,23 @@ export function ListingCard({
 }: ListingCardProps) {
   return (
     <Card preview={preview} interactive={interactive} className={className}>
-      <div className="relative">
-        <div className="aspect-5/4 bg-neutral-100">{image}</div>
-        <button
-          type="button"
-          aria-pressed={favorite}
-          aria-label={
-            favorite ? 'Remover dos favoritos' : 'Marcar como favorito'
-          }
-          onClick={onFavorite}
-          className="absolute top-2 right-2 grid size-8 cursor-pointer place-items-center rounded-full bg-white/90 text-primary-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary-500"
-        >
-          <Icon name="heart" size={16} filled={favorite} />
-        </button>
+      <div className="relative border-b border-border-default bg-surface-input">
+        <div className="mx-auto aspect-[5/7] w-full overflow-hidden p-3 [&>img]:h-full [&>img]:w-full [&>img]:object-contain">
+          {image}
+        </div>
+        {onFavorite ? (
+          <button
+            type="button"
+            aria-pressed={favorite}
+            aria-label={
+              favorite ? 'Remover dos favoritos' : 'Marcar como favorito'
+            }
+            onClick={onFavorite}
+            className="absolute top-2 right-2 grid size-11 cursor-pointer place-items-center rounded-full border border-border-default bg-surface-default text-brand-primary shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-support-blue"
+          >
+            <Icon name="heart" size={20} filled={favorite} />
+          </button>
+        ) : null}
         <div className="absolute bottom-2 left-2 flex max-w-[calc(100%-1rem)] flex-wrap gap-1">
           <Badge variant={transactionVariant[transaction]}>
             {transactionLabel[transaction]}
@@ -107,21 +123,26 @@ export function ListingCard({
           {rarity ? <Badge variant={rarityVariant}>{rarity}</Badge> : null}
         </div>
       </div>
-      <div className="space-y-1.5 p-3">
-        <h3 className="font-display text-sm leading-tight font-semibold text-neutral-900">
+      <div className="flex min-w-0 flex-col gap-2 p-3.5">
+        <h3
+          className="line-clamp-2 min-h-10 wrap-anywhere font-sans text-sm leading-5 font-bold text-text-ink"
+          title={title}
+        >
           {title}
         </h3>
-        <p className="text-xs text-neutral-700">{seller}</p>
-        <p className="flex items-center gap-1 text-xs text-neutral-500">
-          <Icon name="star" size={16} filled className="text-rare-500" />
-          <span className="font-semibold text-neutral-700">{rating}</span>
+        <p className="truncate text-sm text-text-secondary" title={seller}>
+          {seller}
+        </p>
+        <p className="flex items-center gap-1 text-xs text-text-secondary">
+          <Icon name="star" size={16} filled className="text-accent-gold-deep" />
+          <span className="font-semibold text-text-primary">{rating}</span>
           <span>({reviews})</span>
         </p>
-        <div className="flex items-center justify-between gap-2 pt-1">
+        <div className="mt-auto flex items-center justify-between gap-2 border-t border-border-default pt-2">
           <Badge variant={transactionVariant[transaction]}>
             {transactionLabel[transaction]}
           </Badge>
-          <span className="inline-flex shrink-0 items-center gap-1 rounded-control bg-primary-900 px-2 py-1 font-display text-xs font-bold whitespace-nowrap text-white">
+          <span className="inline-flex shrink-0 items-center gap-1 rounded-control bg-brand-primary px-2 py-1.5 font-sans text-sm font-bold text-white">
             {price}
             <Icon name="cart" size={16} />
           </span>

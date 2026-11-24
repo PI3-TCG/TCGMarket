@@ -17,6 +17,7 @@ type CollectionItemCardProps = {
   onAdvertise?: (item: CollectionItem) => void
 }
 
+/** Sem preço artificial; ações continuam delegadas à página de coleção. */
 export function CollectionItemCard({
   item,
   onDetails,
@@ -36,23 +37,30 @@ export function CollectionItemCard({
       <TradingCardImage url={item.card.imageUrl} name={item.card.name}>
         <span
           aria-label={`${item.quantity} exemplares`}
-          className="absolute right-2 bottom-2 rounded-md bg-white px-2 py-1 text-xs font-bold text-neutral-900"
+          className="absolute right-2 bottom-2 rounded-control border border-border-default bg-surface-default px-2 py-1 text-xs font-bold text-text-ink shadow-sm"
         >
           ×{item.quantity}
         </span>
       </TradingCardImage>
 
-      <div className="flex flex-1 flex-col gap-2 p-3">
-        <h3 className="font-display text-sm font-bold wrap-anywhere text-neutral-900">
+      <div className="flex min-w-0 flex-1 flex-col gap-2 p-3.5">
+        <h3
+          className="line-clamp-2 min-h-10 wrap-anywhere font-sans text-sm leading-5 font-bold text-text-ink"
+          title={item.card.name}
+        >
           {item.card.name}
         </h3>
 
-        <p className="text-xs text-neutral-500">
+        <p className="line-clamp-2 text-xs leading-4 text-text-secondary">
           {item.card.edition}
           {item.card.cardNumber ? ` · Nº ${item.card.cardNumber}` : ''}
         </p>
 
-        <span className={tradingCardRarity}>{item.card.officialRarity}</span>
+        {item.card.officialRarity && (
+          <span className={tradingCardRarity}>
+            {item.card.officialRarity}
+          </span>
+        )}
 
         <div className="mt-auto flex flex-wrap items-center gap-2 pt-1">
           <span className={cardConditionBadge(item.condition)}>
@@ -64,7 +72,7 @@ export function CollectionItemCard({
         </div>
       </div>
 
-      <div className="grid grid-cols-[repeat(auto-fit,minmax(2.75rem,1fr))] gap-1 border-t border-neutral-200 p-2">
+      <div className="grid grid-cols-2 gap-1 border-t border-border-default p-2 xl:grid-cols-4">
         {actions.map((action) => (
           <button
             key={action.label}
@@ -77,10 +85,10 @@ export function CollectionItemCard({
                 ? action.label
                 : `${action.label} — ainda não disponível nesta prévia`
             }
-            className="flex min-h-12 flex-col items-center justify-center gap-1 rounded-md px-1 py-2 text-primary-900 transition-colors enabled:cursor-pointer enabled:hover:bg-primary-100 focus-visible:outline-2 focus-visible:outline-secondary-500 disabled:cursor-not-allowed disabled:opacity-40"
+            className="flex min-h-11 min-w-0 flex-col items-center justify-center gap-1 rounded-control px-1 py-2 text-brand-primary transition-colors duration-150 enabled:cursor-pointer enabled:hover:bg-surface-brand-tint enabled:active:bg-surface-subtle focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-support-blue disabled:cursor-not-allowed disabled:opacity-40 motion-reduce:transition-none"
           >
-            <Icon name={action.icon} size={16} />
-            <span className="text-[10px] font-medium text-neutral-700">
+            <Icon name={action.icon} size={20} />
+            <span className="text-[11px] leading-4 font-semibold text-text-primary">
               {action.label}
             </span>
           </button>

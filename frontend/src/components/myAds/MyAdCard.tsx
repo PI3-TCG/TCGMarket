@@ -11,6 +11,7 @@ type MyAdCardProps = {
   onCancel: (ad: OwnAd) => void
 }
 
+/** Mantém as operações existentes condicionadas ao status do anúncio. */
 export function MyAdCard({ ad, onDetails, onEdit, onCancel }: MyAdCardProps) {
   return (
     <AdListingCard
@@ -29,7 +30,7 @@ export function MyAdCard({ ad, onDetails, onEdit, onCancel }: MyAdCardProps) {
       >
         Ver detalhes
       </button>
-      <div className="grid min-h-12 grid-cols-2 gap-2">
+      <div className="grid min-h-11 grid-cols-2 gap-2">
         {ad.status === 'ACTIVE' && (
           <>
             <CardAction
@@ -70,14 +71,14 @@ function CardAction({
       type="button"
       onClick={onClick}
       aria-label={`${label === 'Cancelar' ? 'Cancelar anúncio' : label}: ${cardName}`}
-      className={`flex min-h-12 cursor-pointer rounded-control flex-col items-center justify-center gap-1 px-1 py-2 transition-colors focus-visible:outline-2 focus-visible:outline-secondary-500 ${
+      className={`flex min-h-11 cursor-pointer flex-col items-center justify-center gap-1 rounded-control px-1 py-2 font-sans text-sm transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-support-blue motion-reduce:transition-none ${
         danger
-          ? 'text-error-700 hover:bg-error-50'
-          : 'text-primary-900 hover:bg-primary-100'
+          ? 'text-state-error hover:bg-error-50 active:bg-error-50'
+          : 'text-brand-primary hover:bg-surface-brand-tint active:bg-surface-subtle'
       }`}
     >
-      <Icon name={icon} size={16} />
-      <span className="text-[10px] font-medium">{label}</span>
+      <Icon name={icon} size={20} />
+      <span className="text-xs font-semibold">{label}</span>
     </button>
   )
 }

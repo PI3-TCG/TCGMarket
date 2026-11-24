@@ -13,20 +13,21 @@ type CatalogCardProps = {
   onSelect?: (card: CatalogCardData) => void
 }
 
+/** Catálogo exibe metadados da carta, sem preço ou estoque inventado. */
 export function CatalogCard({ card, onSelect, footer }: CatalogCardProps) {
   const cardContent = (
     <>
       <TradingCardImage url={card.imageUrl} name={card.name} />
 
-      <div className="flex flex-1 flex-col gap-2 p-3.5">
-        <h3 className="font-display line-clamp-1 text-sm font-bold text-neutral-900">
+      <div className="flex min-w-0 flex-1 flex-col gap-2 p-3.5">
+        <h3
+          className="line-clamp-2 min-h-10 wrap-anywhere font-sans text-sm leading-5 font-bold text-text-ink"
+          title={card.name}
+        >
           {card.name}
         </h3>
         {card.namePt && (
-          <p
-            lang="pt-BR"
-            className="-mt-1.5 line-clamp-1 text-xs text-neutral-600"
-          >
+          <p lang="pt-BR" className="line-clamp-2 text-sm text-text-secondary">
             {card.namePt}
           </p>
         )}
@@ -35,13 +36,13 @@ export function CatalogCard({ card, onSelect, footer }: CatalogCardProps) {
           <span className={tradingCardRarity}>{card.officialRarity}</span>
         )}
 
-        <p className="line-clamp-1 text-xs text-neutral-500">
+        <p className="line-clamp-2 text-xs leading-4 text-text-secondary">
           {card.edition}
           {card.cardNumber ? ` · Nº ${card.cardNumber}` : ''}
         </p>
 
         {footer && (
-          <div className="border-t border-neutral-100 pt-2 text-xs text-neutral-700">
+          <div className="mt-auto border-t border-border-default pt-2 text-sm text-text-secondary">
             {footer}
           </div>
         )}
@@ -56,7 +57,7 @@ export function CatalogCard({ card, onSelect, footer }: CatalogCardProps) {
           type="button"
           onClick={() => onSelect(card)}
           aria-label={`Ver detalhes de ${card.name}`}
-          className="flex h-full w-full cursor-pointer flex-col text-left focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-secondary-500"
+          className="flex h-full w-full cursor-pointer flex-col text-left focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-support-blue"
         >
           {cardContent}
         </button>
@@ -64,7 +65,8 @@ export function CatalogCard({ card, onSelect, footer }: CatalogCardProps) {
         <Link
           to="/cartas/$id"
           params={{ id: card.id }}
-          className="flex h-full w-full cursor-pointer flex-col text-left focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-secondary-500"
+          aria-label={`Ver detalhes de ${card.name}`}
+          className="flex h-full w-full cursor-pointer flex-col text-left focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-support-blue"
         >
           {cardContent}
         </Link>
