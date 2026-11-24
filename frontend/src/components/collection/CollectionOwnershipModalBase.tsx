@@ -1,23 +1,23 @@
-import { useEffect, useId, useRef, type ReactNode } from 'react'
-import { createPortal } from 'react-dom'
+import { useId, type ReactNode } from 'react'
+
 import { Alert } from '@/components/ui/Alert'
 import { cn } from '@/components/ui/cn'
 import { Icon } from '@/components/ui/Icon'
+import { Modal } from '@/components/ui/Modal'
 import {
-  ModalHeaderOrnaments,
-  modalBody,
-  modalCloseButton,
   modalDangerButton,
-  modalFooter,
-  modalFrame,
-  modalHeader,
-  modalHeadingIcon,
   modalPrimaryButton,
   modalSecondaryButton,
 } from '@/components/ui/modalTheme'
 import type { CardCondition, CardLanguage } from '@/types/Collection'
 
+/**
+ * DS-05 — A base compartilhada controla portal, foco, Escape, backdrop,
+ * scroll lock e moldura. Este componente cuida apenas da composição
+ * e das ações específicas da coleção.
+ */
 const MAX_QUANTITY = 2147483647
+
 export type CollectionModalCard = {
   name: string
   imageUrl: string | null
@@ -28,6 +28,7 @@ export type CollectionModalCard = {
 }
 
 type ModalMode = 'add' | 'edit' | 'remove'
+
 type ModalBaseProps = {
   mode: ModalMode
   card: CollectionModalCard
@@ -51,7 +52,18 @@ const SUCCESS_TITLES: Record<ModalMode, string> = {
   edit: 'Alterações salvas!',
   remove: 'Carta removida!',
 }
-const PRIMARY_ICONS = { add: 'layers', edit: 'edit', remove: 'trash' } as const
+
+const PRIMARY_ICONS = {
+  add: 'layers',
+  edit: 'edit',
+  remove: 'trash',
+} as const
+
+const HEADER_ICONS = {
+  add: 'layers',
+  edit: 'edit',
+  remove: 'trash',
+} as const
 
 const GAME_LABELS: Record<string, string> = {
   POKEMON: 'Pokémon',
@@ -76,286 +88,116 @@ export function CollectionOwnershipModalBase({
   children,
   summaryAside,
 }: ModalBaseProps) {
-  const titleId = useId()
-  const descriptionId = useId()
   const collectionFormId = useId()
-  const closeButtonRef = useRef<HTMLButtonElement>(null)
-  const dialogRef = useRef<HTMLElement>(null)
 
-  useEffect(() => {
-    const previousOverflow = document.body.style.overflow
-    const previousFocus =
-      document.activeElement instanceof HTMLElement
-        ? document.activeElement
-        : null
-    document.body.style.overflow = 'hidden'
-    closeButtonRef.current?.focus()
-    return () => {
-      document.body.style.overflow = previousOverflow
-      if (previousFocus?.isConnected) previousFocus.focus()
-    }
-  }, [])
+  return (
+    <Modal
+      open
+      presentation="refined"
+      size="lg"
+      className={cn(
+        'mx-auto',
+        mode === 'edit'
+          ? 'max-w-[680px]'
+          : mode === 'remove'
+            ? 'max-w-[560px]'
+            : 'max-w-[610px]',
+      )}
+      title={title}
+      subtitle={subtitle}
+      headerIcon={HEADER_ICONS[mode]}
+      onClose={onClose}
+      closeDisabled={isSaving}
+      footer={
+        <div className="flex w-full flex-col-reverse gap-2.5 sm:flex-row sm:items-center sm:justify-end sm:gap-3">
+          <button
+            type="button"
+            disabled={isSaving}
+            onClick={onClose}
+            className={cn(modalSecondaryButton, 'w-full sm:w-auto')}
+          >
+            {isComplete ? 'Fechar' : 'Cancelar'}
+          </button>
 
-  useEffect(() => {
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') {
-        if (!isSaving) {
-          event.preventDefault()
-          onClose()
-        }
-        return
-      }
-      if (event.key !== 'Tab' || !dialogRef.current) return
-      const dialog = dialogRef.current
-      const focusable = Array.from(
-        dialog.querySelectorAll<HTMLElement>(
-          'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
-        ),
-      ).filter(
-        (el) =>
-          el.getClientRects().length > 0 &&
-          !el.closest('[inert]') &&
-          !el.matches(':disabled'),
-      )
-      if (focusable.length === 0) {
-        event.preventDefault()
-        dialog.focus()
-        return
-      }
-      const first = focusable[0]
-      const last = focusable[focusable.length - 1]
-      const active = document.activeElement
-      if (!dialog.contains(active) || active === dialog) {
-        event.preventDefault()
-        ;(event.shiftKey ? last : first).focus()
-      } else if (event.shiftKey && active === first) {
-        event.preventDefault()
-        last.focus()
-      } else if (!event.shiftKey && active === last) {
-        event.preventDefault()
-        first.focus()
-      }
-    }
-    document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [isSaving, onClose])
-
-  return createPortal(
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[#15091F]/75 p-3 backdrop-blur-[4px] sm:p-5"
-      onMouseDown={(event) => {
-        if (event.target === event.currentTarget && !isSaving) onClose()
-      }}
-    >
-      <section
-        ref={dialogRef}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={titleId}
-        aria-describedby={descriptionId}
-        tabIndex={-1}
-        className={cn(
-          'flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-[21px] outline-none',
-          mode === 'edit'
-            ? 'max-w-[670px]'
-            : mode === 'remove'
-              ? 'max-w-[590px]'
-              : 'max-w-[575px]',
-          modalFrame,
-        )}
-      >
-        <header
-          className={cn(
-            'relative shrink-0 px-4 pb-6 pt-4 sm:px-6 sm:pb-7',
-            modalHeader,
+          {isComplete ? (
+            <button
+              type="button"
+              onClick={onClose}
+              className={cn(modalPrimaryButton, 'w-full sm:w-auto')}
+            >
+              <Icon name="check" size={20} />
+              Concluir
+            </button>
+          ) : (
+            <button
+              type="submit"
+              form={collectionFormId}
+              disabled={isSaving || disablePrimary}
+              className={cn(
+                mode === 'remove' ? modalDangerButton : modalPrimaryButton,
+                'w-full sm:w-auto',
+              )}
+            >
+              <Icon name={PRIMARY_ICONS[mode]} size={20} />
+              {isSaving ? busyLabel : primaryLabel}
+            </button>
           )}
-        >
-          <ModalHeaderOrnaments />
+        </div>
+      }
+    >
+      <div className="space-y-5">
+        {(mode === 'add' || mode === 'edit') && (
+          <CollectionCardSummary
+            card={card}
+            variant={mode}
+            summaryAside={summaryAside}
+          />
+        )}
 
-          <div className="relative grid grid-cols-[40px_minmax(0,1fr)_40px] items-center gap-2">
-            <div aria-hidden="true" className={modalHeadingIcon}>
-              <Icon
-                name={
-                  mode === 'remove'
-                    ? 'trash'
-                    : mode === 'edit'
-                      ? 'edit'
-                      : 'layers'
-                }
-                size={20}
-              />
-            </div>
-            <div className="min-w-0 text-center">
-              <h2
-                id={titleId}
-                className="font-display text-base font-bold leading-tight text-white sm:text-[19px]"
+        <form
+          id={collectionFormId}
+          noValidate
+          onSubmit={(event) => {
+            event.preventDefault()
+            onSubmit()
+          }}
+        >
+          {mode === 'remove' && !isComplete && (
+            <div className="mb-5 space-y-2 rounded-surface border border-error-200 bg-error-50 px-4 py-5 text-center">
+              <div
+                aria-hidden="true"
+                className="mx-auto grid size-12 place-items-center rounded-control bg-white text-state-error"
               >
-                {title}
-              </h2>
-              <p
-                id={descriptionId}
-                className="mt-0.5 text-[11px] leading-snug text-white/90 sm:text-xs"
-              >
-                {subtitle}
+                <Icon name="trash" size={24} />
+              </div>
+              <h3 className="font-title text-xl font-bold text-text-ink">
+                Remover item da coleção?
+              </h3>
+              <p className="text-sm leading-relaxed text-text-secondary">
+                Este item será removido da sua coleção, mas continuará
+                disponível no catálogo.
+              </p>
+              <p className="text-sm font-semibold text-text-primary">
+                {card.name}
               </p>
             </div>
-            <button
-              ref={closeButtonRef}
-              type="button"
-              disabled={isSaving}
-              onClick={onClose}
-              aria-label="Fechar modal"
-              className={cn(
-                'justify-self-end rounded-lg p-2 disabled:opacity-50',
-                modalCloseButton,
-              )}
-            >
-              <Icon name="close" size={20} />
-            </button>
-          </div>
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-x-0 bottom-0 z-20"
-          >
-            {/* Linha dourada refinada */}
-            <div
-              className="mx-4 h-[2px] sm:mx-6"
-              style={{
-                background:
-                  'linear-gradient(90deg, rgba(215,154,0,0) 0%, #B87C00 10%, #E7B81E 24%, #FFF1A6 50%, #E7B81E 76%, #B87C00 90%, rgba(215,154,0,0) 100%)',
-                boxShadow:
-                  '0 0 8px rgba(252, 210, 3, 0.22), 0 1px 0 rgba(255,255,255,0.10)',
-              }}
-            />
-
-            {/* Losango central */}
-            <div className="absolute left-1/2 top-1/2 flex size-[16px] -translate-x-1/2 -translate-y-1/2 rotate-45 items-center justify-center rounded-[2px] border border-[#F6CD3A] bg-[linear-gradient(180deg,#FFF8D7_0%,#F0C839_100%)] shadow-[0_0_0_2px_#7A117C,0_0_8px_rgba(252,210,3,0.35)]">
-              <div className="size-[5px] border border-[#F6CD3A] bg-white/75" />
-            </div>
-          </div>
-        </header>
-        {/* Divisória decorativa entre cabeçalho e conteúdo */}
-        <div
-          aria-hidden="true"
-          className="relative z-10 h-[2px] shrink-0 bg-[linear-gradient(90deg,#C78600_0%,#FCD84C_30%,#FFF0A8_50%,#FCD84C_70%,#C78600_100%)] shadow-[0_0_8px_rgba(252,210,3,0.25)]"
-        >
-          <div className="absolute left-1/2 top-1/2 flex size-[16px] -translate-x-1/2 -translate-y-1/2 rotate-45 items-center justify-center border-2 border-[#FCD84C] bg-[#FFF6C8] shadow-[0_0_0_2px_#7A117C,0_0_8px_rgba(252,210,3,0.35)]">
-            <span className="size-[5px] bg-[#FCD84C]" />
-          </div>
-        </div>
-        <div
-          className={cn(
-            'relative flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-contain rounded-t-[20px] p-4 sm:p-5',
-            modalBody,
-          )}
-        >
-          {mode === 'add' && (
-            <CollectionCardSummary card={card} variant="add" />
-          )}
-          {mode === 'edit' && (
-            <CollectionCardSummary
-              card={card}
-              variant="edit"
-              summaryAside={summaryAside}
-            />
           )}
 
-          <form
-            id={collectionFormId}
-            noValidate
-            className={cn(
-              'min-w-0',
-              mode === 'remove' ? '' : 'mt-4 border-t border-[#DAD6E9] pt-4',
-            )}
-            onSubmit={(event) => {
-              event.preventDefault()
-              onSubmit()
-            }}
-          >
-            {mode === 'remove' && !isComplete && (
-              <div className="mb-4 flex flex-col items-center gap-2 text-center">
-                <div
-                  aria-hidden="true"
-                  className="flex size-16 items-center justify-center rounded-[20px] bg-[#FCE4E7] text-[#D41127]"
-                >
-                  <Icon name="trash" size={32} />
-                </div>
-                <h3 className="font-display text-xl font-bold text-[#1B1439]">
-                  Remover item da coleção?
-                </h3>
-                <p className="max-w-[440px] text-sm leading-relaxed text-[#2D264C]">
-                  Este item será removido da sua coleção, mas continuará
-                  disponível no catálogo.
-                </p>
-                <p className="text-xs font-semibold text-[#6B557C]">
-                  {card.name}
-                </p>
-              </div>
-            )}
-            {children}
-            <div className="space-y-3" aria-live="polite">
-              {error && (
-                <div className="mt-4">
-                  <Alert variant="error">{error}</Alert>
-                </div>
-              )}
+          {children}
+
+          {(error || successMessage) && (
+            <div className="mt-4 space-y-3" aria-live="polite">
+              {error && <Alert variant="error">{error}</Alert>}
               {successMessage && (
-                <div className="mt-4">
-                  <Alert variant="success" title={SUCCESS_TITLES[mode]}>
-                    {successMessage}
-                  </Alert>
-                </div>
+                <Alert variant="success" title={SUCCESS_TITLES[mode]}>
+                  {successMessage}
+                </Alert>
               )}
             </div>
-          </form>
-        </div>
-
-        <footer
-          className={cn(
-            'shrink-0 px-6 py-3.5',
-            modalFooter,
-            modalBody,
           )}
-        >
-          <div className="flex flex-wrap items-center justify-end gap-3 border-t border-[#DAD6E9] pt-4">
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={isSaving}
-              className={modalSecondaryButton}
-            >
-              {isComplete ? 'Fechar' : 'Cancelar'}
-            </button>
-            {isComplete ? (
-              <button
-                type="button"
-                onClick={onClose}
-                className={cn(
-                  'inline-flex items-center justify-center gap-2',
-                  modalPrimaryButton,
-                )}
-              >
-                <Icon name="check" size={20} /> Concluir
-              </button>
-            ) : (
-              <button
-                type="submit"
-                form={collectionFormId}
-                disabled={isSaving || disablePrimary}
-                className={cn(
-                  'inline-flex items-center justify-center gap-2',
-                  mode === 'remove' ? modalDangerButton : modalPrimaryButton,
-                )}
-              >
-                <Icon name={PRIMARY_ICONS[mode]} size={20} />{' '}
-                {isSaving ? busyLabel : primaryLabel}
-              </button>
-            )}
-          </div>
-        </footer>
-      </section>
-    </div>,
-    document.body,
+        </form>
+      </div>
+    </Modal>
   )
 }
 
@@ -371,41 +213,44 @@ function CollectionCardSummary({
   return (
     <div
       className={cn(
-        'flex min-w-0 items-center gap-3',
-        variant === 'edit' ? 'pb-1' : 'border-b border-[#DAD6E9] pb-4',
+        'flex min-w-0 items-center gap-4 sm:gap-5',
+        variant === 'edit' && 'flex-wrap sm:flex-nowrap',
       )}
     >
-      <div className="w-[76px] shrink-0 sm:w-[88px]">
+      <div className="w-[92px] shrink-0 sm:w-[106px]">
         {card.imageUrl ? (
           <img
             src={card.imageUrl}
             alt={`Carta ${card.name}`}
-            className="aspect-[3/4] w-full rounded-md object-contain shadow-[0_3px_11px_rgba(33,12,55,0.30)] ring-1 ring-[#C9AC74]"
+            className="aspect-5/7 w-full rounded-md object-contain shadow-md ring-1 ring-border-emphasis/40 motion-safe:transition-transform motion-safe:duration-200 motion-safe:hover:scale-[1.04]"
           />
         ) : (
-          <div className="flex aspect-[3/4] items-center justify-center rounded-md bg-[#EAE6F4] text-[#4D366F]">
+          <div
+            role="img"
+            aria-label={`Imagem indisponível: ${card.name}`}
+            className="grid aspect-5/7 place-items-center rounded-control border border-border-default bg-surface-subtle text-text-secondary"
+          >
             <Icon name="cards" size={32} />
-            <span className="sr-only">Imagem indisponível</span>
           </div>
         )}
       </div>
-      <div className="min-w-0 flex-1">
-        <h3 className="font-display text-lg font-bold leading-tight text-[#20143E] sm:text-xl">
+
+      <div className="min-w-0 flex-1 space-y-1.5">
+        <span className="sr-only">{GAME_LABELS[card.game] ?? card.game}</span>
+        <h3 className="font-title text-xl font-bold leading-tight text-text-ink sm:text-2xl">
           {card.name}
         </h3>
-        <p className="mt-1 text-sm text-[#514475]">
+        <p className="text-sm leading-relaxed text-text-secondary">
           {card.edition || 'Coleção não informada'}
-          {card.cardNumber ? ` · #${card.cardNumber}` : ''}
+          {card.cardNumber ? ` · Nº ${card.cardNumber}` : ''}
         </p>
-        <span className="mt-2 inline-block rounded-full bg-[#E8C9FA] px-3 py-1 text-xs font-bold text-[#5F1498]">
+        <span className="inline-flex max-w-full items-center rounded-full border border-border-default bg-accent-gold-soft px-2.5 py-1 text-xs font-semibold text-accent-gold-deep">
           {card.officialRarity || 'Raridade não informada'}
         </span>
-        {variant === 'add' && (
-          <span className="sr-only">{GAME_LABELS[card.game] ?? card.game}</span>
-        )}
       </div>
+
       {variant === 'edit' && summaryAside ? (
-        <div className="min-w-[105px] max-w-[145px] shrink-0 border-l border-[#DAD6E9] pl-3 text-center sm:min-w-[135px] sm:pl-4">
+        <div className="w-full min-w-0 text-left sm:w-auto sm:max-w-[145px] sm:shrink-0 sm:text-center">
           {summaryAside}
         </div>
       ) : null}
@@ -424,6 +269,7 @@ type FieldsProps = {
   onConditionChange: (value: CardCondition) => void
   onLanguageChange: (value: CardLanguage) => void
 }
+
 const CONDITIONS: { value: CardCondition; label: string }[] = [
   { value: 'NEAR_MINT', label: 'Near Mint (NM)' },
   { value: 'LIGHTLY_PLAYED', label: 'Lightly Played (LP)' },
@@ -449,22 +295,29 @@ export function CollectionOwnershipFields({
   const conditionId = `${uniqueId}-condition`
   const languageId = `${uniqueId}-language`
   const currentQuantity = /^\d+$/.test(quantity) ? Number(quantity) : 0
+
   const inputClasses =
-    'h-9 w-full min-w-0 rounded-lg border border-[#C8C5E2] bg-white/40 px-3 text-sm text-[#21183D] outline-none transition focus-visible:border-[#1254BD] focus-visible:ring-2 focus-visible:ring-[#A3BAFF] disabled:opacity-60'
-  const labelClass = 'mb-1.5 block text-xs font-bold text-[#21183D]'
+    'h-11 w-full min-w-0 rounded-control border border-border-default bg-surface-input px-3 text-sm text-text-primary outline-none transition-colors focus-visible:border-support-blue focus-visible:ring-2 focus-visible:ring-support-blue disabled:cursor-not-allowed disabled:opacity-60 sm:h-10'
+  const labelClass =
+    'mb-1.5 block text-sm font-semibold text-text-primary'
 
   return (
     <div
       className={cn(
-        'grid gap-x-4 gap-y-3',
+        'grid gap-x-4 gap-y-4',
         layout === 'edit' ? 'sm:grid-cols-3' : 'sm:grid-cols-2',
       )}
     >
       <div className="min-w-0">
         <label htmlFor={quantityId} className={labelClass}>
-          Quantidade <span className="text-[#BD0923]">*</span>
+          Quantidade <span className="text-state-error">*</span>
         </label>
-        <div className="flex h-9 overflow-hidden rounded-lg border border-[#C8C5E2] bg-white/50 focus-within:border-[#1254BD] focus-within:ring-2 focus-within:ring-[#A3BAFF]">
+        <div
+          className={cn(
+            'flex h-11 overflow-hidden rounded-control border bg-surface-input focus-within:ring-2 focus-within:ring-support-blue sm:h-10',
+            quantityError ? 'border-state-error' : 'border-border-default',
+          )}
+        >
           <button
             type="button"
             aria-label="Diminuir quantidade"
@@ -472,7 +325,7 @@ export function CollectionOwnershipFields({
             onClick={() =>
               onQuantityChange(String(Math.max(1, currentQuantity - 1)))
             }
-            className="flex w-10 shrink-0 items-center justify-center border-r border-[#C8C5E2] bg-[#EEECF9] text-[#074CE1] hover:bg-[#DCE4FF] disabled:opacity-40"
+            className="grid w-11 shrink-0 place-items-center border-r border-border-default bg-surface-sand text-brand-deep transition-colors enabled:hover:bg-surface-subtle disabled:cursor-not-allowed disabled:opacity-40 sm:w-10"
           >
             <Icon name="minus" size={20} />
           </button>
@@ -488,7 +341,7 @@ export function CollectionOwnershipFields({
             aria-invalid={Boolean(quantityError)}
             aria-describedby={quantityError ? quantityErrorId : undefined}
             onChange={(event) => onQuantityChange(event.target.value)}
-            className="min-w-0 flex-1 bg-transparent px-1 text-center text-sm font-semibold text-[#21183D] outline-none"
+            className="min-w-0 flex-1 bg-transparent px-1 text-center text-sm font-semibold text-text-primary outline-none disabled:cursor-not-allowed"
           />
           <button
             type="button"
@@ -496,12 +349,10 @@ export function CollectionOwnershipFields({
             disabled={disabled || currentQuantity >= MAX_QUANTITY}
             onClick={() =>
               onQuantityChange(
-                String(
-                  Math.min(MAX_QUANTITY, Math.max(0, currentQuantity) + 1),
-                ),
+                String(Math.min(MAX_QUANTITY, Math.max(0, currentQuantity) + 1)),
               )
             }
-            className="flex w-10 shrink-0 items-center justify-center border-l border-[#C8C5E2] bg-[#EEECF9] text-[#074CE1] hover:bg-[#DCE4FF] disabled:opacity-40"
+            className="grid w-11 shrink-0 place-items-center border-l border-border-default bg-surface-sand text-brand-deep transition-colors enabled:hover:bg-surface-subtle disabled:cursor-not-allowed disabled:opacity-40 sm:w-10"
           >
             <Icon name="plus" size={20} />
           </button>
@@ -509,15 +360,17 @@ export function CollectionOwnershipFields({
         {quantityError && (
           <p
             id={quantityErrorId}
-            className="mt-2 text-sm font-medium text-error-700"
+            className="mt-2 text-sm font-medium text-state-error"
+            role="alert"
           >
             {quantityError}
           </p>
         )}
       </div>
+
       <div className="min-w-0">
         <label htmlFor={conditionId} className={labelClass}>
-          Condição <span className="text-[#BD0923]">*</span>
+          Condição <span className="text-state-error">*</span>
         </label>
         <select
           id={conditionId}
@@ -536,9 +389,10 @@ export function CollectionOwnershipFields({
           ))}
         </select>
       </div>
+
       <div className={cn('min-w-0', layout !== 'edit' && 'sm:col-span-2')}>
         <label htmlFor={languageId} className={labelClass}>
-          Idioma <span className="text-[#BD0923]">*</span>
+          Idioma <span className="text-state-error">*</span>
         </label>
         <select
           id={languageId}
@@ -555,10 +409,11 @@ export function CollectionOwnershipFields({
           <option value="JAPANESE">Japonês (JP)</option>
         </select>
       </div>
+
       {layout !== 'edit' && (
         <div className="sm:col-span-2">
-          <div className="flex items-start gap-2 rounded-lg border border-[#BFD2FD] bg-[#E8F0FF] px-3 py-3 text-xs leading-relaxed text-[#103D98]">
-            <Icon name="info" size={20} />
+          <div className="flex items-start gap-2.5 rounded-control border border-border-default bg-surface-sand/55 px-3.5 py-3 text-sm leading-relaxed text-text-secondary">
+            <Icon name="info" size={20} className="shrink-0 text-brand-deep" />
             <span>
               A carta será adicionada à sua coleção com a quantidade, condição e
               idioma informados.
