@@ -12,6 +12,7 @@ import { tradingCardGrid } from '@/components/ui/tradingCardStyles'
 import { Button } from '@/components/ui/Button'
 import { FeedbackState } from '@/components/ui/FeedbackState'
 import { PageBanner } from '@/components/layout/PageBanner'
+import { ListingHeader, ListingSkeleton, listingPanelClass, listingSortClass, listingLabelClass } from '@/components/ui/ListingPresentation'
 import { useEffect, useId, useState } from 'react'
 import { useNavigate, useParams, useSearch } from '@tanstack/react-router'
 import { CatalogCard } from '@/components/catalog/CatalogCard'
@@ -25,24 +26,18 @@ import { typeLabels } from '@/components/catalog/catalogLabels'
 import pokemonBanner from '@/assets/images/image-pokemon.png'
 import magicBanner from '@/assets/images/image-magic.png'
 import yugiohBanner from '@/assets/images/image-yugioh.png'
-import onePieceBanner from '@/assets/images/image-onePiece.png'
-import digimonBanner from '@/assets/images/image-digimon.png'
 import type { CatalogCard as CatalogCardData } from '@/types/Catalog'
 
 const gameNames: Record<string, string> = {
   pokemon: 'Pokémon',
   magic: 'Magic: The Gathering',
   yugioh: 'Yu-Gi-Oh!',
-  'one-piece': 'One Piece',
-  digimon: 'Digimon',
 }
 
 const gameBanners: Record<string, string> = {
   pokemon: pokemonBanner,
   magic: magicBanner,
   yugioh: yugiohBanner,
-  'one-piece': onePieceBanner,
-  digimon: digimonBanner,
 }
 
 const supportedGames = ['pokemon', 'magic', 'yugioh']
@@ -129,7 +124,7 @@ function CatalogView({ game }: { game: string }) {
   }
 
   return (
-    <main className="min-h-screen pb-12 text-[#171443]">
+    <main className="min-h-screen pb-12 text-text-primary">
       <div className="mx-auto w-full max-w-[1600px] px-4 pt-4 sm:px-6 xl:px-[38px]">
         <PageBanner
           title={gameName}
@@ -151,29 +146,39 @@ function CatalogView({ game }: { game: string }) {
             />
           </ResponsiveFilters>
 
-          <section className="panel-ornaments min-w-0 rounded-xl border border-rare-500 bg-white p-4" aria-label="Resultados do catálogo">
-            <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-              <p className="text-sm font-semibold" aria-live="polite">
-                {isLoading ? 'Buscando cartas...' : data ? (
-                  <>
-                    <span className="underline decoration-primary-900 underline-offset-2">{total.toLocaleString('pt-BR')}</span>{' '}
-                    {total === 1 ? 'carta encontrada' : 'cartas encontradas'}
-                  </>
-                ) : null}
-              </p>
-              <label className="flex items-center gap-2 text-xs text-[#514b7e]" htmlFor="catalog-sort">
-                <span className="hidden sm:inline">Ordenar por:</span>
-                <select
-                  id="catalog-sort"
-                  value={sort ?? 'name-asc'}
-                  onChange={(event) => updateSearch({ sort: event.target.value === 'name-desc' ? 'name-desc' : undefined })}
-                  className="rounded-lg border border-[#e1def5] bg-white px-3 py-2 text-xs text-[#171443] sm:text-sm"
-                >
-                  <option value="name-asc">Nome: A–Z</option>
-                  <option value="name-desc">Nome: Z–A</option>
-                </select>
-              </label>
-            </div>
+          <section className={listingPanelClass} aria-label="Resultados do catálogo">
+            <ListingHeader
+              title="Cartas do catálogo"
+              description={
+                isLoading
+                  ? 'Buscando cartas...'
+                  : data
+                    ? `${total.toLocaleString('pt-BR')} ${total === 1 ? 'carta encontrada' : 'cartas encontradas'}`
+                    : supportedGame
+                      ? 'Consulta indisponível no momento'
+                      : 'Catálogo indisponível'
+              }
+              actions={
+                <label className={`flex flex-wrap items-center gap-2 ${listingLabelClass}`} htmlFor="catalog-sort">
+                  <span>Ordenar por:</span>
+                  <select
+                    id="catalog-sort"
+                    value={sort ?? 'name-asc'}
+                    onChange={(event) => {
+                      const choice = event.target.value
+                      updateSearch({
+                        sort: choice === 'name-desc' ? choice : undefined,
+                      })
+                    }}
+                    className={listingSortClass}
+                  >
+                    <option value="name-asc">Nome: A–Z</option>
+                    <option value="name-desc">Nome: Z–A</option>
+                    
+                  </select>
+                </label>
+              }
+            />
 
             {hasFilters && (
               <ul aria-label="Filtros ativos" className="mb-3 flex flex-wrap items-center gap-2">
@@ -183,14 +188,14 @@ function CatalogView({ game }: { game: string }) {
                       type="button"
                       onClick={() => updateSearch({ [filter.key]: undefined })}
                       aria-label={`Remover filtro ${filter.label}`}
-                      className="inline-flex min-h-10 items-center gap-1.5 rounded-control border border-accent-bronze bg-surface-sand px-3 py-1 text-xs font-semibold text-brand-deep hover:bg-surface-subtle focus-visible:outline-2 focus-visible:outline-support-blue"
+                      className="inline-flex min-h-10 items-center gap-1.5 rounded-control border border-border-emphasis bg-surface-lavender px-3 py-1 text-xs font-semibold text-brand-deep hover:bg-surface-subtle focus-visible:outline-2 focus-visible:outline-support-blue"
                     >
                       {filter.label} <span aria-hidden="true">×</span>
                     </button>
                   </li>
                 ))}
                 <li>
-                  <button type="button" onClick={clearFilters} className="min-h-10 px-2 text-xs font-semibold text-primary-900 underline underline-offset-2">Limpar filtros</button>
+                  <button type="button" onClick={clearFilters} className="min-h-10 px-2 text-xs font-semibold text-brand-primary underline underline-offset-2 focus-visible:outline-2 focus-visible:outline-support-blue">Limpar filtros</button>
                 </li>
               </ul>
             )}
@@ -198,20 +203,9 @@ function CatalogView({ game }: { game: string }) {
             {!supportedGame ? (
               <EmptyState icon="info" title="Catálogo em breve" message={`O catálogo de ${gameName} ainda não está disponível.`} />
             ) : isLoading ? (
-              <div role="status" aria-label="Carregando cartas" className={tradingCardGrid}>
-                {Array.from({ length: 10 }, (_, index) => (
-                  <div key={index} className="animate-pulse overflow-hidden rounded-xl border border-[#eeeafb] bg-white">
-                    <div className="aspect-square bg-primary-100" />
-                    <div className="space-y-2 p-3.5">
-                      <div className="h-3.5 w-3/4 rounded bg-neutral-100" />
-                      <div className="h-3 w-1/2 rounded bg-neutral-100" />
-                      <div className="h-5 w-16 rounded-full bg-neutral-100" />
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <ListingSkeleton label="Carregando cartas do catálogo" />
             ) : loadError ? (
-              <FeedbackState role="alert" icon="alert" title="Não foi possível carregar as cartas" description="Verifique sua conexão e tente novamente." className="rounded-xl border border-neutral-200 bg-white">
+              <FeedbackState role="alert" icon="alert" title="Não foi possível carregar as cartas" description="Verifique sua conexão e tente novamente." className="rounded-surface border border-border-default bg-surface-default">
                 <Button onClick={() => setAttempt((value) => value + 1)}>Tentar novamente</Button>
               </FeedbackState>
             ) : outOfRange ? (
@@ -349,7 +343,7 @@ function EmptyState({
   action?: { label: string; onClick: () => void }
 }) {
   return (
-    <FeedbackState icon={icon} title={title} description={message} className="rounded-xl border border-dashed border-primary-300/40 bg-white">
+    <FeedbackState icon={icon} title={title} description={message} className="rounded-surface border border-dashed border-border-emphasis bg-surface-default">
       {action && (
         <button type="button" onClick={action.onClick} className="mt-5 rounded-lg bg-primary-900 button-vignette px-5 py-2.5 text-sm font-semibold text-white">
           {action.label}

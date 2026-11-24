@@ -1,15 +1,19 @@
 import { Pagination as PageNavigation } from '@/components/ui/Pagination'
 import { tradingCardGrid } from '@/components/ui/tradingCardStyles'
 import { FeedbackState } from '@/components/ui/FeedbackState'
+import {
+  FilterChips,
+  type AppliedFilterChip,
+  ResponsiveFilters,
+} from '@/components/ui/ResponsiveFilters'
+import { ListingHeader, ListingSkeleton, listingPanelClass, listingLabelClass, listingSortClass } from '@/components/ui/ListingPresentation'
 import { pageBanners } from '@/config/pageBanners'
 import { useCallback, useState } from 'react'
 import { conditionLabels, languageLabels } from '@/components/ads/adFormat'
-import { Link } from '@tanstack/react-router'
+import { useNavigate } from '@tanstack/react-router'
 import { Button } from '@/components/ui/Button'
-import { Icon } from '@/components/ui/Icon'
 import { PageBanner } from '@/components/layout/PageBanner'
 import { MarketplaceAdCard } from '@/components/marketplace/MarketplaceAdCard'
-import { ResponsiveFilters } from '@/components/ui/ResponsiveFilters'
 import { MarketplaceFilters } from '@/components/marketplace/MarketplaceFilters'
 import { emptyMarketplaceFilters } from '@/components/marketplace/marketplaceFilterDefaults'
 import { useRemoteData } from '@/hooks/useRemoteData'
@@ -19,21 +23,14 @@ import type {
   MarketplaceSort,
 } from '@/types/Marketplace'
 
-type Props = {
-  sort?: MarketplaceSort
-}
+type Props = { sort?: MarketplaceSort }
+type Query = { page: number; filters: FilterValues }
 
-type Query = {
-  page: number
-  filters: FilterValues
-}
-
-const sortOptions: {
-  value: MarketplaceSort
-  label: string
-}[] = [
+const sortOptions: { value: MarketplaceSort; label: string }[] = [
   { value: 'recent', label: 'Mais recentes' },
-  { value: 'priceDesc', label: 'Destaques' },
+  { value: 'oldest', label: 'Mais antigos' },
+  { value: 'priceAsc', label: 'Menor preço' },
+  { value: 'priceDesc', label: 'Maior preço' },
 ]
 
 const gameLabels: Record<string, string> = {
@@ -49,9 +46,7 @@ const modalityLabels: Record<string, string> = {
 }
 
 export function MarketplacePage({ sort = 'recent' }: Props) {
-  const [filters, setFilters] = useState<FilterValues>({
-    ...emptyMarketplaceFilters,
-  })
+  const [filters, setFilters] = useState<FilterValues>({ ...emptyMarketplaceFilters })
   const [filterVersion, setFilterVersion] = useState(0)
 
   function applyFilters(next: FilterValues) {
@@ -59,30 +54,34 @@ export function MarketplacePage({ sort = 'recent' }: Props) {
     setFilterVersion((current) => current + 1)
   }
 
+  function removeFilter(key: keyof FilterValues) {
+    applyFilters({ ...filters, [key]: emptyMarketplaceFilters[key] })
+  }
+
   return (
-    <main className="min-h-screen pb-12 text-neutral-900">
+    <main className="min-h-screen pb-12 text-text-primary">
       <div className="mx-auto w-full max-w-[1600px] px-4 pt-4 sm:px-6 xl:px-[38px]">
         <PageBanner
           image={pageBanners.marketplace}
           title="Marketplace"
-          subtitle={
-            <>
-              Encontre cartas para comprar ou trocar.
-              <br />
-              Complete sua coleção!
-            </>
-          }
+          subtitle="Encontre cartas para comprar ou trocar. Complete sua coleção!"
         />
 
         <div className="grid items-start gap-6 pt-5 lg:grid-cols-[280px_minmax(0,1fr)]">
           <ResponsiveFilters>
-            <MarketplaceFilters onApply={applyFilters} />
+            <MarketplaceFilters
+              key={JSON.stringify(filters)}
+              onApply={applyFilters}
+              initialFilters={filters}
+            />
           </ResponsiveFilters>
 
           <MarketplaceResults
             key={`${sort}:${filterVersion}`}
             sort={sort}
             initialFilters={filters}
+            onRemoveFilter={removeFilter}
+            onClearFilters={() => applyFilters({ ...emptyMarketplaceFilters })}
           />
         </div>
       </div>
@@ -93,225 +92,146 @@ export function MarketplacePage({ sort = 'recent' }: Props) {
 function MarketplaceResults({
   sort,
   initialFilters,
+  onRemoveFilter,
+  onClearFilters,
 }: {
   sort: MarketplaceSort
   initialFilters: FilterValues
+  onRemoveFilter: (key: keyof FilterValues) => void
+  onClearFilters: () => void
 }) {
-  const [query, setQuery] = useState<Query>({
-    page: 1,
-    filters: initialFilters,
-  })
-
+  const navigate = useNavigate({ from: '/marketplace' })
+  const [query, setQuery] = useState<Query>({ page: 1, filters: initialFilters })
   const { page, filters } = query
-
   const fetchAds = useCallback(
     () => getMarketplaceAds(page, sort, filters),
     [page, sort, filters],
   )
-
   const { state, retry } = useRemoteData(
     JSON.stringify(['marketplace', sort, page, filters]),
     fetchAds,
   )
-
   const data = state.status === 'ready' ? state.data : null
-
-  const hasFilters = Boolean(
-    Object.values(filters).some(Boolean),
-  )
-
-  const appliedFilters = [
-    filters.search ? `Nome: ${filters.search}` : null,
-    filters.edition ? `Edição: ${filters.edition}` : null,
-    filters.rarity ? `Raridade: ${filters.rarity}` : null,
-    filters.condition ? `Condição: ${conditionLabels[filters.condition]}` : null,
-    filters.language ? `Idioma: ${languageLabels[filters.language]}` : null,
-    filters.minPrice ? `Preço mínimo: R$ ${filters.minPrice}` : null,
-    filters.maxPrice ? `Preço máximo: R$ ${filters.maxPrice}` : null,
-    filters.game
-      ? `TCG: ${gameLabels[filters.game] ?? filters.game}`
-      : null,
-    filters.modality
-      ? `Tipo: ${modalityLabels[filters.modality]}`
-      : null,
-  ].filter((value): value is string => value !== null)
+  const hasFilters = Object.values(filters).some(Boolean)
+  const chips: AppliedFilterChip[] = [
+    { key: 'search', label: `Nome: ${filters.search}` },
+    { key: 'edition', label: `Edição: ${filters.edition}` },
+    { key: 'rarity', label: `Raridade: ${filters.rarity}` },
+    { key: 'condition', label: `Condição: ${filters.condition ? conditionLabels[filters.condition] : ''}` },
+    { key: 'language', label: `Idioma: ${filters.language ? languageLabels[filters.language] : ''}` },
+    { key: 'minPrice', label: `Preço mínimo: R$ ${filters.minPrice}` },
+    { key: 'maxPrice', label: `Preço máximo: R$ ${filters.maxPrice}` },
+    { key: 'game', label: `TCG: ${gameLabels[filters.game] ?? filters.game}` },
+    { key: 'modality', label: `Tipo: ${modalityLabels[filters.modality] ?? filters.modality}` },
+  ].filter((item) => Boolean(filters[item.key as keyof FilterValues]))
 
   function changePage(nextPage: number) {
-    setQuery((current) => ({
-      ...current,
-      page: nextPage,
-    }))
-
+    setQuery((current) => ({ ...current, page: nextPage }))
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   return (
-    <section
-      aria-label="Anúncios disponíveis"
-      className="min-w-0 panel-ornaments rounded-xl border border-rare-500 bg-white p-4"
-    >
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-4 border-b border-primary-300/20 pb-4">
-        <div>
-          <h2 className="flex items-center gap-2 font-display text-lg font-bold text-primary-900">
-            <Icon name="grid" size={20} />
-            Explore os anúncios
-          </h2>
-
-          <p
-            aria-live="polite"
-            className="mt-1 text-xs text-neutral-700"
-          >
-            {state.status === 'loading'
-              ? 'Carregando anúncios...'
-              : data
-                ? `${data.totalElements} ${
-                    data.totalElements === 1
-                      ? 'anúncio encontrado'
-                      : 'anúncios encontrados'
-                  }`
-                : 'Consulta indisponível no momento'}
-          </p>
-        </div>
-
-        <nav
-          aria-label="Ordenação dos anúncios"
-          className="flex flex-wrap items-center gap-2"
-        >
-          <span className="text-xs text-neutral-700">
-            Ordenar por:
-          </span>
-
-          {sortOptions.map((option) => (
-            <Link
-              key={option.value}
-              to="/marketplace"
-              search={{ sort: option.value }}
-              aria-current={
-                sort === option.value ? 'true' : undefined
-              }
-              className={`rounded-lg border px-3 py-2 text-xs font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500 ${
-                sort === option.value
-                  ? 'border-transparent bg-primary-900 button-vignette text-white'
-                  : 'border-primary-300/40 bg-white text-primary-900 hover:bg-primary-100'
-              }`}
+    <section aria-label="Anúncios disponíveis" className={listingPanelClass}>
+      <ListingHeader
+        title="Explore os anúncios"
+        description={
+          state.status === 'loading'
+            ? 'Carregando anúncios...'
+            : data
+              ? `${data.totalElements.toLocaleString('pt-BR')} ${data.totalElements === 1 ? 'anúncio encontrado' : 'anúncios encontrados'}`
+              : 'Consulta indisponível no momento'
+        }
+        actions={
+          <label htmlFor="marketplace-sort" className={`flex min-w-0 flex-wrap items-center gap-2 ${listingLabelClass}`}>
+            <span>Ordenar por:</span>
+            <select
+              id="marketplace-sort"
+              value={sort}
+              onChange={(event) => {
+                const selected = sortOptions.find((option) => option.value === event.target.value)
+                if (selected && selected.value !== sort) {
+                  void navigate({ to: '/marketplace', search: { sort: selected.value } })
+                }
+              }}
+              className={listingSortClass}
             >
-              {option.label}
-            </Link>
-          ))}
-        </nav>
-      </div>
+              {sortOptions.map((option) => (
+                <option key={option.value} value={option.value}>{option.label}</option>
+              ))}
+            </select>
+          </label>
+        }
+      />
 
-      {appliedFilters.length > 0 && (
-        <div className="mb-4">
-          <p className="mb-2 text-xs font-semibold text-neutral-700">
-            Filtros aplicados
-          </p>
-
-          <ul
-            aria-label="Filtros aplicados"
-            className="flex flex-wrap gap-2"
-          >
-            {appliedFilters.map((label) => (
-              <li
-                key={label}
-                className="max-w-full wrap-anywhere rounded-lg bg-primary-100 px-3 py-2 text-xs font-semibold text-primary-900"
-              >
-                {label}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+      <FilterChips
+        chips={chips}
+        onRemove={(key) => onRemoveFilter(key as keyof FilterValues)}
+      />
+      {hasFilters ? (
+        <button
+          type="button"
+          onClick={onClearFilters}
+          className="mb-4 min-h-10 text-sm font-semibold text-brand-primary underline underline-offset-2 focus-visible:outline-2 focus-visible:outline-support-blue"
+        >
+          Limpar todos os filtros
+        </button>
+      ) : null}
 
       {state.status === 'loading' ? (
-        <div
-          role="status"
-          aria-label="Carregando anúncios"
-          aria-busy="true"
-          className={tradingCardGrid}
-        >
-          {Array.from({ length: 10 }, (_, index) => (
-            <div
-              key={index}
-              aria-hidden="true"
-              className="overflow-hidden rounded-xl border border-neutral-200 bg-white motion-safe:animate-pulse"
-            >
-              <div className="aspect-square bg-primary-100" />
-
-              <div className="space-y-3 p-3">
-                <div className="h-4 w-3/4 rounded bg-neutral-200" />
-                <div className="h-3 w-1/2 rounded bg-neutral-200" />
-                <div className="h-6 w-24 rounded bg-primary-100" />
-                <div className="h-10 rounded bg-neutral-200" />
-              </div>
-            </div>
-          ))}
-        </div>
+        <ListingSkeleton label="Carregando anúncios do marketplace" />
       ) : !data ? (
         <FeedbackState
           role="alert"
           icon="alert"
           title="Não foi possível carregar os anúncios"
           description="Verifique sua conexão e tente novamente."
-          className="rounded-xl bg-neutral-50"
+          className="rounded-surface border border-border-default bg-surface-default"
         >
           <Button onClick={retry}>Tentar novamente</Button>
         </FeedbackState>
       ) : data.content.length === 0 ? (
-        <div
-          role="status"
-          className="rounded-xl border border-dashed border-primary-300/40 bg-neutral-50 px-6 py-12 text-center"
-        >
-          <Icon
-            name={hasFilters ? 'search' : 'gem'}
-            size={32}
-            className="mx-auto text-primary-900"
-          />
-
-          <h3 className="mt-4 font-display text-xl font-bold text-primary-900">
-            {page > 1
+        <FeedbackState
+          icon={hasFilters ? 'search' : 'gem'}
+          title={
+            page > 1
               ? 'Não há anúncios nesta página'
               : hasFilters
                 ? 'Nenhum anúncio encontrado'
-                : 'Ainda não há anúncios no marketplace'}
-          </h3>
-
-          <p className="mt-2 text-sm text-neutral-700">
-            {page > 1
+                : 'Ainda não há anúncios no marketplace'
+          }
+          description={
+            page > 1
               ? 'A disponibilidade dos anúncios pode ter mudado.'
               : hasFilters
-                ? 'Altere os filtros ou clique em “Limpar filtros” para consultar todos os anúncios.'
-                : 'Quando houver anúncios disponíveis, eles aparecerão aqui.'}
-          </p>
-
-          {page > 1 && (
-            <Button
-              className="mt-5"
-              onClick={() => changePage(1)}
-            >
-              Voltar à primeira página
-            </Button>
-          )}
-        </div>
+                ? 'Altere ou limpe os filtros para ampliar sua busca.'
+                : 'Quando houver anúncios disponíveis, eles aparecerão aqui.'
+          }
+          className="rounded-surface border border-dashed border-border-emphasis bg-surface-default"
+        >
+          {page > 1 ? (
+            <Button onClick={() => changePage(1)}>Voltar à primeira página</Button>
+          ) : hasFilters ? (
+            <Button variant="outline" onClick={onClearFilters}>Limpar filtros</Button>
+          ) : null}
+        </FeedbackState>
       ) : (
         <>
           <div className={tradingCardGrid}>
-            {data.content.map((ad) => (
-              <MarketplaceAdCard key={ad.id} ad={ad} />
-            ))}
+            {data.content.map((ad) => <MarketplaceAdCard key={ad.id} ad={ad} />)}
           </div>
-
-          <div className="mt-6 border-t border-primary-300/20 pt-4">
-            <p className="text-xs text-neutral-700">
+          <div className="mt-6 border-t border-border-default pt-4">
+            <p className="text-sm text-text-secondary">
               Exibindo {(data.page - 1) * data.size + 1}–
-              {(data.page - 1) * data.size + data.content.length}
-              {' de '}
-              {data.totalElements} anúncios
+              {(data.page - 1) * data.size + data.content.length} de{' '}
+              {data.totalElements.toLocaleString('pt-BR')} anúncios
             </p>
-
-            {data.totalPages > 1 && (
-              <PageNavigation label="Paginação do marketplace" page={data.page} totalPages={data.totalPages} onPageChange={changePage} className="mt-4" />
-            )}
+            <PageNavigation
+              label="Paginação do marketplace"
+              page={data.page}
+              totalPages={data.totalPages}
+              onPageChange={changePage}
+              className="mt-4"
+            />
           </div>
         </>
       )}

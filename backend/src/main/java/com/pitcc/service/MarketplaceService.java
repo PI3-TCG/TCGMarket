@@ -77,6 +77,19 @@ public class MarketplaceService {
                     Sort.Order.desc("id")
             );
 
+            case "oldest" -> Sort.by(
+                    Sort.Order.asc("createdAt"),
+                    Sort.Order.asc("id")
+            );
+
+            // Anúncios de venda com preço aparecem antes dos somente de troca.
+            case "priceAsc" -> Sort.by(
+                    Sort.Order.desc("saleEnabled"),
+                    Sort.Order.asc("unitPrice"),
+                    Sort.Order.desc("createdAt"),
+                    Sort.Order.desc("id")
+            );
+
             case "priceDesc" -> Sort.by(
                     Sort.Order.desc("unitPrice"),
                     Sort.Order.desc("createdAt"),
@@ -84,7 +97,7 @@ public class MarketplaceService {
             );
 
             default -> throw new IllegalArgumentException(
-                    "Ordenação inválida. Use recent ou priceDesc."
+                    "Ordenação inválida. Use recent, oldest, priceAsc ou priceDesc."
             );
         };
 

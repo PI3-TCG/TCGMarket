@@ -10,6 +10,7 @@ type Props = {
   className?: string
 }
 
+/** Paginação visual v2.2; API e numeração das páginas preservadas. */
 export function Pagination({
   label,
   page,
@@ -19,15 +20,13 @@ export function Pagination({
 }: Props) {
   if (totalPages <= 1) return null
   const current = Math.min(totalPages, Math.max(1, page))
-  const control = 'min-h-11 min-w-11 border-neutral-300'
+  const control =
+    'min-h-11 min-w-11 rounded-control border-border-default text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-support-blue'
 
   return (
     <nav
       aria-label={label}
-      className={cn(
-        'flex flex-wrap items-center justify-center gap-2',
-        className,
-      )}
+      className={cn('flex flex-wrap items-center justify-center gap-2', className)}
     >
       <Button
         variant="outline"
@@ -39,11 +38,7 @@ export function Pagination({
       </Button>
       {pageItems(current, totalPages).map((item, index) =>
         item === 'gap' ? (
-          <span
-            key={`gap-${index}`}
-            aria-hidden="true"
-            className="px-1 text-neutral-700"
-          >
+          <span key={`gap-${index}`} aria-hidden="true" className="px-1 text-text-secondary">
             …
           </span>
         ) : (
