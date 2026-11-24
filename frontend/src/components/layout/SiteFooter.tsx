@@ -6,7 +6,6 @@ import cornerBR from '@/assets/design-system/canto-id.svg'
 import { Link } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
 
-type Props = { onSoon?: (feature: string) => void }
 type Platform = 'youtube' | 'instagram' | 'tiktok' | 'discord' | 'twitch'
 
 type SocialLink = { label: string; platform: Platform; href: string }
@@ -91,7 +90,7 @@ function SocialIcon({ platform }: { platform: Platform }): ReactNode {
   }
 }
 
-export function SiteFooter({ onSoon: _onSoon }: Props) {
+export function SiteFooter() {
   return (
     <footer aria-label="Rodapé do TCG Market" className="tcg-footer">
       <img

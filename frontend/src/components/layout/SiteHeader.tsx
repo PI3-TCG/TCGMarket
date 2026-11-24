@@ -14,7 +14,6 @@ import { AccountNavigation } from './AccountNavigation'
 import { NAV_GAMES } from './navigationItems'
 import { TradeReviewNotifications } from './TradeReviewNotifications'
 
-type Props = { onSoon: (feature: string) => void }
 type OpenPanel = 'games' | 'account' | 'mobile' | null
 
 function AccountPhoto({ url }: { url: string | null }) {
@@ -32,7 +31,7 @@ function AccountPhoto({ url }: { url: string | null }) {
   return <Icon name="user" size={24} />
 }
 
-export function SiteHeader({ onSoon: _onSoon }: Props) {
+export function SiteHeader() {
   const navigate = useNavigate()
   const pathname = useRouterState({ select: (state) => state.location.pathname })
   const { user, sessionReady, setLoginNotice } = useSession()
