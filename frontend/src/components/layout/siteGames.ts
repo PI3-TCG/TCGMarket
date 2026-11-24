@@ -1,3 +1,4 @@
+/** Jogos disponíveis no catálogo. Outros TCGs não devem aparecer como destinos navegáveis. */
 export const GAMES = [
   {
     name: 'Pokémon',
@@ -6,7 +7,6 @@ export const GAMES = [
     mark: 'poke',
     slug: 'pokemon',
   },
-
   {
     name: 'Magic',
     from: '#1e3a5f',
@@ -14,28 +14,11 @@ export const GAMES = [
     mark: 'magic',
     slug: 'magic',
   },
-
   {
     name: 'Yu-Gi-Oh!',
     from: '#7c2d12',
     to: '#3b0764',
     mark: 'yugioh',
     slug: 'yugioh',
-  },
-
-  {
-    name: 'One Piece',
-    from: '#be123c',
-    to: '#7f1d1d',
-    mark: 'piece',
-    slug: null,
-  },
-
-  {
-    name: 'Digimon',
-    from: '#0369a1',
-    to: '#164e63',
-    mark: 'digimon',
-    slug: null,
   },
 ] as const
