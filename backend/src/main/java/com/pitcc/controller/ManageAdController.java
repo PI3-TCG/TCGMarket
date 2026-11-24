@@ -1,6 +1,7 @@
 package com.pitcc.controller;
 
 import com.pitcc.dto.OwnAdFilters;
+import com.pitcc.dto.ListingSort;
 import com.pitcc.dto.OwnAdResponse;
 import com.pitcc.dto.UpdateAdRequest;
 import com.pitcc.exception.InvalidAuthenticationException;
@@ -39,13 +40,14 @@ public class ManageAdController {
             @RequestParam(name = "search", required = false) String search,
             @RequestParam(name = "game", required = false) CardGame game,
             @RequestParam(name = "modality", required = false) AdModality modality,
-            @RequestParam(name = "status", required = false) AdStatus status) {
+            @RequestParam(name = "status", required = false) AdStatus status,
+            @RequestParam(name = "sort", defaultValue = "RECENT") ListingSort sort) {
 
         return manageAdService.findOwnAds(
                 userId(current),
                 page,
                 size,
-                new OwnAdFilters(search, game, modality, status)
+                new OwnAdFilters(search, game, modality, status, sort)
         );
     }
 

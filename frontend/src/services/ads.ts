@@ -1,3 +1,4 @@
+import type { ListingSortOrder } from '@/components/ui/ListingSort'
 import { api } from '@/services/api'
 import type {
   AdResponse,
@@ -17,6 +18,7 @@ type OwnAdsQuery = {
   page?: number
   size?: number
   filters?: OwnAdFilterValues
+  sort?: ListingSortOrder
   signal?: AbortSignal
 }
 
@@ -24,12 +26,14 @@ export async function getMyAds({
   page = 0,
   size = 20,
   filters,
+  sort,
   signal,
 }: OwnAdsQuery = {}): Promise<OwnAdPage> {
   const response = await api.get<OwnAdPage>('/api/users/me/ads', {
     params: {
       page,
       size,
+      sort,
       search: filters?.search.trim() || undefined,
       modality: filters?.modality || undefined,
       game: filters?.game || undefined,

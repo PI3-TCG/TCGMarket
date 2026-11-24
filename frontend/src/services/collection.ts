@@ -1,3 +1,4 @@
+import type { ListingSortOrder } from '@/components/ui/ListingSort'
 import { api } from '@/services/api'
 import type {
   AddToCollectionRequest,
@@ -13,6 +14,7 @@ type CollectionQuery = {
   page?: number
   size?: number
   filters?: CollectionFilterValues
+  sort?: ListingSortOrder
   signal?: AbortSignal
 }
 export async function addToMyCollection(
@@ -25,6 +27,7 @@ export async function getMyCollection({
   page = 0,
   size = 20,
   filters,
+  sort,
   signal,
 }: CollectionQuery = {}): Promise<CollectionPage> {
   const response = await api.get<CollectionPage>(
@@ -33,6 +36,7 @@ export async function getMyCollection({
       params: {
         page,
         size,
+        sort,
         search: filters?.search.trim() || undefined,
         game: filters?.game || undefined,
         edition: filters?.edition || undefined,

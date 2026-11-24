@@ -53,12 +53,11 @@ public class CollectionSearchRepository {
         // Consulta o catálogo somente quando um filtro depende da carta.
         if (filters.hasCardFilters()) {
             addCardFilters(pipeline, filters);
+        } else if (filters.sort().byName()) {
+            lookupCatalogCard(pipeline);
         }
 
-        // Ordenação estável para a paginação.
-        pipeline.add(
-                new Document("$sort", new Document("_id", 1))
-        );
+        filters.sort().addToPipeline(pipeline, null);
 
         List<Document> contentPipeline = List.of(
                 new Document("$skip", pageable.getOffset()),
@@ -66,7 +65,7 @@ public class CollectionSearchRepository {
                 new Document(
                         "$project",
                         new Document("cardLookupIds", 0)
-                                .append("catalogCard", 0)
+                                .append("catalogCard", 0).append("listingSortName", 0)
                 )
         );
 
@@ -112,10 +111,7 @@ public class CollectionSearchRepository {
         return new PageImpl<>(items, pageable, total);
     }
 
-    private void addCardFilters(
-            List<Document> pipeline,
-            CollectionFilters filters) {
-
+    private void lookupCatalogCard(List<Document> pipeline) {
         // Aceita referências a IDs armazenados como String ou ObjectId.
         pipeline.add(Document.parse("""
                 {
@@ -145,6 +141,13 @@ public class CollectionSearchRepository {
                   }
                 }
                 """));
+    }
+
+    private void addCardFilters(
+            List<Document> pipeline,
+            CollectionFilters filters) {
+
+        lookupCatalogCard(pipeline);
 
         Document cardMatch = new Document();
 

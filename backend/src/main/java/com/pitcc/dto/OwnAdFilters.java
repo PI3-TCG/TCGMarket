@@ -8,10 +8,16 @@ public record OwnAdFilters(
         String search,
         CardGame game,
         AdModality modality,
-        AdStatus status
+        AdStatus status,
+        ListingSort sort
 ) {
 
+    public OwnAdFilters(String search, CardGame game, AdModality modality, AdStatus status) {
+        this(search, game, modality, status, ListingSort.RECENT);
+    }
+
     public OwnAdFilters {
+        sort = sort == null ? ListingSort.RECENT : sort;
         search = search == null || search.isBlank() ? null : search.trim();
     }
 

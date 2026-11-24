@@ -1,6 +1,7 @@
 package com.pitcc.controller;
 
 import com.pitcc.dto.CollectionFilters;
+import com.pitcc.dto.ListingSort;
 import com.pitcc.dto.CollectionItemResponse;
 import com.pitcc.dto.CollectionSummaryResponse;
 import com.pitcc.dto.CollectionFilterOptionsResponse;
@@ -54,7 +55,10 @@ public class CollectionController {
             CardCondition condition,
 
             @RequestParam(name = "language", required = false)
-            CardLanguage language) {
+            CardLanguage language,
+
+            @RequestParam(name = "sort", defaultValue = "RECENT")
+            ListingSort sort) {
 
         if (current == null) {
             throw new InvalidAuthenticationException();
@@ -66,7 +70,8 @@ public class CollectionController {
                 edition,
                 rarity,
                 condition,
-                language
+                language,
+                sort
         );
 
         return collectionService.findOwnCollection(

@@ -1,3 +1,4 @@
+import { ListingSort, type ListingSortOrder } from '@/components/ui/ListingSort'
 import { Pagination as PageNavigation } from '@/components/ui/Pagination'
 import { tradingCardDetailsButton, tradingCardGrid } from '@/components/ui/tradingCardStyles'
 import { pageBanners } from '@/config/pageBanners'
@@ -46,6 +47,7 @@ export function MyAdsPage() {
 
 function MyAdsContent() {
   const [page, setPage] = useState(0)
+  const [sort, setSort] = useState<ListingSortOrder>('RECENT')
   const [attempt, setAttempt] = useState(0)
   const [filters, setFilters] = useState<OwnAdFilterValues>(emptyOwnAdFilters)
   const [formVersion, setFormVersion] = useState(0)
@@ -63,19 +65,26 @@ function MyAdsContent() {
         />
       </ResponsiveFilters>
 
-      <MyAdsResults
-        key={`${page}-${attempt}`}
-        page={page}
-        filters={filters}
-        onPageChange={setPage}
-        onRetry={() => setAttempt((current) => current + 1)}
-        onClearFilters={() => {
-          setFilters(emptyOwnAdFilters)
-          setFormVersion((current) => current + 1)
-          setPage(0)
-          setAttempt((current) => current + 1)
-        }}
-      />
+      <div className="min-w-0">
+        <MyAdsResults
+          attempt={attempt}
+          page={page}
+          filters={filters}
+          sort={sort}
+          onSortChange={(value) => {
+            setSort(value)
+            setPage(0)
+          }}
+          onPageChange={setPage}
+          onRetry={() => setAttempt((current) => current + 1)}
+          onClearFilters={() => {
+            setFilters(emptyOwnAdFilters)
+            setFormVersion((current) => current + 1)
+            setPage(0)
+            setAttempt((current) => current + 1)
+          }}
+        />
+      </div>
     </div>
   )
 }
@@ -83,26 +92,34 @@ function MyAdsContent() {
 type ActiveModal = { ad: OwnAd; view: MyAdModalView } | null
 
 function MyAdsResults({
+  attempt,
   page,
+  sort,
+  onSortChange,
   filters,
   onPageChange,
   onRetry,
   onClearFilters,
 }: {
+  attempt: number
   page: number
+  sort: ListingSortOrder
+  onSortChange: (sort: ListingSortOrder) => void
   filters: OwnAdFilterValues
   onPageChange: (page: number) => void
   onRetry: () => void
   onClearFilters: () => void
 }) {
-  const [result, setResult] = useState<AdsResult>({ status: 'loading' })
+  const requestKey = `${attempt}-${sort}-${page}`
+  const [response, setResponse] = useState<{ requestKey: string; result: AdsResult }>()
+  const result = response?.requestKey === requestKey ? response.result : { status: 'loading' as const }
   const [modal, setModal] = useState<ActiveModal>(null)
   const [reload, setReload] = useState(0)
 
   useEffect(() => {
     const controller = new AbortController()
 
-    getMyAds({ page, size: PAGE_SIZE, filters, signal: controller.signal })
+    getMyAds({ page, size: PAGE_SIZE, filters, sort, signal: controller.signal })
       .then((data) => {
         if (controller.signal.aborted) return
         // Após uma mutação a página pode ficar vazia: volta à última válida.
@@ -110,14 +127,14 @@ function MyAdsResults({
           onPageChange(data.totalPages - 1)
           return
         }
-        setResult({ status: 'success', data })
+        setResponse({ requestKey, result: { status: 'success', data } })
       })
       .catch(() => {
-        if (!controller.signal.aborted) setResult({ status: 'error' })
+        if (!controller.signal.aborted) setResponse({ requestKey, result: { status: 'error' } })
       })
 
     return () => controller.abort()
-  }, [page, filters, reload, onPageChange])
+  }, [page, filters, sort, requestKey, reload, onPageChange])
 
   const hasFilters = Object.values(filters).some((value) => value !== '')
 
@@ -127,6 +144,19 @@ function MyAdsResults({
       aria-busy={result.status === 'loading' || undefined}
       className="min-w-0 rounded-surface border border-border-default bg-surface-default p-3 shadow-sm sm:p-5"
     >
+      <header className="mb-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-3 border-b border-border-default pb-4">
+        <div className="min-w-0">
+          <h2 className="font-title text-xl font-bold text-text-ink">Seus anúncios</h2>
+          {result.status === 'success' && (
+            <p aria-live="polite" className="mt-1 text-sm text-text-secondary">
+              {result.data.totalElements.toLocaleString('pt-BR')}{' '}
+              {result.data.totalElements === 1 ? 'anúncio' : 'anúncios'}
+            </p>
+          )}
+        </div>
+        <ListingSort value={sort} onChange={onSortChange} />
+      </header>
+
       {result.status === 'loading' ? (
         <TradingCardSkeletonGrid label="Carregando seus anúncios..." />
       ) : result.status === 'error' ? (
@@ -164,14 +194,6 @@ function MyAdsResults({
         )
       ) : (
         <>
-          <h2
-            aria-live="polite"
-            className="mb-4 font-title text-2xl font-bold text-text-ink"
-          >
-            {result.data.totalElements}{' '}
-            {result.data.totalElements === 1 ? 'anúncio' : 'anúncios'}
-          </h2>
-
           <div className={tradingCardGrid}>
             {result.data.content.map((ad) => (
               <MyAdCard
