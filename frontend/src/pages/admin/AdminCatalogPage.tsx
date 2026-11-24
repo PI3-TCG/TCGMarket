@@ -520,7 +520,7 @@ export function AdminCatalogPage() {
         title="Ocultar carta do catálogo"
         onClose={close}
         closeDisabled={saving}
-        presentation="refined"
+        busy={saving}
         headerIcon="cards"
         secondaryAction={{ label: 'Cancelar' }}
         primaryAction={{
@@ -529,31 +529,31 @@ export function AdminCatalogPage() {
         }}
       >
         {pending ? (
-          <div className="space-y-3 text-[#35223F]">
+          <div className="space-y-3 text-text-primary">
             <p className="text-sm leading-relaxed">
               A carta some do catálogo público, mas continua válida para
               coleções e anúncios existentes.
             </p>
-            <div className="flex items-center gap-3 rounded-lg border border-[#DFCBEB] bg-[#FBF6FE] p-3">
+            <div className="flex items-center gap-3 rounded-control border border-border-default bg-surface-input p-3">
               <CardThumb card={pending.card} />
               <div className="min-w-0 text-sm">
-                <p className="break-words font-bold text-[#32183F]">
+                <p className="break-words font-bold text-text-primary">
                   {pending.card.name}
                 </p>
-                <p className="mt-1 break-words text-xs text-[#715F7C]">
+                <p className="mt-1 break-words text-xs text-text-primary">
                   {pending.card.setName} · {SOURCE_LABEL[pending.card.source]} ·{' '}
                   <code>{pending.card.externalId}</code>
                 </p>
               </div>
             </div>
-            <p className="flex gap-2 rounded-lg border border-[#D7C0E2] bg-[#F5EAFB] p-3 text-xs leading-relaxed text-[#572477]">
+            <p className="flex gap-2 rounded-control border border-border-default bg-surface-input p-3 text-xs leading-relaxed text-text-primary">
               <Icon name="info" size={16} />
               Os dados importados não são alterados. A ocultação continua
               valendo mesmo se a carta for importada de novo.
             </p>
             <label
               htmlFor="hide-reason"
-              className="block pt-2 text-sm font-bold text-[#341740]"
+              className="block pt-2 text-sm font-bold text-text-primary"
             >
               Motivo <span className="text-error-700">*</span>
             </label>
@@ -569,19 +569,19 @@ export function AdminCatalogPage() {
               aria-invalid={reasonError ? true : undefined}
               aria-describedby="hide-reason-hint"
               placeholder="Ex.: imagem da carta está trocada na API."
-              className="w-full rounded-lg border border-[#CAACDA] bg-white px-3 py-2 text-sm text-[#301A3E] outline-none placeholder:text-[#806C8A] hover:border-[#9C57B3] focus:border-[#7B3B9B] focus:ring-2 focus:ring-[#DDB5EA] aria-invalid:border-error-700"
+              className="w-full rounded-control border border-border-default bg-surface-input px-3 py-2 text-sm text-text-primary outline-none placeholder:text-text-secondary hover:border-border-default focus:border-support-blue focus:ring-2 focus:ring-support-blue aria-invalid:border-error-700"
             />
             <div
               id="hide-reason-hint"
               className="flex justify-between gap-3 text-xs"
             >
               <span
-                className={reasonError ? 'text-error-700' : 'text-[#75647F]'}
+                className={reasonError ? 'text-error-700' : 'text-text-primary'}
               >
                 {reasonError ??
                   `Entre ${REASON_MIN} e ${REASON_MAX} caracteres.`}
               </span>
-              <span className="text-[#75647F]">
+              <span className="text-text-primary">
                 {reason.trim().length}/{REASON_MAX}
               </span>
             </div>
@@ -594,7 +594,7 @@ export function AdminCatalogPage() {
         title="Reexibir carta"
         onClose={close}
         closeDisabled={saving}
-        presentation="refined"
+        busy={saving}
         headerIcon="cards"
         secondaryAction={{ label: 'Cancelar' }}
         primaryAction={{
@@ -603,13 +603,13 @@ export function AdminCatalogPage() {
         }}
       >
         {pending ? (
-          <div className="space-y-3 rounded-lg border border-[#DFCBEB] bg-[#FBF6FE] p-4 text-sm leading-relaxed text-[#35223F]">
+          <div className="space-y-3 rounded-control border border-border-default bg-surface-input p-4 text-sm leading-relaxed text-text-primary">
             <p>
               <strong>{pending.card.name}</strong> volta a aparecer no catálogo
               público.
             </p>
             {pending.card.hiddenReason ? (
-              <p className="text-xs text-[#725D80]">
+              <p className="text-xs text-text-primary">
                 Motivo da ocultação: {pending.card.hiddenReason}
               </p>
             ) : null}

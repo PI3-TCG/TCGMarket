@@ -390,6 +390,8 @@ function ProfileForm({ profile }: { profile: ProfileResponse }) {
       <Modal
         open={confirmCancel}
         title="Descartar alterações?"
+        headerIcon="alert"
+        role="alertdialog"
         onClose={() => setConfirmCancel(false)}
         secondaryAction={{ label: 'Continuar editando' }}
         primaryAction={{

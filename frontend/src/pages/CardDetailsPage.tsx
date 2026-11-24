@@ -312,7 +312,13 @@ function CardImage({ card }: { card: CatalogCardDetails }) {
           Ver imagem completa
         </Button>
       ) : null}
-      <Modal open={zoomed} title={card.name} onClose={() => setZoomed(false)}>
+      <Modal
+        open={zoomed}
+        title={card.name}
+        headerIcon="cards"
+        onClose={() => setZoomed(false)}
+        secondaryAction={{ label: 'Fechar' }}
+      >
         <img
           src={imageUrl ?? undefined}
           alt={alt}

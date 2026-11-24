@@ -430,7 +430,7 @@ export function AdminUsersPage() {
         title={pending ? MODAL_TITLE[pending.kind] : ''}
         onClose={close}
         closeDisabled={saving}
-        presentation="refined"
+        busy={saving}
         headerIcon="shield-check"
         secondaryAction={{ label: 'Cancelar' }}
         primaryAction={{
@@ -439,28 +439,28 @@ export function AdminUsersPage() {
           onClick: () => void confirm(),
         }}
       >
-        <div className="space-y-4 text-[#362342]">
+        <div className="space-y-4 text-text-primary">
           {pending?.kind === 'role' ? (
-            <p className="rounded-lg border border-[#E3D3EB] bg-[#FBF7FE] p-3 text-sm leading-relaxed">
+            <p className="rounded-control border border-border-default bg-surface-input p-3 text-sm leading-relaxed">
               Alterar o perfil de <strong>{pending.user.name}</strong> para{' '}
               <strong>{ROLE_LABEL[pending.role].toLowerCase()}</strong>?
             </p>
           ) : null}
           {pending?.kind === 'suspend' ? (
-            <p className="rounded-lg border border-[#F1C7CF] bg-[#FFF5F6] p-3 text-sm leading-relaxed">
+            <p className="rounded-control border border-error-200 bg-surface-input p-3 text-sm leading-relaxed">
               <strong>{pending.user.name}</strong> perde o acesso à plataforma a
               partir da próxima ação, e o perfil público deixa de aparecer.
             </p>
           ) : null}
           {pending?.kind === 'reactivate' ? (
-            <p className="rounded-lg border border-[#D9CDE5] bg-[#F8F4FB] p-3 text-sm leading-relaxed">
+            <p className="rounded-control border border-border-default bg-surface-input p-3 text-sm leading-relaxed">
               <strong>{pending.user.name}</strong> volta a acessar a plataforma,
               e o perfil público volta a aparecer.
             </p>
           ) : null}
           {pending?.kind === 'moderate' ? (
-            <fieldset className="space-y-3 rounded-lg border border-[#E3D3EB] bg-[#FBF7FE] p-4">
-              <legend className="px-1 text-sm font-semibold leading-relaxed text-[#3D2750]">
+            <fieldset className="space-y-3 rounded-control border border-border-default bg-surface-input p-4">
+              <legend className="px-1 text-sm font-semibold leading-relaxed text-text-primary">
                 Escolha o que remover do perfil de{' '}
                 <strong>{pending.user.name}</strong>. Nome e usuário só podem
                 ser alterados pelo próprio jogador.
