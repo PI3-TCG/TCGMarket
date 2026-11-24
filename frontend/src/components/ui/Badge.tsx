@@ -25,30 +25,37 @@ type BadgeProps = {
   className?: string
 }
 
+// Conservar a API pública e manter rótulo/ícone como evidência de estado,
+// sem depender apenas de diferenças cromáticas.
 const soft: Record<BadgeVariant, string> = {
-  sale: 'bg-primary-900 text-white',
-  trade: 'bg-secondary-500 text-white',
-  both: 'bg-primary-100 text-primary-900',
-  available: 'bg-success-50 text-success-700',
-  sold: 'bg-neutral-100 text-neutral-500',
-  rare: 'bg-rare-100 text-rare-700',
-  foil: 'bg-rare-100 text-rare-700',
-  primary: 'bg-primary-100 text-primary-900',
-  secondary: 'bg-secondary-100 text-secondary-700',
-  success: 'bg-success-50 text-success-700',
-  warning: 'bg-warning-50 text-warning-700',
-  error: 'bg-error-50 text-error-700',
-  neutral: 'bg-neutral-100 text-neutral-700',
+  sale: 'bg-brand-primary text-white',
+  trade: 'bg-support-blue-text text-white',
+  both: 'bg-surface-brand-tint text-brand-primary',
+  available: 'bg-success-50 text-state-success-text',
+  sold: 'bg-surface-subtle text-text-secondary',
+  rare: 'bg-accent-gold-soft text-accent-gold-deep',
+  foil: 'bg-accent-gold-soft text-accent-gold-deep',
+  primary: 'bg-surface-brand-tint text-brand-primary',
+  secondary: 'bg-info-50 text-support-blue-text',
+  success: 'bg-success-50 text-state-success-text',
+  warning: 'bg-warning-50 text-state-warning-text',
+  error: 'bg-error-50 text-state-error',
+  neutral: 'bg-surface-subtle text-text-primary',
 }
 
 const solidOverride: Partial<Record<BadgeVariant, string>> = {
-  rare: 'bg-rare-500 text-white',
-  foil: 'bg-rare-500 text-white',
+  rare: 'bg-chip-rare-bg text-chip-rare-text',
+  foil: 'bg-accent-gold-deep text-white',
 }
 
 const defaultIcon: Partial<Record<BadgeVariant, IconName>> = {
   rare: 'gem',
   foil: 'sparkle',
+  available: 'check-circle',
+  sold: 'close-circle',
+  success: 'check-circle',
+  warning: 'alert',
+  error: 'close-circle',
 }
 
 export function Badge({
@@ -59,13 +66,16 @@ export function Badge({
   className,
 }: BadgeProps) {
   const glyph = icon ?? defaultIcon[variant]
+  const appearance =
+    tone === 'solid' && solidOverride[variant]
+      ? solidOverride[variant]
+      : soft[variant]
 
   return (
     <span
       className={cn(
-        'inline-flex min-h-6 items-center gap-1 rounded-full px-2 text-xs font-semibold',
-        soft[variant],
-        tone === 'solid' && solidOverride[variant],
+        'inline-flex min-h-6 items-center gap-1 rounded-full px-2 py-0.5 font-sans text-xs font-semibold leading-4',
+        appearance,
         className,
       )}
     >
