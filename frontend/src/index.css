@@ -1,41 +1,29 @@
 @import 'tailwindcss';
 
 /*
- * TCG Market — Design System v2.2
- *
+ * TCG Market — Design System v2.2 · DS-02
  * Fonte única dos tokens visuais da aplicação.
- * Não é necessário importar tokens.css ou pergaminho.css.
+ * Não importar tokens.css, pergaminho.css ou criar tokens.ts paralelos.
+ * Os aliases legados permanecem disponíveis durante a migração.
  */
 
 @theme {
-  /* ========================================
-     TIPOGRAFIA
-     ======================================== */
-
+  /* TIPOGRAFIA */
   --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
   --font-display: Cinzel, ui-serif, Georgia, serif;
   --font-title: 'Crimson Text', Georgia, serif;
 
-  /* ========================================
-     ESPAÇAMENTO
-     ======================================== */
-
+  /* ESPAÇAMENTO */
   --spacing: 4px;
 
-  /* ========================================
-     IDENTIDADE VISUAL — V2.2
-     ======================================== */
-
+  /* IDENTIDADE VISUAL — V2.2 */
   --color-brand-primary: #660366;
   --color-brand-primary-hover: #4f024f;
   --color-brand-primary-light: #721e78;
   --color-brand-primary-deep: #47114f;
   --color-brand-deep: #310b43;
 
-  /* ========================================
-     SUPERFÍCIES
-     ======================================== */
-
+  /* SUPERFÍCIES */
   --color-surface-canvas: #f7e9e0;
   --color-surface-default: #faf1e7;
   --color-surface-input: #f9f8f9;
@@ -44,41 +32,50 @@
   --color-surface-lavender: #e1d0e3;
   --color-surface-brand-tint: #f0e3f0;
 
-  /* ========================================
-     TEXTOS
-     ======================================== */
-
+  /* TEXTOS — não confundir com gold decorativo */
+  --color-text-primary: #302b40;
   --color-text-ink: #1a1216;
   --color-text-price: #3a0a38;
   --color-text-secondary: #5f565b;
   --color-text-inverse: #ffffff;
 
-  /* ========================================
-     BORDAS
-     ======================================== */
-
+  /* BORDAS */
   --color-border-default: #e7ddd3;
   --color-border-emphasis: #b98fb9;
 
-  /* ========================================
-     DOURADO E ORNAMENTOS
-     ======================================== */
-
+  /* DOURADO E ORNAMENTOS */
   --color-accent-gold: #e0a100;
   --color-accent-gold-frame: #e9a150;
   --color-accent-bronze: #b08252;
   --color-accent-gold-deep: #8a5a12;
   --color-accent-gold-soft: #fff4cc;
 
-  /* ========================================
-     CORES SEMÂNTICAS
-     ======================================== */
-
+  /* CORES SEMÂNTICAS — tons de marca aprovados */
   --color-support-blue: #0969d7;
-
+  --color-state-info: #0969d7;
   --color-state-success: #15803d;
   --color-state-warning: #b45309;
   --color-state-error: #b91c1c;
+
+  /*
+   * VARIANTES DE TEXTO AA EM CANVAS/PERGAMINHO.
+   * Não substituem as cores institucionais; usar somente quando o texto
+   * estiver sobre superfícies claras. Valores derivados e medidos na DS-02.
+   */
+  --color-support-blue-text: #075fc4;
+  --color-state-success-text: #116f33;
+  --color-state-warning-text: #a34b08;
+
+  /* CHIPS DE RARIDADE — pares aprovados no guia v2.2 */
+  --color-chip-rare-bg: #74afef;
+  --color-chip-rare-text: #0b2f5e;
+  --color-chip-mythic-bg: #9348d1;
+  --color-chip-mythic-text: #ffffff;
+
+  /* ESTADOS DE ERRO: aliases sem cópias paralelas de valores */
+  --color-danger: var(--color-state-error);
+  --color-danger-soft-bg: var(--color-error-50);
+  --color-danger-soft-text: var(--color-error-600);
 
   /* ========================================
      COMPATIBILIDADE COM O TEMA ANTERIOR
@@ -127,23 +124,21 @@
   --color-rare-500: #e0a100;
   --color-rare-100: #fff4cc;
 
-  /* ========================================
-     BORDAS ARREDONDADAS
-     ======================================== */
-
+  /* BORDAS ARREDONDADAS */
   --radius-control: 8px;
   --radius-surface: 12px;
   --radius-card: 12px;
   --radius-banner: 16px;
   --radius-modal: 16px;
 
-  /* ========================================
-     SOMBRAS
-     ======================================== */
-
+  /* SOMBRAS — manter nomes existentes */
   --shadow-sm: 0 1px 3px rgb(48 43 64 / 0.08);
   --shadow-md: 0 4px 12px rgb(48 43 64 / 0.1);
-  --shadow-lg: 0 8px 24px rgb(48 43 64 / 0.14);
+  --shadow-lg: 0 12px 32px rgb(48 43 64 / 0.16);
+
+  /* MOVIMENTO — tokens reutilizáveis, não aplicar transição a todo elemento */
+  --motion-fast: 150ms;
+  --motion-normal: 200ms;
 }
 
 /* ========================================
@@ -152,7 +147,7 @@
 
 @layer base {
   body {
-    @apply bg-surface-canvas font-sans text-neutral-900 antialiased;
+    @apply bg-surface-canvas font-sans text-text-primary antialiased;
 
     background-image: url('./assets/design-system/pergaminho.webp');
     background-repeat: repeat;
@@ -174,6 +169,21 @@
   select:disabled,
   input:disabled {
     cursor: not-allowed;
+  }
+}
+
+/*
+ * Preferência de movimento é global, sem interferir nos estilos padrões
+ * do usuário que não ativou a preferência de redução.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
 
