@@ -67,8 +67,8 @@ export function MarketplaceFilters({ onApply }: Props) {
     { key: 'game', label: `TCG: ${labelFor(games, applied.game)}` },
     { key: 'edition', label: `Edição: ${applied.edition}` },
     { key: 'rarity', label: `Raridade: ${applied.rarity}` },
-    { key: 'condition', label: `Condição: ${conditionLabels[applied.condition] ?? applied.condition}` },
-    { key: 'language', label: `Idioma: ${languageLabels[applied.language] ?? applied.language}` },
+    { key: 'condition', label: `Condição: ${labelFor(conditionOptions, applied.condition)}` },
+    { key: 'language', label: `Idioma: ${labelFor(languageOptions, applied.language)}` },
     { key: 'minPrice', label: `Mínimo: R$ ${applied.minPrice}` },
     { key: 'maxPrice', label: `Máximo: R$ ${applied.maxPrice}` },
   ].filter(({ key }) => Boolean(applied[key as keyof FilterValues]))

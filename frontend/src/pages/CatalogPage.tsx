@@ -27,10 +27,7 @@ import magicBanner from '@/assets/images/image-magic.png'
 import yugiohBanner from '@/assets/images/image-yugioh.png'
 import onePieceBanner from '@/assets/images/image-onePiece.png'
 import digimonBanner from '@/assets/images/image-digimon.png'
-import { CardDetailsModal } from '@/components/catalog/CardDetailsModal'
-import { CollectionAdditionNotice } from '@/components/catalog/CollectionAdditionNotice'
 import type { CatalogCard as CatalogCardData } from '@/types/Catalog'
-import { useSession } from '@/session'
 
 const gameNames: Record<string, string> = {
   pokemon: 'Pokémon',
@@ -58,9 +55,6 @@ export function CatalogPage() {
 }
 
 function CatalogView({ game }: { game: string }) {
-  const [activeCard, setActiveCard] = useState<CatalogCardData | null>(null)
-  const [addedCard, setAddedCard] = useState<string | null>(null)
-  const { user, setLoginNotice } = useSession()
   const search = useSearch({ from: '/site-layout/catalogo/$game' })
   const navigate = useNavigate({ from: '/catalogo/$game' })
   const supportedGame = supportedGames.includes(game)
@@ -131,22 +125,7 @@ function CatalogView({ game }: { game: string }) {
   const total = data?.totalElements ?? 0
 
   function openCardDetails(card: CatalogCardData) {
-    setAddedCard(null)
-    setActiveCard(card)
-  }
-
-  function redirectToLogin(cardId: string) {
-    setLoginNotice('Entre na sua conta para adicionar cartas à coleção.')
-    navigate({
-      to: '/login',
-      search: { redirect: `/cartas/${encodeURIComponent(cardId)}?adicionar=1` },
-    })
-  }
-
-  function closeModal() { setActiveCard(null) }
-  function confirmAddition(cardName: string) {
-    setAddedCard(cardName)
-    closeModal()
+    void navigate({ to: '/cartas/$id', params: { id: card.id } })
   }
 
   return (
@@ -267,16 +246,6 @@ function CatalogView({ game }: { game: string }) {
           </section>
         </div>
       </div>
-      <CollectionAdditionNotice cardName={addedCard} onDismiss={() => setAddedCard(null)} />
-      {activeCard && (
-        <CardDetailsModal
-          key={activeCard.id}
-          cardId={activeCard.id}
-          onClose={closeModal}
-          onAdded={user ? confirmAddition : undefined}
-          onRequireLogin={user ? undefined : redirectToLogin}
-        />
-      )}
     </main>
   )
 }
