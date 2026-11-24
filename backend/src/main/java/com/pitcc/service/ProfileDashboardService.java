@@ -36,7 +36,8 @@ public class ProfileDashboardService {
   public record Activity(String id, String kind, String description, Instant occurredAt, String status) {}
   public record Dashboard(long totalGames, long totalCopies, long activeAds, long publishedAds,
       long completedTransactions, List<Activity> activities) {}
-  public record PublicSummary(boolean collectionPublic, String avatarUrl, long completedTransactions) {}
+  public record PublicSummary(boolean collectionPublic, String avatarUrl, long completedTransactions,
+      List<CardGame> collectionGames) {}
   public record PublicCollectionItem(CollectionCardResponse card, int quantity) {}
 
   private User own(String id) {
@@ -119,8 +120,11 @@ public class ProfileDashboardService {
 
   public PublicSummary publicSummary(String username) {
     User user = publicUser(username);
+    List<CardGame> games = user.isCollectionPublic()
+        ? collection.summarizeOwnCollection(user.getId()).games()
+        : List.of();
     return new PublicSummary(user.isCollectionPublic(), display(user.getAvatarUrl()),
-        mongo.count(Query.query(participant(user.getId())), Transaction.class));
+        mongo.count(Query.query(participant(user.getId())), Transaction.class), games);
   }
 
   public Page<PublicCollectionItem> publicCollection(String username, int page, int size) {

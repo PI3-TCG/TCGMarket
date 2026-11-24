@@ -1,4 +1,5 @@
 import {
+  ProfileShell,
   ProfileSkeleton,
   ProfileStatus,
 } from '@/components/profile/ProfileView'
@@ -14,17 +15,15 @@ export function PublicProfilePage() {
   const { state, retry } = useRemoteData(username, fetchProfile)
 
   return (
-    <main className="mx-auto w-full max-w-[1400px] space-y-5 px-4 pt-4 pb-12 sm:px-6 xl:px-[38px]">
+    <ProfileShell showBanner={false}>
       {state.status === 'loading' ? <ProfileSkeleton /> : null}
       {state.status === 'notFound' ? <ProfileStatus kind="notFound" /> : null}
       {state.status === 'error' ? (
         <ProfileStatus kind="error" onRetry={retry} />
       ) : null}
       {state.status === 'ready' ? (
-        <>
-          <PublicCollector key={username} profile={state.data} />
-        </>
+        <PublicCollector key={username} profile={state.data} />
       ) : null}
-    </main>
+    </ProfileShell>
   )
 }

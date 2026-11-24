@@ -1,3 +1,5 @@
+import { focusRing } from '@/components/ui/styles'
+import { profilePanel, profileTextLink } from './profileStyles'
 import { useCallback } from 'react'
 import { api } from '@/services/api'
 import type { ProfileReputation as ReputationDataResponse } from '@/types/Review'
@@ -5,127 +7,12 @@ import type { ReactNode } from 'react'
 import { Badge, type BadgeVariant } from '@/components/ui/Badge'
 import { Link } from '@tanstack/react-router'
 import { Card } from '@/components/ui/Card'
-import { Icon, type IconName } from '@/components/ui/Icon'
+import { Icon } from '@/components/ui/Icon'
 import { useRemoteData } from '@/hooks/useRemoteData'
 import { getProfileDashboard } from '@/services/profileApi'
 import { useSession } from '@/session'
 import { ProfileStatus } from './ProfileView'
 
-export interface ReputationData {
-  average: number | null
-  totalReviews: number
-  reviews: {
-    id: string
-    author: string
-    rating: number
-    comment: string
-    createdAt: string
-  }[]
-}
-export function ReputationCard({
-  data,
-  loading = false,
-}: {
-  data?: ReputationData
-  loading?: boolean
-}) {
-  return (
-    <Card className="h-full border-rare-500/70 p-5" aria-busy={loading}>
-      <h2 className="flex items-center gap-2 text-lg font-semibold text-primary-900">
-        <Icon name="shield-check" size={24} />
-        Reputação
-      </h2>
-      <div role="status" className="mt-3 text-sm text-neutral-700">
-        {loading ? (
-          'Carregando reputação...'
-        ) : data ? (
-          <>
-            <p className="font-display text-2xl font-bold text-primary-900">
-              {data.average === null
-                ? 'Sem nota'
-                : `${data.average.toLocaleString('pt-BR')} / 5`}
-            </p>
-            <p className="mt-2">{data.totalReviews} avaliações recebidas</p>
-          </>
-        ) : (
-          'A reputação estará disponível em breve.'
-        )}
-      </div>
-    </Card>
-  )
-}
-export function ReviewsCard({
-  data,
-  loading = false,
-}: {
-  data?: ReputationData
-  loading?: boolean
-}) {
-  return (
-    <Card className="h-full border-rare-500/70 p-5" aria-busy={loading}>
-      <h2 className="flex items-center gap-2 text-lg font-semibold text-primary-900">
-        <Icon name="message-square" size={24} />
-        Avaliações
-      </h2>
-      <div role="status" className="mt-3 text-sm text-neutral-700">
-        {loading ? (
-          'Carregando avaliações...'
-        ) : !data ? (
-          'O recurso de avaliações ainda não está disponível.'
-        ) : data.reviews.length === 0 ? (
-          'Nenhuma avaliação recebida.'
-        ) : (
-          <ul className="space-y-3">
-            {data.reviews.map((review) => (
-              <li
-                key={review.id}
-                className="border-b border-neutral-200 pb-3 last:border-0 last:pb-0"
-              >
-                <strong>{review.author}</strong> · {review.rating} / 5
-                <p className="mt-1 break-words">{review.comment}</p>
-                <time
-                  className="mt-1 block text-xs text-neutral-500"
-                  dateTime={review.createdAt}
-                >
-                  {new Date(review.createdAt).toLocaleDateString('pt-BR')}
-                </time>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-    </Card>
-  )
-}
-const shortcuts: {
-  to:
-    | '/minha-colecao'
-    | '/meus-anuncios'
-    | '/perfil/propostas'
-    | '/perfil/historico'
-  title: string
-  description: string
-  icon: IconName
-}[] = [
-  {
-    to: '/meus-anuncios',
-    title: 'Meus anúncios',
-    description: 'Gerencie suas ofertas no Marketplace.',
-    icon: 'storefront',
-  },
-  {
-    to: '/perfil/propostas',
-    title: 'Minhas propostas',
-    description: 'Acompanhe propostas enviadas e recebidas.',
-    icon: 'arrows-right-left',
-  },
-  {
-    to: '/perfil/historico',
-    title: 'Histórico de transações',
-    description: 'Consulte compras e vendas concluídas.',
-    icon: 'receipt',
-  },
-]
 const statuses: Record<string, string> = {
   ACTIVE: 'Ativo',
   CANCELLED: 'Cancelado',
@@ -148,15 +35,11 @@ const statusVariants: Record<string, BadgeVariant> = {
 }
 export function ProfileDashboard({
   username,
-  about,
-  privacy,
-  reputation,
+  overview,
   collection,
 }: {
   username: string
-  about: ReactNode
-  privacy: ReactNode
-  reputation?: ReactNode
+  overview: ReactNode
   collection: ReactNode
 }) {
   const { user } = useSession()
@@ -170,15 +53,21 @@ export function ProfileDashboard({
     )
     return response.data.summary
   }, [username])
-  const { state: reputationState } = useRemoteData(`reputation-summary:${username}`, getReputation)
-  const summary = reputationState.status === 'ready' ? reputationState.data : null
+  const { state: reputationState } = useRemoteData(
+    `reputation-summary:${username}`,
+    getReputation,
+  )
+  const summary =
+    reputationState.status === 'ready' ? reputationState.data : null
   const reputationLabel = summary
     ? summary.average === null
       ? 'Ainda sem avaliações'
       : `${summary.average.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} / 5`
-    : reputationState.status === 'loading' ? 'Carregando…' : 'Indisponível'
+    : reputationState.status === 'loading'
+      ? 'Carregando…'
+      : 'Indisponível'
   return (
-    <div className="space-y-5 pt-4">
+    <div className="space-y-6">
       <section
         aria-label="Resumo da conta"
         aria-busy={state.status === 'loading'}
@@ -190,77 +79,75 @@ export function ProfileDashboard({
         ) : state.status !== 'ready' ? (
           <ProfileStatus kind="error" onRetry={retry} />
         ) : (
-          <div className="grid grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-6">
-            {[
-              ['TCGs colecionados', state.data.totalGames, 'layers'],
-              ['Cartas colecionadas', state.data.totalCopies, 'cards'],
-              ['Anúncios ativos', state.data.activeAds, 'tag'],
-              ['Anúncios publicados', state.data.publishedAds, 'megaphone'],
-              [
-                'Transações concluídas',
-                state.data.completedTransactions,
-                'handshake',
-              ],
-              ['Reputação', reputationLabel, 'star'],
-            ].map(([label, value, icon]) => (
-              <Card
-                key={label}
-                className="grid h-full min-h-[140px] grid-rows-[minmax(3rem,1fr)_3rem] border-rare-500/70 p-4 text-center"
-              >
-                <p className="flex items-center justify-center gap-2 text-sm text-neutral-700">
-                  <Icon name={icon as IconName} size={20} />
-                  {label === 'Reputação' ? (
-                    <Link
-                      to="/perfil/reputacao"
-                      className="font-semibold text-primary-900 underline-offset-4 hover:underline focus-visible:underline"
+          <Card className={`${profilePanel} p-4 sm:p-5`}>
+            <h2 className="text-lg font-semibold text-brand-primary">
+              Resumo da conta
+            </h2>
+            <div className="mt-3 grid grid-cols-2 gap-x-3 sm:gap-x-6">
+              {(
+                [
+                  [
+                    ['TCGs colecionados', state.data.totalGames, 'layers'],
+                    ['Cartas colecionadas', state.data.totalCopies, 'cards'],
+                    ['Reputação', reputationLabel, 'star'],
+                  ],
+                  [
+                    ['Anúncios ativos', state.data.activeAds, 'tag'],
+                    [
+                      'Anúncios publicados',
+                      state.data.publishedAds,
+                      'megaphone',
+                    ],
+                    [
+                      'Transações concluídas',
+                      state.data.completedTransactions,
+                      'handshake',
+                    ],
+                  ],
+                ] as const
+              ).map((group) => (
+                <dl
+                  key={group[0][0]}
+                  className="grid min-w-0 grid-rows-3 divide-y divide-border-default"
+                >
+                  {group.map(([label, value, icon]) => (
+                    <div
+                      key={label}
+                      className="flex min-w-0 flex-col justify-center gap-1 py-3 md:flex-row md:items-center md:justify-between md:gap-3"
                     >
-                      {label}
-                    </Link>
-                  ) : (
-                    <span>{label}</span>
-                  )}
-                </p>
-                <p className={`flex items-center justify-center font-bold text-primary-900 ${label === 'Reputação' && summary?.average == null ? 'text-sm' : 'font-display text-2xl'}`}>
-                  {typeof value === 'number'
-                    ? value.toLocaleString('pt-BR')
-                    : value}
-                </p>
-              </Card>
-            ))}
-          </div>
+                      <dt className="flex min-w-0 items-center gap-2 text-sm wrap-anywhere text-text-secondary">
+                        <Icon
+                          name={icon}
+                          size={16}
+                          className="shrink-0 text-brand-primary"
+                        />
+                        {label === 'Reputação' ? (
+                          <Link
+                            to="/perfil/reputacao"
+                            className={`${profileTextLink} underline`}
+                          >
+                            {label}
+                          </Link>
+                        ) : (
+                          label
+                        )}
+                      </dt>
+                      <dd className="font-semibold wrap-anywhere text-brand-primary">
+                        {typeof value === 'number'
+                          ? value.toLocaleString('pt-BR')
+                          : value}
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              ))}
+            </div>
+          </Card>
         )}
       </section>
-      <section
-        aria-label="Gerenciar minha conta"
-        className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"
-      >
-        {shortcuts.map((item) => (
-          <Link
-            key={item.to}
-            to={item.to}
-            className="flex min-h-[160px] flex-col items-center justify-center rounded-xl border border-rare-500/70 bg-white p-5 text-center hover:border-rare-500 focus-visible:outline-2 focus-visible:outline-secondary-500"
-          >
-            <Icon name={item.icon} size={24} />
-            <h2 className="mt-3 font-semibold text-primary-900">
-              {item.title}
-            </h2>
-            <p className="mt-1 text-sm text-neutral-700">{item.description}</p>
-          </Link>
-        ))}
-        {about}
-      </section>
-      {reputation ?? (
-        <section
-          aria-label="Reputação e avaliações"
-          className="grid items-stretch gap-5 sm:grid-cols-2"
-        >
-          <ReputationCard />
-          <ReviewsCard />
-        </section>
-      )}
-      {privacy}
+      {overview}
       {collection}
-      <Card className="border-rare-500/70 p-5">
+      <Card className={`${profilePanel} p-4 sm:p-5`}>
         <h2 className="flex items-center gap-2 text-lg font-semibold text-primary-900">
           <Icon name="clock" size={24} />
           Atividades recentes
@@ -274,7 +161,12 @@ export function ProfileDashboard({
               Você ainda não tem atividades para exibir.
             </p>
           ) : (
-            <div className="mx-auto mt-5 w-full max-w-5xl overflow-x-auto rounded-xl border border-neutral-200">
+            <div
+              tabIndex={0}
+              role="region"
+              aria-label="Tabela de atividades recentes"
+              className={`${focusRing} mx-auto mt-4 w-full max-w-5xl overflow-x-auto rounded-surface border border-border-default`}
+            >
               <table className="w-full min-w-[480px] table-fixed border-collapse text-center text-sm">
                 <caption className="sr-only">
                   Atividades recentes da sua conta
@@ -303,8 +195,8 @@ export function ProfileDashboard({
                       key={`${item.kind}:${item.id}`}
                       className="transition-colors hover:bg-neutral-50"
                     >
-                      <td className="px-4 py-4 align-middle">
-                        <p className="font-semibold text-neutral-900">
+                      <td className="px-3 py-3 align-middle">
+                        <p className="font-semibold wrap-anywhere text-neutral-900">
                           {item.description}
                         </p>
                         <time
@@ -314,14 +206,14 @@ export function ProfileDashboard({
                           {new Date(item.occurredAt).toLocaleString('pt-BR')}
                         </time>
                       </td>
-                      <td className="px-4 py-4 align-middle">
+                      <td className="px-3 py-3 align-middle">
                         <Badge
                           variant={statusVariants[item.status] ?? 'neutral'}
                         >
                           {statuses[item.status] ?? 'Atualização registrada'}
                         </Badge>
                       </td>
-                      <td className="px-4 py-4 align-middle">
+                      <td className="px-3 py-3 align-middle">
                         {item.kind === 'TRANSACTION' ? (
                           <Link
                             to="/perfil/historico/$transactionId"

@@ -2,6 +2,7 @@ import { api } from '@/services/api'
 import type {
   ProfileResponse,
   PublicProfileResponse,
+  CardGame,
   UpdateProfileRequest,
 } from '@/types/User'
 
@@ -32,6 +33,7 @@ export interface ProfileSettings {
 }
 export interface PublicSummary extends ProfileSettings {
   completedTransactions: number
+  collectionGames?: CardGame[]
 }
 export interface ProfileActivity {
   id: string

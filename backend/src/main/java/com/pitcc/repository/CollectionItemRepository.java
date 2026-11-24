@@ -78,6 +78,7 @@ public interface CollectionItemRepository extends MongoRepository<CollectionItem
                 "_id": 0,
                 "totalItems": 1,
                 "totalCopies": 1,
+                "games": { "$setDifference": ["$games", [null]] },
                 "totalGames": {
                   "$size": {
                     "$setDifference": ["$games", [null]]

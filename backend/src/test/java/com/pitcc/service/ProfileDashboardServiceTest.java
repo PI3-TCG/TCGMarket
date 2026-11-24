@@ -46,6 +46,24 @@ class ProfileDashboardServiceTest {
     assertEquals(card, result.card()); assertEquals(3, result.quantity());
     assertEquals(List.of("card", "quantity"), Arrays.stream(result.getClass().getRecordComponents()).map(c -> c.getName()).toList());
   }
+  @Test void publicSummaryHidesGamesWhenCollectionIsPrivate() {
+    when(users.findByUsername("collector")).thenReturn(Optional.of(user()));
+
+    assertTrue(service.publicSummary("collector").collectionGames().isEmpty());
+    verifyNoInteractions(collection);
+  }
+
+  @Test void publicSummaryUsesGamesFromThePublicCollection() {
+    User user = user();
+    user.setCollectionPublic(true);
+    when(users.findByUsername("collector")).thenReturn(Optional.of(user));
+    var games = List.of(CardGame.POKEMON, CardGame.YUGIOH);
+    when(collection.summarizeOwnCollection("owner"))
+        .thenReturn(new CollectionSummaryResponse(4, 17, 2, games));
+
+    assertEquals(games, service.publicSummary("collector").collectionGames());
+  }
+
   @Test void privacyChangesOnlySettingsOfAuthenticatedAccount() {
     when(users.findById("owner")).thenReturn(Optional.of(user()));
     var value = new ProfileSettings(true, null);
@@ -109,7 +127,7 @@ class ProfileDashboardServiceTest {
 
   @Test void dashboardUsesPersistedCountsAndExcludesAbortedAds() {
     when(users.findById("owner")).thenReturn(Optional.of(user()));
-    when(collection.summarizeOwnCollection("owner")).thenReturn(new CollectionSummaryResponse(4, 17, 2));
+    when(collection.summarizeOwnCollection("owner")).thenReturn(new CollectionSummaryResponse(4, 17, 2, List.of(CardGame.POKEMON, CardGame.YUGIOH)));
     when(mongo.count(any(Query.class), eq(Ad.class))).thenReturn(8L, 3L);
     when(mongo.count(any(Query.class), eq(Transaction.class))).thenReturn(5L);
     when(mongo.find(any(Query.class), eq(Ad.class))).thenReturn(List.of());

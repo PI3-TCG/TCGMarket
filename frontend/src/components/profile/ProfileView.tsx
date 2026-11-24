@@ -1,4 +1,5 @@
-import { BannerGoldDivider, PageBanner } from '@/components/layout/PageBanner'
+import { profilePanel, profileTextLink } from './profileStyles'
+import { PageBanner } from '@/components/layout/PageBanner'
 import { pageBanners } from '@/config/pageBanners'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
@@ -26,7 +27,7 @@ export function ProfileShell({
   showBanner?: boolean
 }) {
   return (
-    <main className="mx-auto w-full max-w-[1400px] space-y-5 px-4 pt-4 pb-12 sm:px-6 xl:px-[38px]">
+    <main className="mx-auto w-full max-w-[1400px] space-y-6 px-4 pt-4 pb-12 sm:px-6 xl:px-[38px]">
       {showBanner && (
         <PageBanner
           image={pageBanners.profile}
@@ -86,7 +87,7 @@ export function Avatar({
     <span
       aria-hidden="true"
       className={cn(
-        'font-display flex shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary-300 to-primary-700 font-bold text-white ring-2 ring-[#FCD203]/70 shadow-md',
+        'font-display flex shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary-300 to-primary-700 font-bold text-white ring-1 ring-border-default shadow-md',
         size === 'lg' ? 'size-24 text-3xl sm:size-28' : 'size-20 text-2xl',
       )}
     >
@@ -108,18 +109,20 @@ export function ProfileHero({
   action,
   avatarUrl,
   avatar,
+  collectionGames,
 }: {
   avatar?: ReactNode
+  collectionGames?: ProfileViewData['favoriteGames']
   avatarUrl?: string | null
   profile: ProfileViewData
   action?: ReactNode
 }) {
   const games = PROFILE_GAMES.filter((game) =>
-    profile.favoriteGames.includes(game.value),
+    (collectionGames ?? profile.favoriteGames).includes(game.value),
   )
 
   return (
-    <header className="relative isolate min-h-[200px] rounded-xl border-2 border-b-0 border-[#FCD203]/70 bg-[#130b30] shadow-sm">
+    <header className="relative isolate mb-6 min-h-[200px] rounded-surface border border-border-default bg-brand-deep shadow-sm">
       <img
         src={pageBanners.profile}
         alt=""
@@ -128,35 +131,39 @@ export function ProfileHero({
       />
       <div
         className={cn(
-          'relative grid min-h-[196px] grid-cols-[auto_minmax(0,1fr)] items-center gap-x-5 gap-y-4 p-6 sm:px-8',
+          'relative grid min-h-[196px] grid-cols-1 items-center justify-items-start gap-x-5 gap-y-4 p-5 sm:grid-cols-[auto_minmax(0,1fr)] sm:px-8',
           Boolean(action) && 'lg:grid-cols-[auto_minmax(0,1fr)_auto]',
         )}
       >
         {avatar ?? <Avatar name={profile.name} image={avatarUrl} />}
-        <div className="min-w-0 flex-1 space-y-2">
+        <div className="w-full min-w-0 space-y-2">
           <div className="flex flex-wrap items-center gap-2">
-            <h1 className="banner-text-outline font-display text-2xl font-bold break-words text-white sm:text-4xl">
+            <h1 className="banner-text-outline font-display text-2xl leading-tight font-bold wrap-anywhere text-white sm:text-4xl">
               {profile.name}
             </h1>
             {profile.administrator ? (
               <Badge variant="primary">Administrador</Badge>
             ) : null}
           </div>
-          <ul className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-white/90">
-            <li>@{profile.username}</li>
-            <li className="flex items-center gap-1">
+          <ul className="flex flex-wrap gap-x-4 gap-y-1 text-sm wrap-anywhere text-white">
+            <li className="banner-text-outline min-w-0">@{profile.username}</li>
+            <li className="banner-text-outline flex items-center gap-1">
               <CalendarIcon />
               {formatMemberSince(profile.registrationDate)}
             </li>
           </ul>
           {games.length > 0 ? (
-            <ul className="flex flex-wrap gap-2" aria-label="TCGs que joga">
+            <ul
+              className="flex flex-wrap gap-2"
+              aria-label={collectionGames ? 'TCGs da coleção' : 'TCGs que joga'}
+            >
               {games.map((game) => (
                 <li key={game.value}>
                   <Badge
                     variant="neutral"
                     className="border border-primary-300 bg-white text-primary-900"
                   >
+                    {collectionGames && <Icon name={game.icon} size={16} />}
                     {game.label}
                   </Badge>
                 </li>
@@ -165,54 +172,10 @@ export function ProfileHero({
           ) : null}
         </div>
         {action ? (
-          <div className="col-span-2 min-w-0 lg:col-span-1">{action}</div>
+          <div className="min-w-0 sm:col-span-2 lg:col-span-1">{action}</div>
         ) : null}
       </div>
-      <BannerGoldDivider />
     </header>
-  )
-}
-
-export function GamesCard({
-  profile,
-  title,
-  editAction,
-}: {
-  profile: ProfileViewData
-  title: string
-  editAction?: ReactNode
-}) {
-  if (!editAction && profile.favoriteGames.length === 0) return null
-
-  return (
-    <Card className="border-rare-500/70 p-5">
-      <div className="flex items-center justify-between gap-3">
-        <h2 className="text-base font-semibold text-neutral-900">{title}</h2>
-        {editAction}
-      </div>
-      <ul className="mt-4 grid gap-3 sm:grid-cols-3">
-        {PROFILE_GAMES.map((game) => {
-          const selected = profile.favoriteGames.includes(game.value)
-          return (
-            <li
-              key={game.value}
-              className={cn(
-                'flex flex-col items-center gap-2 rounded-surface border px-3 py-4 text-sm font-semibold',
-                selected
-                  ? 'border-primary-900 bg-primary-900 text-white'
-                  : 'border-neutral-200 bg-neutral-50 text-neutral-500',
-              )}
-            >
-              <Icon name={game.icon} size={32} />
-              {game.label}
-              <span className="sr-only">
-                {selected ? '(joga)' : '(não joga)'}
-              </span>
-            </li>
-          )
-        })}
-      </ul>
-    </Card>
   )
 }
 
@@ -228,7 +191,7 @@ export function AboutCard({
   const location = formatLocation(profile.city, profile.state)
 
   return (
-    <Card className="border-rare-500/70 p-5">
+    <Card className={`${profilePanel} p-4 sm:p-5`}>
       <h2 className="text-base font-semibold text-neutral-900">Sobre mim</h2>
       {profile.bio ? (
         <p className="mt-3 text-sm break-words whitespace-pre-line text-neutral-700">
@@ -258,17 +221,17 @@ export function AboutCard({
               href={url}
               target="_blank"
               rel="noopener noreferrer nofollow ugc"
-              className="truncate text-primary-900 underline underline-offset-2 hover:text-primary-800"
+              className={`${profileTextLink} min-w-0 wrap-anywhere underline`}
             >
               {linkLabel(url)}
             </a>
           </li>
         ))}
         {email ? (
-          <li className="flex min-w-0 items-center gap-2">
+          <li className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
             <LockIcon />
-            <span className="truncate">{email}</span>
-            <span className="shrink-0 text-xs text-neutral-500">
+            <span className="min-w-0 wrap-anywhere">{email}</span>
+            <span className="text-xs text-text-secondary">
               (visível só para você)
             </span>
           </li>

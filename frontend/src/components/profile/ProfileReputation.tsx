@@ -1,5 +1,6 @@
+import { profilePanel } from './profileStyles'
 import { Pagination as PageNavigation } from '@/components/ui/Pagination'
-import { useCallback, useState } from 'react'
+import { useCallback, useState, type ReactNode } from 'react'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { useRemoteData } from '@/hooks/useRemoteData'
@@ -10,7 +11,15 @@ import { ReputationIndicator } from './ReputationIndicator'
 // Tamanho da página retornada por ReputationService.
 const REVIEWS_PER_PAGE = 10
 
-export function ProfileReputation({ username }: { username: string }) {
+export function ProfileReputation({
+  username,
+  about,
+  completedTransactions,
+}: {
+  username: string
+  about?: ReactNode
+  completedTransactions?: number
+}) {
   const [page, setPage] = useState(1)
   const fetchPage = useCallback(async () => {
     const response = await api.get<ReputationData>(
@@ -24,25 +33,33 @@ export function ProfileReputation({ username }: { username: string }) {
     fetchPage,
   )
 
+  const statusSpan = about ? 'lg:col-span-2' : 'md:col-span-2'
+
   return (
     <section
       aria-label="Reputação e avaliações"
+      className={
+        about
+          ? 'grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.35fr)]'
+          : 'grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]'
+      }
       aria-busy={state.status === 'loading'}
     >
+      {about}
       {state.status === 'loading' ? (
-        <p role="status" className="p-5">
+        <p role="status" className={`p-5 ${statusSpan}`}>
           Carregando avaliações...
         </p>
       ) : state.status !== 'ready' ? (
-        <Card className="space-y-3 p-5">
+        <Card className={`space-y-3 p-5 ${statusSpan}`}>
           <p role="alert">Não foi possível consultar a reputação.</p>
           <Button variant="outline" onClick={retry}>
             Tentar novamente
           </Button>
         </Card>
       ) : (
-        <div className="grid gap-5 md:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
-          <Card className="border-rare-500/70 p-5">
+        <>
+          <Card className={`${profilePanel} p-4 sm:p-5`}>
             <h2 className="text-lg font-semibold text-primary-900">
               Reputação
             </h2>
@@ -69,10 +86,20 @@ export function ProfileReputation({ username }: { username: string }) {
               </ul>
             )}
           </Card>
-          <Card className="border-rare-500/70 p-5">
-            <h2 className="text-lg font-semibold text-primary-900">
-              Avaliações recebidas
-            </h2>
+          <Card className={`${profilePanel} p-4 sm:p-5`}>
+            <header className="flex flex-wrap items-start justify-between gap-x-3 gap-y-1">
+              <h2 className="text-lg font-semibold text-primary-900">
+                Avaliações recebidas
+              </h2>
+              {completedTransactions !== undefined && (
+                <p className="ml-auto rounded-control bg-surface-brand-tint px-2 py-1 text-right text-xs text-brand-primary">
+                  <strong>
+                    {completedTransactions.toLocaleString('pt-BR')}
+                  </strong>{' '}
+                  transações concluídas
+                </p>
+              )}
+            </header>
             {state.data.reviews.length === 0 ? (
               <p className="mt-3 text-sm text-neutral-700">
                 {page === 1
@@ -110,10 +137,18 @@ export function ProfileReputation({ username }: { username: string }) {
               </ul>
             )}
             {(page > 1 || state.data.hasNext) && (
-              <PageNavigation label="Páginas de avaliações" page={page} totalPages={Math.ceil(state.data.summary.totalReviews / REVIEWS_PER_PAGE)} onPageChange={setPage} className="mt-4" />
+              <PageNavigation
+                label="Páginas de avaliações"
+                page={page}
+                totalPages={Math.ceil(
+                  state.data.summary.totalReviews / REVIEWS_PER_PAGE,
+                )}
+                onPageChange={setPage}
+                className="mt-4"
+              />
             )}
           </Card>
-        </div>
+        </>
       )}
     </section>
   )

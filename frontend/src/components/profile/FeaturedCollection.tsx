@@ -1,3 +1,5 @@
+import { profileCollectionPanel, profileTextLink } from './profileStyles'
+import type { ReactNode } from 'react'
 import { Link } from '@tanstack/react-router'
 import { CatalogCard } from '@/components/catalog/CatalogCard'
 import { Card } from '@/components/ui/Card'
@@ -9,11 +11,11 @@ import { useSession } from '@/session'
 
 const loadFeatured = () => getMyCollection({ size: 5 })
 
-export function FeaturedCollection() {
+export function FeaturedCollection({ privacy }: { privacy: ReactNode }) {
   const { user } = useSession()
   const { state, retry } = useRemoteData(`featured:${user?.id}`, loadFeatured)
   return (
-    <Card className="panel-ornaments overflow-visible! border-rare-500! p-5">
+    <Card className={profileCollectionPanel}>
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <h2 className="flex items-center gap-2 text-lg font-semibold text-primary-900">
           <Icon name="grid" size={24} />
@@ -21,7 +23,7 @@ export function FeaturedCollection() {
         </h2>
         <Link
           to="/minha-colecao"
-          className="text-sm font-semibold text-primary-900 underline"
+          className={`${profileTextLink} text-sm underline`}
         >
           Ver minha coleção completa
         </Link>
@@ -58,6 +60,7 @@ export function FeaturedCollection() {
           ))}
         </div>
       )}
+      {privacy}
     </Card>
   )
 }

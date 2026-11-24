@@ -1,7 +1,8 @@
+import { focusRing } from '@/components/ui/styles'
+import { profileTextLink } from './profileStyles'
 import { useId } from 'react'
 import { Link } from '@tanstack/react-router'
 import { useProfileSettings } from './profileSettings'
-import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Alert } from '@/components/ui/Alert'
 import { Icon } from '@/components/ui/Icon'
@@ -12,11 +13,11 @@ export function ProfilePrivacy({ username }: { username: string }) {
   const id = useId()
   const [copyMessage, setCopyMessage] = useState<string | null>(null)
   return (
-    <Card className="border-rare-500/70 p-5">
-      <h2 className="flex items-center gap-2 text-lg font-semibold text-primary-900">
+    <section className="mt-5 border-t border-border-default pt-5">
+      <h3 className="flex items-center gap-2 text-lg font-semibold text-primary-900">
         <Icon name="lock" size={24} />
         Privacidade da coleção
-      </h2>
+      </h3>
       {state.status === 'loading' ? (
         <p role="status" className="mt-3">
           Carregando configurações...
@@ -56,7 +57,7 @@ export function ProfilePrivacy({ username }: { username: string }) {
                   type="radio"
                   name={id}
                   checked={state.data.collectionPublic === option.value}
-                  className="mt-1 accent-primary-900"
+                  className={`${focusRing} mt-1 accent-brand-primary`}
                   onChange={() => {
                     setCopyMessage(null)
                     void save({ collectionPublic: option.value })
@@ -84,7 +85,7 @@ export function ProfilePrivacy({ username }: { username: string }) {
                 to="/jogadores/$username"
                 params={{ username }}
                 hash="colecao"
-                className="text-sm font-semibold text-primary-900 underline"
+                className={`${profileTextLink} text-sm underline`}
               >
                 Ver coleção pública
               </Link>
@@ -115,6 +116,6 @@ export function ProfilePrivacy({ username }: { username: string }) {
           )}
         </div>
       )}
-    </Card>
+    </section>
   )
 }
