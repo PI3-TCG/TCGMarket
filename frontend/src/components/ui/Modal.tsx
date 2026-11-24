@@ -316,17 +316,14 @@ export function Modal({
 
   if (embedded) return panel
 
-  function requestBackdropClose() {
-    if (!closeDisabled && onClose) {
-      onClose()
-    }
-  }
-
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
       <div
         className="absolute inset-0 bg-neutral-900/55 backdrop-blur-[2px]"
-        onMouseDown={requestBackdropClose}
+        onMouseDown={(event) => {
+          event.preventDefault()
+          if (!closeDisabled) onClose?.()
+        }}
       />
 
       <div
