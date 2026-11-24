@@ -258,7 +258,7 @@ function AddButton({
   return (
     <div className="flex justify-center">
       <Button
-        className="w-52 max-w-full whitespace-normal"
+        className="w-64 max-w-full whitespace-normal"
         icon={<Icon name="plus" size={20} />}
         onClick={onClick}
         disabled={disabled}
@@ -312,7 +312,13 @@ function CardImage({ card }: { card: CatalogCardDetails }) {
           Ver imagem completa
         </Button>
       ) : null}
-      <Modal open={zoomed} title={card.name} onClose={() => setZoomed(false)}>
+      <Modal
+        open={zoomed}
+        title={card.name}
+        headerIcon="cards"
+        onClose={() => setZoomed(false)}
+        secondaryAction={{ label: 'Fechar' }}
+      >
         <img
           src={imageUrl ?? undefined}
           alt={alt}

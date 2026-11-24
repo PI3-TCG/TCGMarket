@@ -38,7 +38,7 @@ type Result =
   | { kind: 'ready'; data: TradeProposalView }
 
 const surface =
-  'rounded-[18px] border border-[#DBC7E4] bg-[linear-gradient(180deg,#FFFFFF_0%,#FBF7FD_100%)] p-4 shadow-[0_3px_12px_rgba(60,17,87,0.07),inset_0_1px_0_rgba(255,255,255,0.8)] sm:p-5'
+  'rounded-[18px] border border-border-default bg-surface-input p-4 shadow-sm sm:p-5'
 
 type TradeActionButtonProps = {
   tone?: 'primary' | 'danger' | 'secondary'
@@ -68,7 +68,7 @@ function TradeActionButton({
       disabled={disabled}
       onClick={onClick}
       className={cn(
-        'inline-flex min-h-11 items-center justify-center gap-2 whitespace-normal text-center',
+        'whitespace-normal text-center',
         style,
         className,
       )}
@@ -205,7 +205,6 @@ export function TradeProposalDetailsModal({
   return (
     <Modal
       open
-      presentation="refined"
       headerIcon={
         confirmation
           ? confirming === 'accept'
@@ -221,8 +220,11 @@ export function TradeProposalDetailsModal({
           ? 'Confira sua decisão antes de continuar.'
           : 'Confira os termos registrados na negociação.'
       }
-      onClose={processing ? undefined : onClose}
+      onClose={confirming ? () => setConfirming(null) : onClose}
       closeDisabled={processing}
+      busy={processing}
+      focusKey={confirming ?? 'details'}
+      role={confirming && confirming !== 'accept' ? 'alertdialog' : 'dialog'}
       footer={
         confirmation ? (
           <>
@@ -256,10 +258,7 @@ export function TradeProposalDetailsModal({
                 params={{ transactionId: data.transactionId }}
                 search={{ type: 'TRADE' }}
                 onClick={onClose}
-                className={cn(
-                  'inline-flex min-h-11 items-center justify-center gap-2 text-center',
-                  modalPrimaryButton,
-                )}
+                className={modalPrimaryButton}
               >
                 <Icon name="star" size={16} />
                 Avaliar troca
@@ -332,8 +331,8 @@ export function TradeProposalDetailsModal({
             <div
               className={
                 confirming === 'accept'
-                  ? 'flex items-start gap-3 rounded-[16px] border border-[#C7DAF9] bg-[linear-gradient(135deg,#F0F7FF_0%,#E7F0FF_100%)] p-4 text-[#164C89]'
-                  : 'flex items-start gap-3 rounded-[16px] border border-[#F2C7CC] bg-[linear-gradient(135deg,#FFF7F7_0%,#FFF0F2_100%)] p-4 text-[#8A2030]'
+                  ? 'flex items-start gap-3 rounded-[16px] border border-info-200 bg-surface-input p-4 text-state-info'
+                  : 'flex items-start gap-3 rounded-[16px] border border-error-200 bg-surface-input p-4 text-state-error'
               }
             >
               <Icon
@@ -349,7 +348,7 @@ export function TradeProposalDetailsModal({
             </div>
             <ProposalDetails data={data} />
             {processing && (
-              <p role="status" className="text-sm font-semibold text-[#660366]">
+              <p role="status" className="text-sm font-semibold text-text-primary">
                 Processando sua decisão. Não feche esta janela.
               </p>
             )}
@@ -371,28 +370,28 @@ function ProposalDetails({ data }: { data: TradeProposalView }) {
       : data.recipient
 
   return (
-    <div className="space-y-4 sm:space-y-5 text-[#484B5A]">
+    <div className="space-y-4 sm:space-y-5 text-text-primary">
       <section
         className={`${surface} space-y-4`}
         aria-label="Identificação e status da proposta"
       >
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="font-display text-sm font-bold uppercase tracking-[0.08em] text-[#7A2E8F]">
+            <p className="font-title text-sm font-bold uppercase tracking-[0.08em] text-text-primary">
               Proposta de troca
             </p>
-            <p className="mt-1 break-all font-mono text-xs text-[#676276]">
+            <p className="mt-1 break-all font-mono text-xs text-text-primary">
               {data.id}
             </p>
           </div>
           <span
-            className={`inline-flex shrink-0 items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] ${status.className}`}
+            className={`inline-flex shrink-0 items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold shadow-sm ${status.className}`}
           >
             <span aria-hidden="true">●</span>
             {status.label}
           </span>
         </div>
-        <div className="grid gap-x-6 gap-y-4 border-t border-[#E8DAED] pt-4 sm:grid-cols-2">
+        <div className="grid gap-x-6 gap-y-4 border-t border-border-default pt-4 sm:grid-cols-2">
           <DetailValue
             label="Proponente"
             value={participantName(data.proposer)}
@@ -412,7 +411,7 @@ function ProposalDetails({ data }: { data: TradeProposalView }) {
             value={proposalDate(data.updatedAt)}
           />
         </div>
-        <p className="rounded-lg bg-[#F4ECF8] px-3 py-2 text-xs font-medium text-[#702D80]">
+        <p className="rounded-control bg-surface-input px-3 py-2 text-xs font-medium text-text-primary">
           Você está visualizando esta proposta como {ownRole}.
         </p>
       </section>
@@ -434,24 +433,24 @@ function ProposalDetails({ data }: { data: TradeProposalView }) {
         <section className={surface} aria-label="Complemento financeiro">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h3 className="font-display text-[17px] font-bold text-[#702D80]">
+              <h3 className="font-title text-[17px] font-bold text-text-primary">
                 Complemento financeiro
               </h3>
-              <p className="mt-2 text-sm text-[#484B5A]">
+              <p className="mt-2 text-sm text-text-primary">
                 Pagador:{' '}
-                <span className="font-semibold text-[#302B40]">
+                <span className="font-semibold text-text-primary">
                   {participantName(payer)}
                 </span>
               </p>
             </div>
-            <p className="rounded-xl border border-[#E0CEE8] bg-[#F5EBF9] px-4 py-2 font-display text-xl font-bold text-[#660366]">
+            <p className="rounded-surface border border-border-default bg-surface-input px-4 py-2 font-title text-xl font-bold text-text-primary">
               {proposalMoney(
                 data.financialAdjustment.amount,
                 data.financialAdjustment.currency,
               )}
             </p>
           </div>
-          <p className="mt-3 text-xs text-[#676276]">
+          <p className="mt-3 text-xs text-text-primary">
             Valor registrado na proposta. Nenhum pagamento é processado nesta
             etapa.
           </p>
@@ -460,13 +459,13 @@ function ProposalDetails({ data }: { data: TradeProposalView }) {
 
       <section className={surface} aria-label="Datas e histórico de status">
         <div className="flex items-center gap-2">
-          <Icon name="clock" size={20} className="text-[#7A2E8F]" />
-          <h3 className="font-display text-[17px] font-bold text-[#702D80]">
+          <Icon name="clock" size={20} className="text-brand-deep" />
+          <h3 className="font-title text-[17px] font-bold text-text-primary">
             Histórico da proposta
           </h3>
         </div>
         {data.events.length > 0 ? (
-          <ol className="mt-4 space-y-4 border-l-2 border-[#D3AFE1] pl-4">
+          <ol className="mt-4 space-y-4 border-l-2 border-border-default pl-4">
             {data.events.map((event, index) => (
               <li
                 key={`${event.eventType}-${event.occurredAt}-${index}`}
@@ -474,14 +473,14 @@ function ProposalDetails({ data }: { data: TradeProposalView }) {
               >
                 <span
                   aria-hidden="true"
-                  className="absolute -left-[22px] top-1 size-2.5 rounded-full border-2 border-white bg-[#A65CB4] shadow-[0_0_0_1px_#BD8FCE]"
+                  className="absolute -left-[22px] top-1 size-2.5 rounded-full border-2 border-white bg-surface-input shadow-sm"
                 />
-                <p className="text-sm font-semibold text-[#302B40]">
+                <p className="text-sm font-semibold text-text-primary">
                   {event.eventType === 'CREATED'
                     ? 'Proposta enviada'
                     : statusPresentation[event.toStatus].label}
                 </p>
-                <p className="mt-0.5 text-xs text-[#676276]">
+                <p className="mt-0.5 text-xs text-text-primary">
                   {proposalDate(event.occurredAt)} ·{' '}
                   {event.actor === 'PROPOSER'
                     ? 'Proponente'
@@ -493,11 +492,11 @@ function ProposalDetails({ data }: { data: TradeProposalView }) {
             ))}
           </ol>
         ) : (
-          <p className="mt-3 text-sm text-[#676276]">
+          <p className="mt-3 text-sm text-text-primary">
             Nenhum evento registrado.
           </p>
         )}
-        <div className="mt-4 grid gap-2 border-t border-[#E8DAED] pt-3 text-xs text-[#484B5A] sm:grid-cols-2">
+        <div className="mt-4 grid gap-2 border-t border-border-default pt-3 text-xs text-text-primary sm:grid-cols-2">
           {data.acceptedAt && <p>Aceita em: {proposalDate(data.acceptedAt)}</p>}
           {data.rejectedAt && (
             <p>Recusada em: {proposalDate(data.rejectedAt)}</p>
@@ -525,12 +524,12 @@ function DetailValue({
 }) {
   return (
     <div className="min-w-0">
-      <p className="text-xs font-semibold text-[#72547E]">{label}</p>
-      <p className="mt-0.5 break-words text-sm font-bold text-[#302B40]">
+      <p className="text-xs font-semibold text-text-primary">{label}</p>
+      <p className="mt-0.5 break-words text-sm font-bold text-text-primary">
         {value}
       </p>
       {username && !value.includes(`@${username}`) && (
-        <p className="text-xs text-[#676276]">@{username}</p>
+        <p className="text-xs text-text-primary">@{username}</p>
       )}
     </div>
   )
@@ -545,7 +544,7 @@ function SnapshotArt({ item }: { item: TradeProposalCardItem }) {
         alt=""
         loading="lazy"
         onError={() => setFailed(true)}
-        className="h-24 w-[70px] shrink-0 rounded-[9px] border border-[#E3D5E9] bg-[#F9F5FC] object-contain shadow-[0_3px_10px_rgba(35,9,48,0.13)]"
+        className="h-24 w-[70px] shrink-0 rounded-[9px] border border-border-default bg-surface-input object-contain shadow-sm"
       />
     )
   }
@@ -553,7 +552,7 @@ function SnapshotArt({ item }: { item: TradeProposalCardItem }) {
     <span
       aria-label={`Imagem indisponível de ${item.name}`}
       role="img"
-      className="flex h-24 w-[70px] shrink-0 items-center justify-center rounded-[9px] border border-[#E3D5E9] bg-[#F6F0F9] text-[#72547E]"
+      className="flex h-24 w-[70px] shrink-0 items-center justify-center rounded-[9px] border border-border-default bg-surface-input text-text-primary"
     >
       <Icon name="gem" size={24} />
     </span>
@@ -572,14 +571,14 @@ function ProposalItemsPanel({
   const count = items.reduce((sum, item) => sum + item.quantity, 0)
   return (
     <section className={`${surface} min-w-0`} aria-label={title}>
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-2 border-b border-[#E9DCEC] pb-3">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-2 border-b border-border-default pb-3">
         <div className="flex items-center gap-2">
           <span
             aria-hidden="true"
             className={
               tone === 'receive'
-                ? 'flex size-8 items-center justify-center rounded-lg border border-[#BFD8FA] bg-[#E7F2FF] text-[#1465B7]'
-                : 'flex size-8 items-center justify-center rounded-lg border border-[#E0C8E8] bg-[#F2E7F8] text-[#702D80]'
+                ? 'flex size-8 items-center justify-center rounded-control border border-info-200 bg-info-50 text-state-info'
+                : 'flex size-8 items-center justify-center rounded-control border border-border-default bg-surface-input text-text-primary'
             }
           >
             <Icon
@@ -587,12 +586,12 @@ function ProposalItemsPanel({
               size={20}
             />
           </span>
-          <h3 className="font-display text-[17px] font-bold text-[#702D80]">
+          <h3 className="font-title text-[17px] font-bold text-text-primary">
             {title}
           </h3>
         </div>
         <span
-          className={`rounded-full px-3 py-1 text-xs font-semibold ${tone === 'receive' ? 'bg-secondary-100 text-secondary-700' : 'bg-primary-100 text-[#660366]'}`}
+          className={`rounded-full px-3 py-1 text-xs font-semibold ${tone === 'receive' ? 'bg-surface-sand text-brand-deep' : 'bg-surface-sand text-text-primary'}`}
         >
           {count} {count === 1 ? 'exemplar' : 'exemplares'}
         </span>
@@ -601,26 +600,26 @@ function ProposalItemsPanel({
         {items.map((item, index) => (
           <li
             key={`${item.cardId}-${index}`}
-            className="flex min-w-0 gap-3 rounded-[13px] border border-[#E6D8EC] bg-[linear-gradient(145deg,#FFFFFF_0%,#F8F3FB_100%)] p-3 shadow-[0_2px_9px_rgba(70,25,88,0.04)]"
+            className="flex min-w-0 gap-3 rounded-[13px] border border-border-default bg-surface-input p-3 shadow-sm"
           >
             <SnapshotArt item={item} />
             <div className="min-w-0 flex-1">
-              <p className="font-display break-words text-[15px] font-bold text-[#660366]">
+              <p className="font-title break-words text-[15px] font-bold text-text-primary">
                 {item.name}
               </p>
-              <p className="mt-0.5 text-xs text-[#484B5A]">
+              <p className="mt-0.5 text-xs text-text-primary">
                 {gameName(item.game)}
                 {item.edition ? ` · ${item.edition}` : ''}
               </p>
-              <p className="mt-1 text-xs text-[#484B5A]">
+              <p className="mt-1 text-xs text-text-primary">
                 {conditionName(item.condition)} · {languageName(item.language)}
               </p>
               {item.cardNumber && (
-                <p className="mt-1 text-xs text-[#676276]">
+                <p className="mt-1 text-xs text-text-primary">
                   Nº {item.cardNumber}
                 </p>
               )}
-              <p className="mt-2 inline-flex rounded-full bg-[#EFE0F5] px-2.5 py-1 text-xs font-bold text-[#702D80]">
+              <p className="mt-2 inline-flex rounded-full bg-surface-input px-2.5 py-1 text-xs font-bold text-text-primary">
                 {item.quantity}{' '}
                 {item.quantity === 1 ? 'exemplar' : 'exemplares'}
               </p>
@@ -637,12 +636,12 @@ function DetailsSkeleton() {
     <div role="status" className="space-y-4">
       <span className="sr-only">Carregando detalhes da proposta...</span>
       <div aria-hidden="true" className="space-y-4 motion-safe:animate-pulse">
-        <div className="h-32 rounded-[18px] bg-[#EDE3F2]" />
+        <div className="h-32 rounded-[18px] bg-surface-input" />
         <div className="grid gap-4 sm:grid-cols-2">
-          <div className="h-60 rounded-[18px] bg-[#EDE3F2]" />
-          <div className="h-60 rounded-[18px] bg-[#EDE3F2]" />
+          <div className="h-60 rounded-[18px] bg-surface-input" />
+          <div className="h-60 rounded-[18px] bg-surface-input" />
         </div>
-        <div className="h-28 rounded-[18px] bg-[#EDE3F2]" />
+        <div className="h-28 rounded-[18px] bg-surface-input" />
       </div>
     </div>
   )

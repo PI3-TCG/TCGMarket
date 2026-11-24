@@ -27,7 +27,6 @@ export function DetailsModal({
       title={title}
       eyebrow={eyebrow}
       onClose={onClose}
-      presentation="refined"
       size="lg"
       className="max-w-[880px]"
       footer={

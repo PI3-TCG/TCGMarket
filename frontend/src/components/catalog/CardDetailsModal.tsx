@@ -81,7 +81,6 @@ export function CardDetailsModal({
   return (
     <Modal
       open
-      presentation="refined"
       headerLayout="compact"
       size="lg"
       className="mx-auto max-w-[900px]"

@@ -1,3 +1,4 @@
+import { modalPrimaryButton } from '@/components/ui/modalTheme'
 import { useEffect, useState } from 'react'
 import { Link } from '@tanstack/react-router'
 import { Icon } from '@/components/ui/Icon'
@@ -75,9 +76,9 @@ export function TradeReviewNotifications() {
       {open && (
         <Modal
           open
-          presentation="refined"
           title="Notificações"
           headerIcon="bell"
+          secondaryAction={{ label: 'Fechar' }}
           onClose={() => setOpen(false)}
         >
           {failed && (
@@ -90,12 +91,12 @@ export function TradeReviewNotifications() {
             <p>Você não tem notificações pendentes.</p>
           )}
           {hasNotifications && (
-            <ul className="divide-y divide-neutral-200">
+            <ul className="divide-y divide-border-default">
               {items?.proposals.map(({ proposalId, createdAt }) => (
                 <li key={`proposal:${proposalId}`} className="space-y-2 py-3">
                   <p>Você recebeu uma proposta de troca.</p>
                   {createdAt && (
-                    <time dateTime={createdAt} className="block text-xs text-neutral-600">
+                    <time dateTime={createdAt} className="block text-xs text-text-secondary">
                       {new Date(createdAt).toLocaleString('pt-BR')}
                     </time>
                   )}
@@ -103,7 +104,7 @@ export function TradeReviewNotifications() {
                     to="/perfil/propostas"
                     search={{ direction: 'RECEIVED', status: 'PENDING', proposalId }}
                     onClick={() => setOpen(false)}
-                    className="inline-flex min-h-10 items-center rounded-control bg-secondary-500 px-4 font-semibold text-white hover:bg-secondary-700"
+                    className={modalPrimaryButton}
                   >
                     Ver proposta
                   </Link>
@@ -115,7 +116,7 @@ export function TradeReviewNotifications() {
                   {completedAt && (
                     <time
                       dateTime={completedAt}
-                      className="block text-xs text-neutral-600"
+                      className="block text-xs text-text-secondary"
                     >
                       {new Date(completedAt).toLocaleString('pt-BR')}
                     </time>
@@ -125,7 +126,7 @@ export function TradeReviewNotifications() {
                     params={{ transactionId }}
                     search={{ type: 'TRADE' }}
                     onClick={() => setOpen(false)}
-                    className="inline-flex min-h-10 items-center rounded-control bg-secondary-500 px-4 font-semibold text-white hover:bg-secondary-700"
+                    className={modalPrimaryButton}
                   >
                     Avaliar troca
                   </Link>

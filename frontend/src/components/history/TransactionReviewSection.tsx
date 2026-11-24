@@ -1,7 +1,7 @@
 import { useCallback, useId, useState, type FormEvent } from 'react'
 import { formatHistoryDate } from '@/components/history/historyFormat'
 import { Alert } from '@/components/ui/Alert'
-import { Button } from '@/components/ui/Button'
+import { modalPrimaryButton, modalSecondaryButton } from '@/components/ui/modalTheme'
 import { cn } from '@/components/ui/cn'
 import { Icon } from '@/components/ui/Icon'
 import { useRemoteData } from '@/hooks/useRemoteData'
@@ -61,7 +61,7 @@ export function TransactionReviewSection({
       className={
         compact
           ? undefined
-          : 'rounded-xl border border-neutral-200 bg-white p-4'
+          : 'rounded-surface border border-border-default bg-surface-input p-4'
       }
     >
       <h2
@@ -69,7 +69,7 @@ export function TransactionReviewSection({
         className={
           compact
             ? 'sr-only'
-            : 'mb-4 font-display text-xl font-bold text-primary-900'
+            : 'mb-4 font-title text-xl font-bold text-text-ink'
         }
       >
         Avaliação da negociação
@@ -79,7 +79,7 @@ export function TransactionReviewSection({
         <div
           role="status"
           aria-busy="true"
-          className="h-32 rounded-lg bg-neutral-100 motion-safe:animate-pulse"
+          className="h-32 rounded-control bg-surface-subtle motion-safe:animate-pulse"
         >
           <span className="sr-only">Carregando avaliações...</span>
         </div>
@@ -90,7 +90,7 @@ export function TransactionReviewSection({
           <button
             type="button"
             onClick={retry}
-            className="font-semibold underline underline-offset-2"
+            className={modalSecondaryButton}
           >
             Tentar novamente
           </button>
@@ -118,14 +118,14 @@ export function TransactionReviewSection({
           ) : null}
 
           {!compact && (canReceiveReview || reviews.received) && (
-            <div className="border-t border-neutral-200 pt-4">
+            <div className="border-t border-border-default pt-4">
               {reviews.received ? (
                 <ReviewCard
                   title={`Avaliação recebida de ${counterpartyName}`}
                   review={reviews.received}
                 />
               ) : (
-                <p className="text-sm text-neutral-700">
+                <p className="text-sm text-text-secondary">
                   {counterpartyName} ainda não avaliou esta negociação.
                 </p>
               )}
@@ -196,7 +196,7 @@ function ReviewForm({
   return (
     <form onSubmit={handleSubmit} noValidate className="space-y-4">
       <fieldset aria-describedby={gradeMissing ? gradeErrorId : undefined}>
-        <legend className="mb-2 text-sm font-semibold text-neutral-900">
+        <legend className="mb-2 text-sm font-semibold text-text-ink">
           Como foi negociar com {counterpartyName}?
         </legend>
         <div className="flex items-center gap-1">
@@ -205,7 +205,7 @@ function ReviewForm({
             return (
               <label
                 key={value}
-                className="cursor-pointer rounded-md p-1 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-secondary-500"
+                className="cursor-pointer rounded-md p-1 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-support-blue"
               >
                 <input
                   type="radio"
@@ -222,7 +222,7 @@ function ReviewForm({
                   name="star"
                   size={32}
                   filled={active}
-                  className={active ? 'text-rare-500' : 'text-neutral-300'}
+                  className={active ? 'text-accent-gold-deep' : 'text-border-emphasis'}
                 />
                 <span className="sr-only">
                   {value} de 5 — {gradeLabels[value]}
@@ -231,7 +231,7 @@ function ReviewForm({
             )
           })}
           {grade !== null && (
-            <span className="ml-2 text-sm font-medium text-neutral-700">
+            <span className="ml-2 text-sm font-medium text-text-secondary">
               {gradeLabels[grade]}
             </span>
           )}
@@ -246,10 +246,10 @@ function ReviewForm({
       <div>
         <label
           htmlFor={commentId}
-          className="mb-1 block text-sm font-semibold text-neutral-900"
+          className="mb-1 block text-sm font-semibold text-text-ink"
         >
           Comentário{' '}
-          <span className="font-normal text-neutral-500">(opcional)</span>
+          <span className="font-normal text-text-secondary">(opcional)</span>
         </label>
         <textarea
           id={commentId}
@@ -258,12 +258,12 @@ function ReviewForm({
           maxLength={REVIEW_COMMENT_MAX}
           aria-describedby={`${commentId}-count`}
           onChange={(event) => setComment(event.target.value)}
-          className="w-full resize-y rounded-control border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 outline-none placeholder:text-neutral-500 focus:ring-2 focus:ring-secondary-500"
+          className="w-full resize-y rounded-control border border-border-default bg-surface-input px-3 py-2 text-sm text-text-ink outline-none placeholder:text-text-secondary focus:ring-2 focus:ring-support-blue"
           placeholder="Conte como foi a negociação."
         />
         <p
           id={`${commentId}-count`}
-          className="mt-1 text-right text-xs text-neutral-500"
+          className="mt-1 text-right text-xs text-text-secondary"
         >
           {comment.length}/{REVIEW_COMMENT_MAX}
         </p>
@@ -271,9 +271,9 @@ function ReviewForm({
 
       {error && <Alert variant="error">{error}</Alert>}
 
-      <Button type="submit" disabled={submitting}>
+      <button type="submit" className={modalPrimaryButton} disabled={submitting}>
         {submitting ? 'Enviando...' : 'Enviar avaliação'}
-      </Button>
+      </button>
     </form>
   )
 }
@@ -287,7 +287,7 @@ function ReviewCard({
 }) {
   return (
     <div>
-      <p className="text-sm font-semibold text-neutral-900">{title}</p>
+      <p className="text-sm font-semibold text-text-ink">{title}</p>
       <div className="mt-1 flex items-center gap-2">
         <span
           role="img"
@@ -301,17 +301,17 @@ function ReviewCard({
               size={20}
               filled={value <= review.grade}
               className={cn(
-                value <= review.grade ? 'text-rare-500' : 'text-neutral-300',
+                value <= review.grade ? 'text-accent-gold-deep' : 'text-border-emphasis',
               )}
             />
           ))}
         </span>
-        <time dateTime={review.reviewDate} className="text-xs text-neutral-500">
+        <time dateTime={review.reviewDate} className="text-xs text-text-secondary">
           {formatHistoryDate(review.reviewDate)}
         </time>
       </div>
       {review.comment && (
-        <p className="mt-2 whitespace-pre-line text-sm text-neutral-700">
+        <p className="mt-2 whitespace-pre-line text-sm text-text-secondary">
           {review.comment}
         </p>
       )}

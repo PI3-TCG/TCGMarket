@@ -8,6 +8,7 @@ import { Icon, type IconName } from '@/components/ui/Icon'
 import { Modal } from '@/components/ui/Modal'
 import {
   modalPrimaryButton,
+  modalDangerButton,
   modalSecondaryButton,
 } from '@/components/ui/modalTheme'
 import { useRemoteData } from '@/hooks/useRemoteData'
@@ -58,13 +59,9 @@ const dateTimeFormat = new Intl.DateTimeFormat('pt-BR', {
 })
 
 const sectionHeading =
-  'flex items-center gap-2 text-sm font-bold text-[#22153C]'
-const sectionIcon = 'text-[#6512BA]'
-const metaText = 'text-xs leading-relaxed text-[#615576]'
-const iconButton =
-  'inline-flex min-h-11 flex-1 items-center justify-center gap-2 whitespace-nowrap px-3 py-2.5 sm:min-w-0'
-const softDangerButton =
-  'rounded-xl border border-[#EF9EAF] bg-[linear-gradient(180deg,#FFF1F3_0%,#F9DDE3_100%)] text-sm font-bold text-[#AB1430] shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] transition hover:brightness-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#AB1430] disabled:cursor-not-allowed disabled:opacity-50'
+  'flex items-center gap-2 text-sm font-bold text-text-primary'
+const sectionIcon = 'text-brand-deep'
+const metaText = 'text-xs leading-relaxed text-text-secondary'
 
 function displayCount(value: number | null | undefined): string {
   return typeof value === 'number' && Number.isFinite(value) && value >= 0
@@ -119,14 +116,13 @@ export function AdminUserDetailsModal({
   return (
     <Modal
       open
-      presentation="refined"
       headerIcon="user"
       size="lg"
-      className="admin-dialog mx-auto max-w-[790px]"
+      className="mx-auto max-w-[790px]"
       title="Detalhes do usuário"
       onClose={onClose}
       footer={
-        <div className="flex w-full flex-col gap-3 sm:flex-row sm:justify-center sm:gap-4">
+        <div className="flex w-full flex-wrap justify-center gap-2.5 sm:gap-3">
           <button
             type="button"
             disabled={isSelf || !onChangeRole}
@@ -138,7 +134,7 @@ export function AdminUserDetailsModal({
                   : undefined
             }
             onClick={() => onChangeRole?.(nextRole)}
-            className={`${modalPrimaryButton} ${iconButton}`}
+            className={modalPrimaryButton}
           >
             <Icon name={user.role === 'ADMIN' ? 'minus' : 'star'} size={20} />
             {user.role === 'ADMIN' ? 'Remover admin' : 'Promover'}
@@ -154,7 +150,7 @@ export function AdminUserDetailsModal({
                   : undefined
             }
             onClick={() => onChangeStatus?.(nextStatus)}
-            className={`${softDangerButton} ${iconButton}`}
+            className={nextStatus === 'SUSPENDED' ? modalDangerButton : modalPrimaryButton}
           >
             <Icon
               name={user.status === 'ACTIVE' ? 'alert' : 'check-circle'}
@@ -166,24 +162,24 @@ export function AdminUserDetailsModal({
             type="button"
             disabled={isSelf}
             onClick={onModerate}
-            className={`${modalSecondaryButton} ${iconButton}`}
+            className={modalSecondaryButton}
           >
             <Icon name="edit" size={20} /> Limpar perfil
           </button>
         </div>
       }
     >
-      <div className="space-y-3 text-[#241936]">
+      <div className="space-y-3 text-text-primary">
         {/* Resumo da conta: mesmo arranjo horizontal da referência. */}
         <section
           aria-label="Resumo do usuário"
-          className="rounded-lg border border-[#E6D8F0] bg-[linear-gradient(145deg,#FFFFFF_0%,#FCF9FF_100%)] p-4 shadow-[0_5px_18px_rgba(65,20,87,0.07)] sm:p-5"
+          className="rounded-control border border-border-default bg-surface-input p-4 shadow-sm sm:p-5"
         >
-          <div className="grid gap-4 border-b border-[#DDD0E8] pb-4 md:grid-cols-[minmax(0,1.45fr)_minmax(0,1fr)]">
+          <div className="grid gap-4 border-b border-border-default pb-4 md:grid-cols-[minmax(0,1.45fr)_minmax(0,1fr)]">
             <div className="flex min-w-0 items-center gap-4">
               <div
                 aria-hidden="true"
-                className="grid size-[90px] shrink-0 place-items-center overflow-hidden rounded-full border-[3px] border-[#EABF46] bg-[radial-gradient(circle_at_30%_25%,#AF75D1_0%,#6B268E_48%,#330E50_100%)] text-3xl font-black text-white shadow-[0_4px_14px_rgba(76,21,103,0.23)]"
+                className="grid size-[90px] shrink-0 place-items-center overflow-hidden rounded-full border border-accent-bronze bg-surface-input text-3xl font-bold text-brand-deep shadow-sm"
               >
                 {profile?.avatarUrl && !avatarFailed ? (
                   <img
@@ -199,14 +195,14 @@ export function AdminUserDetailsModal({
               </div>
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="break-words font-display text-xl font-bold text-[#22143D] sm:text-2xl">
+                  <h3 className="break-words font-title text-xl font-bold text-text-ink sm:text-2xl">
                     {user.username || user.name}
                   </h3>
                   {user.role === 'ADMIN' && (
                     <Icon
                       name="shield-check"
                       size={20}
-                      className="text-[#1575E9]"
+                      className="text-state-info"
                     />
                   )}
                 </div>
@@ -216,11 +212,11 @@ export function AdminUserDetailsModal({
                 </p>
                 <div className="mt-2 flex flex-wrap items-center gap-2">
                   {profile?.verifiedSeller === true ? (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-[#EDE0FA] px-3 py-1 text-xs font-semibold text-[#5F1684]">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-surface-input px-3 py-1 text-xs font-semibold text-text-primary">
                       <Icon name="shield-check" size={16} /> Vendedor verificado
                     </span>
                   ) : (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-[#F0E7F7] px-3 py-1 text-xs font-semibold text-[#63227B]">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-surface-input px-3 py-1 text-xs font-semibold text-text-primary">
                       <Icon name="shield-check" size={16} />{' '}
                       {ROLE_LABEL[user.role]}
                     </span>
@@ -229,7 +225,7 @@ export function AdminUserDetailsModal({
                     <Link
                       to="/jogadores/$username"
                       params={{ username: user.username }}
-                      className="text-xs font-semibold text-[#6512BA] underline underline-offset-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1254BD]"
+                      className="text-xs font-semibold text-text-primary underline underline-offset-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-support-blue"
                     >
                       Ver perfil
                     </Link>
@@ -237,14 +233,14 @@ export function AdminUserDetailsModal({
                 </div>
               </div>
             </div>
-            <div className="min-w-0 border-t border-[#E5D9EE] pt-3 md:border-l md:border-t-0 md:pl-5 md:pt-1">
+            <div className="min-w-0 border-t border-border-default pt-3 md:border-l md:border-t-0 md:pl-5 md:pt-1">
               <h4 className={sectionHeading}>
                 Reputação{' '}
-                <Icon name="info" size={16} className="text-[#605477]" />
+                <Icon name="info" size={16} className="text-brand-deep" />
               </h4>
               <div className="mt-2 flex flex-wrap items-center gap-2">
-                <Icon name="star" filled size={24} className="text-[#F4AA00]" />
-                <strong className="text-xl font-extrabold text-[#241936]">
+                <Icon name="star" filled size={24} className="text-accent-gold-deep" />
+                <strong className="text-xl font-extrabold text-text-primary">
                   {hasRating ? ratingFormat.format(rating) : '—'}
                 </strong>
                 <span className={metaText}>
@@ -254,7 +250,7 @@ export function AdminUserDetailsModal({
                 </span>
               </div>
               {hasPercent ? (
-                <span className="mt-2 inline-flex items-center gap-2 rounded-full bg-[#DFF5E9] px-3 py-1 text-xs font-bold text-[#146A43]">
+                <span className="mt-2 inline-flex items-center gap-2 rounded-full bg-success-50 px-3 py-1 text-xs font-bold text-state-success">
                   <Icon name="check-circle" size={16} />{' '}
                   {numberFormat.format(percent)}% positivas
                 </span>
@@ -294,7 +290,7 @@ export function AdminUserDetailsModal({
             </section>
             <section
               aria-labelledby="admin-collection-metrics"
-              className="border-t border-[#E5D9EE] pt-4 md:border-l md:border-t-0 md:pl-5 md:pt-0"
+              className="border-t border-border-default pt-4 md:border-l md:border-t-0 md:pl-5 md:pt-0"
             >
               <h4 id="admin-collection-metrics" className={sectionHeading}>
                 <Icon name="layers" size={20} className={sectionIcon} /> Coleção
@@ -320,9 +316,9 @@ export function AdminUserDetailsModal({
           </div>
 
           {/* Faixa inferior: status real e indicadores futuros. */}
-          <div className="grid gap-3 rounded-xl border border-[#DED4EF] bg-[linear-gradient(130deg,#FAF8FF,#F3EEFA)] px-4 py-3 sm:grid-cols-3 sm:gap-0">
+          <div className="grid gap-3 rounded-surface border border-border-default bg-surface-input px-4 py-3 sm:grid-cols-3 sm:gap-0">
             <div className="min-w-0 sm:pr-3">
-              <h4 className="flex items-center gap-2 text-xs font-bold text-[#241936]">
+              <h4 className="flex items-center gap-2 text-xs font-bold text-text-primary">
                 <Icon name="shield-check" size={20} className={sectionIcon} />{' '}
                 Status da conta
               </h4>
@@ -339,8 +335,8 @@ export function AdminUserDetailsModal({
                 </p>
               </div>
             </div>
-            <div className="min-w-0 border-t border-[#DED4EF] pt-3 sm:border-l sm:border-t-0 sm:px-3 sm:pt-0">
-              <h4 className="flex items-center gap-2 text-xs font-bold text-[#241936]">
+            <div className="min-w-0 border-t border-border-default pt-3 sm:border-l sm:border-t-0 sm:px-3 sm:pt-0">
+              <h4 className="flex items-center gap-2 text-xs font-bold text-text-primary">
                 <Icon name="clock" size={20} className={sectionIcon} /> Última
                 atividade
               </h4>
@@ -348,12 +344,12 @@ export function AdminUserDetailsModal({
                 {displayDateTime(profile?.lastActivityAt)}
               </p>
             </div>
-            <div className="min-w-0 border-t border-[#DED4EF] pt-3 sm:border-l sm:border-t-0 sm:pl-3 sm:pt-0">
-              <h4 className="flex items-center gap-2 text-xs font-bold text-[#241936]">
+            <div className="min-w-0 border-t border-border-default pt-3 sm:border-l sm:border-t-0 sm:pl-3 sm:pt-0">
+              <h4 className="flex items-center gap-2 text-xs font-bold text-text-primary">
                 <Icon name="cart" size={20} className={sectionIcon} /> Total de
                 pedidos
               </h4>
-              <p className="mt-2 pl-7 text-sm font-bold text-[#241936]">
+              <p className="mt-2 pl-7 text-sm font-bold text-text-primary">
                 {displayCount(profile?.orderCount)}
               </p>
             </div>
@@ -361,8 +357,8 @@ export function AdminUserDetailsModal({
         </section>
 
         {/* Preserva a funcionalidade existente sem alterar o layout-resumo. */}
-        <details className="rounded-xl border border-[#E4D6F0] bg-white/80 px-4 py-3">
-          <summary className="cursor-pointer text-sm font-semibold text-[#551D77] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1254BD]">
+        <details className="rounded-surface border border-border-default bg-surface-input px-4 py-3">
+          <summary className="cursor-pointer text-sm font-semibold text-text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-support-blue">
             Histórico de ações administrativas
           </summary>
           <div className="pt-3">
@@ -411,9 +407,9 @@ function ProfileRow({
 }) {
   return (
     <div className="grid min-w-0 grid-cols-[18px_100px_minmax(0,1fr)] items-start gap-2 text-xs sm:grid-cols-[18px_100px_minmax(0,1fr)]">
-      <Icon name={icon} size={16} className="text-[#7253A1]" />
-      <dt className="font-semibold text-[#34274B]">{label}</dt>
-      <dd className="min-w-0 break-words text-[#4D415E]">{value}</dd>
+      <Icon name={icon} size={16} className="text-brand-deep" />
+      <dt className="font-semibold text-text-primary">{label}</dt>
+      <dd className="min-w-0 break-words text-text-primary">{value}</dd>
     </div>
   )
 }
@@ -428,12 +424,12 @@ function MetricTile({
   label: string
 }) {
   return (
-    <div className="flex min-w-0 flex-col items-center justify-center rounded-xl border border-[#E2D6EF] bg-[linear-gradient(145deg,#F9F6FE,#F0E9FA)] px-2 py-3 text-center shadow-[0_3px_8px_rgba(65,20,87,0.04)]">
-      <Icon name={icon} size={24} className="text-[#6512BA]" />
-      <strong className="mt-1 text-base font-extrabold text-[#241936]">
+    <div className="flex min-w-0 flex-col items-center justify-center rounded-surface border border-border-default bg-surface-input px-2 py-3 text-center shadow-sm">
+      <Icon name={icon} size={24} className="text-brand-deep" />
+      <strong className="mt-1 text-base font-extrabold text-text-primary">
         {displayCount(value)}
       </strong>
-      <span className="text-[11px] text-[#5F5474]">{label}</span>
+      <span className="text-[11px] text-text-primary">{label}</span>
     </div>
   )
 }
