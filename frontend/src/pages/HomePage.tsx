@@ -1,3 +1,4 @@
+import { focusRing, lightAction } from '@/components/ui/styles'
 import { BannerGoldDivider } from '@/components/layout/PageBanner'
 import { GAMES } from '@/components/layout/siteGames'
 import { useSession } from '@/session'
@@ -81,7 +82,7 @@ export function HomePage() {
                   navigate({ to: user ? '/anuncios/novo' : '/login' })
                 }
 
-                className="rounded-md border border-white/80 bg-white/90 px-5 py-3 text-sm font-semibold text-primary-900 hover:bg-white"
+                className={`${lightAction} ${focusRing} cursor-pointer`}
               >
                 Criar anúncio
               </button>

@@ -1,5 +1,4 @@
-import { pageBanners } from '@/config/pageBanners'
-import { PageBanner } from '@/components/layout/PageBanner'
+import { focusRing, lightAction } from '@/components/ui/styles'
 import {
   conditionLabels,
   copies,
@@ -24,13 +23,22 @@ import { TradeProposalFlow } from '@/components/trade/TradeProposalFlow'
 import { useSession } from '@/session'
 import type { MarketplaceAd } from '@/types/Marketplace'
 import { Link, useNavigate, useParams } from '@tanstack/react-router'
-import { useCallback, useId, useState } from 'react'
+import { useCallback, useId, useState, type ReactNode } from 'react'
 
 const BUY_LOGIN_NOTICE =
   'Entre na sua conta para comprar cartas no Marketplace.'
 
 const panelClass =
-  'rounded-xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-6'
+  'min-w-0 rounded-xl border border-neutral-200 bg-white p-4 shadow-sm sm:p-5'
+
+const adGridClass =
+  'grid grid-cols-1 items-start gap-4 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:gap-6'
+
+const adImageClass =
+  'aspect-[63/88] w-full max-w-[220px] overflow-hidden rounded-surface md:max-w-[280px] lg:max-w-[320px]'
+
+const actionButtonClass = 'min-h-11 w-52 max-w-full whitespace-normal'
+const actionGroupClass = 'flex flex-wrap items-center gap-3'
 
 const backLinkClass =
   'inline-flex items-center gap-2 text-sm font-semibold text-secondary-700 underline underline-offset-2 hover:text-primary-900'
@@ -51,11 +59,19 @@ function MarketplaceAdView({ id }: { id: string }) {
   return (
     <main className="min-h-screen pb-12 text-neutral-900">
       <div className="mx-auto w-full max-w-[1400px] px-4 pt-4 sm:px-6 xl:px-[38px]">
-        <PageBanner
-          image={pageBanners.marketplace}
-          title="Detalhes do anúncio"
-          subtitle="Confira as informações da carta e escolha como negociar."
-        />
+        <header className="mb-4 space-y-2">
+          <Link
+            to="/marketplace"
+            search={{ sort: 'recent' }}
+            className={backLinkClass}
+          >
+            <span aria-hidden="true">←</span>
+            Voltar ao Marketplace
+          </Link>
+          <h1 className="font-display text-2xl font-bold text-primary-900">
+            Detalhes do anúncio
+          </h1>
+        </header>
 
         {state.status === 'loading' ? <AdSkeleton /> : null}
         {state.status === 'notFound' ? <AdStatus kind="notFound" /> : null}
@@ -73,11 +89,6 @@ function AdDetails({ ad }: { ad: MarketplaceAd }) {
 
   const rows = [
     {
-      label: 'Condição',
-      value: <Badge variant="success">{conditionLabels[ad.condition]}</Badge>,
-    },
-    { label: 'Idioma', value: languageLabels[ad.language] },
-    {
       label: 'Vendedor',
       value: ad.sellerUsername ? (
         <Link
@@ -91,46 +102,26 @@ function AdDetails({ ad }: { ad: MarketplaceAd }) {
         'Não informado'
       ),
     },
+    {
+      label: 'Condição',
+      value: <Badge variant="success">{conditionLabels[ad.condition]}</Badge>,
+    },
+    { label: 'Idioma', value: languageLabels[ad.language] },
     { label: 'Disponíveis', value: copies(ad.remainingQuantity) },
   ]
 
   return (
-    <div className="grid grid-cols-1 items-start gap-5 md:grid-cols-2">
-      <AdImage ad={ad} />
-
-      <section aria-labelledby="ad-card-name" className={panelClass}>
+    <div className={adGridClass}>
+      <section
+        aria-labelledby="ad-card-name"
+        className={`${panelClass} md:col-start-2 md:row-start-1`}
+      >
         <h2
           id="ad-card-name"
           className="font-display text-3xl leading-tight font-bold wrap-anywhere text-primary-900"
         >
           {ad.cardName}
         </h2>
-
-        <p className="mt-1 wrap-anywhere text-sm text-neutral-700">
-          <Link
-            to="/cartas/$id"
-            params={{ id: ad.cardId }}
-            className="text-secondary-700 underline underline-offset-2 hover:text-primary-900"
-          >
-            {game?.name ?? ad.game}
-          </Link>
-          {ad.edition ? ` • ${ad.edition}` : ''}
-          {ad.cardNumber ? ` • Nº ${ad.cardNumber}` : ''}
-        </p>
-
-        <dl className="mt-4 divide-y divide-neutral-100 border-y border-neutral-100 text-sm">
-          {rows.map((row) => (
-            <div
-              key={row.label}
-              className="grid grid-cols-[minmax(0,2fr)_minmax(0,3fr)] items-center gap-3 sm:grid-cols-[120px_minmax(0,1fr)] py-2.5"
-            >
-              <dt className="text-neutral-700">{row.label}</dt>
-              <dd className="min-w-0 wrap-anywhere text-neutral-900">
-                {row.value}
-              </dd>
-            </div>
-          ))}
-        </dl>
 
         <div
           className="mt-4 flex flex-wrap gap-2"
@@ -148,8 +139,38 @@ function AdDetails({ ad }: { ad: MarketplaceAd }) {
           ) : null}
         </div>
 
+        <div className="mt-3 space-y-3 border-t border-neutral-100 pt-3">
+          {ad.saleEnabled ? <PurchasePanel ad={ad} /> : null}
+          {ad.tradeEnabled ? <TradeEntry ad={ad} /> : null}
+        </div>
+
+        <dl className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 text-sm">
+          {rows.map((row) => (
+            <div key={row.label} className="min-w-0">
+              <dt className="text-xs font-semibold text-neutral-700">
+                {row.label}
+              </dt>
+              <dd className="mt-0.5 wrap-anywhere text-neutral-900">
+                {row.value}
+              </dd>
+            </div>
+          ))}
+        </dl>
+
+        <p className="mt-3 wrap-anywhere text-sm text-neutral-700">
+          <Link
+            to="/cartas/$id"
+            params={{ id: ad.cardId }}
+            className="text-secondary-700 underline underline-offset-2 hover:text-primary-900"
+          >
+            {game?.name ?? ad.game}
+          </Link>
+          {ad.edition ? ` • ${ad.edition}` : ''}
+          {ad.cardNumber ? ` • Nº ${ad.cardNumber}` : ''}
+        </p>
+
         {ad.description?.trim() ? (
-          <div className="mt-4">
+          <div className="mt-3">
             <h3 className="text-sm font-semibold text-primary-900">
               Descrição do anúncio
             </h3>
@@ -159,20 +180,13 @@ function AdDetails({ ad }: { ad: MarketplaceAd }) {
           </div>
         ) : null}
 
-        <div className="mt-5 border-t border-neutral-100 pt-5">
-          {ad.saleEnabled ? <PurchasePanel ad={ad} /> : null}
-          {ad.tradeEnabled ? <TradeEntry ad={ad} /> : null}
-        </div>
-
-        <Link
-          to="/marketplace"
-          search={{ sort: 'recent' }}
-          className={`mt-5 ${backLinkClass}`}
-        >
-          <span aria-hidden="true">←</span>
-          Voltar ao Marketplace
-        </Link>
+        {ad.saleEnabled && !ad.ownAd && ad.unitPrice !== null ? (
+          <div className="mt-3 space-y-2">
+            <PurchaseNotices />
+          </div>
+        ) : null}
       </section>
+      <AdImage ad={ad} />
     </div>
   )
 }
@@ -182,8 +196,10 @@ function AdImage({ ad }: { ad: MarketplaceAd }) {
   const available = Boolean(ad.imageUrl) && !failed
 
   return (
-    <div className={`${panelClass} flex justify-center`}>
-      <div className="aspect-[63/88] w-full max-w-[340px] overflow-hidden rounded-surface">
+    <div
+      className={`${panelClass} flex justify-center md:col-start-1 md:row-start-1`}
+    >
+      <div className={adImageClass}>
         {available ? (
           <img
             src={ad.imageUrl ?? undefined}
@@ -210,7 +226,7 @@ function PurchasePanel({ ad }: { ad: MarketplaceAd }) {
   const { user } = useSession()
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       <div>
         <p className="text-sm font-semibold text-neutral-700">Preço unitário</p>
         <p className="font-display text-3xl font-bold text-primary-900">
@@ -329,7 +345,7 @@ function QuantitySelector({
   const buyNowButton = (
     <Button
       variant="secondary"
-      className="h-12 w-full"
+      className={actionButtonClass}
       disabled={
         adding || (inCart === 0 && (!valid || cartState.status !== 'ready'))
       }
@@ -341,18 +357,16 @@ function QuantitySelector({
 
   if (loggedIn && available === 0 && inCart > 0) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-2">
         {result?.kind === 'added' ? <AddedNotice result={result} /> : null}
         <InCartChip quantity={inCart} />
         <Alert variant="info">
           Todos os exemplares disponíveis já estão no seu carrinho.
         </Alert>
-        <CartActions />
-        {buyNowButton}
+        <CartActions>{buyNowButton}</CartActions>
         {result?.kind === 'failed' && (
           <Alert variant="error">{result.message}</Alert>
         )}
-        <PurchaseNotices />
       </div>
     )
   }
@@ -372,7 +386,7 @@ function QuantitySelector({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       {result?.kind === 'added' ? <AddedNotice result={result} /> : null}
       {result?.kind === 'failed' ? (
         <Alert variant="error" title="Não foi possível atualizar o carrinho.">
@@ -449,27 +463,28 @@ function QuantitySelector({
         </div>
       </div>
 
-      {loggedIn ? (
-        <Button
-          className="h-12 w-full"
-          icon={<Icon name="cart" size={20} />}
-          disabled={!valid || adding}
-          onClick={addToCart}
-        >
-          {adding ? 'Adicionando...' : 'Adicionar ao carrinho'}
-        </Button>
-      ) : (
-        <Button
-          className="h-12 w-full"
-          icon={<Icon name="user" size={20} />}
-          onClick={goToLogin}
-        >
-          Entrar para comprar
-        </Button>
-      )}
+      <div className={actionGroupClass}>
+        {loggedIn ? (
+          <Button
+            className={actionButtonClass}
+            icon={<Icon name="cart" size={20} />}
+            disabled={!valid || adding}
+            onClick={addToCart}
+          >
+            {adding ? 'Adicionando...' : 'Adicionar ao carrinho'}
+          </Button>
+        ) : (
+          <Button
+            className={actionButtonClass}
+            icon={<Icon name="user" size={20} />}
+            onClick={goToLogin}
+          >
+            Entrar para comprar
+          </Button>
+        )}
 
-      {loggedIn && buyNowButton}
-      <PurchaseNotices />
+        {loggedIn && buyNowButton}
+      </div>
     </div>
   )
 }
@@ -486,18 +501,19 @@ function AddedNotice({ result }: { result: { quantity: number } }) {
   )
 }
 
-function CartActions() {
+function CartActions({ children }: { children: ReactNode }) {
   const navigate = useNavigate()
 
   return (
-    <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
+    <div className={actionGroupClass}>
       <Button
-        className="h-11 flex-1"
+        className={actionButtonClass}
         icon={<Icon name="cart" size={20} />}
         onClick={() => navigate({ to: '/carrinho' })}
       >
         Ver carrinho
       </Button>
+      {children}
       <Link
         to="/marketplace"
         search={{ sort: 'recent' }}
@@ -561,36 +577,48 @@ function TradeEntry({ ad }: { ad: MarketplaceAd }) {
   }
 
   return (
-    <div className="mt-4 space-y-3">
-      <Button
-        className="h-12 w-full"
-        icon={<Icon name="share" size={20} />}
-        onClick={openTrade}
-      >
-        {user ? 'Propor troca' : 'Entrar para propor troca'}
-      </Button>
+    <>
+      {user ? (
+        <button
+          type="button"
+          className={`${lightAction} ${focusRing} inline-flex min-h-11 w-52 max-w-full cursor-pointer items-center justify-center gap-2`}
+          onClick={openTrade}
+        >
+          <Icon name="share" size={20} />
+          Propor troca
+        </button>
+      ) : (
+        <Button
+          variant="secondary"
+          className={actionButtonClass}
+          icon={<Icon name="share" size={20} />}
+          onClick={openTrade}
+        >
+          Entrar para propor troca
+        </Button>
+      )}
       <TradeProposalFlow ad={ad} open={open} onClose={() => setOpen(false)} />
-    </div>
+    </>
   )
 }
 
 function AdSkeleton() {
   return (
-    <div
-      aria-busy="true"
-      aria-live="polite"
-      className="grid grid-cols-1 items-start gap-5 md:grid-cols-2"
-    >
+    <div aria-busy="true" aria-live="polite" className={adGridClass}>
       <span className="sr-only">Carregando anúncio...</span>
-      <div className={`${panelClass} flex justify-center`}>
-        <div className="aspect-[63/88] w-full max-w-[340px] animate-pulse rounded-surface bg-neutral-200" />
-      </div>
-      <div className={`${panelClass} space-y-4`}>
+      <div className={`${panelClass} space-y-3 md:col-start-2 md:row-start-1`}>
         <span className="block h-9 w-2/3 animate-pulse rounded bg-neutral-200" />
         <span className="block h-4 w-1/3 animate-pulse rounded bg-neutral-200" />
-        <span className="block h-36 animate-pulse rounded bg-neutral-100" />
+        <span className="block h-20 animate-pulse rounded bg-neutral-100" />
         <span className="block h-10 w-1/2 animate-pulse rounded bg-neutral-200" />
-        <span className="block h-12 animate-pulse rounded bg-primary-100" />
+        <span className="block h-11 animate-pulse rounded bg-primary-100" />
+      </div>
+      <div
+        className={`${panelClass} flex justify-center md:col-start-1 md:row-start-1`}
+      >
+        <div
+          className={`${adImageClass} animate-pulse rounded-surface bg-neutral-200`}
+        />
       </div>
     </div>
   )
@@ -619,17 +647,11 @@ function AdStatus({
           ? 'Este anúncio não existe ou não está mais disponível. Ele pode ter sido cancelado ou esgotado.'
           : 'Verifique sua conexão e tente novamente.'}
       </Alert>
-      <div className="flex flex-wrap items-center justify-center gap-4">
-        {notFound ? null : <Button onClick={onRetry}>Tentar novamente</Button>}
-        <Link
-          to="/marketplace"
-          search={{ sort: 'recent' }}
-          className={backLinkClass}
-        >
-          <span aria-hidden="true">←</span>
-          Voltar ao Marketplace
-        </Link>
-      </div>
+      {notFound ? null : (
+        <div className="flex justify-center">
+          <Button onClick={onRetry}>Tentar novamente</Button>
+        </div>
+      )}
     </div>
   )
 }

@@ -8,4 +8,7 @@ export const focusRing =
 export const controlHeight = 'h-10'
 
 export const controlText =
-  'text-sm text-text-primary placeholder:text-text-secondary'
+  'text-sm text-neutral-900 placeholder:text-neutral-500'
+
+export const lightAction =
+  'rounded-md border border-primary-900 bg-white/90 px-5 py-3 text-sm font-semibold text-primary-900 hover:bg-white'
