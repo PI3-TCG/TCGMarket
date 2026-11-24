@@ -1,28 +1,37 @@
 import type { CardCondition } from '@/types/Collection'
+import { cardSurface } from './Card'
 
+/**
+ * 320px: 1 coluna; 390px: 2; tablet: 2-3; desktop: até 4.
+ * Mesma grade para Catálogo, Marketplace, Coleção e Meus Anúncios.
+ */
 export const tradingCardGrid =
-  'grid gap-4 grid-cols-[repeat(auto-fill,minmax(min(100%,max(14rem,calc((100%_-_3rem)/4))),1fr))]'
+  'grid grid-cols-1 items-stretch gap-4 min-[390px]:grid-cols-2 md:grid-cols-3 xl:grid-cols-4'
 
+/** Somente estrutura e superfície; os dados/ações ficam em cada domínio. */
 export const tradingCardSurface =
-  'group flex min-w-0 flex-col overflow-hidden rounded-xl border border-primary-300/70 bg-secondary-100/20 shadow-sm transition-[border-color,box-shadow] hover:border-[#FCD203] hover:shadow-md focus-within:ring-2 focus-within:ring-secondary-500'
+  `${cardSurface} group flex min-w-0 flex-col focus-within:ring-2 focus-within:ring-support-blue focus-within:ring-offset-2 focus-within:ring-offset-surface-canvas hover:border-border-emphasis hover:shadow-md`
 
 export const tradingCardDetailsButton =
-  'flex min-h-11 w-full cursor-pointer items-center justify-center rounded-control bg-primary-900 px-3 py-2.5 text-center text-sm font-semibold text-white button-vignette transition-colors hover:bg-primary-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-900'
+  'inline-flex min-h-11 w-full cursor-pointer items-center justify-center rounded-control bg-brand-primary px-3 py-2.5 text-center font-sans text-sm font-semibold text-text-inverse transition-colors duration-150 hover:bg-brand-primary-hover active:bg-brand-primary-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-support-blue motion-reduce:transition-none'
 
 const conditionColors: Record<CardCondition, string> = {
-  NEAR_MINT: 'bg-success-50 text-success-700',
-  LIGHTLY_PLAYED: 'bg-info-50 text-info-700',
-  MODERATELY_PLAYED: 'bg-yellow-100 text-yellow-900',
-  HEAVILY_PLAYED: 'bg-orange-100 text-orange-900',
-  DAMAGED: 'bg-error-50 text-error-700',
+  NEAR_MINT: 'border-success-200 bg-success-50 text-state-success-text',
+  LIGHTLY_PLAYED: 'border-info-200 bg-info-50 text-info-700',
+  MODERATELY_PLAYED: 'border-warning-200 bg-warning-50 text-state-warning-text',
+  HEAVILY_PLAYED: 'border-orange-200 bg-orange-100 text-orange-900',
+  DAMAGED: 'border-error-200 bg-error-50 text-error-700',
 }
+
+const badgeBase =
+  'inline-flex w-fit max-w-full items-center rounded-full border px-2 py-1 text-xs leading-4 font-semibold wrap-anywhere'
 
 export function cardConditionBadge(condition: CardCondition) {
-  return `w-fit rounded-full px-2 py-0.5 text-xs font-semibold ${conditionColors[condition] ?? 'bg-neutral-100 text-neutral-700'}`
+  return `${badgeBase} ${conditionColors[condition] ?? 'border-border-default bg-surface-subtle text-text-primary'}`
 }
 
-const tradingCardBadge =
-  'w-fit rounded-full px-2 py-1 text-xs font-semibold wrap-anywhere'
+export const tradingCardRarity =
+  `${badgeBase} border-border-default bg-accent-gold-soft text-accent-gold-deep`
 
-export const tradingCardRarity = `${tradingCardBadge} text-[#A87800]`
-export const tradingCardLanguage = `${tradingCardBadge} bg-white text-neutral-700`
+export const tradingCardLanguage =
+  `${badgeBase} border-border-default bg-surface-input text-text-secondary`

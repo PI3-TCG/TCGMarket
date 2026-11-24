@@ -27,6 +27,7 @@ type Props = Pick<
   children: ReactNode
 }
 
+/** Base de anúncios reais. Preço é exibido apenas quando a venda o fornece. */
 export function AdListingCard({
   cardName,
   imageUrl,
@@ -43,16 +44,16 @@ export function AdListingCard({
 }: Props) {
   const price =
     saleEnabled && unitPrice !== null ? (
-      <p className="wrap-anywhere font-display text-lg font-bold text-primary-900">
+      <p className="wrap-anywhere font-sans text-xl leading-7 font-bold text-text-price">
         {formatCurrency(unitPrice)}
-        <span className="ml-1 font-sans text-xs font-normal text-neutral-700">
+        <span className="ml-1 text-xs font-normal text-text-secondary">
           / un.
         </span>
       </p>
     ) : saleEnabled ? (
-      <p className="text-sm text-neutral-700">Preço indisponível</p>
+      <p className="text-sm text-text-secondary">Preço indisponível</p>
     ) : (
-      <p className="text-sm font-semibold text-info-700">
+      <p className="text-sm font-semibold text-support-blue-text">
         Disponível para troca
       </p>
     )
@@ -63,9 +64,9 @@ export function AdListingCard({
         {status && <div className="absolute top-2 right-2">{status}</div>}
       </TradingCardImage>
 
-      <div className="flex flex-1 flex-col gap-2 p-3">
+      <div className="flex min-w-0 flex-1 flex-col gap-2 p-3.5">
         <h3
-          className="line-clamp-2 wrap-anywhere text-sm font-bold text-neutral-900"
+          className="line-clamp-2 min-h-10 wrap-anywhere font-sans text-sm leading-5 font-bold text-text-ink"
           title={cardName}
         >
           {cardName}
@@ -83,13 +84,13 @@ export function AdListingCard({
 
         <div className="flex flex-wrap items-center gap-1.5">
           {saleEnabled && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-primary-100 px-2 py-1 text-xs font-semibold text-primary-900">
+            <span className="inline-flex items-center gap-1 rounded-full bg-surface-brand-tint px-2 py-1 text-xs font-semibold text-brand-primary">
               <Icon name="cart" size={16} />
               Venda
             </span>
           )}
           {tradeEnabled && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-secondary-100 px-2 py-1 text-xs font-semibold text-info-700">
+            <span className="inline-flex items-center gap-1 rounded-full bg-info-50 px-2 py-1 text-xs font-semibold text-support-blue-text">
               <Icon name="arrows-right-left" size={16} />
               Troca
             </span>
@@ -99,7 +100,7 @@ export function AdListingCard({
 
         {seller}
 
-        <div className="mt-auto space-y-2 pt-1">
+        <div className="mt-auto space-y-2 border-t border-border-default pt-2">
           {!priceBesideModality && price}
           {children}
         </div>
