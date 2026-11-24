@@ -1,6 +1,16 @@
 import { useId, type InputHTMLAttributes, type ReactNode } from 'react'
 import { cn } from './cn'
 import { Icon } from './Icon'
+import {
+  controlDisabled,
+  controlError,
+  controlHeight,
+  controlHint,
+  controlInvalid,
+  controlLabel,
+  controlSurface,
+  controlText,
+} from './styles'
 
 export type InputVariant = 'default' | 'search'
 export type InputPreview = 'hover' | 'focus' | 'disabled' | 'readonly'
@@ -27,65 +37,80 @@ export function Input({
   className,
   disabled,
   readOnly,
+  'aria-describedby': externalDescription,
+  'aria-label': ariaLabel,
   ...props
 }: InputProps) {
   const generatedId = useId()
   const fieldId = id ?? generatedId
-  const messageId = `${fieldId}-message`
+  const hintId = `${fieldId}-hint`
+  const errorId = `${fieldId}-error`
   const isError = Boolean(error) || invalid
   const isDisabled = Boolean(disabled || preview === 'disabled')
   const isReadOnly = Boolean(readOnly || preview === 'readonly')
-  const isSearch = variant === 'search'
-  const describedBy = error || hint ? messageId : undefined
+  const hasLeadingIcon = variant === 'search' || icon != null
+  const describedBy = [
+    externalDescription,
+    hint ? hintId : undefined,
+    error ? errorId : undefined,
+  ]
+    .filter(Boolean)
+    .join(' ') || undefined
 
   return (
     <div className={cn('w-full', className)}>
       {label ? (
-        <label
-          htmlFor={fieldId}
-          className="mb-2 block text-sm font-medium text-neutral-900"
-        >
+        <label htmlFor={fieldId} className={controlLabel}>
           {label}
         </label>
       ) : null}
       <div className="group relative">
-        {isSearch || icon ? (
+        {hasLeadingIcon ? (
           <span
+            aria-hidden="true"
             className={cn(
-              'pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-neutral-500',
-              isSearch
-                ? 'group-focus-within:text-secondary-500'
-                : 'group-focus-within:text-primary-900',
-              preview === 'focus' &&
-                (isSearch ? 'text-secondary-500' : 'text-primary-900'),
+              'pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-text-secondary',
+              'group-focus-within:text-support-blue-text',
             )}
           >
             {icon ?? <Icon name="search" size={20} />}
           </span>
         ) : null}
         <input
+          {...props}
           id={fieldId}
-          disabled={isDisabled}
-          readOnly={isReadOnly}
+          aria-label={ariaLabel ?? (label ? undefined : props.placeholder)}
           aria-invalid={isError || undefined}
           aria-describedby={describedBy}
+          disabled={isDisabled}
+          readOnly={isReadOnly}
           className={cn(
-            'h-10 w-full rounded-control border bg-white px-3 text-sm text-neutral-900 transition-colors outline-none placeholder:text-neutral-500',
-            'disabled:cursor-not-allowed disabled:border-neutral-200 disabled:bg-neutral-100 disabled:text-neutral-500',
-            'read-only:border-neutral-200 read-only:bg-neutral-100 read-only:text-neutral-700',
-            (isSearch || icon != null) && 'pr-3 pl-10',
-            fieldChrome({ isError, isSearch, preview, isDisabled, isReadOnly }),
+            'w-full px-3 outline-none focus-visible:ring-2 focus-visible:ring-support-blue',
+            controlHeight,
+            controlText,
+            controlSurface,
+            controlDisabled,
+            'read-only:border-border-default read-only:bg-surface-subtle',
+            hasLeadingIcon && 'pr-3 pl-10',
+            fieldChrome({
+              isError,
+              isSearch: variant === 'search',
+              preview,
+              isDisabled,
+              isReadOnly,
+            }),
           )}
-          {...props}
         />
       </div>
-      {error ? (
-        <p id={messageId} className="mt-1 text-sm text-error-700">
-          {error}
-        </p>
-      ) : hint ? (
-        <p id={messageId} className="mt-1 text-sm text-neutral-500">
+      {hint ? (
+        <p id={hintId} className={controlHint}>
           {hint}
+        </p>
+      ) : null}
+      {error ? (
+        <p id={errorId} className={controlError}>
+          <span aria-hidden="true">⚠ </span>
+          {error}
         </p>
       ) : null}
     </div>
@@ -105,27 +130,20 @@ function fieldChrome({
   isDisabled: boolean
   isReadOnly: boolean
 }) {
-  if (isDisabled || isReadOnly) return 'border-neutral-200'
+  if (isDisabled || isReadOnly) return 'border-border-default'
 
   if (preview === 'hover') {
-    if (isError) return 'border-error-600'
-    return isSearch ? 'border-secondary-500' : 'border-primary-900'
+    return isError ? 'border-state-error' : 'border-brand-primary'
   }
-
   if (preview === 'focus') {
-    if (isError) return 'border-error-700 ring-2 ring-error-700'
-    return isSearch
-      ? 'border-secondary-500 ring-2 ring-secondary-500'
-      : 'border-primary-900 ring-2 ring-secondary-500'
+    return isError
+      ? 'border-state-error ring-2 ring-state-error'
+      : 'border-support-blue ring-2 ring-support-blue'
   }
+  if (isError) return controlInvalid
 
-  if (isError) {
-    return 'border-error-700 hover:border-error-600 focus:border-error-700 focus:ring-2 focus:ring-error-700'
-  }
-
-  if (isSearch) {
-    return 'border-neutral-300 hover:border-secondary-500 focus:border-secondary-500 focus:ring-2 focus:ring-secondary-500'
-  }
-
-  return 'border-neutral-300 hover:border-primary-900 focus:border-primary-900 focus:ring-2 focus:ring-secondary-500'
+  return cn(
+    'border-border-default hover:border-brand-primary focus-visible:border-support-blue',
+    isSearch && 'hover:border-support-blue',
+  )
 }
