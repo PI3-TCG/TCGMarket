@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/Button'
 import { Pagination as PageNavigation } from '@/components/ui/Pagination'
 import { tradingCardGrid } from '@/components/ui/tradingCardStyles'
 import { FeedbackState } from '@/components/ui/FeedbackState'
@@ -41,7 +42,7 @@ export function MyCollectionPage() {
   const { user } = useSession()
 
   return (
-    <main className="min-h-screen pb-12 text-[#171443]">
+    <main className="min-h-screen pb-12 text-text-primary">
       <div className="mx-auto w-full max-w-[1600px] px-4 pt-4 sm:px-6 xl:px-[38px]">
         <PageBanner
           title="Minha Coleção"
@@ -106,16 +107,15 @@ function CollectionContent() {
   }
 
   return (
-    <div className="space-y-6 pt-4">
+    <div className="mt-10 space-y-6">
       <CollectionSummaryData key={summaryAttempt} />
 
-      <button
-        type="button"
+      <Button
+        variant="ghost"
         onClick={() => setSummaryAttempt((current) => current + 1)}
-        className="cursor-pointer rounded text-xs text-primary-900 underline focus-visible:outline-2 focus-visible:outline-secondary-500"
       >
         Atualizar resumo
-      </button>
+      </Button>
 
       <div className="grid items-start gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
         <CollectionFilters
@@ -224,14 +224,11 @@ function CollectionPageData({
 
   const hasFilters = Object.values(filters).some((value) => value.trim() !== '')
 
-  const pageButtonClass =
-    'min-h-10 rounded-lg border border-primary-900 px-4 py-2 text-sm font-semibold text-primary-900 enabled:cursor-pointer enabled:hover:bg-primary-100 disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500'
-
   return (
     <>
       <section
         aria-label="Itens da coleção"
-        className="panel-ornaments rounded-xl border border-rare-500 bg-white p-4"
+        className="min-w-0 rounded-surface border border-border-default bg-surface-default p-3 shadow-sm sm:p-5"
       >
         <AppliedCollectionFilters filters={filters} />
 
@@ -253,7 +250,7 @@ function CollectionPageData({
           <>
             <h2
               aria-live="polite"
-              className="mb-4 text-sm font-semibold text-primary-900"
+              className="mb-4 font-title text-2xl font-bold text-text-ink"
             >
               {result.data.totalElements}{' '}
               {hasFilters
@@ -279,23 +276,26 @@ function CollectionPageData({
                 ))}
               </div>
             ) : (
-              <p className="py-8 text-center text-sm text-neutral-700">
+              <p className="py-8 text-center text-sm text-text-secondary">
                 Esta página não possui itens. Volte à primeira página.
               </p>
             )}
 
-            <div className="mt-6 flex flex-wrap items-center justify-center gap-3 border-t border-neutral-200 pt-4">
-              <PageNavigation label="Paginação da coleção" page={result.data.number + 1} totalPages={result.data.totalPages} onPageChange={(page) => onPageChange(page - 1)} />
-              {result.data.content.length === 0 && (
-                <button
-                  type="button"
-                  onClick={() => onPageChange(0)}
-                  className={pageButtonClass}
-                >
-                  Primeira página
-                </button>
-              )}
-            </div>
+            {(result.data.totalPages > 1 || result.data.content.length === 0) && (
+              <div className="mt-6 flex flex-wrap items-center justify-center gap-3 border-t border-border-default pt-4">
+                <PageNavigation
+                  label="Paginação da coleção"
+                  page={result.data.number + 1}
+                  totalPages={result.data.totalPages}
+                  onPageChange={(page) => onPageChange(page - 1)}
+                />
+                {result.data.content.length === 0 && (
+                  <Button variant="outline" onClick={() => onPageChange(0)}>
+                    Primeira página
+                  </Button>
+                )}
+              </div>
+            )}
           </>
         )}
       </section>
