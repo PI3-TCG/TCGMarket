@@ -1,5 +1,15 @@
-import { useState } from 'react'
-import { cardSurface } from '@/components/ui/Card'
+import { useId, useState } from 'react'
+import {
+  CollapsibleFilterChoices,
+  FilterChips,
+  FilterHeading,
+  ResponsiveFilters,
+  SearchableFilterSelect,
+  filterApplyClass,
+  filterFieldClass,
+  filterLabelClass,
+  type AppliedFilterChip,
+} from '@/components/ui/ResponsiveFilters'
 import type {
   CollectionFilterOptions,
   CollectionFilterValues,
@@ -9,8 +19,8 @@ import { emptyCollectionFilters } from './collectionFilterDefaults'
 
 export type { CollectionFilterValues } from '@/types/Collection'
 
-
 type CollectionFiltersProps = {
+  /** Compatibilidade com a coleção pública, que ainda passa appearance="card". */
   appearance?: 'decorated' | 'card'
   items?: CollectionItem[]
   options?: CollectionFilterOptions
@@ -19,190 +29,151 @@ type CollectionFiltersProps = {
   onApply: (filters: CollectionFilterValues) => void
 }
 
+const games = [
+  { value: 'POKEMON', label: 'Pokémon TCG' },
+  { value: 'YUGIOH', label: 'Yu-Gi-Oh! TCG' },
+  { value: 'MAGIC_THE_GATHERING', label: 'Magic: The Gathering' },
+]
+const conditions = [
+  { value: 'NEAR_MINT', label: 'Near Mint (NM)' },
+  { value: 'LIGHTLY_PLAYED', label: 'Lightly Played (LP)' },
+  { value: 'MODERATELY_PLAYED', label: 'Moderately Played (MP)' },
+  { value: 'HEAVILY_PLAYED', label: 'Heavily Played (HP)' },
+  { value: 'DAMAGED', label: 'Damaged (DMG)' },
+]
+const languages = [
+  { value: 'PORTUGUESE', label: 'Português (PT-BR)' },
+  { value: 'ENGLISH', label: 'Inglês (EN)' },
+  { value: 'JAPANESE', label: 'Japonês (JP)' },
+]
+const labelFor = (options: { value: string; label: string }[], value: string) =>
+  options.find((item) => item.value === value)?.label ?? value
+
 export function CollectionFilters({
-  appearance = 'decorated',
   items = [],
   options,
   optionsStatus = 'success',
   onRetryOptions,
   onApply,
 }: CollectionFiltersProps) {
-  const [draft, setDraft] = useState<CollectionFilterValues>(
-    emptyCollectionFilters,
-  )
+  const titleId = useId()
+  const [draft, setDraft] = useState<CollectionFilterValues>({ ...emptyCollectionFilters })
+  const [applied, setApplied] = useState<CollectionFilterValues>({ ...emptyCollectionFilters })
 
-  const editions =
-    [...new Set([...(options?.editions ?? items.map((item) => item.card.edition)), draft.edition])].filter(Boolean)
+  // Somente opções existentes: não inventa quantidade ou raridade de cartas.
+  const editions = [...new Set([
+    ...(options?.editions ?? items.map((item) => item.card.edition)),
+    draft.edition,
+  ])].filter(Boolean).sort((a, b) => a.localeCompare(b, 'pt-BR'))
+  const rarities = [...new Set([
+    ...(options?.rarities ?? items.map((item) => item.card.officialRarity)),
+    draft.rarity,
+  ])].filter(Boolean).sort((a, b) => a.localeCompare(b, 'pt-BR'))
 
-  const rarities =
-    [...new Set([...(options?.rarities ?? items.map((item) => item.card.officialRarity)), draft.rarity])].filter(Boolean)
-
-  function updateFilter(
-    field: keyof CollectionFilterValues,
-    value: string,
+  function change<K extends keyof CollectionFilterValues>(
+    key: K,
+    value: CollectionFilterValues[K],
   ) {
-    setDraft((current) => ({
-      ...current,
-      [field]: value,
-    }))
+    setDraft((current) => ({ ...current, [key]: value }))
   }
 
-  function clearFilters() {
-    setDraft({ ...emptyCollectionFilters })
-    onApply({ ...emptyCollectionFilters })
+  function apply(next: CollectionFilterValues) {
+    const filters = { ...next, search: next.search.trim() }
+    setDraft(filters)
+    setApplied(filters)
+    onApply(filters)
   }
 
-  const fieldClass =
-    'mt-2 h-10 w-full rounded-control border border-neutral-200 bg-white filter-field px-3 text-sm text-neutral-900 focus:border-primary-900 focus:outline-none focus:ring-2 focus:ring-secondary-500 disabled:cursor-not-allowed disabled:opacity-50'
+  const chips: AppliedFilterChip[] = [
+    { key: 'search', label: `Pesquisa: ${applied.search}` },
+    { key: 'game', label: `TCG: ${labelFor(games, applied.game)}` },
+    { key: 'edition', label: `Coleção: ${applied.edition}` },
+    { key: 'rarity', label: `Raridade: ${applied.rarity}` },
+    { key: 'condition', label: `Condição: ${labelFor(conditions, applied.condition)}` },
+    { key: 'language', label: `Idioma: ${labelFor(languages, applied.language)}` },
+  ].filter(({ key }) => Boolean(applied[key as keyof CollectionFilterValues]))
 
   return (
-    <aside
-      className={`min-w-0 self-start ${appearance === 'card'
-        ? `${cardSurface} bg-white! p-4`
-        : 'filter-panel panel-ornaments'}`}
-    >
-      <div className="mb-5 flex items-center justify-between gap-2">
-        <h2 className="text-sm font-bold text-primary-900">
-          FILTROS
-        </h2>
+    <ResponsiveFilters>
+      <aside aria-labelledby={titleId} className="min-w-0">
+        <FilterHeading id={titleId} onClear={() => apply({ ...emptyCollectionFilters })} />
+        <FilterChips
+          chips={chips}
+          onRemove={(key) => apply({ ...applied, [key]: emptyCollectionFilters[key as keyof CollectionFilterValues] })}
+        />
 
-        <button
-          type="button"
-          onClick={clearFilters}
-          className="cursor-pointer text-xs text-primary-900 underline"
+        {optionsStatus === 'loading' && (
+          <p role="status" className="mb-3 text-xs text-text-secondary">Carregando coleções e raridades...</p>
+        )}
+        {optionsStatus === 'error' && (
+          <div role="alert" className="mb-3 rounded-control border border-state-error/40 bg-surface-sand p-3 text-xs">
+            Não foi possível carregar as coleções e raridades.
+            {onRetryOptions && (
+              <button type="button" onClick={onRetryOptions} className="mt-2 block min-h-10 font-semibold text-brand-primary underline">Tentar novamente</button>
+            )}
+          </div>
+        )}
+
+        <form
+          className="space-y-3"
+          onSubmit={(event) => { event.preventDefault(); apply(draft) }}
         >
-          Limpar filtros
-        </button>
-      </div>
+          <label className={filterLabelClass}>
+            Buscar na coleção
+            <input
+              type="search"
+              value={draft.search}
+              maxLength={120}
+              onChange={(event) => change('search', event.target.value)}
+              placeholder="Nome da carta"
+              className={filterFieldClass}
+            />
+          </label>
 
-      {optionsStatus === 'loading' && (
-        <p role="status" className="mb-4 text-xs text-neutral-700">
-          Carregando edições e raridades…
-        </p>
-      )}
-
-      {optionsStatus === 'error' && (
-        <div role="alert" className="mb-4 text-xs text-neutral-700">
-          <p>Não foi possível carregar as edições e raridades.</p>
-
-          {onRetryOptions && (
-            <button
-              type="button"
-              onClick={onRetryOptions}
-              className="mt-2 cursor-pointer text-primary-900 underline"
-            >
-              Tentar novamente
-            </button>
-          )}
-        </div>
-      )}
-
-      <form
-        className="space-y-4"
-        onSubmit={(event) => {
-          event.preventDefault()
-          onApply({ ...draft, search: draft.search.trim() })
-        }}
-      >
-        <label className="block text-sm font-semibold text-neutral-900">
-          Buscar na coleção
-          <input
-            type="search"
-            value={draft.search}
-            maxLength={120}
-            onChange={(event) => updateFilter('search', event.target.value)}
-            placeholder="Nome da carta"
-            className={fieldClass}
-          />
-        </label>
-
-        <label className="block text-sm font-semibold text-neutral-900">
-          TCG
-          <select
+          <CollapsibleFilterChoices
+            title="TCG"
+            options={games}
             value={draft.game}
-            onChange={(event) => updateFilter('game', event.target.value)}
-            className={fieldClass}
-          >
-            <option value="">Todos os TCGs</option>
-            <option value="POKEMON">Pokémon</option>
-            <option value="YUGIOH">Yu-Gi-Oh!</option>
-            <option value="MAGIC_THE_GATHERING">
-              Magic: The Gathering
-            </option>
-          </select>
-        </label>
+            onValueChange={(value) => change('game', value)}
+          />
 
-        <label className="block text-sm font-semibold text-neutral-900">
-          Coleção / Set
-          <select
+          <SearchableFilterSelect
+            label="Coleção / Set"
             value={draft.edition}
+            onValueChange={(value) => change('edition', value)}
+            options={editions}
+            placeholder="Pesquisar coleção..."
             disabled={optionsStatus !== 'success'}
-            onChange={(event) => updateFilter('edition', event.target.value)}
-            className={fieldClass}
-          >
-            <option value="">Todas as coleções</option>
-            {editions.map((edition) => (
-              <option key={edition} value={edition}>
-                {edition}
-              </option>
-            ))}
-          </select>
-        </label>
+          />
 
-        <label className="block text-sm font-semibold text-neutral-900">
-          Raridade
-          <select
+          <SearchableFilterSelect
+            label="Raridade"
             value={draft.rarity}
+            onValueChange={(value) => change('rarity', value)}
+            options={rarities}
+            placeholder="Pesquisar raridade..."
             disabled={optionsStatus !== 'success'}
-            onChange={(event) => updateFilter('rarity', event.target.value)}
-            className={fieldClass}
-          >
-            <option value="">Todas as raridades</option>
-            {rarities.map((rarity) => (
-              <option key={rarity} value={rarity}>
-                {rarity}
-              </option>
-            ))}
-          </select>
-        </label>
+          />
 
-        <label className="block text-sm font-semibold text-neutral-900">
-          Condição
-          <select
+          <CollapsibleFilterChoices
+            title="Condição"
+            options={conditions}
             value={draft.condition}
-            onChange={(event) => updateFilter('condition', event.target.value)}
-            className={fieldClass}
-          >
-            <option value="">Todas as condições</option>
-            <option value="NEAR_MINT">Near Mint</option>
-            <option value="LIGHTLY_PLAYED">Lightly Played</option>
-            <option value="MODERATELY_PLAYED">Moderately Played</option>
-            <option value="HEAVILY_PLAYED">Heavily Played</option>
-            <option value="DAMAGED">Damaged</option>
-          </select>
-        </label>
+            onValueChange={(value) => change('condition', value)}
+            defaultOpen={false}
+          />
 
-        <label className="block text-sm font-semibold text-neutral-900">
-          Idioma
-          <select
+          <CollapsibleFilterChoices
+            title="Idioma"
+            options={languages}
             value={draft.language}
-            onChange={(event) => updateFilter('language', event.target.value)}
-            className={fieldClass}
-          >
-            <option value="">Todos os idiomas</option>
-            <option value="PORTUGUESE">Português</option>
-            <option value="ENGLISH">Inglês</option>
-            <option value="JAPANESE">Japonês</option>
-          </select>
-        </label>
+            onValueChange={(value) => change('language', value)}
+            defaultOpen={false}
+          />
 
-        <button
-          type="submit"
-          className="filter-button mx-auto block min-h-11 w-fit max-w-full cursor-pointer"
-        >
-          Aplicar filtros
-        </button>
-      </form>
-    </aside>
+          <button type="submit" className={filterApplyClass}>Aplicar filtros</button>
+        </form>
+      </aside>
+    </ResponsiveFilters>
   )
 }

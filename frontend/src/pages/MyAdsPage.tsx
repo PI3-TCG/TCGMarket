@@ -49,7 +49,7 @@ function MyAdsContent() {
   const [formVersion, setFormVersion] = useState(0)
 
   return (
-    <div className="mt-10 grid items-start gap-6 lg:grid-cols-[240px_minmax(0,1fr)]">
+    <div className="mt-10 grid items-start gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
       <ResponsiveFilters>
         <MyAdsFilters
           key={formVersion}
