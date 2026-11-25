@@ -244,7 +244,7 @@ function CollectionPageData({
     <>
       <section
         aria-label="Itens da coleção"
-        className="min-w-0 rounded-surface border border-border-default bg-surface-default p-3 shadow-sm sm:p-5"
+        className="min-w-0 rounded-surface border border-border-default bg-neutral-0 p-3 shadow-sm sm:p-5"
       >
         <header className="mb-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-3 border-b border-border-default pb-4">
           <div className="min-w-0">

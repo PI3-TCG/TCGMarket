@@ -1,7 +1,9 @@
+import { useNavigate } from '@tanstack/react-router'
+
 import { conditionLabels } from '@/components/ads/adFormat'
 import { Icon, type IconName } from '@/components/ui/Icon'
+import { focusRing } from '@/components/ui/styles'
 import type { CardCondition } from '@/types/Collection'
-import { useNavigate } from '@tanstack/react-router'
 
 type Step = {
   title: string
@@ -16,10 +18,7 @@ type Condition = {
   indicators: number
 }
 
-/**
- * Informações institucionais da Home. As condições e seus rótulos vêm do
- * mesmo domínio usado nos formulários de coleção e anúncios.
- */
+// Conteúdo da issue #210, com rotas existentes e estilos definidos pelos tokens DS v2.2.
 const STEPS: Step[] = [
   {
     title: 'Cadastre sua coleção',
@@ -71,12 +70,19 @@ const CONDITIONS: Condition[] = [
   },
 ]
 
-const NAV_ACTIONS: { label: string; target: 'buy' | 'sell' | 'trade' | 'collection'; icon: IconName }[] = [
+const NAV_ACTIONS: {
+  label: string
+  target: 'buy' | 'sell' | 'trade' | 'collection'
+  icon: IconName
+}[] = [
   { label: 'Comprar', target: 'buy', icon: 'cart' },
   { label: 'Vender', target: 'sell', icon: 'megaphone' },
   { label: 'Trocar', target: 'trade', icon: 'arrows-right-left' },
   { label: 'Minha coleção', target: 'collection', icon: 'cards' },
 ]
+
+const sectionTitle =
+  'font-display text-xl font-bold uppercase tracking-[0.02em] text-text-primary sm:text-2xl'
 
 export function HomeInformationSections({
   isAuthenticated,
@@ -103,43 +109,45 @@ export function HomeInformationSections({
   }
 
   return (
-    <div className="grid min-w-0 items-stretch gap-4 xl:grid-cols-2" aria-label="Informações sobre o TCC Market">
-      {/* Coluna esquerda: mesma composição de três passos da referência. */}
+    <div
+      className="mx-auto flex w-full max-w-[1192px] min-w-0 flex-col gap-5"
+      aria-label="Informações sobre o TCG Market"
+    >
       <section
         id="como-funciona"
         aria-labelledby="como-funciona-title"
-        className="panel-ornaments flex min-w-0 flex-col rounded-xl border border-rare-500/75 bg-[linear-gradient(145deg,#FBF6FF_0%,#F6F0FC_53%,#F0F2FF_100%)] p-4 shadow-[0_8px_26px_rgba(67,20,85,0.09)] sm:p-6 lg:p-7"
+        className="flex min-w-0 flex-col rounded-surface border border-border-default bg-surface-default p-4 shadow-sm sm:p-6"
       >
-        <div className="mb-5">
-          <h2 id="como-funciona-title" className="font-display text-xl font-bold tracking-[0.015em] text-[#30223F] sm:text-[25px]">
+        <header className="mb-5 border-b border-border-default pb-4">
+          <h2 id="como-funciona-title" className={sectionTitle}>
             Como funciona
           </h2>
-          <p className="mt-1 text-sm leading-relaxed text-neutral-700">
+          <p className="mt-2 text-sm leading-relaxed text-text-secondary">
             Da primeira carta à negociação, em três passos.
           </p>
-        </div>
+        </header>
 
         <ol className="grid gap-3 sm:grid-cols-3 xl:gap-3">
           {STEPS.map((step, index) => (
             <li
               key={step.title}
-              className="flex min-w-0 flex-col rounded-xl border border-[#E4D9EC] bg-white/95 p-4 shadow-[0_2px_6px_rgba(55,20,75,0.035)] transition-shadow duration-200 hover:shadow-[0_7px_20px_rgba(68,21,82,0.11)]"
+              className="flex min-w-0 flex-col rounded-card border border-border-default bg-surface-input p-4 shadow-sm"
             >
               <div className="mb-3 flex flex-wrap items-center gap-3">
                 <span
                   aria-hidden="true"
-                  className="grid size-9 shrink-0 place-items-center rounded-lg border border-[#9B4AA7]/40 bg-[linear-gradient(145deg,#84258B,#54045A)] text-white shadow-[0_3px_8px_rgba(80,12,92,0.18)]"
+                  className="grid size-10 shrink-0 place-items-center rounded-control border border-border-default bg-surface-brand-tint text-brand-primary"
                 >
                   <Icon name={step.icon} size={20} />
                 </span>
-                <span className="text-[11px] font-extrabold uppercase tracking-[0.11em] text-[#636579]">
+                <span className="text-xs font-bold uppercase tracking-wide text-accent-gold-deep">
                   Passo {index + 1}
                 </span>
               </div>
-              <h3 className="text-sm font-extrabold leading-snug text-neutral-900">
+              <h3 className="font-sans text-sm font-bold leading-snug text-text-ink">
                 {step.title}
               </h3>
-              <p className="mt-2 text-[13px] leading-relaxed text-neutral-700">
+              <p className="mt-2 text-[13px] leading-relaxed text-text-secondary">
                 {step.description}
               </p>
             </li>
@@ -147,16 +155,19 @@ export function HomeInformationSections({
         </ol>
 
         <div className="mt-auto pt-5">
-          <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.13em] text-[#69457B]">
+          <p className="mb-2 text-xs font-bold uppercase tracking-wide text-text-secondary">
             Explore a plataforma
           </p>
-          <nav aria-label="Acessar funcionalidades do marketplace" className="flex flex-wrap gap-2">
+          <nav
+            aria-label="Acessar funcionalidades do Marketplace"
+            className="flex flex-wrap gap-2"
+          >
             {NAV_ACTIONS.map((action) => (
               <button
                 key={action.target}
                 type="button"
                 onClick={() => openFlow(action.target)}
-                className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-[#D8BEDF] bg-white px-3 py-2 text-xs font-bold text-[#622174] shadow-sm transition-colors hover:border-[#A95BB0] hover:bg-[#F6EBFA] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6E227A]"
+                className={`${focusRing} inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-control border border-border-default bg-surface-input px-3 py-2 text-xs font-semibold text-brand-primary transition-colors hover:border-border-emphasis hover:bg-surface-brand-tint`}
               >
                 <Icon name={action.icon} size={16} />
                 {action.label}
@@ -164,58 +175,62 @@ export function HomeInformationSections({
             ))}
           </nav>
           {!isAuthenticated ? (
-            <p className="mt-2 text-xs text-neutral-700">
+            <p className="mt-3 text-xs leading-relaxed text-text-secondary">
               Para anunciar, trocar e gerenciar sua coleção, entre na sua conta.
             </p>
           ) : null}
         </div>
       </section>
 
-      {/* Coluna direita: as cinco condições registradas nos formulários. */}
       <section
         id="guia-de-condicao"
         aria-labelledby="guia-condicao-title"
-        className="panel-ornaments min-w-0 rounded-xl border border-rare-500/75 bg-white p-4 shadow-[0_8px_26px_rgba(67,20,85,0.07)] sm:p-6 lg:p-7"
+        className="min-w-0 rounded-surface border border-border-default bg-surface-default p-4 shadow-sm sm:p-6"
       >
-        <header className="mb-4 flex items-start justify-between gap-4">
+        <header className="mb-4 flex items-start justify-between gap-4 border-b border-border-default pb-4">
           <div className="min-w-0">
-            <h2 id="guia-condicao-title" className="font-display text-xl font-bold tracking-[0.015em] text-[#30223F] sm:text-[25px]">
+            <h2 id="guia-condicao-title" className={sectionTitle}>
               Guia de condição
             </h2>
-            <p className="mt-1 text-sm leading-relaxed text-neutral-700">
+            <p className="mt-2 text-sm leading-relaxed text-text-secondary">
               Use a mesma classificação ao cadastrar e anunciar.
             </p>
           </div>
-          <span aria-hidden="true" className="mt-1 text-[#94519B]">
+          <span
+            aria-hidden="true"
+            className="grid size-10 shrink-0 place-items-center rounded-control border border-border-default bg-surface-brand-tint text-brand-primary"
+          >
             <Icon name="shield-check" size={24} />
           </span>
         </header>
 
-        <ul className="divide-y divide-[#E6DEEB]">
+        <ul className="divide-y divide-border-default">
           {CONDITIONS.map((condition) => (
             <li key={condition.value} className="flex min-w-0 items-center gap-3 py-3 sm:gap-4">
-              <span className="inline-flex min-h-8 min-w-12 shrink-0 items-center justify-center rounded-full border border-[#EDE0F0] bg-[#FBF6FC] px-2 text-[11px] font-extrabold text-[#6E1877]">
+              <span className="inline-flex min-h-8 min-w-12 shrink-0 items-center justify-center rounded-control border border-border-default bg-surface-brand-tint px-2 text-xs font-bold text-brand-primary">
                 {condition.abbreviation}
               </span>
               <div className="min-w-0 flex-1">
-                <h3 className="text-[13px] font-bold leading-snug text-neutral-900 sm:text-sm">
+                <h3 className="font-sans text-sm font-bold leading-snug text-text-ink">
                   {conditionLabels[condition.value]}
                 </h3>
-                <p className="mt-0.5 text-xs leading-relaxed text-neutral-700 sm:text-[13px]">
+                <p className="mt-1 text-xs leading-relaxed text-text-secondary sm:text-[13px]">
                   {condition.shortDescription}
                 </p>
               </div>
               <span
-                className="flex shrink-0 gap-[3px]"
+                className="flex shrink-0 gap-1"
                 role="img"
-                aria-label={`Referência visual: ${condition.indicators} de 5 marcas de conservação`}
+                aria-label={`Indicador ilustrativo de conservação: ${condition.indicators} de 5`}
               >
                 {Array.from({ length: 5 }, (_, index) => (
                   <span
                     key={index}
                     aria-hidden="true"
-                    className={`h-3.5 w-[5px] rounded-full sm:h-4 sm:w-[6px] ${
-                      index < condition.indicators ? 'bg-[#7F398C]' : 'bg-[#E4E4EC]'
+                    className={`h-3.5 w-1 rounded-full sm:h-4 ${
+                      index < condition.indicators
+                        ? 'bg-brand-primary'
+                        : 'bg-surface-subtle'
                     }`}
                   />
                 ))}
@@ -224,20 +239,24 @@ export function HomeInformationSections({
           ))}
         </ul>
 
-        <details className="group mt-4 border-t border-[#E6DEEB] pt-4">
-          <summary className="flex cursor-pointer items-center gap-2 rounded-md py-1 text-xs font-bold text-[#6C287C] transition-colors hover:text-[#4D155B] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7B3188] sm:text-sm">
+        <details className="group mt-4 border-t border-border-default pt-4">
+          <summary className={`${focusRing} flex min-h-11 cursor-pointer items-center gap-2 rounded-control py-1 text-sm font-semibold text-brand-primary hover:text-brand-primary-hover`}>
             <Icon name="info" size={16} />
             O que observar antes de classificar?
-            <Icon name="chevron-down" size={16} className="ml-auto transition-transform group-open:rotate-180" />
+            <Icon
+              name="chevron-down"
+              size={16}
+              className="ml-auto transition-transform group-open:rotate-180 motion-reduce:transition-none"
+            />
           </summary>
-          <ul className="mt-3 grid list-disc gap-x-6 gap-y-1.5 pl-5 text-xs leading-relaxed text-neutral-700 sm:grid-cols-2 sm:text-[13px]">
+          <ul className="mt-3 grid list-disc gap-x-6 gap-y-2 pl-5 text-xs leading-relaxed text-text-secondary sm:grid-cols-2 sm:text-[13px]">
             <li>Desgaste nas bordas e nos cantos.</li>
             <li>Arranhões, riscos e marcas superficiais.</li>
             <li>Dobras, vincos e amassados.</li>
             <li>Manchas e alterações na coloração.</li>
             <li>Danos estruturais, como rasgos.</li>
           </ul>
-          <p className="mt-3 text-xs leading-relaxed text-neutral-700">
+          <p className="mt-3 text-xs leading-relaxed text-text-secondary">
             A escala acima é apenas ilustrativa: avalie a carta inteira e descreva os defeitos com clareza no anúncio.
           </p>
         </details>
