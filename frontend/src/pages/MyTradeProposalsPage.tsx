@@ -1,5 +1,3 @@
-import { Pagination as PageNavigation } from '@/components/ui/Pagination'
-import { pageBanners } from '@/config/pageBanners'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useSearch } from '@tanstack/react-router'
 import { PageBanner } from '@/components/layout/PageBanner'
@@ -16,6 +14,9 @@ import {
 import { Alert } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
 import { Icon } from '@/components/ui/Icon'
+import { listingPanelClass, listingSortClass } from '@/components/ui/ListingPresentation'
+import { Pagination as PageNavigation } from '@/components/ui/Pagination'
+import { pageBanners } from '@/config/pageBanners'
 import { getMyTradeProposals } from '@/services/tradeProposalRead'
 import { useSession } from '@/session'
 import type {
@@ -27,8 +28,13 @@ import type {
 } from '@/types/TradeProposalView'
 
 const PAGE_SIZE = 10
-const panel =
-  'rounded-xl border border-rare-500 bg-white p-4 shadow-sm sm:p-5'
+const tabBase =
+  'inline-flex min-h-11 items-center justify-center rounded-control border px-4 py-2 text-sm font-semibold transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-support-blue'
+const tabActive = 'border-brand-primary bg-brand-primary text-white shadow-sm'
+const tabIdle =
+  'border-border-default bg-neutral-0 text-brand-deep hover:border-border-emphasis hover:bg-surface-brand-tint'
+const previewClass =
+  'min-w-0 rounded-surface border border-border-default bg-surface-default p-3 sm:p-4'
 
 type Settled =
   | { key: string; kind: 'error' }
@@ -39,18 +45,12 @@ export function MyTradeProposalsPage() {
   const search = useSearch({ from: '/site-layout/perfil/propostas' })
 
   return (
-    <main className="min-h-screen pb-12 text-neutral-900">
+    <main className="min-h-screen pb-12 text-text-primary">
       <div className="mx-auto w-full max-w-[1400px] px-4 pt-4 sm:px-6 xl:px-[38px]">
         <PageBanner
           image={pageBanners.profile}
           title="Minhas propostas"
-          subtitle={
-            <>
-              Acompanhe as propostas de troca que você
-              <br />
-              enviou ou recebeu.
-            </>
-          }
+          subtitle="Acompanhe as propostas de troca que você enviou ou recebeu."
           symbol="⇄"
         />
         {user && <ProposalsContent key={user.id} search={search} />}
@@ -63,7 +63,6 @@ function ProposalsContent({ search }: { search: TradeProposalsSearch }) {
   const navigate = useNavigate()
   const [attempt, setAttempt] = useState(0)
   const [settled, setSettled] = useState<Settled | null>(null)
-  const detailsId = search.proposalId
   const page = (search.page ?? 1) - 1
   const requestKey = `${search.direction}:${search.status ?? 'ALL'}:${page}:${attempt}`
 
@@ -77,56 +76,47 @@ function ProposalsContent({ search }: { search: TradeProposalsSearch }) {
       signal: abort.signal,
     })
       .then((data) => {
-        if (!abort.signal.aborted)
+        if (!abort.signal.aborted) {
           setSettled({ key: requestKey, kind: 'ready', data })
+        }
       })
       .catch(() => {
-        if (!abort.signal.aborted)
+        if (!abort.signal.aborted) {
           setSettled({ key: requestKey, kind: 'error' })
+        }
       })
     return () => abort.abort()
   }, [search.direction, search.status, page, requestKey])
 
   const current = settled?.key === requestKey ? settled : null
-
-  function updateSearch(next: TradeProposalsSearch) {
+  const updateSearch = (next: TradeProposalsSearch) =>
     navigate({ to: '/perfil/propostas', search: next })
-  }
 
   function changeDirection(direction: TradeProposalDirection) {
     updateSearch({ direction, status: search.status })
   }
 
   return (
-    <div className="mt-10 space-y-4">
-      <div className="filter-panel flex flex-wrap items-center justify-between gap-3">
-        <div
-          role="tablist"
-          aria-label="Propostas por direção"
-          className="flex flex-wrap gap-2"
-        >
+    <div className="mt-8 space-y-4 sm:mt-10">
+      <div className="flex min-w-0 flex-col gap-4 rounded-surface border border-accent-gold-frame bg-surface-default p-4 shadow-sm sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:p-5">
+        <div role="group" aria-label="Propostas por direção" className="flex flex-wrap gap-2">
           {(['RECEIVED', 'SENT'] as const).map((direction) => {
             const selected = search.direction === direction
             return (
               <button
                 key={direction}
                 type="button"
-                role="tab"
-                aria-selected={selected}
+                aria-pressed={selected}
                 onClick={() => changeDirection(direction)}
-                className={`min-h-11 rounded-full px-5 py-2 text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500 ${
-                  selected
-                    ? 'button-vignette bg-primary-900 text-white shadow-sm'
-                    : 'border border-neutral-300 bg-white text-primary-900 hover:bg-primary-100'
-                }`}
+                className={`${tabBase} ${selected ? tabActive : tabIdle}`}
               >
                 {directionLabel(direction)}
               </button>
             )
           })}
         </div>
-        <label className="flex w-full min-w-0 items-center gap-3 sm:w-auto sm:min-w-56 text-sm font-semibold text-neutral-700">
-          Status
+        <label className="flex min-w-0 flex-col gap-1.5 text-sm font-semibold text-text-primary sm:w-56">
+          Status da proposta
           <select
             value={search.status ?? ''}
             onChange={(event) => {
@@ -138,9 +128,9 @@ function ProposalsContent({ search }: { search: TradeProposalsSearch }) {
                 status: selected?.value,
               })
             }}
-            className="filter-field min-h-11 min-w-0 flex-1 rounded-control border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 focus-visible:outline-2 focus-visible:outline-secondary-500"
+            className={listingSortClass}
           >
-            <option value="">Todos</option>
+            <option value="">Todos os status</option>
             {TRADE_STATUSES.map((status) => (
               <option key={status.value} value={status.value}>
                 {status.label}
@@ -153,18 +143,14 @@ function ProposalsContent({ search }: { search: TradeProposalsSearch }) {
       <section
         aria-label={`Propostas ${directionLabel(search.direction).toLowerCase()}`}
         aria-busy={current === null}
-        className={panel}
+        className={listingPanelClass}
       >
         {current === null ? (
           <ProposalsSkeleton />
         ) : current.kind === 'error' ? (
-          <div className="mx-auto max-w-lg space-y-4 py-12 text-center">
-            <Alert
-              variant="error"
-              title="Não foi possível carregar suas propostas"
-            >
-              Verifique sua conexão e tente novamente. Os filtros foram
-              preservados.
+          <div className="mx-auto max-w-lg space-y-4 py-10 text-center">
+            <Alert variant="error" title="Não foi possível carregar suas propostas">
+              Verifique sua conexão e tente novamente. Os filtros foram preservados.
             </Alert>
             <Button onClick={() => setAttempt((value) => value + 1)}>
               Tentar novamente
@@ -177,36 +163,24 @@ function ProposalsContent({ search }: { search: TradeProposalsSearch }) {
           />
         ) : current.data.content.length === 0 ? (
           <div className="space-y-3 py-12 text-center">
-            <p className="text-sm text-neutral-700">
-              Não há propostas nesta página.
-            </p>
+            <p className="text-sm text-text-secondary">Não há propostas nesta página.</p>
             <Button
               variant="outline"
-              onClick={() =>
-                updateSearch({
-                  direction: search.direction,
-                  status: search.status,
-                })
-              }
+              onClick={() => updateSearch({ direction: search.direction, status: search.status })}
             >
               Voltar à primeira página
             </Button>
           </div>
         ) : (
           <>
-            <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-              <h2 className="font-display text-xl font-bold text-primary-900 sm:text-2xl">
+            <div className="mb-5 flex flex-wrap items-center justify-between gap-2 border-b border-border-default pb-4">
+              <h2 className="font-display text-xl font-bold text-brand-deep sm:text-2xl">
                 {directionLabel(search.direction)}
               </h2>
-              <span
-                aria-live="polite"
-                className="text-sm font-medium text-neutral-700"
-              >
+              <p aria-live="polite" className="text-sm font-medium text-text-secondary">
                 {current.data.totalElements}{' '}
-                {current.data.totalElements === 1
-                  ? 'proposta encontrada'
-                  : 'propostas encontradas'}
-              </span>
+                {current.data.totalElements === 1 ? 'proposta encontrada' : 'propostas encontradas'}
+              </p>
             </div>
             <ul className="space-y-4">
               {current.data.content.map((proposal) => (
@@ -226,9 +200,9 @@ function ProposalsContent({ search }: { search: TradeProposalsSearch }) {
         )}
       </section>
 
-      {detailsId && (
+      {search.proposalId && (
         <TradeProposalDetailsModal
-          id={detailsId}
+          id={search.proposalId}
           onClose={() => updateSearch({ ...search, proposalId: undefined })}
           onDecision={() => setAttempt((value) => value + 1)}
         />
@@ -247,48 +221,46 @@ function ProposalRow({
   const { receive, deliver, counterparty, counterpartyRole } =
     proposalPerspective(proposal)
   const status = statusPresentation[proposal.status]
+
   return (
-    <article className="rounded-xl border border-neutral-200 bg-white p-4 transition-shadow hover:shadow-md sm:p-5">
+    <article className="min-w-0 rounded-surface border border-border-default bg-surface-default p-4 shadow-sm transition-[border-color,box-shadow] duration-150 hover:border-border-emphasis hover:shadow-md sm:p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0 space-y-1">
-          <p className="text-xs font-semibold uppercase tracking-wide text-primary-700">
+          <p className="text-xs font-bold uppercase tracking-wide text-brand-primary">
             Proposta de troca
           </p>
-          <p className="break-all font-mono text-xs text-neutral-500">
+          <p className="break-all font-mono text-xs text-text-secondary">
             {proposal.id}
           </p>
-          <p className="text-sm text-neutral-700">
+          <p className="text-sm text-text-secondary">
             {counterpartyRole}:{' '}
-            <span className="wrap-anywhere font-semibold text-neutral-900">
+            <span className="wrap-anywhere font-semibold text-text-primary">
               {participantName(counterparty)}
             </span>
           </p>
-          <time
-            className="block text-xs text-neutral-500"
-            dateTime={proposal.createdAt}
-          >
+          <time className="block text-xs text-text-secondary" dateTime={proposal.createdAt}>
             Enviada em {proposalDate(proposal.createdAt)}
           </time>
         </div>
         <span
-          className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold ${status.className}`}
+          className={`inline-flex min-h-8 items-center gap-2 rounded-control border px-3 py-1.5 text-xs font-semibold ${status.className}`}
         >
-          <span aria-hidden="true">●</span>
+          <span aria-hidden="true" className="size-1.5 rounded-full bg-current" />
           {status.label}
         </span>
       </div>
 
-      <div className="mt-4 grid gap-3 md:grid-cols-2">
-        <SidePreview title="Você recebe" items={receive} accent="blue" />
-        <SidePreview title="Você entrega" items={deliver} accent="purple" />
+      <div className="mt-4 grid min-w-0 gap-3 md:grid-cols-2">
+        <SidePreview title="Você recebe" items={receive} />
+        <SidePreview title="Você entrega" items={deliver} />
       </div>
 
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-neutral-200 pt-4">
-        <div className="text-xs text-neutral-700">
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-border-default pt-4">
+        <div className="text-xs leading-relaxed text-text-secondary">
           {proposal.financialAdjustment ? (
             <span>
               Complemento:{' '}
-              <strong className="text-primary-900">
+              <strong className="text-text-price">
                 {proposalMoney(
                   proposal.financialAdjustment.amount,
                   proposal.financialAdjustment.currency,
@@ -303,11 +275,7 @@ function ProposalRow({
             <span>Troca sem complemento financeiro</span>
           )}
         </div>
-        <Button
-          variant="outline"
-          onClick={onView}
-          icon={<Icon name="search" size={16} />}
-        >
+        <Button variant="outline" onClick={onView} icon={<Icon name="search" size={16} />}>
           Ver detalhes
         </Button>
       </div>
@@ -318,43 +286,32 @@ function ProposalRow({
 function SidePreview({
   title,
   items,
-  accent,
 }: {
   title: string
   items: TradeProposalCardItem[]
-  accent: 'blue' | 'purple'
 }) {
   const total = items.reduce((sum, item) => sum + item.quantity, 0)
+
   return (
-    <section
-      className={`min-w-0 rounded-xl border p-3 ${accent === 'blue' ? 'border-secondary-100 bg-secondary-100/30' : 'border-primary-100 bg-primary-100/30'}`}
-    >
+    <section className={previewClass} aria-label={title}>
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h3 className="text-sm font-bold text-primary-900">{title}</h3>
-        <span className="text-xs text-neutral-700">
+        <h3 className="text-sm font-bold text-brand-deep">{title}</h3>
+        <span className="text-xs text-text-secondary">
           {total} {total === 1 ? 'exemplar' : 'exemplares'}
         </span>
       </div>
-      <ul className="mt-2 space-y-1">
+      <ul className="mt-3 space-y-2">
         {items.slice(0, 2).map((item, index) => (
-          <li
-            key={`${item.cardId}-${index}`}
-            className="flex min-w-0 items-center gap-2 text-xs text-neutral-900"
-          >
+          <li key={`${item.cardId}-${index}`} className="flex min-w-0 items-center gap-2 text-xs text-text-primary">
             <MiniCardArt item={item} />
-            <span className="shrink-0 font-semibold text-primary-900">
-              {item.quantity}×
-            </span>
-            <span className="min-w-0 truncate" title={item.name}>
-              {item.name}
-            </span>
+            <span className="shrink-0 font-semibold text-brand-deep">{item.quantity}×</span>
+            <span className="min-w-0 truncate" title={item.name}>{item.name}</span>
           </li>
         ))}
       </ul>
       {items.length > 2 && (
-        <p className="mt-1 text-xs text-neutral-500">
-          +{items.length - 2}{' '}
-          {items.length - 2 === 1 ? 'outra carta' : 'outras cartas'}
+        <p className="mt-2 text-xs text-text-secondary">
+          +{items.length - 2} {items.length - 2 === 1 ? 'outra carta' : 'outras cartas'}
         </p>
       )}
     </section>
@@ -378,7 +335,7 @@ function MiniCardArt({ item }: { item: TradeProposalCardItem }) {
     <span
       role="img"
       aria-label={`Imagem indisponível de ${item.name}`}
-      className="grid h-11 w-8 shrink-0 place-items-center rounded-sm bg-white text-neutral-500"
+      className="grid h-11 w-8 shrink-0 place-items-center rounded-sm border border-border-default bg-neutral-0 text-text-secondary"
     >
       <Icon name="gem" size={16} />
     </span>
@@ -393,24 +350,18 @@ function ProposalsEmpty({
   onClear: () => void
 }) {
   return (
-    <div
-      role="status"
-      className="flex min-h-72 flex-col items-center justify-center px-4 py-10 text-center"
-    >
-      <span
-        aria-hidden="true"
-        className="mb-4 rounded-full bg-primary-100 p-5 text-primary-900"
-      >
+    <div role="status" className="flex min-h-72 flex-col items-center justify-center px-4 py-10 text-center">
+      <span aria-hidden="true" className="mb-4 rounded-full bg-surface-brand-tint p-5 text-brand-primary">
         <Icon name="sparkle" size={32} />
       </span>
-      <h2 className="font-display text-xl font-bold text-primary-900">
+      <h2 className="font-display text-xl font-bold text-brand-deep">
         {search.status
           ? 'Nenhuma proposta com este status'
           : search.direction === 'RECEIVED'
             ? 'Você ainda não recebeu propostas'
             : 'Você ainda não enviou propostas'}
       </h2>
-      <p className="mt-2 max-w-md text-sm text-neutral-700">
+      <p className="mt-2 max-w-md text-sm text-text-secondary">
         {search.status
           ? 'Experimente mostrar todos os status para consultar suas negociações.'
           : search.direction === 'RECEIVED'
@@ -419,14 +370,12 @@ function ProposalsEmpty({
       </p>
       <div className="mt-5">
         {search.status ? (
-          <Button variant="outline" onClick={onClear}>
-            Limpar filtro
-          </Button>
+          <Button variant="outline" onClick={onClear}>Limpar filtro</Button>
         ) : (
           <Link
             to="/marketplace"
             search={{ sort: 'recent' }}
-            className="inline-flex min-h-11 items-center rounded-control bg-primary-900 button-vignette px-5 py-2 text-sm font-semibold text-white hover:bg-primary-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500"
+            className="inline-flex min-h-11 items-center justify-center rounded-control bg-brand-primary px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-brand-primary-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-support-blue"
           >
             Explorar anúncios
           </Link>
@@ -445,14 +394,16 @@ function ProposalPager({
 }) {
   const first = data.number * data.size + 1
   const last = first + data.content.length - 1
+
   return (
-    <div
-      className="mt-5 flex flex-wrap items-center justify-between gap-4 border-t border-neutral-200 pt-4"
-    >
-      <p className="text-sm text-neutral-700">
-        Exibindo {first}–{last} de {data.totalElements}
-      </p>
-      <PageNavigation label="Paginação de propostas" page={data.number + 1} totalPages={data.totalPages} onPageChange={(page) => onPage(page - 1)} />
+    <div className="mt-5 flex flex-wrap items-center justify-between gap-4 border-t border-border-default pt-4">
+      <p className="text-sm text-text-secondary">Exibindo {first}–{last} de {data.totalElements}</p>
+      <PageNavigation
+        label="Paginação de propostas"
+        page={data.number + 1}
+        totalPages={data.totalPages}
+        onPageChange={(page) => onPage(page - 1)}
+      />
     </div>
   )
 }
@@ -463,15 +414,12 @@ function ProposalsSkeleton() {
       <span className="sr-only">Carregando suas propostas...</span>
       <div aria-hidden="true" className="space-y-4 motion-safe:animate-pulse">
         {Array.from({ length: 3 }, (_, index) => (
-          <div
-            key={index}
-            className="space-y-3 rounded-xl border border-neutral-200 p-4"
-          >
-            <div className="h-5 w-32 rounded bg-primary-100" />
-            <div className="h-4 w-64 max-w-full rounded bg-neutral-200" />
+          <div key={index} className="space-y-3 rounded-surface border border-border-default bg-surface-default p-4">
+            <div className="h-5 w-32 rounded-control bg-surface-lavender" />
+            <div className="h-4 w-64 max-w-full rounded-control bg-surface-subtle" />
             <div className="grid gap-3 sm:grid-cols-2">
-              <div className="h-20 rounded-lg bg-neutral-100" />
-              <div className="h-20 rounded-lg bg-neutral-100" />
+              <div className="h-20 rounded-surface bg-surface-sand" />
+              <div className="h-20 rounded-surface bg-surface-sand" />
             </div>
           </div>
         ))}
