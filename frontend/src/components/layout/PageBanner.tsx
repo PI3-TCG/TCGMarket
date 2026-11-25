@@ -88,18 +88,13 @@ export function BannerFrame({
 }
 
 /**
- * Divisor inferior com losango central, inclusive em banners antigos que
- * importam diretamente este componente. Não desenha uma segunda borda externa.
+ * Filete inferior DS v2.2: retira o antigo recorte/losango amarelo da base
+ * dos banners. Preserva moldura e ornamentos dos cantos, sem triângulos.
  */
 export function BannerGoldDivider() {
   return (
-    <div
-      aria-hidden="true"
-      className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-3"
-    >
+    <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-2">
       <span className="absolute inset-x-0 bottom-[3px] h-px bg-[linear-gradient(90deg,transparent_0%,var(--color-accent-bronze)_9%,var(--color-accent-gold-frame)_50%,var(--color-accent-bronze)_91%,transparent_100%)]" />
-      <span className="absolute bottom-[1px] left-1/2 size-3 -translate-x-1/2 rotate-45 border border-accent-bronze bg-accent-gold-soft shadow-[0_0_0_2px_var(--color-brand-deep)]" />
-      <span className="absolute bottom-[4px] left-1/2 size-1 -translate-x-1/2 rotate-45 bg-accent-gold-deep" />
     </div>
   )
 }
@@ -129,11 +124,8 @@ function BannerCornerDecorations() {
 
 /**
  * Todo banner interno compartilha a mesma moldura do hero, inclusive full bleed.
- * Todos os banners internos compartilham a mesma altura nominal:
- * 180px (mobile), 196px (tablet), 212px (desktop). Caso o texto ou o zoom
- * exijam mais espaço, o painel cresce sem truncar o conteúdo.
- * As páginas existentes usam padding-top: 1rem; -mt-4 elimina a distância
- * para a navbar. Apenas o banner é full bleed; os conteúdos seguem contidos.
+ * Alturas nominais: 180px mobile, 196px tablet, 212px desktop.
+ * Se o texto exigir espaço adicional, a composição pode crescer.
  */
 export function PageBanner({
   title,
@@ -144,26 +136,16 @@ export function PageBanner({
 }: PageBannerProps) {
   return (
     <header className="relative left-1/2 -mt-4 mb-4 w-screen -translate-x-1/2">
-      <BannerFrame
-        image={image}
-        imagePosition={imagePosition}
-        variant="page"
-        fullBleed
-      >
+      <BannerFrame image={image} imagePosition={imagePosition} variant="page" fullBleed>
         <div
           className={cn(
             'relative z-10 mx-auto flex w-full max-w-[1600px] items-center',
-            // Altura nominal única para todos os banners internos.
-            // min-h-max permite crescer em textos longos e com zoom de 200%.
             'h-[180px] min-h-max sm:h-[196px] lg:h-[212px]',
             'px-4 py-5 sm:px-6 sm:py-6 lg:px-8',
           )}
         >
           <div className="min-w-0 max-w-[760px] px-5 sm:px-9 lg:px-12">
-            <nav
-              aria-label="Navegação estrutural"
-              className="mb-2 text-[11px] font-semibold uppercase tracking-[0.15em] text-white/90"
-            >
+            <nav aria-label="Navegação estrutural" className="mb-2 text-[11px] font-semibold uppercase tracking-[0.15em] text-white/90">
               <ol className="flex flex-wrap items-center gap-2">
                 <li>
                   <Link
@@ -175,7 +157,11 @@ export function PageBanner({
                 </li>
                 <li aria-hidden="true">/</li>
                 <li aria-current="page" className="min-w-0 break-words">
-                  {symbol && <span aria-hidden="true" className="mr-1 text-accent-gold-soft">{symbol}</span>}
+                  {symbol && (
+                    <span aria-hidden="true" className="mr-1 text-accent-gold-soft">
+                      {symbol}
+                    </span>
+                  )}
                   {title}
                 </li>
               </ol>

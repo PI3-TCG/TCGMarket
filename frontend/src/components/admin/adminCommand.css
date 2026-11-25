@@ -1,140 +1,189 @@
-.admin-console {
-  --ink: #2c163b;
-  --edge: #ad90bd;
-  --lavender: #f4eefb;
-  --gold: #f2c552;
-  max-width: 1600px;
-  margin: .6rem auto 0;
-  color: var(--ink);
+/**
+ * DS-17 — estilo administrativo v2.2.
+ * Substitui o console antigo que não era importado. Sem paleta paralela:
+ * apenas variáveis declaradas em frontend/src/index.css (DS-02).
+ * Escopo limitado a .ds17-admin para não alterar Home, catálogo público ou modais.
+ */
+
+/* Moldura dos filtros v2.2 aplicada à sidebar sem converter links em botões. */
+.ds17-admin-rail {
+  /* Mesma superfície do ResponsiveFilters (DS-10): creme #FAF1E7. */
+  background: var(--color-surface-default);
+  color: var(--color-text-primary);
+  box-shadow: inset 0 0 0 4px rgb(176 130 82 / 0.08), var(--shadow-md);
 }
-.admin-shell {
-  display: grid;
-  grid-template-columns: 194px minmax(0,1fr);
-  min-height: 74vh;
-  background: linear-gradient(135deg,#f1eafa,#fcfbfe 60%,#f4edfa);
-  border: 1px solid #dfd3e9;
+
+.ds17-admin-rail::before {
+  position: absolute;
+  inset: 4px;
+  z-index: 0;
+  content: '';
+  pointer-events: none;
+  border: 1px solid rgb(176 130 82 / 0.55);
+  border-radius: calc(var(--radius-surface) - 4px);
 }
-.admin-rail {
-  padding: 1.4rem .65rem;
-  color: white;
-  background: linear-gradient(155deg,#381249,#250d37 65%,#441254);
-  border-inline-end: 2px solid #80558c;
+
+/* Mesma linguagem de item de dropdown da Navbar: sem fundo de botão.
+   Apenas realce discreto, filete dourado e deslizamento do conteúdo. */
+.ds17-admin-link {
+  position: relative;
+  isolation: isolate;
+  border-radius: 4px;
+  background: transparent;
+  text-decoration: none;
+  transition: color var(--motion-fast) ease;
 }
-.admin-rail-title {
-  margin: 0 .5rem 1.3rem;
-  padding-bottom: 1rem;
-  border-bottom: 2px solid transparent;
-  border-image: linear-gradient(to right,var(--gold),#9e53b4,transparent) 1;
-  font-weight: 750;
-  letter-spacing: .075em;
-  text-transform: uppercase;
+
+.ds17-admin-link::before {
+  position: absolute;
+  top: 11px;
+  bottom: 11px;
+  left: 0;
+  width: 3px;
+  border-radius: 3px;
+  background: var(--color-accent-gold-frame);
+  content: '';
+  opacity: 0;
+  transform: scaleY(0.25);
+  transition: opacity var(--motion-normal) ease, transform var(--motion-normal) ease;
 }
-.admin-sections {display: grid;gap: .35rem}
-.admin-nav-link {
-  display: flex;
-  align-items: center;
-  gap: .7rem;
-  min-height: 44px;
-  padding: .55rem .75rem;
-  color: #f5edfb;
-  border-inline-start: 3px solid transparent;
-  border-radius: 3px 9px 3px 3px;
+
+.ds17-admin-link::after {
+  position: absolute;
+  inset: 3px 0;
+  z-index: -1;
+  border-radius: 4px;
+  background: linear-gradient(
+    90deg,
+    var(--color-surface-brand-tint),
+    transparent 94%
+  );
+  content: '';
+  opacity: 0;
+  transform: translateX(-5px);
+  transition: opacity var(--motion-normal) ease, transform var(--motion-normal) ease;
 }
-.admin-nav-link:hover {background: #512662}
-.admin-nav-link[aria-current=page] {
-  background: linear-gradient(105deg,#70328e,#4c1b69);
-  border-color: var(--gold);
-  font-weight: 700;
+
+.ds17-admin-link-content {
+  transition: transform var(--motion-normal) ease;
 }
-.admin-upcoming {margin: 2rem .5rem 0;color:#e5d8ef;font-size:.8rem}
-.admin-upcoming summary {cursor:pointer}
-.admin-upcoming ul {margin-top:.5rem}
-.admin-upcoming li {padding-inline:0;color:#eadff2}
-.admin-workspace {min-width:0;padding:clamp(12px,1.55vw,26px);container-type:inline-size}
-.admin-workspace > nav {margin-bottom:.75rem}
-.admin-overview {display:grid;gap:1rem}
-.admin-heading h1,.admin-management h1 {font:750 clamp(1.5rem,2.3vw,2.35rem)/1.15 var(--font-display,system-ui);color:var(--ink);letter-spacing:-.035em}
-.admin-heading p {margin-top:.35rem;color:#614b70;font-size:.95rem}
-.admin-metrics {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.7rem}
-.admin-dashboard-row {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}
-.admin-catalog-row {grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr)}
-.admin-activity-row {grid-template-columns:minmax(0,1.13fr) minmax(0,.87fr)}
-.admin-panel,.admin-metric {
-  position:relative;
-  isolation:isolate;
-  min-width:0;
-  background:transparent;
-  overflow:visible;
-  border:0;
-  border-radius:0;
-  box-shadow:none;
+
+.ds17-admin-link:is(:hover, :focus-visible),
+.ds17-admin-link[aria-current='page'] {
+  color: var(--color-brand-primary);
 }
-.admin-panel::before,.admin-metric::before,.admin-panel::after,.admin-metric::after {
-  content:"";
-  position:absolute;
-  inset:0;
-  z-index:-2;
-  pointer-events:none;
-  clip-path:polygon(11px 0,calc(100% - 11px) 0,100% 11px,100% calc(100% - 13px),calc(100% - 13px) 100%,11px 100%,0 calc(100% - 11px),0 11px);
-  background:linear-gradient(135deg,#835799,var(--edge) 55%,#653c7e);
+
+.ds17-admin-link:is(:hover, :focus-visible)::before,
+.ds17-admin-link[aria-current='page']::before,
+.ds17-admin-link:is(:hover, :focus-visible)::after,
+.ds17-admin-link[aria-current='page']::after {
+  opacity: 1;
+  transform: none;
 }
-.admin-panel::after,.admin-metric::after {
-  inset:1px;
-  z-index:-1;
-  background:linear-gradient(135deg,transparent calc(100% - 13px),#d4971a calc(100% - 12px),#ffe19a calc(100% - 9px),#bf7d13),linear-gradient(120deg,#fff,#fcfaff 75%,#f4edf9);
+
+.ds17-admin-link:is(:hover, :focus-visible) .ds17-admin-link-content,
+.ds17-admin-link[aria-current='page'] .ds17-admin-link-content {
+  transform: translateX(3px);
 }
-.admin-panel-heading,.admin-management > div:first-child {
-  margin-inline:1px;
-  background:linear-gradient(to right,transparent,#efe6f84d,transparent);
-  border-color:#ded0ea;
+
+.ds17-admin-chevron {
+  transition: transform var(--motion-normal) ease;
 }
-.admin-panel-heading h2,.admin-metric h2 {
-  color:var(--ink);
-  text-transform:uppercase;
-  font-weight:750;
-  letter-spacing:.025em;
+
+.ds17-admin-upcoming[open] .ds17-admin-chevron {
+  transform: rotate(180deg);
 }
-.admin-metric {padding:1rem}
-.admin-metric > div:first-child > span {color:#65118e;background:#f4eafb;border-radius:7px}
-.admin-number {color:#30173e;font:700 clamp(1.55rem,2.1vw,2.1rem)/1.1 ui-monospace,monospace;font-variant-numeric:tabular-nums}
-.admin-text-link,.admin-panel-heading a {font-size:.8rem;color:#631487;text-decoration:underline;text-underline-offset:.2em;font-weight:650}
-.admin-distribution {display:flex;align-items:center;justify-content:space-evenly;gap:1rem;flex-wrap:wrap;padding:clamp(1rem,1.8vw,2rem)}
-.admin-donut {display:grid;place-items:center;width:clamp(140px,11.5vw,192px);aspect-ratio:1;border-radius:50%;flex:none}
-.admin-donut-center {display:grid;place-content:center;width:62%;aspect-ratio:1;border-radius:50%;background:#fcfaff;text-align:center}
-.admin-distribution table {flex:1 1 185px;max-width:340px}
-.admin-workspace table thead {color:#4d2d5e;background:#f0e7f8}
-.admin-workspace tbody tr:nth-child(even),.admin-management li:nth-child(even) {background:#f5effa}
-.admin-workspace tbody tr:hover,.admin-management li:hover {background:#ece1f5}
-.admin-management {padding-bottom:.25rem}
-.admin-management h1 {font-size:1.55rem}
-.admin-management > div:first-child {padding-block:1.1rem}
-.admin-console :is(a,button,summary):focus-visible {
-  outline:3px solid #8341ac;outline-offset:2px;
+
+.ds17-admin-upcoming-content {
+  animation: ds17-upcoming-enter var(--motion-normal) ease both;
 }
-.admin-rail :is(a,summary):focus-visible {outline-color:#ffe087}
-@container (max-width:900px) {
-  .admin-metrics {grid-template-columns:repeat(2,minmax(0,1fr))}
-  .admin-dashboard-row {grid-template-columns:minmax(0,1fr)}
+
+@keyframes ds17-upcoming-enter {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
 }
-@media (max-width:900px) {
-  .admin-shell {grid-template-columns:minmax(0,1fr)}
-  .admin-rail {padding:.45rem .65rem;border-inline-end:0;border-bottom:2px solid #aa7e36}
-  .admin-rail-title,.admin-upcoming {display:none}
-  .admin-sections {grid-template-columns:repeat(3,minmax(0,1fr));gap:.2rem}
-  .admin-nav-link {justify-content:center;gap:.35rem;padding:.45rem .15rem;font-size:.85rem}
+
+/* Consolida as superfícies do dashboard sem mudar suas três linhas de widgets. */
+.ds17-admin :is(section, article)[class*='bg-[linear-gradient'] {
+  overflow: visible !important;
+  clip-path: none !important;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-surface);
+  background: var(--color-surface-default) !important;
+  box-shadow: var(--shadow-sm);
 }
-@container (max-width:450px) {
-  .admin-metrics {gap:.45rem}
-  .admin-metric {padding:.75rem}
-  .admin-metric > div:first-child {flex-wrap:wrap;gap:.4rem}
-  .admin-metric h2 {font-size:.68rem}
-  .admin-distribution {padding:1rem}
+
+.ds17-admin :is(section, article)[class*='bg-[linear-gradient'] > div {
+  min-width: 0;
+  clip-path: none !important;
+  border-radius: var(--radius-surface);
+  background: var(--color-surface-default) !important;
 }
-.admin-panel-heading h2,.admin-heading h1,.admin-management h1 {font-family:var(--font-sans,system-ui)}
-.admin-workspace .overflow-x-auto {position:relative}
-@container (min-width:901px) {
-  .admin-metric {padding:.9rem 1rem .9rem 3.6rem}
-  .admin-metric > div:first-child > span {position:absolute;left:.85rem;top:50%;transform:translateY(-50%);background:transparent}
-  .admin-metric .admin-number {font-size:clamp(1.6rem,2vw,2rem)}
-  .admin-metric > div:nth-child(2) {margin-top:.35rem}
+
+/* Cabeçalho dos painéis do dashboard original; a composição é preservada. */
+.ds17-admin section[class*='bg-[linear-gradient'] > div > div:first-child {
+  border-bottom-color: var(--color-border-default);
+  background: var(--color-surface-subtle) !important;
+}
+
+/* Remove somente cantos de metal decorativos internos nos painéis de dados. */
+.ds17-admin :is(section, article)[class*='bg-[linear-gradient'] > div > span[aria-hidden='true'][class*='clip-path'] {
+  display: none;
+}
+
+/* Filtros de usuários e catálogo: creme claro no lugar de gradientes frios. */
+.ds17-admin .admin-v2-panel > div > div[class*='bg-[linear-gradient'] {
+  border-color: var(--color-border-default);
+  background: var(--color-surface-input) !important;
+}
+
+.ds17-admin .admin-v2-panel > div > div:first-child[class*='border-b'] {
+  border-bottom-color: var(--color-border-default);
+}
+
+/* Mantém as linhas e a rolagem de tabelas, com tokens de superfície. */
+.ds17-admin .overflow-x-auto {
+  max-width: 100%;
+  overscroll-behavior-x: contain;
+}
+
+.ds17-admin table {
+  border-collapse: collapse;
+}
+
+.ds17-admin table thead {
+  background: var(--color-surface-subtle);
+  color: var(--color-text-primary);
+}
+
+.ds17-admin table tbody tr:nth-child(even) {
+  background: color-mix(in srgb, var(--color-surface-input) 70%, white);
+}
+
+.ds17-admin table tbody tr:hover {
+  background: var(--color-surface-brand-tint);
+}
+
+/* Estado de foco consistente com os controles DS-03. */
+.ds17-admin :is(a, button, summary, input, select, [role='combobox']):focus-visible {
+  outline: 2px solid var(--color-support-blue);
+  outline-offset: 2px;
+}
+
+.ds17-admin .ds17-admin-rail :is(a, summary):focus-visible {
+  outline-color: var(--color-support-blue);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ds17-admin :is(a, button, summary),
+  .ds17-admin .ds17-admin-link::before,
+  .ds17-admin .ds17-admin-link::after,
+  .ds17-admin .ds17-admin-link-content,
+  .ds17-admin .ds17-admin-chevron {
+    transition-duration: 0.01ms;
+  }
+
+  .ds17-admin-upcoming-content {
+    animation: none;
+  }
 }
