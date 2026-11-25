@@ -14,21 +14,21 @@ export const historyTypeMeta: Record<
   PURCHASE: {
     label: 'Compra',
     counterpartyRole: 'Vendedor',
-    className: 'bg-rare-100 text-rare-700',
+    className: 'bg-surface-sand text-brand-deep',
   },
   SALE: {
     label: 'Venda',
     counterpartyRole: 'Comprador',
-    className: 'bg-primary-100 text-primary-900',
+    className: 'bg-surface-brand-tint text-brand-deep',
   },
   TRADE: {
     label: 'Troca',
     counterpartyRole: 'Parceiro de troca',
-    className: 'bg-secondary-100 text-secondary-700',
+    className: 'bg-support-blue/10 text-support-blue-text',
   },
 }
 
-/** Cor e ícone juntos: a cor nunca é a única forma de identificar o status. */
+/** Ícone + texto identificam o status; cor é apenas reforço semântico. */
 export const historyStatusMeta: Record<
   TransactionHistoryStatus,
   { label: string; icon: IconName; className: string }
@@ -36,7 +36,7 @@ export const historyStatusMeta: Record<
   COMPLETED: {
     label: 'Concluída',
     icon: 'check-circle',
-    className: 'bg-success-50 text-success-700',
+    className: 'bg-state-success/10 text-state-success-text',
   },
 }
 
@@ -55,9 +55,7 @@ export function counterpartyName(entry: TransactionHistoryEntry) {
 
 export function adjustmentLabel(entry: TransactionHistoryEntry) {
   const adjustment = entry.financialAdjustment
-  if (!adjustment) {
-    return 'Sem complemento'
-  }
+  if (!adjustment) return 'Sem complemento'
   return `${adjustment.direction === 'SENT' ? 'Você pagou' : 'Você recebeu'} ${formatCurrency(adjustment.amount)}`
 }
 
@@ -65,7 +63,9 @@ export function parseHistorySearch(
   search: Record<string, unknown>,
 ): TransactionHistorySearch {
   const type =
-    search.type === 'PURCHASE' || search.type === 'SALE' || search.type === 'TRADE'
+    search.type === 'PURCHASE' ||
+    search.type === 'SALE' ||
+    search.type === 'TRADE'
       ? search.type
       : undefined
   const page = Number(search.page)
