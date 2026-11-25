@@ -1,3 +1,4 @@
+import { checkoutPanel } from '@/components/checkout/checkoutStyles'
 import {
   useCallback,
   useEffect,
@@ -225,11 +226,11 @@ function AdForm({
       ) : (
         <section
           aria-labelledby="ad-config-title"
-          className="panel-ornaments rounded-xl border border-rare-500 bg-white p-4 shadow-sm sm:p-6"
+          className={checkoutPanel}
         >
           <h2
             id="ad-config-title"
-            className="flex items-center gap-2 font-display text-lg font-bold text-primary-900 sm:text-xl"
+            className="flex items-center gap-2 font-title text-lg font-bold text-brand-primary sm:text-xl"
           >
             <Icon name="settings" size={24} />
             Configurar anúncio
@@ -269,15 +270,15 @@ function AdForm({
                 <div>
                   <label
                     htmlFor={quantityId}
-                    className="mb-1.5 block text-sm font-semibold text-primary-900"
+                    className="mb-1.5 block text-sm font-semibold text-brand-primary"
                   >
                     Quantidade
                   </label>
                   <div className="flex flex-wrap items-center gap-3">
                     <div
-                      className={`flex h-10 w-40 overflow-hidden rounded-control border bg-white focus-within:ring-2 focus-within:ring-secondary-500 ${showErrors && quantityError
+                      className={`flex h-10 w-40 overflow-hidden rounded-control border bg-surface-input focus-within:ring-2 focus-within:ring-support-blue ${showErrors && quantityError
                         ? 'border-error-700'
-                        : 'border-neutral-300'
+                        : 'border-border-default'
                         }`}
                     >
                       <button
@@ -285,7 +286,7 @@ function AdForm({
                         aria-label="Diminuir quantidade"
                         disabled={!(parsedQuantity > 1)}
                         onClick={() => changeQuantity(parsedQuantity - 1)}
-                        className="flex w-10 shrink-0 cursor-pointer items-center justify-center border-r border-neutral-200 text-primary-900 hover:bg-primary-100 disabled:cursor-not-allowed disabled:opacity-40"
+                        className="flex w-10 shrink-0 cursor-pointer items-center justify-center border-r border-border-default text-brand-primary hover:bg-surface-brand-tint disabled:cursor-not-allowed disabled:opacity-40"
                       >
                         <Icon name="minus" size={16} />
                       </button>
@@ -298,7 +299,7 @@ function AdForm({
                         aria-invalid={showErrors && quantityError ? true : undefined}
                         aria-describedby={`${quantityId}-hint`}
                         onChange={(event) => setQuantity(event.target.value.trim())}
-                        className="min-w-0 flex-1 bg-transparent text-center text-sm font-semibold text-neutral-900 outline-none"
+                        className="min-w-0 flex-1 bg-transparent text-center text-sm font-semibold text-text-primary outline-none"
                       />
                       <button
                         type="button"
@@ -314,14 +315,14 @@ function AdForm({
                               : 1,
                           )
                         }
-                        className="flex w-10 shrink-0 cursor-pointer items-center justify-center border-l border-neutral-200 text-primary-900 hover:bg-primary-100 disabled:cursor-not-allowed disabled:opacity-40"
+                        className="flex w-10 shrink-0 cursor-pointer items-center justify-center border-l border-border-default text-brand-primary hover:bg-surface-brand-tint disabled:cursor-not-allowed disabled:opacity-40"
                       >
                         <Icon name="plus" size={16} />
                       </button>
                     </div>
                     <p
                       id={`${quantityId}-hint`}
-                      className="text-xs text-primary-700"
+                      className="text-xs text-text-secondary"
                     >
                       Até {copies(available)}{' '}
                       {available === 1 ? 'disponível' : 'disponíveis'}.
@@ -332,11 +333,11 @@ function AdForm({
                   )}
                 </div>
 
-                <fieldset className="border-t border-neutral-200 pt-5">
-                  <legend className="text-sm font-semibold text-primary-900">
+                <fieldset className="border-t border-border-default pt-5">
+                  <legend className="text-sm font-semibold text-brand-primary">
                     Modalidade
                   </legend>
-                  <p className="text-xs text-primary-700">
+                  <p className="text-xs text-text-secondary">
                     Selecione uma ou as duas.
                   </p>
                   <div className="mt-3 grid gap-3 sm:grid-cols-2">
@@ -361,7 +362,7 @@ function AdForm({
                     />
                   </div>
                   {sale && trade && (
-                    <p className="mt-2 flex items-center gap-1 text-xs text-primary-700">
+                    <p className="mt-2 flex items-center gap-1 text-xs text-text-secondary">
                       <Icon name="info" size={16} />
                       Venda e troca usam a mesma quantidade.
                     </p>
@@ -375,18 +376,18 @@ function AdForm({
                   <div>
                     <label
                       htmlFor={priceId}
-                      className="mb-1.5 block text-sm font-semibold text-primary-900"
+                      className="mb-1.5 block text-sm font-semibold text-brand-primary"
                     >
                       Preço por unidade (R$){' '}
                       <span className="text-error-700">*</span>
                     </label>
                     <div
-                      className={`flex h-10 items-center rounded-control border bg-white px-3 focus-within:ring-2 focus-within:ring-secondary-500 ${showErrors && priceError
+                      className={`flex h-10 items-center rounded-control border bg-surface-input px-3 focus-within:ring-2 focus-within:ring-support-blue ${showErrors && priceError
                         ? 'border-error-700'
-                        : 'border-neutral-300'
+                        : 'border-border-default'
                         }`}
                     >
-                      <span className="mr-2 text-sm text-neutral-500">R$</span>
+                      <span className="mr-2 text-sm text-text-secondary">R$</span>
                       <input
                         ref={priceRef}
                         id={priceId}
@@ -403,12 +404,12 @@ function AdForm({
                             setPrice(formatPriceInput(value))
                           }
                         }}
-                        className="min-w-0 flex-1 bg-transparent text-sm text-neutral-900 outline-none"
+                        className="min-w-0 flex-1 bg-transparent text-sm text-text-primary outline-none"
                       />
                     </div>
                     <p
                       id={`${priceId}-hint`}
-                      className="mt-1 text-xs text-primary-700"
+                      className="mt-1 text-xs text-text-secondary"
                     >
                       Obrigatório para venda.
                     </p>
@@ -421,7 +422,7 @@ function AdForm({
                 <div>
                   <label
                     htmlFor={descriptionId}
-                    className="mb-1.5 block text-sm font-semibold text-primary-900"
+                    className="mb-1.5 block text-sm font-semibold text-brand-primary"
                   >
                     Descrição (opcional)
                   </label>
@@ -433,12 +434,12 @@ function AdForm({
                     onChange={(event) => setDescription(event.target.value)}
                     aria-describedby={`${descriptionId}-hint`}
                     placeholder="Conte mais sobre a carta ou suas preferências de troca..."
-                    className="w-full resize-y rounded-control border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 placeholder:text-neutral-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary-500 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="w-full resize-y rounded-control border border-border-default bg-surface-input px-3 py-2 text-sm text-text-primary placeholder:text-text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-support-blue disabled:cursor-not-allowed disabled:opacity-60"
                   />
 
                   <p
                     id={`${descriptionId}-hint`}
-                    className="mt-1 text-xs text-primary-700"
+                    className="mt-1 text-xs text-text-secondary"
                   >
                     Acrescente informações que ajudem outros colecionadores a entender seu anúncio.
                   </p>
@@ -472,7 +473,7 @@ function AdForm({
                 </div>
               </fieldset>
 
-              <div className="mt-6 flex flex-wrap justify-end gap-2 border-t border-neutral-200 pt-4">
+              <div className="mt-6 flex flex-wrap justify-center gap-2 border-t border-border-default pt-4">
                 {publishing ? (
                   <Button variant="outline" disabled>
                     Voltar à coleção
@@ -480,7 +481,7 @@ function AdForm({
                 ) : (
                   <BackToCollectionLink />
                 )}
-                <Button type="submit" disabled={publishing}>
+                <Button type="submit" className="h-auto min-h-11 max-w-full whitespace-normal py-2" disabled={publishing}>
                   {publishing ? (
                     <span
                       aria-hidden="true"
@@ -526,8 +527,8 @@ function ModalityOption({
   const colors =
     tone === 'sale'
       ? {
-        selected: 'border-primary-900 bg-primary-100',
-        text: 'text-primary-900',
+        selected: 'border-brand-primary bg-surface-sand',
+        text: 'text-brand-primary',
         accent: 'accent-primary-900',
       }
       : {
@@ -538,11 +539,11 @@ function ModalityOption({
 
   return (
     <label
-      className={`relative flex cursor-pointer flex-col gap-1 rounded-xl border-2 p-4 transition-colors focus-within:ring-2 focus-within:ring-secondary-500 has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-60 ${checked
+      className={`relative flex cursor-pointer flex-col gap-1 rounded-xl border-2 p-4 transition-colors focus-within:ring-2 focus-within:ring-support-blue has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-60 ${checked
         ? colors.selected
         : invalid
-          ? 'border-error-700 bg-white'
-          : 'border-neutral-200 bg-white hover:border-primary-300'
+          ? 'border-error-700 bg-surface-input'
+          : 'border-border-default bg-surface-input hover:border-primary-300'
         }`}
     >
       <input
@@ -556,10 +557,10 @@ function ModalityOption({
       <span className={colors.text}>
         <Icon name={icon} size={32} />
       </span>
-      <span className={`font-display text-lg font-bold ${colors.text}`}>
+      <span className={`font-title text-lg font-bold ${colors.text}`}>
         {title}
       </span>
-      <span className="text-xs text-neutral-700">{description}</span>
+      <span className="text-xs text-text-secondary">{description}</span>
     </label>
   )
 }
@@ -578,27 +579,27 @@ function AdSummary({
   price: number | null
 }) {
   return (
-    <div className="flex items-start gap-3 rounded-xl bg-primary-100/70 p-4">
-      <span className="text-primary-900">
+    <div className="flex items-start gap-3 rounded-xl bg-surface-sand/50 p-4">
+      <span className="text-brand-primary">
         <Icon name="info" size={32} />
       </span>
       <div>
-        <p className="font-display text-base font-bold text-primary-900">
+        <p className="font-title text-base font-bold text-brand-primary">
           Resumo do anúncio
         </p>
         {valid ? (
           <>
-            <p className="text-sm text-primary-700">
+            <p className="text-sm text-text-secondary">
               {copies(quantity)} • {modalityLabel(sale, trade)}
             </p>
-            <p className="mt-1 font-display text-xl font-bold text-primary-900">
+            <p className="mt-1 font-title text-xl font-bold text-brand-primary">
               {sale && price !== null
                 ? `${formatCurrency(price)} por unidade`
                 : 'Disponível para troca'}
             </p>
           </>
         ) : (
-          <p className="text-sm text-primary-700">
+          <p className="text-sm text-text-secondary">
             Preencha quantidade, modalidade e preço para ver o resumo.
           </p>
         )}
@@ -612,26 +613,26 @@ function PublishedPanel({ ad }: { ad: AdResponse }) {
     <section
       role="status"
       aria-labelledby="ad-published-title"
-      className="flex flex-col items-center rounded-xl border border-neutral-200 bg-white p-6 text-center shadow-sm sm:p-10"
+      className={`${checkoutPanel} flex flex-col items-center py-8 text-center sm:py-10`}
     >
       <span className="flex size-20 items-center justify-center rounded-full bg-success-50 text-success-700">
         <Icon name="check" size={32} />
       </span>
       <h2
         id="ad-published-title"
-        className="mt-4 font-display text-2xl font-bold text-primary-900 sm:text-3xl"
+        className="mt-4 font-title text-2xl font-bold text-brand-primary sm:text-3xl"
       >
         Anúncio publicado!
       </h2>
-      <p className="mt-1 text-primary-700">
+      <p className="mt-1 text-text-secondary">
         Sua carta já está disponível no marketplace.
       </p>
 
-      <div className="mt-6 w-full max-w-md rounded-xl bg-primary-100/70 p-4 text-left">
-        <p className="text-sm text-primary-700">
+      <div className="mt-6 w-full max-w-md rounded-xl bg-surface-sand/50 p-4 text-left">
+        <p className="text-sm text-text-secondary">
           {copies(ad.quantity)} • {modalityLabel(ad.saleEnabled, ad.tradeEnabled)}
         </p>
-        <p className="mt-1 font-display text-xl font-bold text-primary-900">
+        <p className="mt-1 font-title text-xl font-bold text-brand-primary">
           {ad.saleEnabled && ad.unitPrice !== null
             ? `${formatCurrency(ad.unitPrice)} por unidade`
             : 'Disponível para troca'}
@@ -649,7 +650,7 @@ function PublishedPanel({ ad }: { ad: AdResponse }) {
       </div>
       <Link
         to="/minha-colecao"
-        className="mt-4 text-sm font-semibold text-primary-900 underline underline-offset-2 focus-visible:outline-2 focus-visible:outline-secondary-500"
+        className="mt-4 text-sm font-semibold text-brand-primary underline underline-offset-2 focus-visible:outline-2 focus-visible:outline-support-blue"
       >
         Voltar à coleção
       </Link>
@@ -661,7 +662,7 @@ function MyAdsButton() {
   return (
     <Link
       to="/meus-anuncios"
-      className="inline-flex min-h-11 w-fit max-w-full items-center justify-center gap-2 rounded-control border border-primary-900 px-4 text-sm font-semibold text-primary-900 hover:bg-primary-100 focus-visible:outline-2 focus-visible:outline-secondary-500"
+      className="inline-flex min-h-11 w-fit max-w-full items-center justify-center gap-2 rounded-control border border-brand-primary px-4 text-sm font-semibold text-brand-primary hover:bg-surface-brand-tint focus-visible:outline-2 focus-visible:outline-support-blue"
     >
       Meus anúncios
     </Link>
@@ -672,7 +673,7 @@ function BackToCollectionLink() {
   return (
     <Link
       to="/minha-colecao"
-      className="inline-flex h-10 items-center justify-center gap-2 rounded-control border border-primary-900 px-4 text-sm font-semibold text-primary-900 hover:bg-primary-100 focus-visible:outline-2 focus-visible:outline-secondary-500"
+      className="inline-flex h-10 items-center justify-center gap-2 rounded-control border border-brand-primary px-4 text-sm font-semibold text-brand-primary hover:bg-surface-brand-tint focus-visible:outline-2 focus-visible:outline-support-blue"
     >
       Voltar à coleção
     </Link>
@@ -702,17 +703,17 @@ function StatePanel({
   return (
     <section
       role={tone === 'error' ? 'alert' : 'status'}
-      className="flex flex-col items-center rounded-xl border border-neutral-200 bg-white px-4 py-12 text-center shadow-sm"
+      className={`${checkoutPanel} flex flex-col items-center py-12 text-center`}
     >
       <Icon
         name="alert"
         size={32}
         className={tone === 'error' ? 'text-error-700' : 'text-warning-700'}
       />
-      <h2 className="mt-3 font-display text-xl font-bold text-primary-900">
+      <h2 className="mt-3 font-title text-xl font-bold text-brand-primary">
         {title}
       </h2>
-      <p className="mt-1 max-w-md text-sm text-neutral-700">{description}</p>
+      <p className="mt-1 max-w-md text-sm text-text-secondary">{description}</p>
       <div className="mt-5 flex flex-wrap justify-center gap-2">{children}</div>
     </section>
   )
@@ -721,15 +722,15 @@ function StatePanel({
 function FormSkeleton() {
   return (
     <div aria-busy="true">
-      <p role="status" className="mb-3 text-sm text-primary-700">
+      <p role="status" className="mb-3 text-sm text-text-secondary">
         Carregando dados do anúncio...
       </p>
       <div
         aria-hidden="true"
         className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:gap-6"
       >
-        <div className="h-[560px] rounded-xl border border-neutral-200 bg-primary-100/50 motion-safe:animate-pulse" />
-        <div className="h-[560px] rounded-xl border border-neutral-200 bg-primary-100/50 motion-safe:animate-pulse" />
+        <div className="h-[560px] rounded-xl border border-border-default bg-surface-subtle motion-safe:animate-pulse" />
+        <div className="h-[560px] rounded-xl border border-border-default bg-surface-subtle motion-safe:animate-pulse" />
       </div>
     </div>
   )

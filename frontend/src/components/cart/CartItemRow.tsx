@@ -32,7 +32,7 @@ type Props = {
 }
 
 const linkClass =
-  'font-display max-w-full text-lg leading-tight font-bold wrap-anywhere text-secondary-700 hover:text-primary-900 hover:underline'
+  'font-title max-w-full text-lg leading-tight font-bold wrap-anywhere text-secondary-700 hover:text-brand-primary hover:underline'
 
 export function CartItemRow({
   item,
@@ -87,7 +87,7 @@ export function CartItemRow({
                   {name}
                 </Link>
               ) : (
-                <span className="font-display text-lg font-bold text-neutral-700">
+                <span className="font-title text-lg font-bold text-text-secondary">
                   {name}
                 </span>
               )}
@@ -98,12 +98,12 @@ export function CartItemRow({
               ) : null}
             </div>
             {details.length > 0 ? (
-              <p className="mt-1 text-sm text-neutral-700">
+              <p className="mt-1 text-sm text-text-secondary">
                 {details.join(' • ')}
               </p>
             ) : null}
             {traits.length > 0 ? (
-              <p className="text-sm text-neutral-700">{traits.join(' • ')}</p>
+              <p className="text-sm text-text-secondary">{traits.join(' • ')}</p>
             ) : null}
             {unavailable ? (
               <p className="mt-2 flex items-center gap-1.5 text-sm text-error-700">
@@ -123,10 +123,10 @@ export function CartItemRow({
 
           <div className="flex min-w-0 flex-wrap items-center justify-between gap-2 sm:col-span-2 xl:col-span-1 xl:flex-col xl:items-end">
             <div className="min-w-0 wrap-anywhere xl:text-right">
-              <p className="text-xs text-neutral-700">Subtotal</p>
+              <p className="text-xs text-text-secondary">Subtotal</p>
               <p
-                className={`font-display text-lg font-bold ${
-                  unavailable ? 'text-neutral-500' : 'text-primary-900'
+                className={`font-title text-lg font-bold ${
+                  unavailable ? 'text-text-secondary' : 'text-brand-primary'
                 }`}
               >
                 {formatCurrency(itemSubtotal(item))}
@@ -217,7 +217,7 @@ function ItemImage({ item, name }: { item: CartItem; name: string }) {
         className="h-full w-full object-contain"
       />
     ) : (
-      <span className="flex h-full w-full items-center justify-center bg-neutral-100 text-neutral-500">
+      <span className="flex h-full w-full items-center justify-center bg-surface-subtle text-text-secondary">
         <Icon name="gem" size={20} />
       </span>
     )
@@ -249,20 +249,20 @@ function PriceColumn({
 }) {
   return (
     <div>
-      <p className="text-xs text-neutral-700">Preço unitário</p>
+      <p className="text-xs text-text-secondary">Preço unitário</p>
       {item.priceChanged && item.currentUnitPrice !== null ? (
         <>
-          <p className="text-sm text-neutral-500 line-through">
+          <p className="text-sm text-text-secondary line-through">
             {formatCurrency(item.acceptedUnitPrice)}
           </p>
-          <p className="font-display text-lg font-bold text-primary-900">
+          <p className="font-title text-lg font-bold text-brand-primary">
             {formatCurrency(item.currentUnitPrice)}
           </p>
         </>
       ) : (
         <p
-          className={`font-display text-lg font-bold ${
-            unavailable ? 'text-neutral-500' : 'text-primary-900'
+          className={`font-title text-lg font-bold ${
+            unavailable ? 'text-text-secondary' : 'text-brand-primary'
           }`}
         >
           {formatCurrency(item.acceptedUnitPrice)}
@@ -296,16 +296,16 @@ function QuantityStepper({
 
   return (
     <div>
-      <label htmlFor={inputId} className="text-xs text-neutral-700">
+      <label htmlFor={inputId} className="text-xs text-text-secondary">
         Quantidade
       </label>
-      <div className="mt-1 flex h-9 w-28 overflow-hidden rounded-control border border-neutral-300 bg-white focus-within:ring-2 focus-within:ring-secondary-500">
+      <div className="mt-1 flex h-11 w-32 max-w-full overflow-hidden rounded-control border border-border-default bg-surface-input focus-within:ring-2 focus-within:ring-support-blue">
         <button
           type="button"
           aria-label="Diminuir quantidade"
           disabled={disabled || item.quantity <= 1}
           onClick={() => onChange(Math.min(item.quantity - 1, Math.max(max, 1)))}
-          className="flex w-9 shrink-0 cursor-pointer items-center justify-center border-r border-neutral-200 text-primary-900 hover:bg-primary-100 disabled:cursor-not-allowed disabled:opacity-40"
+          className="flex w-10 shrink-0 cursor-pointer bg-surface-sand items-center justify-center border-r border-border-default text-brand-primary hover:bg-surface-brand-tint disabled:cursor-not-allowed disabled:opacity-40"
         >
           <Icon name="minus" size={16} />
         </button>
@@ -320,20 +320,20 @@ function QuantityStepper({
           onKeyDown={(event) => {
             if (event.key === 'Enter') commit()
           }}
-          className="min-w-0 flex-1 bg-transparent text-center text-sm font-semibold text-neutral-900 outline-none disabled:text-neutral-500"
+          className="min-w-0 flex-1 bg-transparent text-center text-sm font-semibold text-text-primary outline-none disabled:text-text-secondary"
         />
         <button
           type="button"
           aria-label="Aumentar quantidade"
           disabled={disabled || item.quantity >= max}
           onClick={() => onChange(item.quantity + 1)}
-          className="flex w-9 shrink-0 cursor-pointer items-center justify-center border-l border-neutral-200 text-primary-900 hover:bg-primary-100 disabled:cursor-not-allowed disabled:opacity-40"
+          className="flex w-10 shrink-0 cursor-pointer bg-surface-sand items-center justify-center border-l border-border-default text-brand-primary hover:bg-surface-brand-tint disabled:cursor-not-allowed disabled:opacity-40"
         >
           <Icon name="plus" size={16} />
         </button>
       </div>
       {!disabled && max > 0 && item.availability === 'AVAILABLE' ? (
-        <p className="mt-1 text-xs text-neutral-500">Até {copies(max)}</p>
+        <p className="mt-1 text-xs text-text-secondary">Até {copies(max)}</p>
       ) : null}
     </div>
   )

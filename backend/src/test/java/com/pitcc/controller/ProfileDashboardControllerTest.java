@@ -6,6 +6,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.pitcc.dto.ProfileSettings;
+import com.pitcc.dto.CollectionFilters;
+import com.pitcc.dto.CollectionFilterOptionsResponse;
+import java.util.List;
 import com.pitcc.exception.GlobalExceptionHandler;
 import com.pitcc.model.*;
 import com.pitcc.repository.UserRepository;
@@ -49,7 +52,7 @@ class ProfileDashboardControllerTest {
   }
   @Test void publicEndpointsAreAnonymousAndNeverCached() throws Exception {
     when(service.publicSummary("collector")).thenReturn(new ProfileDashboardService.PublicSummary(false, null, 2, java.util.List.of()));
-    when(service.publicCollection("collector", 0, 20)).thenReturn(new PageImpl<>(java.util.List.of()));
+    when(service.publicCollection("collector", 0, 20, new CollectionFilters(null, null, null, null, null, null))).thenReturn(new PageImpl<>(java.util.List.of()));
     mvc.perform(get("/api/users/collector/profile/summary")).andExpect(status().isOk())
         .andExpect(header().string("Cache-Control", "no-store"))
         .andExpect(jsonPath("$.collectionPublic").value(false))
@@ -58,6 +61,22 @@ class ProfileDashboardControllerTest {
     mvc.perform(get("/api/users/collector/profile/collection")).andExpect(status().isOk())
         .andExpect(header().string("Cache-Control", "no-store"));
   }
+  @Test void publicCollectionAppliesFiltersAndPublishesOptionsWithoutCaching() throws Exception {
+    mvc.perform(get("/api/users/collector/profile/collection")
+        .param("game", "POKEMON").param("edition", "Base").param("rarity", "Rare"))
+        .andExpect(status().isOk());
+    verify(service).publicCollection("collector", 0, 20,
+        new CollectionFilters(null, CardGame.POKEMON, "Base", "Rare", null, null));
+
+    when(service.publicCollectionFilterOptions("collector"))
+        .thenReturn(new CollectionFilterOptionsResponse(List.of("Base"), List.of("Rare")));
+    mvc.perform(get("/api/users/collector/profile/collection/filter-options"))
+        .andExpect(status().isOk())
+        .andExpect(header().string("Cache-Control", "no-store"))
+        .andExpect(jsonPath("$.editions[0]").value("Base"))
+        .andExpect(jsonPath("$.rarities[0]").value("Rare"));
+  }
+
   @Test void settingsUseAuthenticatedAccountAndRejectUnsafeImages() throws Exception {
     String token = token();
     when(service.updateSettings(eq("owner"), any())).thenReturn(new ProfileSettings(true, null));

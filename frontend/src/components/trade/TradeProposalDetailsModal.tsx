@@ -90,7 +90,7 @@ const decisionContent: Record<
   accept: {
     title: 'Confirmar aceite',
     message:
-      'Você concorda com os termos desta proposta. A disponibilidade das cartas será verificada novamente e, em seguida, as cartas serão transferidas entre as coleções.',
+      'Ao aceitar, a disponibilidade será verificada antes da transferência das cartas.',
     confirmLabel: 'Confirmar aceite',
     successMessage:
       'Troca concluída! As cartas já foram transferidas entre as coleções.',
@@ -328,25 +328,10 @@ export function TradeProposalDetailsModal({
         )}
         {data && confirmation && (
           <section className="space-y-4">
-            <div
-              className={
-                confirming === 'accept'
-                  ? 'flex items-start gap-3 rounded-[16px] border border-info-200 bg-surface-input p-4 text-state-info'
-                  : 'flex items-start gap-3 rounded-[16px] border border-error-200 bg-surface-input p-4 text-state-error'
-              }
-            >
-              <Icon
-                name={confirming === 'accept' ? 'info' : 'alert'}
-                size={24}
-              />
-              <div className="min-w-0">
-                <p className="text-sm font-bold">{confirmation.title}</p>
-                <p className="mt-1 text-sm leading-relaxed">
-                  {confirmation.message}
-                </p>
-              </div>
-            </div>
-            <ProposalDetails data={data} />
+            <Alert variant={confirming === 'accept' ? 'info' : 'warning'}>
+              {confirmation.message}
+            </Alert>
+            {confirming === 'accept' && <ProposalTerms data={data} />}
             {processing && (
               <p role="status" className="text-sm font-semibold text-text-primary">
                 Processando sua decisão. Não feche esta janela.
@@ -361,13 +346,8 @@ export function TradeProposalDetailsModal({
 }
 
 function ProposalDetails({ data }: { data: TradeProposalView }) {
-  const { receive, deliver } = proposalPerspective(data)
   const status = statusPresentation[data.status]
   const ownRole = data.direction === 'RECEIVED' ? 'destinatário' : 'proponente'
-  const payer =
-    data.financialAdjustment?.payer === 'PROPOSER'
-      ? data.proposer
-      : data.recipient
 
   return (
     <div className="space-y-4 sm:space-y-5 text-text-primary">
@@ -416,46 +396,7 @@ function ProposalDetails({ data }: { data: TradeProposalView }) {
         </p>
       </section>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <ProposalItemsPanel
-          title="Você recebe"
-          tone="receive"
-          items={receive}
-        />
-        <ProposalItemsPanel
-          title="Você entrega"
-          tone="deliver"
-          items={deliver}
-        />
-      </div>
-
-      {data.financialAdjustment && (
-        <section className={surface} aria-label="Complemento financeiro">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <h3 className="font-title text-[17px] font-bold text-text-primary">
-                Complemento financeiro
-              </h3>
-              <p className="mt-2 text-sm text-text-primary">
-                Pagador:{' '}
-                <span className="font-semibold text-text-primary">
-                  {participantName(payer)}
-                </span>
-              </p>
-            </div>
-            <p className="rounded-surface border border-border-default bg-surface-input px-4 py-2 font-title text-xl font-bold text-text-primary">
-              {proposalMoney(
-                data.financialAdjustment.amount,
-                data.financialAdjustment.currency,
-              )}
-            </p>
-          </div>
-          <p className="mt-3 text-xs text-text-primary">
-            Valor registrado na proposta. Nenhum pagamento é processado nesta
-            etapa.
-          </p>
-        </section>
-      )}
+      <ProposalTerms data={data} />
 
       <section className={surface} aria-label="Datas e histórico de status">
         <div className="flex items-center gap-2">
@@ -509,6 +450,59 @@ function ProposalDetails({ data }: { data: TradeProposalView }) {
           )}
         </div>
       </section>
+    </div>
+  )
+}
+
+function ProposalTerms({ data }: { data: TradeProposalView }) {
+  const { receive, deliver } = proposalPerspective(data)
+  const payer =
+    data.financialAdjustment?.payer === 'PROPOSER'
+      ? data.proposer
+      : data.recipient
+
+  return (
+    <div className="space-y-4">
+      <div className="grid gap-4 lg:grid-cols-2">
+        <ProposalItemsPanel
+          title="Você recebe"
+          tone="receive"
+          items={receive}
+        />
+        <ProposalItemsPanel
+          title="Você entrega"
+          tone="deliver"
+          items={deliver}
+        />
+      </div>
+
+      {data.financialAdjustment && (
+        <section className={surface} aria-label="Complemento financeiro">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h3 className="font-title text-[17px] font-bold text-text-primary">
+                Complemento financeiro
+              </h3>
+              <p className="mt-2 text-sm text-text-primary">
+                Pagador:{' '}
+                <span className="font-semibold text-text-primary">
+                  {participantName(payer)}
+                </span>
+              </p>
+            </div>
+            <p className="rounded-surface border border-border-default bg-surface-input px-4 py-2 font-title text-xl font-bold text-text-primary">
+              {proposalMoney(
+                data.financialAdjustment.amount,
+                data.financialAdjustment.currency,
+              )}
+            </p>
+          </div>
+          <p className="mt-3 text-xs text-text-primary">
+            Valor registrado na proposta. Nenhum pagamento é processado nesta
+            etapa.
+          </p>
+        </section>
+      )}
     </div>
   )
 }

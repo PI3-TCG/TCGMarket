@@ -1,3 +1,4 @@
+import { ListingHeader, listingPanelClass } from '@/components/ui/ListingPresentation'
 import { ListingSort, type ListingSortOrder } from '@/components/ui/ListingSort'
 import { Button } from '@/components/ui/Button'
 import { Pagination as PageNavigation } from '@/components/ui/Pagination'
@@ -244,20 +245,17 @@ function CollectionPageData({
     <>
       <section
         aria-label="Itens da coleção"
-        className="min-w-0 rounded-surface border border-border-default bg-surface-default p-3 shadow-sm sm:p-5"
+        className={listingPanelClass}
       >
-        <header className="mb-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-3 border-b border-border-default pb-4">
-          <div className="min-w-0">
-            <h2 className="font-title text-xl font-bold text-text-ink">Itens da coleção</h2>
-            {result.status === 'success' && (
-              <p aria-live="polite" className="mt-1 text-sm text-text-secondary">
-                {result.data.totalElements.toLocaleString('pt-BR')}{' '}
-                {result.data.totalElements === 1 ? 'item na coleção' : 'itens na coleção'}
-              </p>
-            )}
-          </div>
-          <ListingSort value={sort} onChange={onSortChange} />
-        </header>
+        <ListingHeader
+          title="ITENS DA COLEÇÃO"
+          description={
+            result.status === 'success'
+              ? `${result.data.totalElements.toLocaleString('pt-BR')} ${result.data.totalElements === 1 ? 'item na coleção' : 'itens na coleção'}`
+              : null
+          }
+          actions={<ListingSort value={sort} onChange={onSortChange} />}
+        />
 
         <AppliedCollectionFilters filters={filters} />
 

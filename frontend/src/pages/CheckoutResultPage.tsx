@@ -1,3 +1,5 @@
+import { CheckoutSteps } from '@/components/checkout/CheckoutSteps'
+import { checkoutContainer, checkoutPanel, checkoutLink } from '@/components/checkout/checkoutStyles'
 import { TransactionReviewButton } from '@/components/history/TransactionReviewButton'
 import { pageBanners } from '@/config/pageBanners'
 import {
@@ -22,10 +24,6 @@ import type {
 import { Link, useNavigate, useParams } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 
-const panelClass =
-  'rounded-xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-6'
-const linkClass =
-  'font-semibold text-secondary-700 underline underline-offset-2 hover:text-primary-900'
 
 const POLL_MS = 2500
 
@@ -113,25 +111,28 @@ function CheckoutResultContent({ checkoutId }: { checkoutId: string }) {
   }, [checkoutId, pending, attempt])
 
   return (
-    <main className="min-h-screen pb-12 text-neutral-900">
-      <div className="mx-auto w-full max-w-[1400px] px-4 pt-4 sm:px-6 xl:px-[38px]">
+    <main className="min-h-screen pb-12 text-text-primary">
+      <div className={checkoutContainer}>
         <PageBanner
           image={pageBanners.checkout}
           title="Resultado da compra"
           subtitle="Acompanhe o status do pagamento simulado."
         />
 
-        {state.status === 'loading' ? <ResultSkeleton /> : null}
-        {state.status === 'notFound' ? <NotFound /> : null}
-        {state.status === 'error' ? (
-          <LoadError
-            title="Não foi possível carregar o resultado"
-            onRetry={refresh}
-          />
-        ) : null}
-        {state.status === 'ready' ? (
-          <CheckoutResult result={state.result} onRefresh={refresh} />
-        ) : null}
+        <div className="mt-10">
+          <CheckoutSteps current={3} />
+          {state.status === 'loading' ? <ResultSkeleton /> : null}
+          {state.status === 'notFound' ? <NotFound /> : null}
+          {state.status === 'error' ? (
+            <LoadError
+              title="Não foi possível carregar o resultado"
+              onRetry={refresh}
+            />
+          ) : null}
+          {state.status === 'ready' ? (
+            <CheckoutResult result={state.result} onRefresh={refresh} />
+          ) : null}
+        </div>
       </div>
     </main>
   )
@@ -210,7 +211,7 @@ function CheckoutResult({
       aria-live="polite"
     >
       <div
-        className={`${panelClass} flex flex-col items-center gap-3 py-10 text-center`}
+        className={`${checkoutPanel} flex flex-col items-center gap-3 py-10 text-center`}
       >
         <span
           className={`flex size-16 items-center justify-center rounded-full ${headline.tone}`}
@@ -226,14 +227,14 @@ function CheckoutResult({
         </span>
         <h2
           id="result-title"
-          className="font-display text-3xl font-bold text-primary-900"
+          className="font-title text-3xl font-bold text-text-ink"
         >
           {headline.title}
         </h2>
-        <p className="text-neutral-700">{headline.text}</p>
-        <p className="text-sm text-neutral-600">
+        <p className="text-text-secondary">{headline.text}</p>
+        <p className="text-sm text-text-secondary">
           Operação{' '}
-          <span className="font-semibold text-neutral-900">
+          <span className="font-semibold text-text-primary">
             {result.checkoutId}
           </span>
         </p>
@@ -248,20 +249,20 @@ function CheckoutResult({
         />
       ))}
 
-      <div className={`${panelClass} space-y-2`}>
+      <div className={`${checkoutPanel} space-y-2`}>
         <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 wrap-anywhere">
-          <span className="text-neutral-900">Total da tentativa</span>
-          <span className="font-display text-2xl font-bold text-primary-900">
+          <span className="text-text-primary">Total da tentativa</span>
+          <span className="font-title text-2xl font-bold text-text-ink">
             {formatCurrency(result.total)}
           </span>
         </div>
-        <p className="text-sm text-neutral-600">
+        <p className="text-sm text-text-secondary">
           Frete não incluído nesta simulação.
         </p>
       </div>
 
       <div
-        className={`${panelClass} flex flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap sm:justify-center`}
+        className={`${checkoutPanel} flex flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap sm:justify-center`}
       >
         {pending ? (
           <Button variant="outline" onClick={onRefresh}>
@@ -286,7 +287,7 @@ function CheckoutResult({
           </Button>
         ) : null}
         {anyFailed ? (
-          <Link to="/carrinho" className={`${linkClass} self-center text-sm`}>
+          <Link to="/carrinho" className={`${checkoutLink} self-center text-sm`}>
             Voltar ao carrinho
           </Link>
         ) : null}
@@ -308,25 +309,25 @@ function CreatedOrder({
   const status = orderStatus[order.status]
 
   return (
-    <article className={panelClass}>
+    <article className={checkoutPanel}>
       <div className="flex flex-wrap items-baseline justify-between gap-3">
         <div>
-          <h3 className="font-display text-xl font-bold text-primary-900">
+          <h3 className="font-title text-xl font-bold text-text-ink">
             {order.sellerUsername
               ? `Vendedor @${order.sellerUsername}`
               : 'Pedido'}
           </h3>
-          <p className="text-sm text-neutral-700">
+          <p className="text-sm text-text-secondary">
             {count > 1 ? `Pedido ${index + 1} de ${count} • ` : null}
             {adsCount(order.items.length)} • {copies(totalCopies)}
           </p>
-          <p className="mt-1 text-xs text-neutral-600">
+          <p className="mt-1 text-xs text-text-secondary">
             Pedido{' '}
-            <span className="font-semibold text-neutral-800">{order.id}</span>
+            <span className="font-semibold text-text-primary">{order.id}</span>
           </p>
         </div>
         <div className="text-right">
-          <p className="font-display text-lg font-bold text-primary-900">
+          <p className="font-title text-lg font-bold text-brand-primary">
             {formatCurrency(order.totalAmount)}
           </p>
           <p className={`text-sm font-semibold ${status.className}`}>
@@ -335,7 +336,7 @@ function CreatedOrder({
         </div>
       </div>
 
-      <ul className="mt-4 space-y-3 border-t border-neutral-100 pt-4">
+      <ul className="mt-4 space-y-3 border-t border-border-default pt-4">
         {order.items.map((item) => (
           <OrderItemRow key={`${order.id}-${item.adId}`} item={item} />
         ))}
@@ -357,7 +358,7 @@ function CreatedOrder({
             <Link
               to="/perfil/historico"
               search={{ type: 'PURCHASE' }}
-              className={linkClass}
+              className={checkoutLink}
             >
               Avaliar pelo histórico
             </Link>
@@ -365,7 +366,7 @@ function CreatedOrder({
         </div>
       )}
       {order.status === 'PAID' && (
-        <p role="status" className="mt-4 text-sm text-neutral-700">
+        <p role="status" className="mt-4 text-sm text-text-secondary">
           A avaliação fica disponível após a conclusão do pedido.
         </p>
       )}
@@ -382,7 +383,7 @@ function OrderItemRow({ item }: { item: OrderItem }) {
   ].filter(Boolean)
 
   return (
-    <li className="flex items-center gap-3">
+    <li className="flex min-w-0 flex-wrap items-center gap-3">
       {item.imageUrl ? (
         <img
           src={item.imageUrl}
@@ -390,20 +391,20 @@ function OrderItemRow({ item }: { item: OrderItem }) {
           className="h-16 w-12 shrink-0 rounded object-cover"
         />
       ) : (
-        <span className="h-16 w-12 shrink-0 rounded bg-neutral-100" />
+        <span className="h-16 w-12 shrink-0 rounded bg-surface-subtle" />
       )}
       <div className="min-w-0 flex-1">
-        <p className="truncate font-display font-bold text-secondary-700">
+        <p className="wrap-anywhere font-semibold text-text-ink">
           {item.cardName}
         </p>
         {meta.length > 0 ? (
-          <p className="text-xs text-neutral-700">{meta.join(' · ')}</p>
+          <p className="text-xs text-text-secondary">{meta.join(' · ')}</p>
         ) : null}
-        <p className="text-xs text-neutral-700">
+        <p className="text-xs text-text-secondary">
           {item.quantity} × {formatCurrency(item.unitPrice)}
         </p>
       </div>
-      <p className="font-display font-bold text-primary-900">
+      <p className="wrap-anywhere font-semibold text-text-price">
         {formatCurrency(item.subtotal)}
       </p>
     </li>
@@ -415,8 +416,8 @@ function DeliverySummary({ address }: { address: DeliveryAddress }) {
   const complement = address.complement ? ` • ${address.complement}` : ''
 
   return (
-    <div className="mt-4 border-t border-neutral-100 pt-4 text-sm text-neutral-700">
-      <p className="font-semibold text-neutral-900">Entrega</p>
+    <div className="mt-4 border-t border-border-default pt-4 text-sm text-text-secondary">
+      <p className="font-semibold text-text-primary">Entrega</p>
       <p>{address.recipientName}</p>
       <p>
         {address.street}, {number}
@@ -434,15 +435,15 @@ function LoadError({ title, onRetry }: { title: string; onRetry: () => void }) {
   return (
     <div
       role="alert"
-      className={`${panelClass} mx-auto flex max-w-3xl flex-col items-center gap-4 py-10 text-center`}
+      className={`${checkoutPanel} mx-auto flex max-w-3xl flex-col items-center gap-4 py-10 text-center`}
     >
       <span className="flex size-16 items-center justify-center rounded-full bg-error-50 text-error-700">
         <Icon name="alert" size={32} />
       </span>
-      <h3 className="font-display text-2xl font-bold text-primary-900">
+      <h3 className="font-title text-2xl font-bold text-text-ink">
         {title}
       </h3>
-      <p className="text-neutral-700">
+      <p className="text-text-secondary">
         Não foi possível confirmar o resultado. Verifique sem criar uma nova
         compra.
       </p>
@@ -450,7 +451,7 @@ function LoadError({ title, onRetry }: { title: string; onRetry: () => void }) {
         <Button onClick={onRetry}>
           Verificar resultado
         </Button>
-        <Link to="/carrinho" className={linkClass}>
+        <Link to="/carrinho" className={checkoutLink}>
           Voltar ao carrinho
         </Link>
       </div>
@@ -464,25 +465,25 @@ function LoadError({ title, onRetry }: { title: string; onRetry: () => void }) {
 function NotFound() {
   return (
     <div
-      className={`${panelClass} mx-auto flex max-w-3xl flex-col items-center gap-4 py-10 text-center`}
+      className={`${checkoutPanel} mx-auto flex max-w-3xl flex-col items-center gap-4 py-10 text-center`}
     >
-      <span className="flex size-16 items-center justify-center rounded-full bg-neutral-100 text-neutral-700">
+      <span className="flex size-16 items-center justify-center rounded-full bg-surface-subtle text-text-secondary">
         <Icon name="search" size={32} />
       </span>
-      <h3 className="font-display text-2xl font-bold text-primary-900">
+      <h3 className="font-title text-2xl font-bold text-text-ink">
         Compra não encontrada
       </h3>
-      <p className="text-neutral-700">
+      <p className="text-text-secondary">
         Não encontramos uma compra com esse identificador na sua conta.
       </p>
       <div className="flex flex-col items-center gap-3 sm:flex-row">
-        <Link to="/carrinho" className={linkClass}>
+        <Link to="/carrinho" className={checkoutLink}>
           Voltar ao carrinho
         </Link>
         <Link
           to="/marketplace"
           search={{ sort: 'recent' }}
-          className={linkClass}
+          className={checkoutLink}
         >
           Continuar comprando
         </Link>
@@ -499,9 +500,9 @@ function ResultSkeleton() {
       className="mx-auto max-w-3xl space-y-4"
     >
       <span className="sr-only">Carregando resultado da compra...</span>
-      <span className={`${panelClass} block h-40 animate-pulse`} />
-      <span className={`${panelClass} block h-48 animate-pulse`} />
-      <span className={`${panelClass} block h-20 animate-pulse`} />
+      <span className={`${checkoutPanel} block h-40 animate-pulse`} />
+      <span className={`${checkoutPanel} block h-48 animate-pulse`} />
+      <span className={`${checkoutPanel} block h-20 animate-pulse`} />
     </div>
   )
 }
