@@ -1,3 +1,4 @@
+import { ListingHeader, listingPanelClass } from '@/components/ui/ListingPresentation'
 import { ListingSort, type ListingSortOrder } from '@/components/ui/ListingSort'
 import { Pagination as PageNavigation } from '@/components/ui/Pagination'
 import { tradingCardDetailsButton, tradingCardGrid } from '@/components/ui/tradingCardStyles'
@@ -142,20 +143,17 @@ function MyAdsResults({
     <section
       aria-label="Seus anúncios"
       aria-busy={result.status === 'loading' || undefined}
-      className="min-w-0 rounded-surface border border-border-default bg-surface-default p-3 shadow-sm sm:p-5"
+      className={listingPanelClass}
     >
-      <header className="mb-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-3 border-b border-border-default pb-4">
-        <div className="min-w-0">
-          <h2 className="font-title text-xl font-bold text-text-ink">Seus anúncios</h2>
-          {result.status === 'success' && (
-            <p aria-live="polite" className="mt-1 text-sm text-text-secondary">
-              {result.data.totalElements.toLocaleString('pt-BR')}{' '}
-              {result.data.totalElements === 1 ? 'anúncio' : 'anúncios'}
-            </p>
-          )}
-        </div>
-        <ListingSort value={sort} onChange={onSortChange} />
-      </header>
+      <ListingHeader
+        title="SEUS ANÚNCIOS"
+        description={
+          result.status === 'success'
+            ? `${result.data.totalElements.toLocaleString('pt-BR')} ${result.data.totalElements === 1 ? 'anúncio' : 'anúncios'}`
+            : null
+        }
+        actions={<ListingSort value={sort} onChange={onSortChange} />}
+      />
 
       {result.status === 'loading' ? (
         <TradingCardSkeletonGrid label="Carregando seus anúncios..." />

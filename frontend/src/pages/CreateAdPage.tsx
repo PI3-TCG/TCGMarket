@@ -46,7 +46,7 @@ export function CreateAdPage() {
   }
 
   return (
-    <main className="min-h-screen pb-12 text-[#171443]">
+    <main className="min-h-screen pb-12 text-text-primary">
       <div className="mx-auto w-full max-w-[1600px] px-4 pt-4 sm:px-6 xl:px-[38px]">
         <PageBanner
           image={pageBanners.createAd}
@@ -55,7 +55,7 @@ export function CreateAdPage() {
         />
 
         {(showSelector || selectorOpened) && (
-          <div hidden={!showSelector} className="pt-5">
+          <div hidden={!showSelector} className="mt-10">
             <AdItemSelector
               onSelect={handleSelect}
               onBackToForm={itemId ? () => setChoosing(false) : undefined}
@@ -64,7 +64,7 @@ export function CreateAdPage() {
         )}
 
         {itemId && (
-          <div hidden={showSelector} className="pt-5">
+          <div hidden={showSelector} className="mt-10">
             <CreateAdForm
               key={itemId}
               itemId={itemId}

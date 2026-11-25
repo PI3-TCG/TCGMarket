@@ -1,5 +1,5 @@
+import { CheckoutSteps } from '@/components/checkout/CheckoutSteps'
 import { cardSurface } from '@/components/ui/Card'
-import { focusRing } from '@/components/ui/styles'
 import { useCart } from '@/cart'
 import { needsReview } from '@/components/cart/cartFormat'
 import { AddressCard } from '@/components/delivery/AddressCard'
@@ -36,30 +36,7 @@ export function DeliveryPage() {
   return (
     <main className="mx-auto w-full max-w-[1400px] space-y-4 px-4 pt-4 pb-12 sm:px-6 xl:px-[38px]">
       <header className="space-y-2">
-        <nav aria-label="Etapas da compra">
-          <ol className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-text-secondary">
-            <li>
-              <Link
-                to="/carrinho"
-                className={`${focusRing} rounded-sm text-brand-primary underline underline-offset-2`}
-              >
-                Carrinho
-              </Link>
-            </li>
-            <li aria-current="step" className="font-bold text-brand-primary">
-              <span aria-hidden="true" className="mr-3 text-text-secondary">
-                ›
-              </span>
-              Entrega
-            </li>
-            <li>
-              <span aria-hidden="true" className="mr-3">
-                ›
-              </span>
-              Revisão
-            </li>
-          </ol>
-        </nav>
+        <CheckoutSteps current={1} />
         <h1 className="font-display text-2xl font-bold text-brand-primary">
           Entrega
         </h1>

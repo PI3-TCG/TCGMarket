@@ -1,3 +1,5 @@
+import { cardSurface } from '@/components/ui/Card'
+import { listingPanelClass, listingSortClass } from '@/components/ui/ListingPresentation'
 import { Pagination as PageNavigation } from '@/components/ui/Pagination'
 import { pageBanners } from '@/config/pageBanners'
 import { useEffect, useState } from 'react'
@@ -27,8 +29,6 @@ import type {
 } from '@/types/TradeProposalView'
 
 const PAGE_SIZE = 10
-const panel =
-  'rounded-xl border border-rare-500 bg-white p-4 shadow-sm sm:p-5'
 
 type Settled =
   | { key: string; kind: 'error' }
@@ -39,7 +39,7 @@ export function MyTradeProposalsPage() {
   const search = useSearch({ from: '/site-layout/perfil/propostas' })
 
   return (
-    <main className="min-h-screen pb-12 text-neutral-900">
+    <main className="min-h-screen pb-12 text-text-primary">
       <div className="mx-auto w-full max-w-[1400px] px-4 pt-4 sm:px-6 xl:px-[38px]">
         <PageBanner
           image={pageBanners.profile}
@@ -99,7 +99,7 @@ function ProposalsContent({ search }: { search: TradeProposalsSearch }) {
 
   return (
     <div className="mt-10 space-y-4">
-      <div className="filter-panel flex flex-wrap items-center justify-between gap-3">
+      <div className={`${cardSurface} flex flex-wrap items-center justify-between gap-3 p-4`}>
         <div
           role="tablist"
           aria-label="Propostas por direção"
@@ -114,10 +114,10 @@ function ProposalsContent({ search }: { search: TradeProposalsSearch }) {
                 role="tab"
                 aria-selected={selected}
                 onClick={() => changeDirection(direction)}
-                className={`min-h-11 rounded-full px-5 py-2 text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500 ${
+                className={`min-h-11 rounded-full px-5 py-2 text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-support-blue ${
                   selected
-                    ? 'button-vignette bg-primary-900 text-white shadow-sm'
-                    : 'border border-neutral-300 bg-white text-primary-900 hover:bg-primary-100'
+                    ? 'bg-brand-primary text-white shadow-sm'
+                    : 'border border-border-default bg-surface-input text-brand-primary hover:bg-surface-brand-tint'
                 }`}
               >
                 {directionLabel(direction)}
@@ -125,7 +125,7 @@ function ProposalsContent({ search }: { search: TradeProposalsSearch }) {
             )
           })}
         </div>
-        <label className="flex w-full min-w-0 items-center gap-3 sm:w-auto sm:min-w-56 text-sm font-semibold text-neutral-700">
+        <label className="flex w-full min-w-0 items-center gap-3 sm:w-auto sm:min-w-56 text-sm font-semibold text-text-secondary">
           Status
           <select
             value={search.status ?? ''}
@@ -138,7 +138,7 @@ function ProposalsContent({ search }: { search: TradeProposalsSearch }) {
                 status: selected?.value,
               })
             }}
-            className="filter-field min-h-11 min-w-0 flex-1 rounded-control border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 focus-visible:outline-2 focus-visible:outline-secondary-500"
+            className={`${listingSortClass} flex-1`}
           >
             <option value="">Todos</option>
             {TRADE_STATUSES.map((status) => (
@@ -153,7 +153,7 @@ function ProposalsContent({ search }: { search: TradeProposalsSearch }) {
       <section
         aria-label={`Propostas ${directionLabel(search.direction).toLowerCase()}`}
         aria-busy={current === null}
-        className={panel}
+        className={listingPanelClass}
       >
         {current === null ? (
           <ProposalsSkeleton />
@@ -177,7 +177,7 @@ function ProposalsContent({ search }: { search: TradeProposalsSearch }) {
           />
         ) : current.data.content.length === 0 ? (
           <div className="space-y-3 py-12 text-center">
-            <p className="text-sm text-neutral-700">
+            <p className="text-sm text-text-secondary">
               Não há propostas nesta página.
             </p>
             <Button
@@ -195,12 +195,12 @@ function ProposalsContent({ search }: { search: TradeProposalsSearch }) {
         ) : (
           <>
             <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-              <h2 className="font-display text-xl font-bold text-primary-900 sm:text-2xl">
+              <h2 className="font-display text-lg font-bold text-text-ink sm:text-2xl">
                 {directionLabel(search.direction)}
               </h2>
               <span
                 aria-live="polite"
-                className="text-sm font-medium text-neutral-700"
+                className="text-sm font-medium text-text-secondary"
               >
                 {current.data.totalElements}{' '}
                 {current.data.totalElements === 1
@@ -248,23 +248,23 @@ function ProposalRow({
     proposalPerspective(proposal)
   const status = statusPresentation[proposal.status]
   return (
-    <article className="rounded-xl border border-neutral-200 bg-white p-4 transition-shadow hover:shadow-md sm:p-5">
+    <article className={`${cardSurface} p-4 hover:shadow-md sm:p-5`}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0 space-y-1">
-          <p className="text-xs font-semibold uppercase tracking-wide text-primary-700">
+          <p className="text-xs font-semibold uppercase tracking-wide text-text-secondary">
             Proposta de troca
           </p>
-          <p className="break-all font-mono text-xs text-neutral-500">
+          <p className="break-all font-mono text-xs text-text-secondary">
             {proposal.id}
           </p>
-          <p className="text-sm text-neutral-700">
+          <p className="text-sm text-text-secondary">
             {counterpartyRole}:{' '}
-            <span className="wrap-anywhere font-semibold text-neutral-900">
+            <span className="wrap-anywhere font-semibold text-text-primary">
               {participantName(counterparty)}
             </span>
           </p>
           <time
-            className="block text-xs text-neutral-500"
+            className="block text-xs text-text-secondary"
             dateTime={proposal.createdAt}
           >
             Enviada em {proposalDate(proposal.createdAt)}
@@ -283,12 +283,12 @@ function ProposalRow({
         <SidePreview title="Você entrega" items={deliver} accent="purple" />
       </div>
 
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-neutral-200 pt-4">
-        <div className="text-xs text-neutral-700">
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-border-default pt-4">
+        <div className="text-xs text-text-secondary">
           {proposal.financialAdjustment ? (
             <span>
               Complemento:{' '}
-              <strong className="text-primary-900">
+              <strong className="text-brand-primary">
                 {proposalMoney(
                   proposal.financialAdjustment.amount,
                   proposal.financialAdjustment.currency,
@@ -330,8 +330,8 @@ function SidePreview({
       className={`min-w-0 rounded-xl border p-3 ${accent === 'blue' ? 'border-secondary-100 bg-secondary-100/30' : 'border-primary-100 bg-primary-100/30'}`}
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h3 className="text-sm font-bold text-primary-900">{title}</h3>
-        <span className="text-xs text-neutral-700">
+        <h3 className="text-sm font-bold text-brand-primary">{title}</h3>
+        <span className="text-xs text-text-secondary">
           {total} {total === 1 ? 'exemplar' : 'exemplares'}
         </span>
       </div>
@@ -339,10 +339,10 @@ function SidePreview({
         {items.slice(0, 2).map((item, index) => (
           <li
             key={`${item.cardId}-${index}`}
-            className="flex min-w-0 items-center gap-2 text-xs text-neutral-900"
+            className="flex min-w-0 items-center gap-2 text-xs text-text-primary"
           >
             <MiniCardArt item={item} />
-            <span className="shrink-0 font-semibold text-primary-900">
+            <span className="shrink-0 font-semibold text-brand-primary">
               {item.quantity}×
             </span>
             <span className="min-w-0 truncate" title={item.name}>
@@ -352,7 +352,7 @@ function SidePreview({
         ))}
       </ul>
       {items.length > 2 && (
-        <p className="mt-1 text-xs text-neutral-500">
+        <p className="mt-1 text-xs text-text-secondary">
           +{items.length - 2}{' '}
           {items.length - 2 === 1 ? 'outra carta' : 'outras cartas'}
         </p>
@@ -378,7 +378,7 @@ function MiniCardArt({ item }: { item: TradeProposalCardItem }) {
     <span
       role="img"
       aria-label={`Imagem indisponível de ${item.name}`}
-      className="grid h-11 w-8 shrink-0 place-items-center rounded-sm bg-white text-neutral-500"
+      className="grid h-11 w-8 shrink-0 place-items-center rounded-sm bg-surface-input text-text-secondary"
     >
       <Icon name="gem" size={16} />
     </span>
@@ -399,18 +399,18 @@ function ProposalsEmpty({
     >
       <span
         aria-hidden="true"
-        className="mb-4 rounded-full bg-primary-100 p-5 text-primary-900"
+        className="mb-4 rounded-full bg-primary-100 p-5 text-brand-primary"
       >
         <Icon name="sparkle" size={32} />
       </span>
-      <h2 className="font-display text-xl font-bold text-primary-900">
+      <h2 className="font-display text-lg font-bold text-text-ink">
         {search.status
           ? 'Nenhuma proposta com este status'
           : search.direction === 'RECEIVED'
             ? 'Você ainda não recebeu propostas'
             : 'Você ainda não enviou propostas'}
       </h2>
-      <p className="mt-2 max-w-md text-sm text-neutral-700">
+      <p className="mt-2 max-w-md text-sm text-text-secondary">
         {search.status
           ? 'Experimente mostrar todos os status para consultar suas negociações.'
           : search.direction === 'RECEIVED'
@@ -426,7 +426,7 @@ function ProposalsEmpty({
           <Link
             to="/marketplace"
             search={{ sort: 'recent' }}
-            className="inline-flex min-h-11 items-center rounded-control bg-primary-900 button-vignette px-5 py-2 text-sm font-semibold text-white hover:bg-primary-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500"
+            className="inline-flex min-h-11 items-center rounded-control bg-brand-primary button-vignette px-5 py-2 text-sm font-semibold text-white hover:bg-primary-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-support-blue"
           >
             Explorar anúncios
           </Link>
@@ -447,9 +447,9 @@ function ProposalPager({
   const last = first + data.content.length - 1
   return (
     <div
-      className="mt-5 flex flex-wrap items-center justify-between gap-4 border-t border-neutral-200 pt-4"
+      className="mt-5 flex flex-wrap items-center justify-between gap-4 border-t border-border-default pt-4"
     >
-      <p className="text-sm text-neutral-700">
+      <p className="text-sm text-text-secondary">
         Exibindo {first}–{last} de {data.totalElements}
       </p>
       <PageNavigation label="Paginação de propostas" page={data.number + 1} totalPages={data.totalPages} onPageChange={(page) => onPage(page - 1)} />
@@ -465,7 +465,7 @@ function ProposalsSkeleton() {
         {Array.from({ length: 3 }, (_, index) => (
           <div
             key={index}
-            className="space-y-3 rounded-xl border border-neutral-200 p-4"
+            className="space-y-3 rounded-xl border border-border-default p-4"
           >
             <div className="h-5 w-32 rounded bg-primary-100" />
             <div className="h-4 w-64 max-w-full rounded bg-neutral-200" />

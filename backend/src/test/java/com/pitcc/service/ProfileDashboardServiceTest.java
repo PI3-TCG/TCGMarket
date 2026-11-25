@@ -27,12 +27,14 @@ class ProfileDashboardServiceTest {
   @Mock AvatarStorage avatars;
   @InjectMocks ProfileDashboardService service;
 
+  private static final CollectionFilters FILTERS = new CollectionFilters("Pikachu", CardGame.POKEMON, "Base", "Rare", null, null);
+
   User user() {
     User user = new User(); user.setId("owner"); user.setUsername("collector"); return user;
   }
   @Test void oldAccountsArePrivateAndCannotLeakCards() {
     when(users.findByUsername("collector")).thenReturn(Optional.of(user()));
-    var exception = assertThrows(ResponseStatusException.class, () -> service.publicCollection("Collector", 0, 20));
+    var exception = assertThrows(ResponseStatusException.class, () -> service.publicCollection("Collector", 0, 20, FILTERS));
     assertEquals(404, exception.getStatusCode().value());
     verifyNoInteractions(collection, mongo);
   }
@@ -40,12 +42,20 @@ class ProfileDashboardServiceTest {
     User user = user(); user.setCollectionPublic(true);
     when(users.findByUsername("collector")).thenReturn(Optional.of(user));
     var card = new CollectionCardResponse("catalog-card", "Pikachu", CardGame.POKEMON, "Base", "1", "Rare", "image");
-    when(collection.findOwnCollection("owner", 0, 20)).thenReturn(new PageImpl<>(List.of(
+    when(collection.findOwnCollection("owner", 0, 20, FILTERS)).thenReturn(new PageImpl<>(List.of(
         new CollectionItemResponse("private-item", 3, CardCondition.NEAR_MINT, CardLanguage.ENGLISH, card, null))));
-    var result = service.publicCollection("collector", 0, 20).getContent().getFirst();
+    var result = service.publicCollection("collector", 0, 20, FILTERS).getContent().getFirst();
     assertEquals(card, result.card()); assertEquals(3, result.quantity());
     assertEquals(List.of("card", "quantity"), Arrays.stream(result.getClass().getRecordComponents()).map(c -> c.getName()).toList());
   }
+  @Test void privateCollectionFilterOptionsAreHidden() {
+    when(users.findByUsername("collector")).thenReturn(Optional.of(user()));
+    var exception = assertThrows(ResponseStatusException.class,
+        () -> service.publicCollectionFilterOptions("collector"));
+    assertEquals(404, exception.getStatusCode().value());
+    verifyNoInteractions(collection);
+  }
+
   @Test void publicSummaryHidesGamesWhenCollectionIsPrivate() {
     when(users.findByUsername("collector")).thenReturn(Optional.of(user()));
 

@@ -30,7 +30,7 @@ import type {
 } from '@/types/TradeProposal'
 import { TradeCollectionPicker } from './TradeCollectionPicker'
 
-type Step = 'compose' | 'picker' | 'review' | 'confirm' | 'discard' | 'success'
+type Step = 'compose' | 'picker' | 'review' | 'discard' | 'success'
 type OfferedItem = { item: CollectionItem; quantity: number }
 type SendError = { kind: 'rejected' | 'unknown'; message: string }
 
@@ -325,7 +325,6 @@ export function TradeProposalFlow({
     compose: 'Montar proposta de troca',
     picker: 'Escolher cartas da coleção',
     review: 'Revisar proposta',
-    confirm: 'Confirmar envio da proposta',
     discard: 'Descartar proposta?',
     success: 'Proposta enviada!',
   }
@@ -333,9 +332,7 @@ export function TradeProposalFlow({
   const subtitles: Record<Step, string> = {
     compose: 'Escolha as cartas que vai oferecer e ajuste as quantidades.',
     picker: 'Selecione quantas cartas diferentes quiser oferecer.',
-    review: 'Confira todos os itens antes de confirmar.',
-    confirm:
-      'O envio cria uma proposta pendente; nenhuma carta será transferida.',
+    review: 'Confira os termos antes de enviar a proposta.',
     discard: 'As alterações não enviadas serão perdidas.',
     success: 'Sua proposta está aguardando a resposta da outra pessoa.',
   }
@@ -375,6 +372,7 @@ export function TradeProposalFlow({
           <button
             type="button"
             className={modalSecondaryButton}
+            disabled={busy || sendError?.kind === 'unknown'}
             onClick={() => setStep('compose')}
           >
             Editar proposta
@@ -382,30 +380,10 @@ export function TradeProposalFlow({
           <button
             type="button"
             className={modalPrimaryButton}
-            onClick={() => setStep('confirm')}
-            disabled={!canReview}
-          >
-            Continuar
-          </button>
-        </>
-      ) : null}
-      {step === 'confirm' ? (
-        <>
-          <button
-            type="button"
-            className={modalSecondaryButton}
-            onClick={() => setStep('review')}
-            disabled={busy || sendError?.kind === 'unknown'}
-          >
-            Voltar
-          </button>
-          <button
-            type="button"
-            className={modalPrimaryButton}
             onClick={submit}
             disabled={busy || !canReview || sendError?.kind === 'unknown'}
           >
-            {busy ? 'Enviando...' : 'Confirmar e enviar'}
+            {busy ? 'Enviando...' : 'Enviar proposta'}
           </button>
         </>
       ) : null}
@@ -449,7 +427,7 @@ export function TradeProposalFlow({
       size={
         step === 'discard'
           ? 'sm'
-          : step === 'confirm' || step === 'success'
+          : step === 'success'
             ? 'md'
             : 'lg'
       }
@@ -683,7 +661,7 @@ export function TradeProposalFlow({
           />
         ) : null}
 
-        {step === 'review' || step === 'confirm' ? (
+        {step === 'review' ? (
           <>
             <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2">
               <section className={surface}>
@@ -751,16 +729,10 @@ export function TradeProposalFlow({
                 Proposta apenas com troca de cartas, sem complemento financeiro.
               </Alert>
             )}
-            {step === 'confirm' ? (
-              <Alert
-                variant="warning"
-                title="Envio de proposta, não conclusão de troca"
-              >
-                A outra pessoa ainda precisará avaliar sua oferta. Nenhuma carta
-                será transferida, reservada ou bloqueada ao enviar.
-              </Alert>
-            ) : null}
-            {sendError && step === 'confirm' ? (
+            <p className="text-sm text-text-secondary">
+              A troca só será realizada após o aceite da outra pessoa.
+            </p>
+            {sendError ? (
               <Alert
                 variant={sendError.kind === 'unknown' ? 'warning' : 'error'}
                 title={

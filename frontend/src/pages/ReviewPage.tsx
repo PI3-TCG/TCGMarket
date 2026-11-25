@@ -1,3 +1,5 @@
+import { CheckoutSteps } from '@/components/checkout/CheckoutSteps'
+import { checkoutContainer, checkoutPanel, checkoutColumns, checkoutLink, checkoutSummary } from '@/components/checkout/checkoutStyles'
 import { pageBanners } from '@/config/pageBanners'
 import { useCart } from '@/cart'
 import { copies, formatCurrency } from '@/components/ads/adFormat'
@@ -16,9 +18,6 @@ import type { Cart, CartItem, CheckoutValidation } from '@/types/Cart'
 import { Link, useNavigate } from '@tanstack/react-router'
 import { useEffect, useId, useRef, useState } from 'react'
 
-const panelClass = 'rounded-xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-6'
-const linkClass =
-  'font-semibold text-secondary-700 underline underline-offset-2 hover:text-primary-900'
 
 type LoadState =
   | { status: 'loading' }
@@ -43,21 +42,24 @@ export function ReviewPage() {
   const userId = user?.id ?? null
 
   return (
-    <main className="min-h-screen pb-12 text-neutral-900">
-      <div className="mx-auto w-full max-w-[1400px] px-4 pt-4 sm:px-6 xl:px-[38px]">
+    <main className="min-h-screen pb-12 text-text-primary">
+      <div className={checkoutContainer}>
         <PageBanner
           image={pageBanners.checkout}
           title="Revisão"
           subtitle="Confira os itens e o endereço antes de confirmar."
         />
 
-        {cartState.status === 'error' ? (
-          <LoadError title="Não foi possível carregar seu carrinho" onRetry={reloadCart} />
-        ) : null}
-        {cartState.status === 'ready' && userId ? (
-          <ReviewContent cart={cartState.cart} userId={userId} />
-        ) : null}
-        {cartState.status === 'idle' || cartState.status === 'loading' ? <ReviewSkeleton /> : null}
+        <div className="mt-10">
+          <CheckoutSteps current={2} />
+          {cartState.status === 'error' ? (
+            <LoadError title="Não foi possível carregar seu carrinho" onRetry={reloadCart} />
+          ) : null}
+          {cartState.status === 'ready' && userId ? (
+            <ReviewContent cart={cartState.cart} userId={userId} />
+          ) : null}
+          {cartState.status === 'idle' || cartState.status === 'loading' ? <ReviewSkeleton /> : null}
+        </div>
       </div>
     </main>
   )
@@ -150,18 +152,15 @@ function ReviewContent({ cart, userId }: { cart: Cart; userId: string }) {
   }
 
   return (
-    <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)]">
-      <h2
-        id="review-title"
-        className="font-display text-3xl font-bold text-primary-900 lg:col-span-2"
-      >
-        Revisão do pedido
-      </h2>
+    <div className={checkoutColumns}>
       <section aria-labelledby="review-title" className="min-w-0 space-y-4">
+        <h2 id="review-title" className="font-title text-2xl font-bold text-text-ink">
+          Revisão do pedido
+        </h2>
         {items.length === 0 ? (
           <Alert variant="warning" title="Nenhum anúncio selecionado">
             Volte ao{' '}
-            <Link to="/carrinho" className={linkClass}>
+            <Link to="/carrinho" className={checkoutLink}>
               carrinho
             </Link>{' '}
             e selecione os anúncios que deseja comprar.
@@ -183,7 +182,7 @@ function ReviewContent({ cart, userId }: { cart: Cart; userId: string }) {
         ))}
 
         {groups.length > 1 ? (
-          <p className="flex items-center gap-2 border-t border-neutral-200 pt-4 text-sm text-neutral-700">
+          <p className="flex items-center gap-2 border-t border-border-default pt-4 text-sm text-text-secondary">
             <Icon name="info" size={20} />
             Anúncios de vendedores diferentes geram um pedido para cada vendedor.
           </p>
@@ -210,7 +209,7 @@ function ReviewIssues({ lines }: { lines: string[] }) {
         ))}
       </ul>
       Revise-os no{' '}
-      <Link to="/carrinho" className={linkClass}>
+      <Link to="/carrinho" className={checkoutLink}>
         carrinho
       </Link>{' '}
       antes de continuar.
@@ -220,7 +219,7 @@ function ReviewIssues({ lines }: { lines: string[] }) {
 
 function AddressPanel({ address }: { address: Address | null }) {
   return (
-    <div className={panelClass}>
+    <div className={checkoutPanel}>
       <div className="flex flex-wrap items-start justify-between gap-3 wrap-anywhere">
         <div className="flex items-start gap-3">
           <span className="mt-0.5 text-secondary-700">
@@ -228,16 +227,16 @@ function AddressPanel({ address }: { address: Address | null }) {
           </span>
           {address ? (
             <div>
-              <p className="font-display text-lg font-bold text-primary-900">{addressTitle(address)}</p>
-              <p className="text-sm text-neutral-700">{address.recipientName}</p>
-              <p className="text-sm text-neutral-700">{streetLine(address)}</p>
-              <p className="text-sm text-neutral-700">{cityLine(address)}</p>
+              <p className="font-title text-lg font-bold text-brand-primary">{addressTitle(address)}</p>
+              <p className="text-sm text-text-secondary">{address.recipientName}</p>
+              <p className="text-sm text-text-secondary">{streetLine(address)}</p>
+              <p className="text-sm text-text-secondary">{cityLine(address)}</p>
             </div>
           ) : (
-            <p className="text-neutral-700">Nenhum endereço selecionado.</p>
+            <p className="text-text-secondary">Nenhum endereço selecionado.</p>
           )}
         </div>
-        <Link to="/carrinho/entrega" className={`${linkClass} shrink-0 text-sm`}>
+        <Link to="/carrinho/entrega" className={`${checkoutLink} shrink-0 text-sm`}>
           {address ? 'Alterar' : 'Selecionar'}
         </Link>
       </div>
@@ -256,35 +255,35 @@ function SellerGroup({ items, sellerUsername, index, count }: SellerGroupProps) 
   const subtotal = items.reduce((sum, item) => sum + itemSubtotal(item), 0)
 
   return (
-    <div className={panelClass}>
+    <div className={checkoutPanel}>
       <div className="flex flex-wrap items-baseline justify-between gap-3 wrap-anywhere">
         <div>
-          <h3 className="font-display text-xl font-bold text-primary-900">
+          <h3 className="font-title text-xl font-bold text-text-ink">
             {sellerUsername ? `Vendedor @${sellerUsername}` : 'Vendedor'}
           </h3>
           {count > 1 ? (
-            <p className="text-sm text-neutral-700">
+            <p className="text-sm text-text-secondary">
               Pedido {index + 1} de {count}
             </p>
           ) : null}
         </div>
-        <span className="font-display font-bold text-primary-900">{formatCurrency(subtotal)}</span>
+        <span className="wrap-anywhere font-semibold text-text-price">{formatCurrency(subtotal)}</span>
       </div>
       <ul className="mt-4 space-y-3">
         {items.map((item) => (
-          <li key={item.adId} className="flex items-center gap-3">
+          <li key={item.adId} className="flex min-w-0 flex-wrap items-center gap-3">
             {item.imageUrl ? (
               <img src={item.imageUrl} alt="" className="h-16 w-12 shrink-0 rounded object-cover" />
             ) : (
-              <span className="h-16 w-12 shrink-0 rounded bg-neutral-100" />
+              <span className="h-16 w-12 shrink-0 rounded bg-surface-subtle" />
             )}
             <div className="min-w-0 flex-1">
-              <p className="truncate font-display font-bold text-secondary-700">{itemName(item)}</p>
-              <p className="text-xs text-neutral-700">
+              <p className="wrap-anywhere font-semibold text-text-ink">{itemName(item)}</p>
+              <p className="text-xs text-text-secondary">
                 {item.quantity} × {formatCurrency(itemUnitPrice(item))}
               </p>
             </div>
-            <p className="font-display font-bold text-primary-900">
+            <p className="wrap-anywhere font-semibold text-text-price">
               {formatCurrency(itemSubtotal(item))}
             </p>
           </li>
@@ -311,30 +310,30 @@ function ReviewSummary({ items, orderCount, blocked, submit, onConfirm }: Review
   return (
     <aside
       aria-labelledby={`${id}-title`}
-      className="rounded-xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-6 self-start"
+      className={checkoutSummary}
     >
-      <h2 id={`${id}-title`} className="font-display text-2xl font-bold text-primary-900">
+      <h2 id={`${id}-title`} className="font-title text-2xl font-bold text-text-ink">
         Resumo
       </h2>
 
-      <dl className="mt-4 divide-y divide-neutral-100 text-sm">
-        <div className="flex justify-between gap-4 py-2.5">
-          <dt className="text-neutral-700">Anúncios</dt>
+      <dl className="mt-4 divide-y divide-border-default text-sm">
+        <div className="flex flex-wrap justify-between gap-x-4 gap-y-1 py-2.5">
+          <dt className="text-text-secondary">Anúncios</dt>
           <dd className="font-semibold">{adsCount(items.length)}</dd>
         </div>
-        <div className="flex justify-between gap-4 py-2.5">
-          <dt className="text-neutral-700">Exemplares</dt>
+        <div className="flex flex-wrap justify-between gap-x-4 gap-y-1 py-2.5">
+          <dt className="text-text-secondary">Exemplares</dt>
           <dd className="font-semibold">{copies(totalCopies)}</dd>
         </div>
-        <div className="flex justify-between gap-4 py-2.5">
-          <dt className="text-neutral-700">Pedidos</dt>
+        <div className="flex flex-wrap justify-between gap-x-4 gap-y-1 py-2.5">
+          <dt className="text-text-secondary">Pedidos</dt>
           <dd className="font-semibold">{orderCount}</dd>
         </div>
       </dl>
 
-      <div className="mt-3 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 wrap-anywhere border-t border-neutral-100 pt-3">
-        <span className="text-neutral-900">Total</span>
-        <span className="font-display text-2xl font-bold text-primary-900">{formatCurrency(total)}</span>
+      <div className="mt-3 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 wrap-anywhere border-t border-border-default pt-3">
+        <span className="text-text-primary">Total</span>
+        <span className="font-title text-2xl font-bold text-text-ink">{formatCurrency(total)}</span>
       </div>
 
       <div className="mt-5 space-y-3">
@@ -344,7 +343,7 @@ function ReviewSummary({ items, orderCount, blocked, submit, onConfirm }: Review
         {submit.status === 'unknown' ? (
           <Alert variant="warning" title="Resultado do pagamento não confirmado">
             A compra pode ter sido registrada. Consulte as compras concluídas no{' '}
-            <Link to="/perfil/historico" search={{ type: 'PURCHASE' }} className={linkClass}>
+            <Link to="/perfil/historico" search={{ type: 'PURCHASE' }} className={checkoutLink}>
               histórico de transações
             </Link>. Pagamentos pendentes ou recusados podem não aparecer lá.
           </Alert>
@@ -360,7 +359,7 @@ function ReviewSummary({ items, orderCount, blocked, submit, onConfirm }: Review
 
         <div className="flex justify-center">
           <Button
-            className="w-52 max-w-full whitespace-normal"
+            className="h-auto min-h-11 w-52 max-w-full whitespace-normal py-2"
             disabled={blocked || submitting || submit.status === 'unknown'}
             onClick={onConfirm}
           >
@@ -368,8 +367,8 @@ function ReviewSummary({ items, orderCount, blocked, submit, onConfirm }: Review
           </Button>
         </div>
 
-        <div className="border-t border-neutral-100 pt-3 text-center">
-          <Link to="/carrinho/entrega" className={`${linkClass} text-sm`}>
+        <div className="border-t border-border-default pt-3 text-center">
+          <Link to="/carrinho/entrega" className={`${checkoutLink} text-sm`}>
             Voltar à entrega
           </Link>
         </div>
@@ -380,12 +379,12 @@ function ReviewSummary({ items, orderCount, blocked, submit, onConfirm }: Review
 
 function LoadError({ title, onRetry }: { title: string; onRetry: () => void }) {
   return (
-    <div role="alert" className={`${panelClass} flex flex-col items-center gap-4 py-10 text-center`}>
+    <div role="alert" className={`${checkoutPanel} flex flex-col items-center gap-4 py-10 text-center`}>
       <span className="flex size-16 items-center justify-center rounded-full bg-error-50 text-error-700">
         <Icon name="alert" size={32} />
       </span>
-      <h3 className="font-display text-2xl font-bold text-primary-900">{title}</h3>
-      <p className="text-neutral-700">Tente novamente em instantes.</p>
+      <h3 className="font-title text-2xl font-bold text-text-ink">{title}</h3>
+      <p className="text-text-secondary">Tente novamente em instantes.</p>
       <Button onClick={onRetry}>
         Tentar novamente
       </Button>
@@ -398,18 +397,18 @@ function ReviewSkeleton() {
     <div
       aria-busy="true"
       aria-live="polite"
-      className="grid grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)]"
+      className={checkoutColumns}
     >
       <span className="sr-only">Carregando revisão...</span>
       <div className="space-y-4">
-        <span className="block h-9 w-72 max-w-full animate-pulse rounded bg-neutral-200" />
-        <span className={`${panelClass} block h-28 animate-pulse`} />
-        <span className={`${panelClass} block h-40 animate-pulse`} />
+        <span className="block h-9 w-72 max-w-full animate-pulse rounded bg-surface-subtle" />
+        <span className={`${checkoutPanel} block h-28 animate-pulse`} />
+        <span className={`${checkoutPanel} block h-40 animate-pulse`} />
       </div>
-      <div className={`${panelClass} space-y-3`}>
-        <span className="block h-7 w-1/2 animate-pulse rounded bg-neutral-200" />
-        <span className="block h-24 animate-pulse rounded bg-neutral-100" />
-        <span className="block h-12 animate-pulse rounded bg-neutral-200" />
+      <div className={`${checkoutPanel} space-y-3`}>
+        <span className="block h-7 w-1/2 animate-pulse rounded bg-surface-subtle" />
+        <span className="block h-24 animate-pulse rounded bg-surface-subtle" />
+        <span className="block h-12 animate-pulse rounded bg-surface-subtle" />
       </div>
     </div>
   )

@@ -127,12 +127,24 @@ public class ProfileDashboardService {
         mongo.count(Query.query(participant(user.getId())), Transaction.class), games);
   }
 
-  public Page<PublicCollectionItem> publicCollection(String username, int page, int size) {
-    User user = publicUser(username);
-    if (!user.isCollectionPublic()) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Coleção privada.");
+  public Page<PublicCollectionItem> publicCollection(String username, int page, int size,
+      CollectionFilters filters) {
+    User user = userWithPublicCollection(username);
     // O DTO público omite IDs dos itens, condição, idioma e disponibilidade para anúncios.
-    return collection.findOwnCollection(user.getId(), page, size)
+    return collection.findOwnCollection(user.getId(), page, size, filters)
         .map(item -> new PublicCollectionItem(item.card(), item.quantity()));
+  }
+
+  public CollectionFilterOptionsResponse publicCollectionFilterOptions(String username) {
+    return collection.findOwnFilterOptions(userWithPublicCollection(username).getId());
+  }
+
+  private User userWithPublicCollection(String username) {
+    User user = publicUser(username);
+    if (!user.isCollectionPublic()) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Coleção privada.");
+    }
+    return user;
   }
 
   public Dashboard dashboard(String id) {
