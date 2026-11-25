@@ -1,4 +1,4 @@
-import { focusRing, lightAction } from '@/components/ui/styles'
+import { focusRing } from '@/components/ui/styles'
 import {
   conditionLabels,
   copies,
@@ -29,7 +29,7 @@ const BUY_LOGIN_NOTICE =
   'Entre na sua conta para comprar cartas no Marketplace.'
 
 const panelClass =
-  'min-w-0 rounded-xl border border-neutral-200 bg-white p-4 shadow-sm sm:p-5'
+  'min-w-0 rounded-card border border-border-default bg-transparent p-4 shadow-sm sm:p-5'
 
 const adGridClass =
   'grid grid-cols-1 items-start gap-4 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:gap-6'
@@ -37,11 +37,11 @@ const adGridClass =
 const adImageClass =
   'aspect-[63/88] w-full max-w-[220px] overflow-hidden rounded-surface md:max-w-[280px] lg:max-w-[320px]'
 
-const actionButtonClass = 'min-h-11 w-52 max-w-full whitespace-normal'
+const actionButtonClass = 'h-auto min-h-11 w-52 max-w-full whitespace-normal text-center py-2.5'
 const actionGroupClass = 'flex flex-wrap items-center gap-3'
 
 const backLinkClass =
-  'inline-flex items-center gap-2 text-sm font-semibold text-secondary-700 underline underline-offset-2 hover:text-primary-900'
+  `${focusRing} inline-flex min-h-11 items-center gap-2 rounded-control text-sm font-semibold text-brand-primary underline underline-offset-2 hover:text-brand-primary-hover`
 
 export function MarketplaceAdPage() {
   const { id } = useParams({ from: '/site-layout/marketplace/anuncios/$id' })
@@ -410,7 +410,7 @@ function QuantitySelector({
             Quantidade
           </label>
           <div
-            className={`flex h-10 w-40 overflow-hidden rounded-control border bg-white focus-within:ring-2 focus-within:ring-secondary-500 ${
+            className={`flex h-11 w-40 max-w-full overflow-hidden rounded-control border bg-surface-input focus-within:ring-2 focus-within:ring-support-blue ${
               valid ? 'border-neutral-300' : 'border-error-700'
             }`}
           >
@@ -419,7 +419,7 @@ function QuantitySelector({
               aria-label="Diminuir quantidade"
               disabled={!(parsed > 1)}
               onClick={() => changeQuantity(parsed - 1)}
-              className="flex w-10 shrink-0 cursor-pointer items-center justify-center border-r border-neutral-200 text-primary-900 hover:bg-primary-100 disabled:cursor-not-allowed disabled:opacity-40"
+              className="flex w-10 shrink-0 cursor-pointer items-center justify-center border-r border-border-default bg-surface-sand text-brand-primary hover:bg-surface-subtle disabled:cursor-not-allowed disabled:opacity-40"
             >
               <Icon name="minus" size={16} />
             </button>
@@ -440,7 +440,7 @@ function QuantitySelector({
               onClick={() =>
                 changeQuantity(Number.isSafeInteger(parsed) ? parsed + 1 : 1)
               }
-              className="flex w-10 shrink-0 cursor-pointer items-center justify-center border-l border-neutral-200 text-primary-900 hover:bg-primary-100 disabled:cursor-not-allowed disabled:opacity-40"
+              className="flex w-10 shrink-0 cursor-pointer items-center justify-center border-l border-border-default bg-surface-sand text-brand-primary hover:bg-surface-subtle disabled:cursor-not-allowed disabled:opacity-40"
             >
               <Icon name="plus" size={16} />
             </button>
@@ -578,25 +578,14 @@ function TradeEntry({ ad }: { ad: MarketplaceAd }) {
 
   return (
     <>
-      {user ? (
-        <button
-          type="button"
-          className={`${lightAction} ${focusRing} inline-flex min-h-11 w-52 max-w-full cursor-pointer items-center justify-center gap-2`}
-          onClick={openTrade}
-        >
-          <Icon name="share" size={20} />
-          Propor troca
-        </button>
-      ) : (
-        <Button
-          variant="secondary"
-          className={actionButtonClass}
-          icon={<Icon name="share" size={20} />}
-          onClick={openTrade}
-        >
-          Entrar para propor troca
-        </Button>
-      )}
+      <Button
+        variant={user ? 'primary' : 'secondary'}
+        className={actionButtonClass}
+        icon={<Icon name="share" size={20} />}
+        onClick={openTrade}
+      >
+        {user ? 'Propor troca' : 'Entrar para propor troca'}
+      </Button>
       <TradeProposalFlow ad={ad} open={open} onClose={() => setOpen(false)} />
     </>
   )

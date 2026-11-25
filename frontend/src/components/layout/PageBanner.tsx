@@ -66,8 +66,8 @@ export function BannerFrame({
         style={{
           background:
             variant === 'hero'
-              ? 'linear-gradient(90deg, rgb(49 11 67 / 0.93) 0%, rgb(49 11 67 / 0.80) 60%, rgb(49 11 67 / 0.55) 100%)'
-              : 'rgb(49 11 67 / 0.90)',
+              ? 'linear-gradient(90deg, rgb(49 11 67 / 0.82) 0%, rgb(49 11 67 / 0.64) 60%, rgb(49 11 67 / 0.40) 100%)'
+              : 'linear-gradient(90deg, rgb(49 11 67 / 0.84), rgb(49 11 67 / 0.48))',
         }}
       />
       <div
@@ -76,8 +76,8 @@ export function BannerFrame({
         style={{
           background:
             variant === 'hero'
-              ? 'linear-gradient(90deg, color-mix(in srgb, var(--color-brand-deep) 95%, transparent) 0%, color-mix(in srgb, var(--color-brand-deep) 89%, transparent) 28%, color-mix(in srgb, var(--color-brand-deep) 73%, transparent) 43%, color-mix(in srgb, var(--color-brand-deep) 32%, transparent) 63%, color-mix(in srgb, var(--color-brand-deep) 7%, transparent) 85%, transparent 100%)'
-              : 'linear-gradient(90deg, color-mix(in srgb, var(--color-brand-deep) 96%, transparent) 0%, color-mix(in srgb, var(--color-brand-deep) 84%, transparent) 50%, color-mix(in srgb, var(--color-brand-deep) 23%, transparent) 100%)',
+              ? 'linear-gradient(90deg, color-mix(in srgb, var(--color-brand-deep) 88%, transparent) 0%, color-mix(in srgb, var(--color-brand-deep) 75%, transparent) 28%, color-mix(in srgb, var(--color-brand-deep) 54%, transparent) 43%, color-mix(in srgb, var(--color-brand-deep) 21%, transparent) 63%, color-mix(in srgb, var(--color-brand-deep) 0%, transparent) 85%, transparent 100%)'
+              : 'linear-gradient(90deg, color-mix(in srgb, var(--color-brand-deep) 88%, transparent) 0%, color-mix(in srgb, var(--color-brand-deep) 55%, transparent) 50%, color-mix(in srgb, var(--color-brand-deep) 4%, transparent) 100%)',
         }}
       />
       {children}

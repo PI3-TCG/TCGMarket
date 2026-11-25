@@ -1,3 +1,5 @@
+import { CheckoutSteps } from '@/components/checkout/CheckoutSteps'
+import { checkoutContainer, checkoutPanel, checkoutColumns } from '@/components/checkout/checkoutStyles'
 import { cardSurface } from '@/components/ui/Card'
 import { pageBanners } from '@/config/pageBanners'
 import { useCart } from '@/cart'
@@ -21,8 +23,6 @@ import type { Cart, CartItem } from '@/types/Cart'
 import { Link, useNavigate } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 
-const panelClass =
-  `${cardSurface} p-5 sm:p-6`
 
 const UNKNOWN_RESULT =
   'Não foi possível confirmar a alteração. Mostramos o estado atual do seu carrinho.'
@@ -33,15 +33,16 @@ export function CartPage() {
   const { state, reload } = useCart()
 
   return (
-    <main className="min-h-screen pb-12 text-neutral-900">
-      <div className="mx-auto w-full max-w-[1400px] px-4 pt-4 sm:px-6 xl:px-[38px]">
+    <main className="min-h-screen pb-12 text-text-primary">
+      <div className={checkoutContainer}>
         <PageBanner
           image={pageBanners.checkout}
           title="Meu carrinho"
           subtitle="Revise os itens antes de continuar."
         />
 
-        <div className="pt-5">
+        <div className="mt-10">
+          <CheckoutSteps current={0} />
           {state.status === 'idle' || state.status === 'loading' ? (
             <CartSkeleton />
           ) : null}
@@ -229,11 +230,11 @@ function CartContent({ cart }: { cart: Cart }) {
       {cart.items.length === 0 ? (
         <EmptyCart />
       ) : (
-        <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)]">
+        <div className={checkoutColumns}>
           <section aria-labelledby="cart-title" className={`${cardSurface} min-w-0 space-y-3 p-4`}>
             <h2
               id="cart-title"
-              className="font-display text-2xl font-bold text-primary-900"
+              className="font-title text-2xl font-bold text-text-ink"
             >
               {adsCount(cart.items.length)} • {copies(totalCopies)}
             </h2>
@@ -260,7 +261,7 @@ function CartContent({ cart }: { cart: Cart }) {
                 disabled={eligible.length === 0 || selectingAll}
                 onChange={toggleAll}
               />
-              <span className="text-sm text-neutral-700">
+              <span className="text-sm text-text-secondary">
                 {selectedCount} de {eligible.length}{' '}
                 {eligible.length === 1 ? 'selecionado' : 'selecionados'}
               </span>
@@ -294,15 +295,15 @@ function EmptyCart() {
 
   return (
     <section
-      className={`${panelClass} flex flex-col items-center gap-4 py-14 text-center`}
+      className={`${checkoutPanel} flex flex-col items-center gap-4 py-14 text-center`}
     >
-      <span className="flex size-20 items-center justify-center rounded-full bg-primary-100 text-primary-900">
+      <span className="flex size-20 items-center justify-center rounded-full bg-surface-sand text-brand-primary">
         <Icon name="cart" size={32} />
       </span>
-      <h2 className="font-display text-3xl font-bold text-primary-900">
+      <h2 className="font-title text-3xl font-bold text-text-ink">
         Seu carrinho está vazio
       </h2>
-      <p className="text-neutral-700">
+      <p className="text-text-secondary">
         Explore os anúncios e encontre sua próxima carta.
       </p>
       <Button
@@ -320,22 +321,22 @@ function CartLoadError({ onRetry }: { onRetry: () => void }) {
   return (
     <section
       role="alert"
-      className={`${panelClass} mx-auto flex max-w-2xl flex-col items-center gap-4 py-12 text-center`}
+      className={`${checkoutPanel} mx-auto flex max-w-2xl flex-col items-center gap-4 py-12 text-center`}
     >
       <span className="flex size-20 items-center justify-center rounded-full bg-error-50 text-error-700">
         <Icon name="alert" size={32} />
       </span>
-      <h2 className="font-display text-3xl font-bold text-primary-900">
+      <h2 className="font-title text-3xl font-bold text-text-ink">
         Não foi possível carregar seu carrinho
       </h2>
-      <p className="text-neutral-700">Tente novamente para visualizar seus itens.</p>
+      <p className="text-text-secondary">Tente novamente para visualizar seus itens.</p>
       <Button onClick={onRetry}>
         Tentar novamente
       </Button>
       <Link
         to="/marketplace"
         search={{ sort: 'recent' }}
-        className="text-sm font-semibold text-secondary-700 underline underline-offset-2 hover:text-primary-900"
+        className="text-sm font-semibold text-secondary-700 underline underline-offset-2 hover:text-brand-primary"
       >
         Voltar ao Marketplace
       </Link>
@@ -358,27 +359,27 @@ function CartSkeleton() {
     <div
       aria-busy="true"
       aria-live="polite"
-      className="grid grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)]"
+      className={checkoutColumns}
     >
       <span className="sr-only">Carregando carrinho...</span>
       <div className="space-y-3">
-        <span className="block h-8 w-64 animate-pulse rounded bg-neutral-200" />
-        <span className="block h-12 animate-pulse rounded-xl bg-white" />
+        <span className="block h-8 w-64 animate-pulse rounded bg-surface-subtle" />
+        <span className="block h-12 animate-pulse rounded-xl bg-surface-input" />
         {[0, 1, 2].map((key) => (
-          <div key={key} className={`${panelClass} flex gap-4`}>
-            <span className="h-24 w-[68px] animate-pulse rounded-md bg-neutral-200" />
+          <div key={key} className={`${checkoutPanel} flex gap-4`}>
+            <span className="h-24 w-[68px] animate-pulse rounded-md bg-surface-subtle" />
             <div className="flex-1 space-y-2">
-              <span className="block h-5 w-1/2 animate-pulse rounded bg-neutral-200" />
-              <span className="block h-4 w-1/3 animate-pulse rounded bg-neutral-100" />
-              <span className="block h-4 w-1/4 animate-pulse rounded bg-neutral-100" />
+              <span className="block h-5 w-1/2 animate-pulse rounded bg-surface-subtle" />
+              <span className="block h-4 w-1/3 animate-pulse rounded bg-surface-subtle" />
+              <span className="block h-4 w-1/4 animate-pulse rounded bg-surface-subtle" />
             </div>
           </div>
         ))}
       </div>
-      <div className={`${panelClass} space-y-3`}>
-        <span className="block h-7 w-1/2 animate-pulse rounded bg-neutral-200" />
-        <span className="block h-24 animate-pulse rounded bg-neutral-100" />
-        <span className="block h-12 animate-pulse rounded bg-neutral-200" />
+      <div className={`${checkoutPanel} space-y-3`}>
+        <span className="block h-7 w-1/2 animate-pulse rounded bg-surface-subtle" />
+        <span className="block h-24 animate-pulse rounded bg-surface-subtle" />
+        <span className="block h-12 animate-pulse rounded bg-surface-subtle" />
       </div>
     </div>
   )

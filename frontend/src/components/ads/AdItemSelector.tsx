@@ -1,3 +1,5 @@
+import { cardConditionBadge, tradingCardGrid, tradingCardLanguage, tradingCardSurface } from '@/components/ui/tradingCardStyles'
+import { checkoutPanel } from '@/components/checkout/checkoutStyles'
 import { Pagination as PageNavigation } from '@/components/ui/Pagination'
 import { useEffect, useId, useState, type ReactNode } from 'react'
 import { Link } from '@tanstack/react-router'
@@ -100,15 +102,15 @@ export function AdItemSelector({ onSelect, onBackToForm }: Props) {
   return (
     <section
       aria-labelledby="ad-selector-title"
-      className="panel-ornaments rounded-xl border border-rare-500 bg-white p-4 shadow-sm sm:p-6"
+      className={checkoutPanel}
     >
       <h2
         id="ad-selector-title"
-        className="font-display text-xl font-bold text-primary-900 sm:text-2xl"
+        className="font-title text-xl font-bold text-brand-primary sm:text-2xl"
       >
         Selecione uma carta da sua coleção
       </h2>
-      <p className="mt-1 text-sm text-primary-700">
+      <p className="mt-1 text-sm text-text-secondary">
         Escolha o item que deseja anunciar.
       </p>
 
@@ -123,7 +125,7 @@ export function AdItemSelector({ onSelect, onBackToForm }: Props) {
         <div>
           <label
             htmlFor={gameSelectId}
-            className="mb-1.5 block text-xs font-semibold text-primary-900"
+            className="mb-1.5 block text-xs font-semibold text-brand-primary"
           >
             TCG
           </label>
@@ -134,7 +136,7 @@ export function AdItemSelector({ onSelect, onBackToForm }: Props) {
               setGame(event.target.value)
               setPage(0)
             }}
-            className="h-10 w-full rounded-control border border-neutral-300 bg-white px-3 text-sm text-neutral-900 outline-none hover:border-primary-900 focus:border-primary-900 focus:ring-2 focus:ring-secondary-500"
+            className="h-10 w-full rounded-control border border-border-default bg-surface-input px-3 text-sm text-text-primary outline-none hover:border-brand-primary focus:border-brand-primary focus:ring-2 focus:ring-support-blue"
           >
             {GAME_OPTIONS.map((option) => (
               <option key={option.value} value={option.value}>
@@ -157,10 +159,10 @@ export function AdItemSelector({ onSelect, onBackToForm }: Props) {
         />
       </div>
 
-      <div className="mt-6 flex flex-wrap gap-2 border-t border-neutral-200 pt-4">
+      <div className="mt-6 flex flex-wrap justify-center gap-2 border-t border-border-default pt-4">
         <Link
           to="/minha-colecao"
-          className="inline-flex h-10 items-center gap-2 rounded-control border border-primary-900 px-4 text-sm font-semibold text-primary-900 hover:bg-primary-100 focus-visible:outline-2 focus-visible:outline-secondary-500"
+          className="inline-flex h-10 items-center gap-2 rounded-control border border-brand-primary px-4 text-sm font-semibold text-brand-primary hover:bg-surface-brand-tint focus-visible:outline-2 focus-visible:outline-support-blue"
         >
           Voltar à coleção
         </Link>
@@ -199,12 +201,12 @@ function SelectorBody({
         <p className="sr-only">Carregando sua coleção...</p>
         <div
           aria-hidden="true"
-          className="grid grid-cols-1 gap-3 min-[420px]:grid-cols-2 md:grid-cols-3 xl:grid-cols-5"
+          className={tradingCardGrid}
         >
           {Array.from({ length: 5 }, (_, index) => (
             <div
               key={index}
-              className="h-80 rounded-xl border border-neutral-200 bg-primary-100/50 motion-safe:animate-pulse"
+              className="h-80 rounded-xl border border-border-default bg-surface-subtle motion-safe:animate-pulse"
             />
           ))}
         </div>
@@ -248,7 +250,7 @@ function SelectorBody({
           <Link
             to="/catalogo/$game"
             params={{ game: 'pokemon' }}
-            className="inline-flex h-10 items-center rounded-control bg-primary-900 button-vignette px-4 text-sm font-semibold text-white hover:bg-primary-800 focus-visible:outline-2 focus-visible:outline-secondary-500"
+            className="inline-flex h-10 items-center rounded-control bg-primary-900 button-vignette px-4 text-sm font-semibold text-white hover:bg-primary-800 focus-visible:outline-2 focus-visible:outline-support-blue"
           >
             Explorar catálogo
           </Link>
@@ -270,13 +272,13 @@ function SelectorBody({
         </Alert>
       )}
 
-      <p className="mb-3 text-xs font-semibold text-primary-700">
+      <p className="mb-3 text-xs font-semibold text-text-secondary">
         {data.totalElements}{' '}
         {data.totalElements === 1 ? 'item na coleção' : 'itens na coleção'}
         {hasFilters ? ' com os filtros aplicados' : ''}
       </p>
 
-      <ul className="grid grid-cols-1 gap-3 min-[420px]:grid-cols-2 md:grid-cols-3 xl:grid-cols-5">
+      <ul className={tradingCardGrid}>
         {data.content.map((item) => (
           <li key={item.id}>
             <SelectableItem item={item} onSelect={onSelect} />
@@ -304,8 +306,8 @@ function SelectableItem({
   const available = item.availability.availableQuantity
 
   return (
-    <article className="flex h-full min-w-0 flex-col rounded-xl border border-neutral-200 bg-white p-3 shadow-sm">
-      <div className="flex h-44 items-center justify-center overflow-hidden rounded-lg bg-primary-100/60">
+    <article className={`${tradingCardSurface} h-full p-3`}>
+      <div className="flex h-44 items-center justify-center overflow-hidden rounded-lg bg-surface-sand/50">
         {hasImage ? (
           <img
             src={card.imageUrl}
@@ -315,42 +317,42 @@ function SelectableItem({
             className={`h-full w-full object-contain p-1 ${available === 0 ? 'opacity-60' : ''}`}
           />
         ) : (
-          <div className="flex flex-col items-center gap-2 text-xs text-primary-700">
+          <div className="flex flex-col items-center gap-2 text-xs text-text-secondary">
             <Icon name="grid" size={32} />
             Imagem indisponível
           </div>
         )}
       </div>
 
-      <h3 className="mt-2 wrap-anywhere font-display text-sm font-bold text-neutral-900">
+      <h3 className="mt-2 wrap-anywhere font-title text-sm font-bold text-text-primary">
         {card.name}
       </h3>
-      <p className="wrap-anywhere text-xs text-primary-700">
+      <p className="wrap-anywhere text-xs text-text-secondary">
         {gameLabels[card.game] ?? card.game}
         {card.edition ? ` • ${card.edition}` : ''}
       </p>
 
       <ul className="mt-2 flex flex-wrap gap-1.5 text-[11px] font-medium">
-        <li className="rounded-full bg-success-50 px-2 py-0.5 text-success-700">
+        <li className={cardConditionBadge(item.condition)}>
           {conditionLabels[item.condition]}
         </li>
-        <li className="rounded-full bg-primary-100 px-2 py-0.5 text-primary-900">
+        <li className={tradingCardLanguage}>
           {languageLabels[item.language]}
         </li>
       </ul>
 
       <div className="mt-auto pt-2 text-center">
         {available > 0 ? (
-          <p className="text-xs font-semibold text-primary-900">
+          <p className="text-xs font-semibold text-brand-primary">
             {availableCopies(available)}
           </p>
         ) : (
           <>
-            <p className="inline-flex items-center gap-1 text-xs font-semibold text-neutral-700">
+            <p className="inline-flex items-center gap-1 text-xs font-semibold text-text-secondary">
               <Icon name="close-circle" size={16} />
               Sem disponibilidade
             </p>
-            <p className="text-[11px] text-neutral-500">
+            <p className="text-[11px] text-text-secondary">
               Todos os exemplares em anúncios
             </p>
           </>
@@ -390,12 +392,12 @@ function EmptyState({
       <Icon
         name={tone === 'error' ? 'alert' : 'search'}
         size={32}
-        className={tone === 'error' ? 'text-error-700' : 'text-primary-700'}
+        className={tone === 'error' ? 'text-error-700' : 'text-text-secondary'}
       />
-      <h3 className="mt-3 font-display text-lg font-bold text-primary-900">
+      <h3 className="mt-3 font-title text-lg font-bold text-brand-primary">
         {title}
       </h3>
-      <p className="mt-1 text-sm text-neutral-700">{description}</p>
+      <p className="mt-1 text-sm text-text-secondary">{description}</p>
       <div className="mt-4">{action}</div>
     </div>
   )
