@@ -26,13 +26,11 @@ public class MercadoPagoPaymentGateway implements PaymentGateway {
     private static final Logger log = LoggerFactory.getLogger(MercadoPagoPaymentGateway.class);
 
     private final RestClient client;
-    private final String notificationUrl;
     private final String testPayerName;
 
     /** {@code client} já vem com a URL base e o cabeçalho de autorização. */
-    public MercadoPagoPaymentGateway(RestClient client, String notificationUrl, String testPayerName) {
+    public MercadoPagoPaymentGateway(RestClient client, String testPayerName) {
         this.client = client;
-        this.notificationUrl = blankToNull(notificationUrl);
         this.testPayerName = blankToNull(testPayerName);
     }
 
@@ -60,9 +58,6 @@ public class MercadoPagoPaymentGateway implements PaymentGateway {
                 "amount", amount,
                 "payment_method", Map.of("id", "pix", "type", "bank_transfer")
         ))));
-        if (notificationUrl != null) {
-            body.put("notification_url", notificationUrl);
-        }
 
         return call(() -> client.post()
                 .uri("/v1/orders")

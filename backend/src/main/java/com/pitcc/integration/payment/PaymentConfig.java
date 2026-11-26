@@ -38,7 +38,6 @@ public class PaymentConfig {
 
         return new MercadoPagoPaymentGateway(
                 mercadoPagoClient(mp).build(),
-                mp.notificationUrl(),
                 mp.testPayerName()
         );
     }
