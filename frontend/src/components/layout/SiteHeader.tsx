@@ -151,7 +151,7 @@ export function SiteHeader() {
             Marketplace
           </Link>
           <Link to="/minha-colecao" onClick={() => setOpenPanel(null)} className="tcg-nav-link" data-active={isCollection || undefined} aria-current={isCollection ? 'page' : undefined}>
-            Minha Coleção
+            Minhas Coleções
           </Link>
         </nav>
 

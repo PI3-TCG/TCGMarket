@@ -47,7 +47,7 @@ export function AccountNavigation({ onSelect, showIdentity = true }: Props) {
           <Icon name="handshake" size={20} /> Propostas
         </Link>
         <Link to="/minha-colecao" onClick={onSelect} aria-current={pathname.startsWith('/minha-colecao') ? 'page' : undefined} className="tcg-dropdown-link">
-          <Icon name="layers" size={20} /> Minha coleção
+          <Icon name="layers" size={20} /> Minhas coleções
         </Link>
         <Link to="/meus-anuncios" onClick={onSelect} aria-current={pathname.startsWith('/meus-anuncios') ? 'page' : undefined} className="tcg-dropdown-link">
           <Icon name="tag" size={20} /> Meus anúncios

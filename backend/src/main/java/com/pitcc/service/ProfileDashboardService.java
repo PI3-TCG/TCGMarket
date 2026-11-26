@@ -6,6 +6,7 @@ import com.pitcc.exception.UserNotFoundException;
 import com.pitcc.integration.r2.AvatarStorage;
 import com.pitcc.integration.r2.R2AvatarStorage;
 import com.pitcc.model.*;
+import com.pitcc.repository.CardCollectionRepository;
 import com.pitcc.repository.UserRepository;
 import java.time.Instant;
 import java.util.*;
@@ -24,12 +25,17 @@ public class ProfileDashboardService {
   private final MongoTemplate mongo;
   private final UserRepository users;
   private final CollectionService collection;
+  private final CardCollectionRepository cardCollections;
+  private final CardCollectionService cardCollectionService;
   private final AvatarStorage avatars;
 
-  public ProfileDashboardService(MongoTemplate mongo, UserRepository users, CollectionService collection, AvatarStorage avatars) {
+  public ProfileDashboardService(MongoTemplate mongo, UserRepository users, CollectionService collection,
+      CardCollectionRepository cardCollections, CardCollectionService cardCollectionService, AvatarStorage avatars) {
     this.mongo = mongo;
     this.users = users;
     this.collection = collection;
+    this.cardCollections = cardCollections;
+    this.cardCollectionService = cardCollectionService;
     this.avatars = avatars;
   }
 
@@ -120,11 +126,41 @@ public class ProfileDashboardService {
 
   public PublicSummary publicSummary(String username) {
     User user = publicUser(username);
-    List<CardGame> games = user.isCollectionPublic()
-        ? collection.summarizeOwnCollection(user.getId()).games()
-        : List.of();
+    List<CardGame> games = new ArrayList<>();
+    for (CardCollection item : cardCollections.findByUserIdAndVisibleTrueOrderByCreatedAtAsc(user.getId())) {
+      for (CardGame game : collection.summarizeOwnCollection(user.getId(), item.getId()).games()) {
+        if (!games.contains(game)) games.add(game);
+      }
+    }
     return new PublicSummary(user.isCollectionPublic(), display(user.getAvatarUrl()),
         mongo.count(Query.query(participant(user.getId())), Transaction.class), games);
+  }
+
+  public List<CardCollectionResponse> publicCollections(String username) {
+    User user = publicUser(username);
+    return cardCollectionService.listVisible(user.getId());
+  }
+
+  public Page<PublicCollectionItem> publicCollection(String username, String collectionId, int page, int size,
+      CollectionFilters filters) {
+    User user = publicUser(username);
+    visibleCollection(user, collectionId);
+    return collection.findOwnCollection(user.getId(), collectionId, page, size, filters)
+        .map(item -> new PublicCollectionItem(item.card(), item.quantity()));
+  }
+
+  public CollectionFilterOptionsResponse publicCollectionFilterOptions(String username, String collectionId) {
+    User user = publicUser(username);
+    visibleCollection(user, collectionId);
+    return collection.findOwnFilterOptions(user.getId(), collectionId);
+  }
+
+  private void visibleCollection(User user, String collectionId) {
+    CardCollection owned = cardCollections.findByIdAndUserId(collectionId, user.getId())
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Coleção privada."));
+    if (!owned.isVisible()) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Coleção privada.");
+    }
   }
 
   public Page<PublicCollectionItem> publicCollection(String username, int page, int size,

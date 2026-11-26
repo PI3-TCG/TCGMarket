@@ -42,7 +42,7 @@ export function CollectionPreviewPage() {
       <PageBanner
         image={collectionBanner}
         imagePosition="right center"
-        title="Minha Coleção"
+        title="Minhas Coleções"
         subtitle="Organize seu acervo e acompanhe sua jornada como colecionador."
       />
 

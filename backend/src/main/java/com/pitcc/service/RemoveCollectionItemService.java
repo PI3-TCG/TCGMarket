@@ -6,6 +6,7 @@ import com.pitcc.exception.CollectionItemNotFoundException;
 import com.pitcc.exception.InvalidAuthenticationException;
 
 import com.pitcc.model.AdReservationStatus;
+import com.pitcc.model.CardCollection;
 import com.pitcc.model.CollectionItem;
 
 import com.pitcc.repository.CollectionItemRepository;
@@ -13,6 +14,7 @@ import com.pitcc.repository.CollectionItemRepository;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -68,6 +70,11 @@ public class RemoveCollectionItemService {
         );
 
         if (result.getDeletedCount() == 1) {
+            mongoTemplate.updateMulti(
+                    Query.query(Criteria.where("userId").is(userId).and("coverItemId").is(itemId)),
+                    new Update().unset("coverItemId"),
+                    CardCollection.class
+            );
             return;
         }
 

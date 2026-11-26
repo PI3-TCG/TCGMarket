@@ -186,7 +186,7 @@ function MyAdsResults({
             description="Escolha uma carta da sua coleção para criar o primeiro anúncio."
           >
             <Link to="/minha-colecao" className={tradingCardDetailsButton}>
-              Ir para minha coleção
+              Ir para minhas coleções
             </Link>
           </FeedbackState>
         )

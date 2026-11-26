@@ -2,6 +2,7 @@ package com.pitcc.controller;
 
 import com.pitcc.dto.AvatarConfirmRequest;
 import com.pitcc.dto.AvatarUploadRequest;
+import com.pitcc.dto.CardCollectionResponse;
 import com.pitcc.dto.CollectionFilterOptionsResponse;
 import com.pitcc.dto.CollectionFilters;
 import com.pitcc.model.CardCondition;
@@ -13,6 +14,7 @@ import com.pitcc.exception.InvalidAuthenticationException;
 import com.pitcc.security.AuthenticatedUser;
 import com.pitcc.service.ProfileDashboardService;
 import jakarta.validation.Valid;
+import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
@@ -50,6 +52,33 @@ public class ProfileDashboardController {
   public ResponseEntity<ProfileDashboardService.PublicSummary> summary(@PathVariable String username) {
     return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(service.publicSummary(username));
   }
+  @GetMapping("/{username}/profile/collections")
+  public ResponseEntity<List<CardCollectionResponse>> collections(@PathVariable String username) {
+    return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(service.publicCollections(username));
+  }
+
+  @GetMapping("/{username}/profile/collections/{collectionId}")
+  public ResponseEntity<Page<ProfileDashboardService.PublicCollectionItem>> collection(
+      @PathVariable String username, @PathVariable String collectionId,
+      @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size,
+      @RequestParam(required = false) String search,
+      @RequestParam(required = false) CardGame game,
+      @RequestParam(required = false) String edition,
+      @RequestParam(required = false) String rarity,
+      @RequestParam(required = false) CardCondition condition,
+      @RequestParam(required = false) CardLanguage language) {
+    var filters = new CollectionFilters(search, game, edition, rarity, condition, language);
+    return ResponseEntity.ok().cacheControl(CacheControl.noStore())
+        .body(service.publicCollection(username, collectionId, page, size, filters));
+  }
+
+  @GetMapping("/{username}/profile/collections/{collectionId}/filter-options")
+  public ResponseEntity<CollectionFilterOptionsResponse> collectionFilterOptions(
+      @PathVariable String username, @PathVariable String collectionId) {
+    return ResponseEntity.ok().cacheControl(CacheControl.noStore())
+        .body(service.publicCollectionFilterOptions(username, collectionId));
+  }
+
   @GetMapping("/{username}/profile/collection")
   public ResponseEntity<Page<ProfileDashboardService.PublicCollectionItem>> collection(@PathVariable String username,
       @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size,

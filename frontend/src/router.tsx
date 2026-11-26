@@ -15,6 +15,7 @@ import { ProfileEditPage } from '@/pages/ProfileEditPage'
 import { ProfilePage } from '@/pages/ProfilePage'
 import { MyReputationPage } from '@/pages/MyReputationPage'
 import { PublicProfilePage } from '@/pages/PublicProfilePage'
+import { PublicCollectionPage } from '@/pages/PublicCollectionPage'
 import { NotFound, RootLayout } from '@/routes/RootLayout'
 import { parseAdminCatalogSearch } from '@/utils/adminCatalogSearch'
 import { parseCatalogSearch } from '@/utils/catalogSearch'
@@ -28,6 +29,7 @@ import {
   redirect,
 } from '@tanstack/react-router'
 import { MyCollectionPage } from '@/pages/MyCollectionPage'
+import { MyCollectionsPage } from '@/pages/MyCollectionsPage'
 import { CreateAdPage } from '@/pages/CreateAdPage'
 import { MyAdsPage } from '@/pages/MyAdsPage'
 import { MarketplaceAdPage } from '@/pages/MarketplaceAdPage'
@@ -116,6 +118,12 @@ const publicProfileRoute = createRoute({
   component: PublicProfilePage,
 })
 
+const publicCollectionRoute = createRoute({
+  getParentRoute: () => siteLayoutRoute,
+  path: '/jogadores/$username/colecoes/$collectionId',
+  component: PublicCollectionPage,
+})
+
 const registerRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/cadastro',
@@ -170,6 +178,16 @@ const designSystemRoute = createRoute({
 const myCollectionRoute = createRoute({
   getParentRoute: () => siteLayoutRoute,
   path: '/minha-colecao',
+  component: () => (
+    <RequireAuth>
+      <MyCollectionsPage />
+    </RequireAuth>
+  ),
+})
+
+const myCollectionDetailRoute = createRoute({
+  getParentRoute: () => siteLayoutRoute,
+  path: '/minha-colecao/$collectionId',
   component: () => (
     <RequireAuth>
       <MyCollectionPage />
@@ -332,12 +350,14 @@ const routeTree = rootRoute.addChildren([
     profileRoute,
     profileEditRoute,
     publicProfileRoute,
+    publicCollectionRoute,
     adminRoute.addChildren([
       adminOverviewRoute,
       adminUsersRoute,
       adminCatalogRoute,
     ]),
     myCollectionRoute,
+    myCollectionDetailRoute,
     createAdRoute,
     myAdsRoute,
     myTradeProposalsRoute,

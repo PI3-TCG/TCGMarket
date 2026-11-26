@@ -58,7 +58,10 @@ public class CollectionController {
             CardLanguage language,
 
             @RequestParam(name = "sort", defaultValue = "RECENT")
-            ListingSort sort) {
+            ListingSort sort,
+
+            @RequestParam(name = "collectionId", required = false)
+            String collectionId) {
 
         if (current == null) {
             throw new InvalidAuthenticationException();
@@ -76,6 +79,7 @@ public class CollectionController {
 
         return collectionService.findOwnCollection(
                 current.id(),
+                collectionId,
                 page,
                 size,
                 filters
@@ -84,13 +88,14 @@ public class CollectionController {
 
     @GetMapping("/summary")
     public CollectionSummaryResponse summarizeOwnCollection(
-            @AuthenticationPrincipal AuthenticatedUser current) {
+            @AuthenticationPrincipal AuthenticatedUser current,
+            @RequestParam(name = "collectionId", required = false) String collectionId) {
 
         if (current == null) {
             throw new InvalidAuthenticationException();
         }
 
-        return collectionService.summarizeOwnCollection(current.id());
+        return collectionService.summarizeOwnCollection(current.id(), collectionId);
     }
 
     @GetMapping("/{itemId}")
@@ -107,12 +112,13 @@ public class CollectionController {
 
     @GetMapping("/filter-options")
     public CollectionFilterOptionsResponse findOwnFilterOptions(
-            @AuthenticationPrincipal AuthenticatedUser current) {
+            @AuthenticationPrincipal AuthenticatedUser current,
+            @RequestParam(name = "collectionId", required = false) String collectionId) {
 
         if (current == null) {
             throw new InvalidAuthenticationException();
         }
 
-        return collectionService.findOwnFilterOptions(current.id());
+        return collectionService.findOwnFilterOptions(current.id(), collectionId);
     }
 }

@@ -119,7 +119,7 @@ export function MobileBottomNavigation() {
         </button>
 
         <button type="button" onClick={() => openProtected('/minha-colecao')} className="tcg-bottom-item" data-active={isCollection || undefined} aria-current={isCollection ? 'page' : undefined}>
-          <Icon name="layers" size={20} /> <span>Coleção</span>
+          <Icon name="layers" size={20} /> <span>Coleções</span>
         </button>
 
         <button type="button" onClick={() => openProtected('/perfil')} className="tcg-bottom-item" data-active={isProfile || undefined} aria-current={isProfile ? 'page' : undefined}>
