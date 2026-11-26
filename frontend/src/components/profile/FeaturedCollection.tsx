@@ -19,13 +19,13 @@ export function FeaturedCollection({ privacy }: { privacy: ReactNode }) {
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <h2 className="flex items-center gap-2 text-lg font-semibold text-primary-900">
           <Icon name="grid" size={24} />
-          Minha coleção
+          Minhas coleções
         </h2>
         <Link
           to="/minha-colecao"
           className={`${profileTextLink} text-sm underline`}
         >
-          Ver minha coleção completa
+          Ver minhas coleções
         </Link>
       </div>
       {state.status === 'loading' ? (

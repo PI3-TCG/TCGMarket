@@ -26,6 +26,7 @@ public class CollectionSearchRepository {
 
     public Page<CollectionItem> findOwnCollection(
             String userId,
+            String collectionId,
             CollectionFilters filters,
             Pageable pageable) {
 
@@ -33,6 +34,9 @@ public class CollectionSearchRepository {
 
         // Primeiro, limita a consulta à coleção do usuário autenticado.
         Document ownershipMatch = new Document("userId", userId);
+        if (collectionId != null) {
+            ownershipMatch.append("collectionId", collectionId);
+        }
 
         if (filters.condition() != null) {
             ownershipMatch.append(
@@ -187,12 +191,14 @@ public class CollectionSearchRepository {
         );
     }
 
-    public CollectionFilterOptionsResponse findFilterOptions(String userId) {
+    public CollectionFilterOptionsResponse findFilterOptions(String userId, String collectionId) {
         List<Document> pipeline = new ArrayList<>();
 
-        pipeline.add(
-                new Document("$match", new Document("userId", userId))
-        );
+        Document match = new Document("userId", userId);
+        if (collectionId != null) {
+            match.append("collectionId", collectionId);
+        }
+        pipeline.add(new Document("$match", match));
 
         // Reutiliza a ligação com o catálogo, sem restringir por filtros.
         addCardFilters(

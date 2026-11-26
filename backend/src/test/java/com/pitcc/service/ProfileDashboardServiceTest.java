@@ -7,6 +7,7 @@ import static org.mockito.Mockito.*;
 import com.pitcc.dto.*;
 import com.pitcc.integration.r2.AvatarStorage;
 import com.pitcc.model.*;
+import com.pitcc.repository.CardCollectionRepository;
 import com.pitcc.repository.UserRepository;
 import java.util.*;
 import org.junit.jupiter.api.Test;
@@ -24,6 +25,8 @@ class ProfileDashboardServiceTest {
   @Mock MongoTemplate mongo;
   @Mock UserRepository users;
   @Mock CollectionService collection;
+  @Mock CardCollectionRepository cardCollections;
+  @Mock CardCollectionService cardCollectionService;
   @Mock AvatarStorage avatars;
   @InjectMocks ProfileDashboardService service;
 
@@ -58,6 +61,7 @@ class ProfileDashboardServiceTest {
 
   @Test void publicSummaryHidesGamesWhenCollectionIsPrivate() {
     when(users.findByUsername("collector")).thenReturn(Optional.of(user()));
+    when(cardCollections.findByUserIdAndVisibleTrueOrderByCreatedAtAsc("owner")).thenReturn(List.of());
 
     assertTrue(service.publicSummary("collector").collectionGames().isEmpty());
     verifyNoInteractions(collection);
@@ -66,9 +70,12 @@ class ProfileDashboardServiceTest {
   @Test void publicSummaryUsesGamesFromThePublicCollection() {
     User user = user();
     user.setCollectionPublic(true);
+    CardCollection visible = new CardCollection("owner", "Minha coleção", true, java.time.Instant.now());
+    org.springframework.test.util.ReflectionTestUtils.setField(visible, "id", "col-1");
     when(users.findByUsername("collector")).thenReturn(Optional.of(user));
+    when(cardCollections.findByUserIdAndVisibleTrueOrderByCreatedAtAsc("owner")).thenReturn(List.of(visible));
     var games = List.of(CardGame.POKEMON, CardGame.YUGIOH);
-    when(collection.summarizeOwnCollection("owner"))
+    when(collection.summarizeOwnCollection("owner", "col-1"))
         .thenReturn(new CollectionSummaryResponse(4, 17, 2, games));
 
     assertEquals(games, service.publicSummary("collector").collectionGames());

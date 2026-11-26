@@ -5,7 +5,7 @@ import { Pagination as PageNavigation } from '@/components/ui/Pagination'
 import { tradingCardGrid } from '@/components/ui/tradingCardStyles'
 import { FeedbackState } from '@/components/ui/FeedbackState'
 import { useEffect, useState } from 'react'
-import { useNavigate } from '@tanstack/react-router'
+import { Link, useNavigate, useParams } from '@tanstack/react-router'
 import { PageBanner } from '@/components/layout/PageBanner'
 import { CollectionItemCard } from '@/components/collection/CollectionItemCard'
 import { CollectionState } from '@/components/collection/CollectionState'
@@ -14,6 +14,8 @@ import {
   getMyCollection,
   getMyCollectionSummary,
   getMyCollectionFilterOptions,
+  listMyCollections,
+  setMyCollectionCover,
 } from '@/services/collection'
 import { useSession } from '@/session'
 import type {
@@ -27,6 +29,7 @@ import { CollectionFilters } from '@/components/collection/CollectionFilters'
 import { emptyCollectionFilters } from '@/components/collection/collectionFilterDefaults'
 import { CardDetailsModal } from '@/components/catalog/CardDetailsModal'
 import type { CatalogCard } from '@/types/Catalog'
+import { CollectionManager } from '@/components/collection/CollectionManager'
 import { EditCollectionItemModal } from '@/components/collection/EditCollectionItemModal'
 import { RemoveCollectionItemModal } from '@/components/collection/RemoveCollectionItemModal'
 
@@ -42,28 +45,48 @@ type SummaryResult =
 
 export function MyCollectionPage() {
   const { user } = useSession()
+  const navigate = useNavigate()
+  const { collectionId } = useParams({
+    from: '/site-layout/minha-colecao/$collectionId',
+  })
 
   return (
     <main className="min-h-screen pb-12 text-text-primary">
       <div className="mx-auto w-full max-w-[1600px] px-4 pt-4 sm:px-6 xl:px-[38px]">
         <PageBanner
-          title="Minha Coleção"
-          subtitle={
-            <>
-              Organize seu acervo e acompanhe sua jornada
-              <br />
-              como colecionador.
-            </>
-          }
+          title="Minhas Coleções"
+          subtitle="Gerencie as cartas desta coleção."
         />
 
-        {user && <CollectionContent key={user.id} />}
+        <Link
+          to="/minha-colecao"
+          className="mt-6 inline-flex min-h-11 items-center text-sm font-semibold text-brand-primary"
+        >
+          Voltar para minhas coleções
+        </Link>
+
+        {user && (
+          <CollectionContent
+            key={`${user.id}-${collectionId}`}
+            userId={user.id}
+            collectionId={collectionId}
+            onDeleted={() => void navigate({ to: '/minha-colecao' })}
+          />
+        )}
       </div>
     </main>
   )
 }
 
-function CollectionContent() {
+function CollectionContent({
+  userId,
+  collectionId,
+  onDeleted,
+}: {
+  userId: string
+  collectionId: string
+  onDeleted: () => void
+}) {
   const [page, setPage] = useState(0)
   const [sort, setSort] = useState<ListingSortOrder>('RECENT')
   const [attempt, setAttempt] = useState(0)
@@ -83,11 +106,30 @@ function CollectionContent() {
   >('loading')
 
   const [optionsAttempt, setOptionsAttempt] = useState(0)
+  const [coverItemId, setCoverItemId] = useState<string | null>(null)
 
   useEffect(() => {
+    let cancelled = false
+    listMyCollections()
+      .then((list) => {
+        if (cancelled) return
+        setCoverItemId(
+          list.find((collection) => collection.id === collectionId)?.coverItemId ?? null,
+        )
+      })
+      .catch(() => {
+        if (!cancelled) setCoverItemId(null)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [collectionId])
+
+  useEffect(() => {
+    if (!collectionId) return
     const controller = new AbortController()
 
-    getMyCollectionFilterOptions(controller.signal)
+    getMyCollectionFilterOptions(collectionId, controller.signal)
       .then((data) => {
         if (!controller.signal.aborted) {
           setOptions(data)
@@ -101,7 +143,7 @@ function CollectionContent() {
       })
 
     return () => controller.abort()
-  }, [optionsAttempt])
+  }, [optionsAttempt, collectionId])
 
   function applyFilters(nextFilters: CollectionFilterValues) {
     setFilters({ ...nextFilters })
@@ -111,7 +153,13 @@ function CollectionContent() {
 
   return (
     <div className="mt-10 space-y-6">
-      <CollectionSummaryData key={summaryAttempt} />
+      <CollectionManager
+        userId={userId}
+        collectionId={collectionId}
+        onDeleted={onDeleted}
+      />
+
+      <CollectionSummaryData key={`${summaryAttempt}-${collectionId ?? ''}`} collectionId={collectionId} />
 
       <Button
         variant="ghost"
@@ -122,8 +170,8 @@ function CollectionContent() {
 
       <div className="grid items-start gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
         <CollectionFilters
-          options={options}
-          optionsStatus={optionsStatus}
+          options={collectionId ? options : { editions: [], rarities: [] }}
+          optionsStatus={collectionId ? optionsStatus : 'success'}
           onRetryOptions={() => {
             setOptionsStatus('loading')
             setOptionsAttempt((current) => current + 1)
@@ -137,6 +185,7 @@ function CollectionContent() {
             page={page}
             filters={filters}
             sort={sort}
+            collectionId={collectionId}
             onSortChange={(value) => {
               setSort(value)
               setPage(0)
@@ -155,6 +204,11 @@ function CollectionContent() {
               setSummaryAttempt((current) => current + 1)
               setOptionsAttempt((current) => current + 1)
             }}
+            coverItemId={coverItemId}
+            onSetCover={async (item) => {
+              const updated = await setMyCollectionCover(collectionId, item.id)
+              setCoverItemId(updated.coverItemId)
+            }}
           />
         </div>
       </div>
@@ -166,12 +220,15 @@ type CollectionPageDataProps = {
   attempt: number
   page: number
   sort: ListingSortOrder
+  collectionId: string | null
   onSortChange: (sort: ListingSortOrder) => void
   filters: CollectionFilterValues
   onPageChange: (page: number) => void
   onRetry: () => void
   onCollectionUpdated: () => void
   onItemRemoved: (pageBecameEmpty: boolean) => void
+  coverItemId: string | null
+  onSetCover: (item: CollectionItem) => Promise<void>
 }
 type CollectionModal =
   | { mode: 'details'; card: CatalogCard; itemId: string }
@@ -183,12 +240,15 @@ function CollectionPageData({
   attempt,
   page,
   sort,
+  collectionId,
   onSortChange,
   filters,
   onPageChange,
   onRetry,
   onCollectionUpdated,
   onItemRemoved,
+  coverItemId,
+  onSetCover,
 }: CollectionPageDataProps) {
   const navigate = useNavigate()
   const [activeModal, setActiveModal] = useState<CollectionModal>(null)
@@ -197,6 +257,7 @@ function CollectionPageData({
   const result = response?.requestKey === requestKey ? response.result : { status: 'loading' as const }
 
   useEffect(() => {
+    if (!collectionId) return
     const controller = new AbortController()
 
     getMyCollection({
@@ -204,6 +265,7 @@ function CollectionPageData({
       size: 20,
       filters,
       sort,
+      collectionId,
       signal: controller.signal,
     })
       .then((data) => {
@@ -217,7 +279,7 @@ function CollectionPageData({
         }
       })
     return () => controller.abort()
-  }, [page, filters, sort, requestKey])
+  }, [page, filters, sort, requestKey, collectionId])
 
   function openDetails(item: CollectionItem) {
     setActiveModal({ mode: 'details', card: item.card, itemId: item.id })
@@ -259,10 +321,14 @@ function CollectionPageData({
 
         <AppliedCollectionFilters filters={filters} />
 
-        {result.status === 'loading' ? (
+        {result.status === 'loading' && collectionId ? (
           <CollectionState status="loading" />
+        ) : !collectionId ? (
+          <CollectionState status="empty" />
         ) : result.status === 'error' ? (
           <CollectionState status="error" onRetry={onRetry} />
+        ) : result.status !== 'success' ? (
+          <CollectionState status="loading" />
         ) : result.data.totalElements === 0 ? (
           hasFilters ? (
             <FeedbackState
@@ -281,10 +347,12 @@ function CollectionPageData({
                   <CollectionItemCard
                     key={item.id}
                     item={item}
+                    isCover={item.id === coverItemId}
                     onDetails={openDetails}
                     onEdit={openEdit}
                     onRemove={openRemove}
                     onAdvertise={(selected) => openCreateAd(selected.id)}
+                    onSetCover={(selected) => void onSetCover(selected)}
                   />
                 ))}
               </div>
@@ -354,7 +422,22 @@ function CollectionPageData({
   )
 }
 
-function CollectionSummaryData() {
+function CollectionSummaryData({ collectionId }: { collectionId: string | null }) {
+  if (!collectionId) {
+    return (
+      <CollectionSummary
+        status="success"
+        totalItems={0}
+        totalCopies={0}
+        totalGames={0}
+      />
+    )
+  }
+
+  return <LoadedCollectionSummary collectionId={collectionId} />
+}
+
+function LoadedCollectionSummary({ collectionId }: { collectionId: string }) {
   const [result, setResult] = useState<SummaryResult>({
     status: 'loading',
   })
@@ -362,7 +445,7 @@ function CollectionSummaryData() {
   useEffect(() => {
     const controller = new AbortController()
 
-    getMyCollectionSummary(controller.signal)
+    getMyCollectionSummary(collectionId, controller.signal)
       .then((data) => {
         if (!controller.signal.aborted) {
           setResult({ status: 'success', data })
@@ -375,7 +458,7 @@ function CollectionSummaryData() {
       })
 
     return () => controller.abort()
-  }, [])
+  }, [collectionId])
 
   return (
     <CollectionSummary

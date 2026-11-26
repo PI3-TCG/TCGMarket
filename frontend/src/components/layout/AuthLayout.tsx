@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { Link } from '@tanstack/react-router'
 import logo from '@/assets/images/tcgmarket-logo-auth.png'
 import { cn } from '@/components/ui/cn'
+import { Icon } from '@/components/ui/Icon'
 import { focusRing } from '@/components/ui/styles'
 
 export function AuthLayout({
@@ -11,13 +12,15 @@ export function AuthLayout({
   description,
   children,
   wide = false,
+  compactLogo = false,
 }: {
   image: string
   bannerContent?: ReactNode
   title: string
-  description: string
+  description?: string
   children: ReactNode
   wide?: boolean
+  compactLogo?: boolean
 }) {
   return (
     <main className="min-h-svh bg-white text-neutral-900 md:grid md:grid-cols-2">
@@ -38,13 +41,30 @@ export function AuthLayout({
 
       <section
         aria-labelledby="auth-title"
-        className="flex min-w-0 items-center justify-center px-4 py-8 sm:px-8 sm:py-12"
+        className={cn(
+          'flex min-w-0 items-center justify-center px-4 sm:px-8',
+          compactLogo ? 'py-4 sm:py-6' : 'py-8 sm:py-12',
+        )}
       >
         <div className={cn('w-full', wide ? 'max-w-xl' : 'max-w-md')}>
+          <Link
+            to="/"
+            className={cn(
+              'inline-flex min-h-11 items-center gap-1.5 rounded-control text-sm font-semibold text-primary-900',
+              focusRing,
+            )}
+          >
+            <Icon name="chevron-down" size={16} className="rotate-90" />
+            Voltar
+          </Link>
           <div className="flex flex-col items-center text-center">
             <Link
               to="/"
-              className={cn('w-[90%] max-w-[25rem] rounded-control', focusRing)}
+              className={cn(
+                'rounded-control',
+                compactLogo ? 'w-1/2 max-w-48' : 'w-[90%] max-w-[25rem]',
+                focusRing,
+              )}
             >
               <img
                 src={logo}
@@ -56,11 +76,16 @@ export function AuthLayout({
             </Link>
             <h1
               id="auth-title"
-              className="font-display mt-5 text-2xl font-bold sm:text-3xl"
+              className={cn(
+                'font-display font-bold',
+                compactLogo ? 'mt-3 text-2xl' : 'mt-5 text-2xl sm:text-3xl',
+              )}
             >
               {title}
             </h1>
-            <p className="mt-2 text-sm text-neutral-700">{description}</p>
+            {description ? (
+              <p className="mt-2 text-sm text-neutral-700">{description}</p>
+            ) : null}
           </div>
           {children}
         </div>

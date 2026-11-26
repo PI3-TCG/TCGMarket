@@ -7,6 +7,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import com.pitcc.dto.CollectionSummaryResponse;
 import org.springframework.data.mongodb.repository.Aggregation;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface CollectionItemRepository extends MongoRepository<CollectionItem, String> {
@@ -17,6 +18,10 @@ public interface CollectionItemRepository extends MongoRepository<CollectionItem
             String id,
             String userId
     );
+
+    List<CollectionItem> findByCollectionId(String collectionId);
+
+    void deleteByCollectionId(String collectionId);
 
     long deleteByIdAndUserId(String id, String userId);
 
@@ -89,6 +94,80 @@ public interface CollectionItemRepository extends MongoRepository<CollectionItem
             """
     })
     Optional<CollectionSummaryResponse> summarizeByUserId(String userId);
+
+    @Aggregation(pipeline = {
+            """
+            {
+              "$match": {
+                "userId": ?0,
+                "collectionId": ?1
+              }
+            }
+            """,
+            """
+            {
+              "$set": {
+                "cardLookupIds": [
+                  "$cardId",
+                  {
+                    "$convert": {
+                      "input": "$cardId",
+                      "to": "objectId",
+                      "onError": null,
+                      "onNull": null
+                    }
+                  }
+                ]
+              }
+            }
+            """,
+            """
+            {
+              "$lookup": {
+                "from": "cards",
+                "localField": "cardLookupIds",
+                "foreignField": "_id",
+                "as": "catalogCard"
+              }
+            }
+            """,
+            """
+            {
+              "$group": {
+                "_id": null,
+                "totalItems": { "$sum": 1 },
+                "totalCopies": { "$sum": "$quantity" },
+                "games": {
+                  "$addToSet": {
+                    "$ifNull": [
+                      { "$arrayElemAt": ["$catalogCard.game", 0] },
+                      null
+                    ]
+                  }
+                }
+              }
+            }
+            """,
+            """
+            {
+              "$project": {
+                "_id": 0,
+                "totalItems": 1,
+                "totalCopies": 1,
+                "games": { "$setDifference": ["$games", [null]] },
+                "totalGames": {
+                  "$size": {
+                    "$setDifference": ["$games", [null]]
+                  }
+                }
+              }
+            }
+            """
+    })
+    Optional<CollectionSummaryResponse> summarizeByUserIdAndCollectionId(
+            String userId,
+            String collectionId
+    );
 
 
 }

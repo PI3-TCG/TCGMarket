@@ -78,7 +78,7 @@ const NAV_ACTIONS: {
   { label: 'Comprar', target: 'buy', icon: 'cart' },
   { label: 'Vender', target: 'sell', icon: 'megaphone' },
   { label: 'Trocar', target: 'trade', icon: 'arrows-right-left' },
-  { label: 'Minha coleção', target: 'collection', icon: 'cards' },
+  { label: 'Minhas coleções', target: 'collection', icon: 'cards' },
 ]
 
 const sectionTitle =

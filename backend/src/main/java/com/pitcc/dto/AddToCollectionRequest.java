@@ -8,6 +8,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public record AddToCollectionRequest(
+        @NotBlank String collectionId,
         @NotBlank String cardId,
         @NotNull @Min(1) Integer quantity,
         @NotNull CardCondition condition,

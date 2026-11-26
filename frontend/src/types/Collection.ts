@@ -12,6 +12,15 @@ export type CardLanguage =
   | 'ENGLISH'
   | 'JAPANESE'
 
+export interface CardCollection {
+  id: string
+  name: string
+  visible: boolean
+  coverItemId: string | null
+  coverImageUrl: string | null
+  cardCount: number
+}
+
 export interface CollectionCard {
   id: string
   name: string
@@ -68,6 +77,7 @@ export interface CollectionFilterOptions {
   rarities: string[]
 }
 export interface AddToCollectionRequest {
+  collectionId: string
   cardId: string
   quantity: number
   condition: CardCondition

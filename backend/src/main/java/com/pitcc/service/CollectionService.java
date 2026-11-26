@@ -33,22 +33,35 @@ public class CollectionService {
     private final CardRepository cardRepository;
     private final CollectionSearchRepository collectionSearchRepository;
     private final AdAvailabilityService adAvailabilityService;
+    private final CardCollectionService cardCollectionService;
 
     public CollectionService(
             CollectionItemRepository collectionItemRepository,
             CardRepository cardRepository,
             CollectionSearchRepository collectionSearchRepository,
-            AdAvailabilityService adAvailabilityService) {
+            AdAvailabilityService adAvailabilityService,
+            CardCollectionService cardCollectionService) {
 
         this.collectionItemRepository = collectionItemRepository;
         this.cardRepository = cardRepository;
         this.collectionSearchRepository = collectionSearchRepository;
         this.adAvailabilityService = adAvailabilityService;
+        this.cardCollectionService = cardCollectionService;
     }
 
 
     public Page<CollectionItemResponse> findOwnCollection(
             String userId,
+            int page,
+            int size,
+            CollectionFilters filters) {
+
+        return findOwnCollection(userId, null, page, size, filters);
+    }
+
+    public Page<CollectionItemResponse> findOwnCollection(
+            String userId,
+            String collectionId,
             int page,
             int size,
             CollectionFilters filters) {
@@ -76,6 +89,7 @@ public class CollectionService {
         Page<CollectionItem> items =
                 collectionSearchRepository.findOwnCollection(
                         userId,
+                        scopedCollection(userId, collectionId),
                         filters,
                         pageable
                 );
@@ -154,12 +168,21 @@ public class CollectionService {
     }
 
     public CollectionSummaryResponse summarizeOwnCollection(String userId) {
+        return summarizeOwnCollection(userId, null);
+    }
+
+    public CollectionSummaryResponse summarizeOwnCollection(String userId, String collectionId) {
         if (userId == null || userId.isBlank()) {
             throw new IllegalArgumentException(
                     "O usuário precisa ser informado.");
         }
 
-        return collectionItemRepository.summarizeByUserId(userId)
+        String scoped = scopedCollection(userId, collectionId);
+        if (scoped == null) {
+            return collectionItemRepository.summarizeByUserId(userId)
+                    .orElseGet(() -> new CollectionSummaryResponse(0L, 0L, 0L, List.of()));
+        }
+        return collectionItemRepository.summarizeByUserIdAndCollectionId(userId, scoped)
                 .orElseGet(() -> new CollectionSummaryResponse(0L, 0L, 0L, List.of()));
     }
 
@@ -185,12 +208,26 @@ public class CollectionService {
     }
 
     public CollectionFilterOptionsResponse findOwnFilterOptions(String userId) {
+        return findOwnFilterOptions(userId, null);
+    }
+
+    public CollectionFilterOptionsResponse findOwnFilterOptions(String userId, String collectionId) {
         if (userId == null || userId.isBlank()) {
             throw new IllegalArgumentException(
                     "O usuário precisa ser informado.");
         }
 
-        return collectionSearchRepository.findFilterOptions(userId);
+        return collectionSearchRepository.findFilterOptions(
+                userId,
+                scopedCollection(userId, collectionId)
+        );
+    }
+
+    private String scopedCollection(String userId, String collectionId) {
+        if (collectionId == null || collectionId.isBlank()) {
+            return null;
+        }
+        return cardCollectionService.requireOwned(userId, collectionId).getId();
     }
 
 }

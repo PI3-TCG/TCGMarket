@@ -2,24 +2,19 @@
 package com.pitcc.model;
 
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Document(collection = "collection_items")
-@CompoundIndex(
-        name = "uk_collection_items_identity",
-        def = "{'userId': 1, 'cardId': 1, 'condition': 1, 'language': 1}",
-        unique = true
-)
 public class CollectionItem {
 
     @Id
     private String id;
 
     private String userId;
+    private String collectionId;
     private String cardId;
 
     // Quantidade total de exemplares.
@@ -94,6 +89,10 @@ public class CollectionItem {
 
     public String getUserId() {
         return userId;
+    }
+
+    public String getCollectionId() {
+        return collectionId;
     }
 
     public String getCardId() {

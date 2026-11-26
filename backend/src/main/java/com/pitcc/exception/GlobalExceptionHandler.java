@@ -178,6 +178,30 @@ public class GlobalExceptionHandler {
                 ));
     }
 
+    @ExceptionHandler(CollectionNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleCollectionNotFound(
+            CollectionNotFoundException exception
+    ) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(error(
+                        HttpStatus.NOT_FOUND,
+                        exception.getMessage(),
+                        List.of()
+                ));
+    }
+
+    @ExceptionHandler(CollectionDeleteBlockedException.class)
+    public ResponseEntity<ApiErrorResponse> handleCollectionDeleteBlocked(
+            CollectionDeleteBlockedException exception
+    ) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(error(
+                        HttpStatus.CONFLICT,
+                        exception.getMessage(),
+                        List.of()
+                ));
+    }
+
     @ExceptionHandler(CollectionItemConflictException.class)
     public ResponseEntity<ApiErrorResponse> handleCollectionItemConflict(
             CollectionItemConflictException exception

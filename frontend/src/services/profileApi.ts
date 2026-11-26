@@ -80,14 +80,22 @@ export interface PublicCollectionPage {
   totalElements: number
   totalPages: number
 }
+export const listPublicCollections = async (username: string) =>
+  (
+    await api.get<import('@/types/Collection').CardCollection[]>(
+      `/api/users/${encodeURIComponent(username)}/profile/collections`,
+    )
+  ).data
+
 export const getPublicCollection = async (
   username: string,
+  collectionId: string,
   page: number,
   filters?: import('@/types/Collection').CollectionFilterValues,
 ) =>
   (
     await api.get<PublicCollectionPage>(
-      `/api/users/${encodeURIComponent(username)}/profile/collection`,
+      `/api/users/${encodeURIComponent(username)}/profile/collections/${encodeURIComponent(collectionId)}`,
       {
         params: {
           page,
@@ -103,9 +111,12 @@ export const getPublicCollection = async (
     )
   ).data
 
-export const getPublicCollectionFilterOptions = async (username: string) =>
+export const getPublicCollectionFilterOptions = async (
+  username: string,
+  collectionId: string,
+) =>
   (
     await api.get<import('@/types/Collection').CollectionFilterOptions>(
-      `/api/users/${encodeURIComponent(username)}/profile/collection/filter-options`,
+      `/api/users/${encodeURIComponent(username)}/profile/collections/${encodeURIComponent(collectionId)}/filter-options`,
     )
   ).data

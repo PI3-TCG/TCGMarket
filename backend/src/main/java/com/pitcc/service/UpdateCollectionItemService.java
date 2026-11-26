@@ -47,12 +47,16 @@ public class UpdateCollectionItemService {
                         || item.getLanguage() != request.language();
 
         if (identityChanged) {
-            Query equivalentQuery = Query.query(
-                    Criteria.where("userId").is(userId)
-                            .and("cardId").is(item.getCardId())
-                            .and("condition").is(request.condition())
-                            .and("language").is(request.language())
-            );
+            Criteria identity = Criteria.where("cardId").is(item.getCardId())
+                    .and("condition").is(request.condition())
+                    .and("language").is(request.language())
+                    .and("_id").ne(item.getId());
+            if (item.getCollectionId() != null && !item.getCollectionId().isBlank()) {
+                identity = identity.and("collectionId").is(item.getCollectionId());
+            } else {
+                identity = identity.and("userId").is(userId);
+            }
+            Query equivalentQuery = Query.query(identity);
 
             if (mongoTemplate.exists(
                     equivalentQuery,

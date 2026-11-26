@@ -15,6 +15,8 @@ type CollectionItemCardProps = {
   onEdit?: (item: CollectionItem) => void
   onRemove?: (item: CollectionItem) => void
   onAdvertise?: (item: CollectionItem) => void
+  onSetCover?: (item: CollectionItem) => void
+  isCover?: boolean
 }
 
 /** Sem preço artificial; ações continuam delegadas à página de coleção. */
@@ -24,6 +26,8 @@ export function CollectionItemCard({
   onEdit,
   onRemove,
   onAdvertise,
+  onSetCover,
+  isCover = false,
 }: CollectionItemCardProps) {
   const actions = [
     { label: 'Detalhes', icon: 'search', handler: onDetails },
@@ -35,6 +39,11 @@ export function CollectionItemCard({
   return (
     <article className={tradingCardSurface}>
       <TradingCardImage url={item.card.imageUrl} name={item.card.name}>
+        {isCover ? (
+          <span className="absolute top-2 left-2 rounded-full bg-brand-primary px-2 py-1 text-xs font-semibold text-white">
+            Capa
+          </span>
+        ) : null}
         <span
           aria-label={`${item.quantity} exemplares`}
           className="absolute right-2 bottom-2 rounded-control border border-border-default bg-surface-default px-2 py-1 text-xs font-bold text-text-ink shadow-sm"
@@ -91,6 +100,16 @@ export function CollectionItemCard({
           </button>
         ))}
       </div>
+      {onSetCover ? (
+        <button
+          type="button"
+          disabled={isCover}
+          onClick={() => onSetCover(item)}
+          className="min-h-11 border-t border-border-default px-3 text-sm font-semibold text-brand-primary enabled:cursor-pointer enabled:hover:bg-surface-brand-tint disabled:cursor-default disabled:text-text-secondary"
+        >
+          {isCover ? 'Capa da coleção' : 'Usar como capa'}
+        </button>
+      ) : null}
     </article>
   )
 }

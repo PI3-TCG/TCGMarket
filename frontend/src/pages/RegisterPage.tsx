@@ -179,8 +179,8 @@ export function RegisterPage() {
     <AuthLayout
       image={hero}
       title="Crie sua conta"
-      description="Faça parte da nossa comunidade de colecionadores e comece sua jornada no mundo dos TCGs."
       wide
+      compactLogo
     >
       {notice ? (
         <div className="mt-5">

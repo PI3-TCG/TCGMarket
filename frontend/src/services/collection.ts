@@ -2,6 +2,7 @@ import type { ListingSortOrder } from '@/components/ui/ListingSort'
 import { api } from '@/services/api'
 import type {
   AddToCollectionRequest,
+  CardCollection,
   CollectionFilterOptions,
   CollectionFilterValues,
   CollectionItem,
@@ -15,6 +16,7 @@ type CollectionQuery = {
   size?: number
   filters?: CollectionFilterValues
   sort?: ListingSortOrder
+  collectionId?: string
   signal?: AbortSignal
 }
 export async function addToMyCollection(
@@ -28,6 +30,7 @@ export async function getMyCollection({
   size = 20,
   filters,
   sort,
+  collectionId,
   signal,
 }: CollectionQuery = {}): Promise<CollectionPage> {
   const response = await api.get<CollectionPage>(
@@ -37,6 +40,7 @@ export async function getMyCollection({
         page,
         size,
         sort,
+        collectionId,
         search: filters?.search.trim() || undefined,
         game: filters?.game || undefined,
         edition: filters?.edition || undefined,
@@ -62,22 +66,24 @@ export async function getMyCollectionItem(
 }
 
 export async function getMyCollectionSummary(
+  collectionId?: string,
   signal?: AbortSignal,
 ): Promise<CollectionSummaryResponse> {
   const response = await api.get<CollectionSummaryResponse>(
     '/api/users/me/collection/summary',
-    { signal },
+    { params: { collectionId }, signal },
   )
 
   return response.data
 }
 
 export async function getMyCollectionFilterOptions(
+  collectionId?: string,
   signal?: AbortSignal,
 ): Promise<CollectionFilterOptions> {
   const response = await api.get<CollectionFilterOptions>(
     '/api/users/me/collection/filter-options',
-    { signal },
+    { params: { collectionId }, signal },
   )
 
   return response.data
@@ -94,4 +100,55 @@ export async function updateMyCollectionItem(
 
 export async function removeMyCollectionItem(itemId: string): Promise<void> {
   await api.delete(`/api/users/me/collection/${encodeURIComponent(itemId)}`)
+}
+
+export async function listMyCollections(): Promise<CardCollection[]> {
+  const response = await api.get<CardCollection[]>('/api/users/me/collections')
+  return response.data
+}
+
+export async function createMyCollection(name: string): Promise<CardCollection> {
+  const response = await api.post<CardCollection>('/api/users/me/collections', {
+    name,
+  })
+  return response.data
+}
+
+export async function renameMyCollection(
+  collectionId: string,
+  name: string,
+): Promise<CardCollection> {
+  const response = await api.patch<CardCollection>(
+    `/api/users/me/collections/${encodeURIComponent(collectionId)}`,
+    { name },
+  )
+  return response.data
+}
+
+export async function deleteMyCollection(collectionId: string): Promise<void> {
+  await api.delete(
+    `/api/users/me/collections/${encodeURIComponent(collectionId)}`,
+  )
+}
+
+export async function setMyCollectionCover(
+  collectionId: string,
+  itemId: string,
+): Promise<CardCollection> {
+  const response = await api.patch<CardCollection>(
+    `/api/users/me/collections/${encodeURIComponent(collectionId)}/cover`,
+    { itemId },
+  )
+  return response.data
+}
+
+export async function setMyCollectionVisibility(
+  collectionId: string,
+  visible: boolean,
+): Promise<CardCollection> {
+  const response = await api.patch<CardCollection>(
+    `/api/users/me/collections/${encodeURIComponent(collectionId)}/visibility`,
+    { visible },
+  )
+  return response.data
 }
