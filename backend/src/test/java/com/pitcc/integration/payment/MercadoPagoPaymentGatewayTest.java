@@ -33,7 +33,7 @@ class MercadoPagoPaymentGatewayTest {
   void setUp() {
     RestClient.Builder builder = RestClient.builder().baseUrl(BASE);
     server = MockRestServiceServer.bindTo(builder).build();
-    gateway = new MercadoPagoPaymentGateway(builder.build(), "https://hml/webhook", "APRO");
+    gateway = new MercadoPagoPaymentGateway(builder.build(), "APRO");
   }
 
   private static String order(String status, String detail, boolean liveMode) {
@@ -54,7 +54,7 @@ class MercadoPagoPaymentGatewayTest {
         .andExpect(jsonPath("$.transactions.payments[0].payment_method.id").value("pix"))
         .andExpect(jsonPath("$.payer.email").value("ana@test.com"))
         .andExpect(jsonPath("$.payer.first_name").value("APRO"))
-        .andExpect(jsonPath("$.notification_url").value("https://hml/webhook"))
+        .andExpect(jsonPath("$.notification_url").doesNotExist())
         .andRespond(
             withSuccess(order("action_required", "waiting_transfer", false), MediaType.APPLICATION_JSON));
 
