@@ -13,10 +13,22 @@ import {
 } from '@/components/ui/ListingPresentation'
 import { tradingCardGrid } from '@/components/ui/tradingCardStyles'
 import { useRemoteData } from '@/hooks/useRemoteData'
+import { gameLabel, PROFILE_GAMES } from '@/components/profile/profileFormat'
+import { Badge } from '@/components/ui/Badge'
+import type { CardGame } from '@/types/Catalog'
 import { api } from '@/services/api'
 import { getMarketplaceAds } from '@/services/marketplace'
 
-type Users = { users: { name: string; username: string }[]; hasMore: boolean }
+type SearchUser = {
+  name: string
+  username: string
+  avatarUrl?: string | null
+  city?: string | null
+  state?: string | null
+  favoriteGames?: CardGame[]
+}
+
+type Users = { users: SearchUser[]; hasMore: boolean }
 
 /** Mantém a paginação anterior da busca, cujo endpoint não informa total. */
 function SearchPagination({
@@ -85,16 +97,34 @@ function UserResults({ q }: { q: string }) {
   return (
     <>
       {state.data.users.length ? (
-        <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="grid grid-cols-[repeat(auto-fill,minmax(16rem,18.5rem))] justify-start gap-3">
           {state.data.users.map((user) => (
             <li key={user.username} className="min-w-0">
               <Link
                 to="/jogadores/$username"
                 params={{ username: user.username }}
-                className="flex min-h-24 min-w-0 flex-col justify-center rounded-surface border border-border-default bg-surface-default px-4 py-3 text-text-primary shadow-sm transition-colors hover:border-border-emphasis hover:bg-surface-sand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-support-blue"
+                className="flex min-w-0 items-center gap-3 rounded-surface border border-border-default bg-surface-default px-3 py-2.5 text-text-primary shadow-sm transition-colors hover:border-border-emphasis hover:bg-surface-sand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-support-blue"
               >
-                <strong className="wrap-anywhere font-sans text-sm">{user.name}</strong>
-                <span className="mt-1 wrap-anywhere text-xs text-brand-primary">@{user.username}</span>
+                <UserPhoto name={user.name} image={user.avatarUrl} />
+                <span className="min-w-0 flex-1">
+                  <strong className="block truncate font-sans text-sm">{user.name}</strong>
+                  <span className="block truncate text-xs text-brand-primary">@{user.username}</span>
+                  {place(user) ? (
+                    <span className="mt-1 block truncate text-xs text-text-secondary">{place(user)}</span>
+                  ) : null}
+                  {user.favoriteGames?.length ? (
+                    <span className="mt-1.5 flex flex-wrap gap-1">
+                      {user.favoriteGames.map((game) => {
+                        const known = PROFILE_GAMES.find((item) => item.value === game)
+                        return (
+                          <Badge key={game} variant={gameBadge(game)} icon={known?.icon}>
+                            {known?.label ?? gameLabel(game)}
+                          </Badge>
+                        )
+                      })}
+                    </span>
+                  ) : null}
+                </span>
               </Link>
             </li>
           ))}
@@ -115,6 +145,28 @@ function UserResults({ q }: { q: string }) {
       />
     </>
   )
+}
+
+function UserPhoto({ name, image }: { name: string; image?: string | null }) {
+  const letter = name.trim().charAt(0).toUpperCase() || '?'
+  return (
+    <span
+      aria-hidden="true"
+      className="font-display flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-primary-300 to-primary-700 text-2xl font-bold text-white"
+    >
+      {image ? <img src={image} alt="" className="h-full w-full object-cover" /> : letter}
+    </span>
+  )
+}
+
+function place(user: SearchUser) {
+  return [user.city, user.state].filter(Boolean).join(', ')
+}
+
+function gameBadge(game: CardGame) {
+  if (game === 'POKEMON') return 'warning' as const
+  if (game === 'YUGIOH') return 'secondary' as const
+  return 'rare' as const
 }
 
 function AdResults({ q }: { q: string }) {

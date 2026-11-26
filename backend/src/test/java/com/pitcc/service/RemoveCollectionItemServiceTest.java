@@ -5,6 +5,7 @@ import com.mongodb.client.result.DeleteResult;
 import com.pitcc.exception.CollectionItemInActiveAdException;
 import com.pitcc.exception.CollectionItemNotFoundException;
 import com.pitcc.exception.InvalidAuthenticationException;
+import com.pitcc.model.CardCollection;
 import com.pitcc.model.CardCondition;
 import com.pitcc.model.CardLanguage;
 import com.pitcc.model.CollectionItem;
@@ -19,6 +20,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Optional;
@@ -102,6 +104,8 @@ class RemoveCollectionItemServiceTest {
 
     verify(collectionItemRepository)
             .findByIdAndUserId("item-1", "u1");
+
+    verify(mongoTemplate).updateMulti(any(Query.class), any(Update.class), eq(CardCollection.class));
 
     verifyNoMoreInteractions(
             collectionItemRepository,
